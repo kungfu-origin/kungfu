@@ -1,8 +1,10 @@
 import { PreStartProcessHooks } from './preStartProcessHook';
-import { StartProcessHooks } from './startProcessHook';
-
+import { ResolveStartOptionsHooks } from './resolveStartProcessOptionsHook';
+import { DealTradingDataHooks } from './dealTradingDataHook';
 export interface KfHooks {
   prestart: PreStartProcessHooks;
+  resolveStartOptions: ResolveStartOptionsHooks;
+  dealTradingData: DealTradingDataHooks;
 }
 
 export class KfHookKeeper {
@@ -11,9 +13,14 @@ export class KfHookKeeper {
   constructor() {
     this.hooks = {
       prestart: new PreStartProcessHooks(),
-      start: new StartProcessHooks(),
+      resolveStartOptions: new ResolveStartOptionsHooks(),
+      dealTradingData: new DealTradingDataHooks(),
     };
+  }
+
+  getHooks(): KfHooks {
+    return this.hooks;
   }
 }
 
-globalThis.hookKeeper = new KfHookKeeper();
+globalThis.HookKeeper = new KfHookKeeper();

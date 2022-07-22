@@ -39,7 +39,6 @@ import {
   showTradingDataDetail,
   useCurrentGlobalKfLocation,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
-import { useExtraCategory } from '@kungfu-trader/kungfu-js-api/utils/extraLocationUtils';
 import TradeStatisticModal from './TradeStatisticModal.vue';
 import { HistoryDateEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 
@@ -66,7 +65,6 @@ const {
 } = useCurrentGlobalKfLocation(window.watcher);
 
 const { handleDownload } = useDownloadHistoryTradingData();
-const { getTradingDataByLocation } = useExtraCategory();
 const statisticModalVisible = ref<boolean>(false);
 
 const columns = computed(() => {
@@ -90,15 +88,13 @@ onMounted(() => {
           return;
         }
 
-        const tradesResolved = getTradingDataByLocation(
-          app?.proxy?.$globalCategoryRegister?.globalRegistedCategories?.[
-            currentGlobalKfLocation.value.category
-          ] || null,
-          watcher.ledger.Trade,
-          currentGlobalKfLocation.value,
-          window.watcher,
-          'trade',
-        ) as KungfuApi.Trade[];
+        const tradesResolved =
+          globalThis.HookKeeper.getHooks().dealTradingData.trigger(
+            watcher,
+            currentGlobalKfLocation.value,
+            watcher.ledger.Trade,
+            'trade',
+          ) as KungfuApi.Trade[];
 
         trades.value = toRaw(
           tradesResolved
@@ -140,15 +136,13 @@ watch(historyDate, async (newDate) => {
     currentGlobalKfLocation.value,
   );
 
-  const tradesResolved = getTradingDataByLocation(
-    app?.proxy?.$globalCategoryRegister?.globalRegistedCategories?.[
-      currentGlobalKfLocation.value.category
-    ] || null,
-    tradingData.Trade,
-    currentGlobalKfLocation.value,
-    window.watcher,
-    'trade',
-  ) as KungfuApi.Trade[];
+  const tradesResolved =
+    globalThis.HookKeeper.getHooks().dealTradingData.trigger(
+      window.watcher,
+      currentGlobalKfLocation.value,
+      tradingData.Trade,
+      'trade',
+    ) as KungfuApi.Trade[];
 
   trades.value = toRaw(
     tradesResolved.map((item) =>

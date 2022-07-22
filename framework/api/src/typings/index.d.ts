@@ -791,7 +791,11 @@ declare namespace KungfuApi {
     script: string;
   }
 
-  export type KfLocationResolved = KfLocation | KfExtraLocation | KfConfig;
+  export type DerivedKfLocation =
+    | KfLocation
+    | KfExtraLocation
+    | kfConfig
+    | KfDaemonLocation;
 
   export type ScheduleTaskMode = 'restart' | 'start' | 'stop';
 

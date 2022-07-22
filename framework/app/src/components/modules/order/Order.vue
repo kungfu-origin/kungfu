@@ -53,7 +53,6 @@ import {
   useCurrentGlobalKfLocation,
   useProcessStatusDetailData,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
-import { useExtraCategory } from '@kungfu-trader/kungfu-js-api/utils/extraLocationUtils';
 import StatisticModal from './OrderStatisticModal.vue';
 import { messagePrompt } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
@@ -84,7 +83,6 @@ const {
 } = useCurrentGlobalKfLocation(window.watcher);
 
 const { handleDownload } = useDownloadHistoryTradingData();
-const { getTradingDataByLocation } = useExtraCategory();
 const adjustOrderMaskVisible = ref(false);
 const statisticModalVisible = ref<boolean>(false);
 
@@ -113,15 +111,13 @@ onMounted(() => {
           return;
         }
 
-        const ordersResolved = getTradingDataByLocation(
-          app?.proxy?.$globalCategoryRegister?.globalRegistedCategories?.[
-            currentGlobalKfLocation.value.category
-          ] || null,
-          watcher.ledger.Order,
-          currentGlobalKfLocation.value,
-          window.watcher,
-          'order',
-        ) as KungfuApi.Order[];
+        const ordersResolved =
+          globalThis.HookKeeper.getHooks().dealTradingData.trigger(
+            window.watcher,
+            currentGlobalKfLocation.value,
+            watcher.ledger.Order,
+            'order',
+          ) as KungfuApi.Order[];
 
         if (unfinishedOrder.value) {
           orders.value = toRaw(
@@ -174,15 +170,13 @@ watch(historyDate, async (newDate) => {
     'Order',
     currentGlobalKfLocation.value,
   );
-  const orderResolved = getTradingDataByLocation(
-    app?.proxy?.$globalCategoryRegister?.globalRegistedCategories?.[
-      currentGlobalKfLocation.value.category
-    ] || null,
-    tradingData.Order,
-    currentGlobalKfLocation.value,
-    window.watcher,
-    'order',
-  ) as KungfuApi.Order[];
+  const orderResolved =
+    globalThis.HookKeeper.getHooks().dealTradingData.trigger(
+      window.watcher,
+      currentGlobalKfLocation.value,
+      tradingData.Order,
+      'order',
+    ) as KungfuApi.Order[];
 
   orders.value = toRaw(
     orderResolved.map((item) =>
@@ -243,27 +237,22 @@ function handleCancelAllOrders(): void {
   });
 }
 
-function filterUnfinishedOrders(
-  orders: KungfuApi.OrderResolved[],
-): KungfuApi.OrderResolved[] {
+function filterUnfinishedOrders(orders: KungfuApi.Order[]): KungfuApi.Order[] {
   return orders.filter((item) => UnfinishedOrderStatus.includes(item.status));
 }
 
-function getTargetCancelOrders(): KungfuApi.OrderResolved[] {
+function getTargetCancelOrders(): KungfuApi.Order[] {
   if (!currentGlobalKfLocation.value || !window.watcher) {
     return [];
   }
 
   return filterUnfinishedOrders(
-    getTradingDataByLocation(
-      app?.proxy?.$globalCategoryRegister?.globalRegistedCategories?.[
-        currentGlobalKfLocation.value.category
-      ] || null,
-      window.watcher.ledger.Order,
-      currentGlobalKfLocation.value,
+    globalThis.HookKeeper.getHooks().dealTradingData.trigger(
       window.watcher,
+      currentGlobalKfLocation.value,
+      window.watcher.ledger.Order,
       'order',
-    ) as KungfuApi.OrderResolved[],
+    ) as KungfuApi.Order[],
   );
 }
 

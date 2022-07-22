@@ -88,7 +88,7 @@ export default {
   },
 
   tradingConfig: {
-    un_known: 'Unknown',
+    unknown: 'Unknown',
     default: 'Default',
     order_task: 'Trade',
 

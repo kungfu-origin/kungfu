@@ -81,7 +81,6 @@ import {
 import { storeToRefs } from 'pinia';
 import { ipcRenderer } from 'electron';
 import { throttleTime } from 'rxjs';
-import { useExtraCategory } from '@kungfu-trader/kungfu-js-api/utils/extraLocationUtils';
 import { useGlobalStore } from '../../pages/index/store/global';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import { messagePrompt } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
@@ -292,7 +291,6 @@ export const useDealExportHistoryTradingData = (): {
   const exportDateModalVisible = ref<boolean>(false);
   const exportEventData = ref<KfEvent.ExportTradingDataEvent>();
   const exportDataLoading = ref<boolean>(false);
-  const { getTradingDataByLocation } = useExtraCategory();
 
   const dealTradingDataItemResolved = (
     isShowOriginData = false,
@@ -398,18 +396,16 @@ export const useDealExportHistoryTradingData = (): {
       return Promise.resolve();
     }
 
-    const exportDatas = getTradingDataByLocation(
-      app?.proxy?.$globalCategoryRegister?.globalRegistedCategories?.[
-        currentKfLocation.category
-      ] || null,
-      tradingData[tradingDataType as KungfuApi.TradingDataTypeName] as
-        | KungfuApi.DataTable<KungfuApi.Order>
-        | KungfuApi.DataTable<KungfuApi.Trade>
-        | KungfuApi.DataTable<KungfuApi.Position>,
-      currentKfLocation,
-      window.watcher,
-      tradingDataType.toLowerCase(),
-    );
+    const exportDatas =
+      globalThis.HookKeeper.getHooks().dealTradingData.trigger(
+        window.watcher,
+        currentKfLocation,
+        tradingData[tradingDataType as KungfuApi.TradingDataTypeName] as
+          | KungfuApi.DataTable<KungfuApi.Order>
+          | KungfuApi.DataTable<KungfuApi.Trade>
+          | KungfuApi.DataTable<KungfuApi.Position>,
+        tradingDataType.toLowerCase(),
+      );
 
     return writeCSV(filename, exportDatas, dealTradingDataItemResolved())
       .then(() => {
@@ -1159,7 +1155,6 @@ export const useCurrentGlobalKfLocation = (
   ): string;
 } => {
   const { currentGlobalKfLocation } = storeToRefs(useGlobalStore());
-  const app = getCurrentInstance();
 
   const setCurrentGlobalKfLocation = (
     kfLocation:
@@ -1207,10 +1202,7 @@ export const useCurrentGlobalKfLocation = (
     }
 
     const extraCategory: Record<string, KungfuApi.KfTradeValueCommonData> =
-      app?.proxy
-        ? app?.proxy.$globalCategoryRegister.getExtraCategoryMap()
-        : {};
-
+      globalThis.HookKeeper.getHooks().dealTradingData.getCategoryMap();
     return dealCategory(currentGlobalKfLocation.value?.category, extraCategory);
   });
 
@@ -1376,7 +1368,6 @@ export const useCurrentPositionList = (
   const { currentGlobalKfLocation } = useCurrentGlobalKfLocation(
     window.watcher,
   );
-  const { getTradingDataByLocation } = useExtraCategory();
   const currentPositionList = ref<KungfuApi.Position[]>([]);
 
   onMounted(() => {
@@ -1387,15 +1378,13 @@ export const useCurrentPositionList = (
             return;
           }
 
-          const positions = getTradingDataByLocation(
-            app?.proxy?.$globalCategoryRegister?.globalRegistedCategories?.[
-              currentGlobalKfLocation.value.category
-            ] || null,
-            watcher.ledger.Position,
-            currentGlobalKfLocation.value,
-            window.watcher,
-            'position',
-          ) as KungfuApi.Position[];
+          const positions =
+            globalThis.HookKeeper.getHooks().dealTradingData.trigger(
+              window.watcher,
+              currentGlobalKfLocation.value,
+              watcher.ledger.Position,
+              'position',
+            ) as KungfuApi.Position[];
 
           currentPositionList.value = toRaw(
             positions.reverse().map((item) => dealPosition(watcher, item)),

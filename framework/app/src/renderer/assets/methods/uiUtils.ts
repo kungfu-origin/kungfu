@@ -40,7 +40,6 @@ import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 const { t } = VueI18n.global;
 import fse from 'fs-extra';
 import { Router } from 'vue-router';
-import * as remoteMain from '@electron/remote/main';
 
 // this utils file is only for ui components
 export const getUIComponents = (
@@ -291,8 +290,6 @@ export const openNewBrowserWindow = (
       backgroundColor: '#000',
       ...windowConfig,
     });
-
-    remoteMain.enable(win.webContents);
 
     win.on('ready-to-show', function () {
       win && win.focus();

@@ -38,7 +38,6 @@ import {
   useCurrentGlobalKfLocation,
   useInstruments,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
-import { useExtraCategory } from '@kungfu-trader/kungfu-js-api/utils/extraLocationUtils';
 
 const app = getCurrentInstance();
 const { handleBodySizeChange } = useDashboardBodySize();
@@ -58,7 +57,6 @@ const {
 const { handleDownload } = useDownloadHistoryTradingData();
 const { triggerOrderBook, triggerMakeOrder } = useTriggerMakeOrder();
 const { instruments } = useInstruments();
-const { getTradingDataByLocation } = useExtraCategory();
 
 const columns = computed(() => {
   if (currentGlobalKfLocation.value === null) {
@@ -77,15 +75,13 @@ onMounted(() => {
           return;
         }
 
-        const positions = getTradingDataByLocation(
-          app?.proxy?.$globalCategoryRegister?.globalRegistedCategories?.[
-            currentGlobalKfLocation.value.category
-          ] || null,
-          watcher.ledger.Position,
-          currentGlobalKfLocation.value,
-          window.watcher,
-          'position',
-        ) as KungfuApi.Position[];
+        const positions =
+          globalThis.HookKeeper.getHooks().dealTradingData.trigger(
+            watcher,
+            currentGlobalKfLocation.value,
+            watcher.ledger.Position,
+            'position',
+          ) as KungfuApi.Position[];
 
         pos.value = toRaw(
           positions.reverse().map((item) => dealPosition(watcher, item)),

@@ -168,6 +168,12 @@ export const KfCategory: Record<
   },
 };
 
+export const UnknownKfCategory: KungfuApi.KfTradeValueCommonData = {
+  name: t('tradingConfig.unknown'),
+  color: 'default',
+  level: 0,
+};
+
 export const Offset: Record<OffsetEnum, KungfuApi.KfTradeValueCommonData> = {
   [OffsetEnum.Open]: { name: t('tradingConfig.open'), color: 'red' },
   [OffsetEnum.Close]: { name: t('tradingConfig.close'), color: 'green' },
@@ -257,7 +263,7 @@ export const OrderStatus: Record<
   KungfuApi.KfTradeValueCommonData
 > = {
   [OrderStatusEnum.Unknown]: {
-    name: t('tradingConfig.un_known'),
+    name: t('tradingConfig.unknown'),
     color: 'default',
   },
   [OrderStatusEnum.Submitted]: {
@@ -335,7 +341,7 @@ export const PriceType: Record<
   [PriceTypeEnum.Fok]: {
     name: t('tradingConfig.Fok'),
   },
-  [PriceTypeEnum.Unknown]: { name: t('tradingConfig.un_known') },
+  [PriceTypeEnum.Unknown]: { name: t('tradingConfig.unknown') },
 };
 
 export const HedgeFlag: Record<
@@ -379,7 +385,7 @@ export const InstrumentType: Record<
   KungfuApi.KfTradeValueCommonData
 > = {
   [InstrumentTypeEnum.unknown]: {
-    name: t('tradingConfig.un_known'),
+    name: t('tradingConfig.unknown'),
     color: 'default',
   },
   [InstrumentTypeEnum.stock]: {
@@ -439,7 +445,7 @@ export const StrategyExtType: Record<
   KungfuApi.KfTradeValueCommonData
 > = {
   unknown: {
-    name: t('tradingConfig.un_known'),
+    name: t('tradingConfig.unknown'),
     color: 'default',
   },
   default: {

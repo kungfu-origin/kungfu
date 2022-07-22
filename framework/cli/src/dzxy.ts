@@ -2,7 +2,6 @@ import './assets/methods/setDzxyEnv';
 import path from 'path';
 import { triggerStartStep } from '@kungfu-trader/kungfu-js-api/kungfu/tradingData';
 import {
-  dealTradingData,
   getOrderTradeFilterKey,
   getProcessIdByKfLocation,
   setTimerPromiseTask,
@@ -90,12 +89,8 @@ function resOrders(packet: Pm2PacketMain) {
   }
 
   const kfLocation = fromPacketToKfLocation(packet);
-  const orders = dealTradingData<KungfuApi.Order>(
-    watcher,
-    watcher.ledger.Order,
-    'Order',
-    kfLocation,
-  )
+  const orders = globalThis.HookKeeper.getHooks()
+    .dealTradingData.trigger(watcher, kfLocation, watcher.ledger.Order, 'order')
     .slice(0, 10)
     .map((item) =>
       dealOrder(
@@ -126,12 +121,8 @@ function resTrades(packet: Pm2PacketMain) {
   }
 
   const kfLocation = fromPacketToKfLocation(packet);
-  const trades = dealTradingData<KungfuApi.Trade>(
-    watcher,
-    watcher.ledger.Trade,
-    'Trade',
-    kfLocation,
-  )
+  const trades = globalThis.HookKeeper.getHooks()
+    .dealTradingData.trigger(watcher, kfLocation, watcher.ledger.Trade, 'trade')
     .slice(0, 10)
     .map((item) =>
       dealTrade(
@@ -162,14 +153,16 @@ function resPosition(packet: Pm2PacketMain) {
   }
 
   const kfLocation = fromPacketToKfLocation(packet);
-  const position = dealTradingData<KungfuApi.Position>(
-    watcher,
-    watcher.ledger.Position,
-    'Position',
-    kfLocation,
-  ).map((item) =>
-    dealPosition(watcher as KungfuApi.Watcher, item as KungfuApi.Position),
-  );
+  const position = globalThis.HookKeeper.getHooks()
+    .dealTradingData.trigger(
+      watcher,
+      kfLocation,
+      watcher.ledger.Position,
+      'position',
+    )
+    .map((item) =>
+      dealPosition(watcher as KungfuApi.Watcher, item as KungfuApi.Position),
+    );
 
   turnBigIntToString(position);
 

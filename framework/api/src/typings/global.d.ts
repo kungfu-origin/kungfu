@@ -1,3 +1,4 @@
+import { StartOptions } from 'pm2';
 import { KfHookKeeper } from '../hooks';
 
 declare global {
@@ -51,4 +52,9 @@ declare module globalThis {
   const __kfResourcesPath: string;
   const pm2: any;
   const HookKeeper: KfHookKeeper;
+}
+
+export interface Pm2StartOptions extends StartOptions {
+  name: string;
+  autorestart?: boolean;
 }

@@ -1,7 +1,7 @@
 import { Proc } from 'pm2';
 
 export type PreStartProcessMethod = (
-  kfLocation: KungfuApi.KfLocationResolved,
+  kfLocation: KungfuApi.DerivedKfLocation,
 ) => Promise<Proc | void>;
 
 export class PreStartProcessHooks {
@@ -42,24 +42,36 @@ export class PreStartProcessHooks {
 
           return [];
         },
+
+        set(
+          target: Record<string, PreStartProcessMethod[]>,
+          prop: string,
+          value: PreStartProcessMethod,
+        ) {
+          if (!Reflect.has(target, prop)) {
+            Reflect.set(target, prop, []);
+          }
+
+          const methods = Reflect.get(target, prop);
+          methods.push(value);
+          Reflect.set(target, prop, methods);
+          console.log(`PreStartProcess hook ${prop} register success`);
+          return true;
+        },
       },
     );
   }
 
   register(
-    kfLocation: KungfuApi.KfLocationResolved,
+    kfLocation: KungfuApi.DerivedKfLocation,
     method: PreStartProcessMethod,
   ) {
     const { category, group, name } = kfLocation;
     const key = `${category}_${group}_${name}`;
-    if (!this.hooks[key]) {
-      this.hooks[key] = [];
-    }
-
-    this.hooks[key].push(method);
+    Reflect.set(this.hooks, key, method);
   }
 
-  run(kfLocation: KungfuApi.KfLocationResolved) {
+  trigger(kfLocation: KungfuApi.DerivedKfLocation) {
     const { category, group, name } = kfLocation;
     const key = `${category}_${group}_${name}`;
     return Promise.all(this.hooks[key].map((method) => method(kfLocation)));

@@ -31,6 +31,7 @@
     "format": "prettier -l -w --config ../core/.prettierrc.js ."
   },
   "dependencies": {
+    "@electron/remote": "^2.0.8",
     "@kungfu-trader/kungfu-js-api": "^2.4.0-alpha.106",
     "ant-design-vue": "^3.2.9",
     "core-js": "^3.20.0",
