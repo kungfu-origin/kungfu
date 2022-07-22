@@ -1,6 +1,6 @@
 import { LedgerCategoryEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
-import { KfCategoryRegisterProps } from '@kungfu-trader/kungfu-js-api/utils/extraLocationUtils';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
+import { DealTradingDataGetter } from '@kungfu-trader/kungfu-js-api/hooks/dealTradingDataHook';
 const { t } = VueI18n.global;
 
 export const columns: AntTableColumns = [
@@ -59,7 +59,7 @@ export const columns: AntTableColumns = [
   },
 ];
 
-export const categoryRegisterConfig: KfCategoryRegisterProps = {
+export const categoryRegisterConfig: DealTradingDataGetter = {
   category: 'globalPos',
   commonData: {
     name: t('PosGlobal'),

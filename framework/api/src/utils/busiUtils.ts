@@ -93,7 +93,7 @@ declare global {
 //for td processId
 String.prototype.toAccountId = function (): string {
   if (this.indexOf('_') === -1) return this.toString();
-  if (this.split('_').length === 3) return this.toString();
+  if (this.split('_').length !== 3) return this.toString();
   return this.split('_').slice(1).join('_');
 };
 
@@ -1049,12 +1049,15 @@ export const buildIdByKeysFromKfConfigSettings = (
     .join('_');
 };
 
-const startProcessByKfLocation = (
-  kfLocation:
-    | KungfuApi.KfLocation
-    | KungfuApi.KfConfig
-    | KungfuApi.KfExtraLocation,
+const startProcessByKfLocation = async (
+  kfLocation: KungfuApi.DerivedKfLocation,
 ) => {
+  try {
+    await globalThis.HookKeeper.getHooks().prestart.trigger(kfLocation);
+  } catch (err) {
+    console.error(err);
+  }
+
   switch (kfLocation.category) {
     case 'system':
       if (kfLocation.name === 'master') {
@@ -1066,9 +1069,9 @@ const startProcessByKfLocation = (
       }
 
     case 'td':
-      return startTd(getIdByKfLocation(kfLocation));
+      return startTd(getIdByKfLocation(kfLocation), kfLocation);
     case 'md':
-      return startMd(getIdByKfLocation(kfLocation));
+      return startMd(getIdByKfLocation(kfLocation), kfLocation);
     case 'strategy':
       const strategyPath =
         JSON.parse((kfLocation as KungfuApi.KfConfig)?.value || '{}')
@@ -1090,10 +1093,7 @@ const startProcessByKfLocation = (
 
 export const switchKfLocation = (
   watcher: KungfuApi.Watcher | null,
-  kfLocation:
-    | KungfuApi.KfLocation
-    | KungfuApi.KfConfig
-    | KungfuApi.KfExtraLocation,
+  kfLocation: KungfuApi.DerivedKfLocation,
   targetStatus: boolean,
 ): Promise<void | Proc> => {
   const processId = getProcessIdByKfLocation(kfLocation);
@@ -1413,12 +1413,14 @@ export const dealStrategyStates = (
   );
 };
 
-export const dealAssetsByHolderUID = (
+export const dealAssetsByHolderUID = <
+  T extends KungfuApi.Asset | KungfuApi.AssetMargin,
+>(
   watcher: KungfuApi.Watcher | null,
-  assets: KungfuApi.DataTable<KungfuApi.Asset>,
-): Record<string, KungfuApi.Asset> => {
+  assets: KungfuApi.DataTable<T>,
+): Record<string, T> => {
   if (!watcher) {
-    return {} as Record<string, KungfuApi.Asset>;
+    return {} as Record<string, T>;
   }
 
   return Object.values(assets).reduce((assetsResolved, asset) => {
@@ -1427,7 +1429,7 @@ export const dealAssetsByHolderUID = (
     const processId = getProcessIdByKfLocation(kfLocation);
     assetsResolved[processId] = asset;
     return assetsResolved;
-  }, {} as Record<string, KungfuApi.Asset>);
+  }, {} as Record<string, T>);
 };
 
 export const dealOrderTradingData = (

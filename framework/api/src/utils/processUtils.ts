@@ -28,7 +28,7 @@ import {
 import { getKfGlobalSettingsValue } from '../config/globalSettings';
 import { Observable } from 'rxjs';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
-// import { KfCategoryTypes } from '../typings/enums';
+import { Pm2StartOptions } from '../typings/global';
 const { t } = VueI18n.global;
 
 process.env.PM2_HOME = path.resolve(os.homedir(), '.pm2');
@@ -82,11 +82,6 @@ export const killKungfu = () => {
 export const killExtra = () => forceKill([kfcName, 'pm2']);
 
 //===================== pm2 start =======================
-
-interface Pm2StartOptions extends StartOptions {
-  name: string;
-  autorestart?: boolean;
-}
 
 export type Pm2ProcessStatusTypes =
   | 'online'
@@ -679,18 +674,11 @@ async function preStartProcess(
   return Promise.resolve();
 }
 
-// const preStartSource = (
-//   category: KfCategoryTypes,
-//   group: string,
-//   name: string,
-// ): Promise<void[]> => {
-//   return Promise.all(
-//     global.preStartSourceMethods.map((method) => method(category, group, name)),
-//   );
-// };
-
 //启动md
-export const startMd = async (sourceId: string): Promise<Proc | void> => {
+export const startMd = async (
+  sourceId: string,
+  kfConfig: KungfuApi.KfConfig,
+): Promise<Proc | void> => {
   const extDirs = await flattenExtensionModuleDirs(EXTENSION_DIRS);
   const args = buildArgs(
     `-X "${extDirs
@@ -701,22 +689,29 @@ export const startMd = async (sourceId: string): Promise<Proc | void> => {
     path.join(KF_RUNTIME_DIR, 'md', sourceId, sourceId),
   );
   await fse.ensureDir(cwd);
-  // await preStartSource('md', sourceId, sourceId);
+  const options =
+    await globalThis.HookKeeper.getHooks().resolveStartOptions.trigger(
+      kfConfig,
+      {
+        name: `md_${sourceId}`,
+        cwd,
+        script: `${dealSpaceInPath(path.join(KFC_DIR, kfcName))}`,
+        args,
+        max_restarts: 3,
+        autorestart: true,
+      },
+    );
 
-  return startProcess({
-    name: `md_${sourceId}`,
-    cwd,
-    script: `${dealSpaceInPath(path.join(KFC_DIR, kfcName))}`,
-    args,
-    max_restarts: 3,
-    autorestart: true,
-  }).catch((err) => {
+  return startProcess(options).catch((err) => {
     kfLogger.error(err.message);
   });
 };
 
 //启动td
-export const startTd = async (accountId: string): Promise<Proc | void> => {
+export const startTd = async (
+  accountId: string,
+  kfConfig: KungfuApi.KfConfig,
+): Promise<Proc | void> => {
   const extDirs = await flattenExtensionModuleDirs(EXTENSION_DIRS);
   const { source, id } = (accountId || '').parseSourceAccountId();
   const args = buildArgs(
@@ -727,20 +722,20 @@ export const startTd = async (accountId: string): Promise<Proc | void> => {
   const cwd = dealSpaceInPath(path.join(KF_RUNTIME_DIR, 'td', source, id));
   await fse.ensureDir(cwd);
   const fullProcessId = `td_${accountId}`;
-  // await preStartSource(
-  //   'td',
-  //   fullProcessId.toKfGroup(),
-  //   fullProcessId.toKfName(),
-  // );
+  const options =
+    await globalThis.HookKeeper.getHooks().resolveStartOptions.trigger(
+      kfConfig,
+      {
+        name: fullProcessId,
+        cwd,
+        script: `${dealSpaceInPath(path.join(KFC_DIR, kfcName))}`,
+        args,
+        max_restarts: 3,
+        autorestart: true,
+      },
+    );
 
-  return startProcess({
-    name: fullProcessId,
-    cwd,
-    script: `${dealSpaceInPath(path.join(KFC_DIR, kfcName))}`,
-    args,
-    max_restarts: 3,
-    autorestart: true,
-  }).catch((err) => {
+  return startProcess(options).catch((err) => {
     kfLogger.error(err.message);
   });
 };

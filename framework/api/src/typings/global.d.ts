@@ -1,3 +1,6 @@
+import { StartOptions } from 'pm2';
+import { KfHookKeeper } from '../hooks';
+
 declare global {
   interface Window {
     watcher: Watcher | null;
@@ -45,13 +48,13 @@ declare module 'tail' {
 }
 
 declare module globalThis {
-  var __publicResources: string;
-  var __kfResourcesPath: string;
-  var pm2: any;
-  var preStartSourceMethods: Record<
-    string,
-    (category: KfCategoryTypes, group: string, name: string) => Promise<void>
-  >;
+  const __publicResources: string;
+  const __kfResourcesPath: string;
+  const pm2: any;
+  const HookKeeper: KfHookKeeper;
 }
 
-export {};
+export interface Pm2StartOptions extends StartOptions {
+  name: string;
+  autorestart?: boolean;
+}

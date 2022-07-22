@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, getCurrentInstance, onMounted, Ref, ref, toRefs } from 'vue';
+import { computed, Ref, ref, toRefs } from 'vue';
 import Icon, {
   FileTextOutlined,
   SettingOutlined,
@@ -35,9 +35,7 @@ import {
   useSwitchAllConfig,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
-import { usePrefix } from '@kungfu-trader/kungfu-js-api/utils/prefixUtils';
 
-const app = getCurrentInstance();
 const { t } = VueI18n.global;
 const { success, error } = messagePrompt();
 
@@ -74,19 +72,10 @@ const { searchKeyword, tableData } = useTableSearchKeyword<KungfuApi.KfConfig>(
 const { handleConfirmAddUpdateKfConfig, handleRemoveKfConfig } =
   useAddUpdateRemoveKfConfig();
 
-const { builtPrefixMap } = usePrefix();
-const prefixMap = ref({});
+const getPrefixByLocation = (kfLocation: KungfuApi.KfLocation) =>
+  globalThis.HookKeeper.getHooks().prefix.trigger(kfLocation);
 
-onMounted(() => {
-  if (app?.proxy) {
-    prefixMap.value = builtPrefixMap(
-      app.proxy.$prefixRegister,
-      tableData.value.map((item) => getProcessIdByKfLocation(item)),
-    );
-  }
-});
-
-function handleOpenSetMdDialog(
+async function handleOpenSetMdDialog(
   type = 'add' as KungfuApi.ModalChangeType,
   selectedSource: string,
   mdConfig?: KungfuApi.KfConfig,
@@ -103,7 +92,15 @@ function handleOpenSetMdDialog(
   currentSelectedSourceId.value = selectedSource;
   setMdConfigPayload.value.type = type;
   setMdConfigPayload.value.title = `${selectedSource} ${t('Md')}`;
-  setMdConfigPayload.value.config = extConfig;
+  setMdConfigPayload.value.config =
+    await globalThis.HookKeeper.getHooks().resolveExtConfig.trigger(
+      {
+        category: 'md',
+        group: selectedSource,
+        name: '*',
+      },
+      extConfig,
+    );
   setMdConfigPayload.value.initValue = undefined;
 
   if (type === 'update') {
@@ -196,12 +193,9 @@ function handleRemoveMd(record: KungfuApi.KfConfig) {
               {{ record.group }}
             </a-tag>
             <Icon
-              v-if="
-                prefixMap[getProcessIdByKfLocation(record)]?.prefixType ===
-                'icon'
-              "
-              :component="prefixMap[getProcessIdByKfLocation(record)].prefix"
-              style="font-size: 14px"
+              v-if="getPrefixByLocation(record).prefixType === 'icon'"
+              :component="getPrefixByLocation(record).prefix"
+              style="font-size: 12px"
             />
           </template>
           <template v-else-if="column.dataIndex === 'stateStatus'">

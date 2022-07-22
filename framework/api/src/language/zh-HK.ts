@@ -88,7 +88,7 @@ export default {
   },
 
   tradingConfig: {
-    un_known: '未知',
+    unknown: '未知',
     default: '封装策略',
     order_task: '下单任务',
 
@@ -304,6 +304,9 @@ export default {
     marked_value: '名义本金',
     margin: '保证金',
     avail_money: '可开仓名义本金',
+    avail_margin: '可用保证金',
+    cash_debt: '融资负债',
+    total_asset: '总资产',
     actions: '操作',
 
     add_td: '添加',
@@ -462,6 +465,8 @@ export default {
     set_fat_finger: '设置乌龙指触发阈值(百分比)',
     close_threshold: '平仓阈值',
     set_close_threshold: '设置平仓阈值(百分比)',
+    asset_margin: '两融',
+    show_asset_margin: '展示两融',
 
     code_editor: '代码编辑器',
     tab_space_type: '缩进类别',

@@ -184,7 +184,11 @@ const findBinaryDependency = (packageJson) => {
         }
       })
       .filter(defined);
-  return [packageJson.dependencies, packageJson.devDependencies]
+  return [
+    packageJson.dependencies || {},
+    packageJson.optionalDependencies || {},
+    packageJson.devDependencies || {},
+  ]
     .filter(defined)
     .map(hasBinary)
     .flat();

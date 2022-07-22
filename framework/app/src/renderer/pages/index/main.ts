@@ -1,6 +1,6 @@
 import './setEnv';
-import './injectWindow';
 import './injectGlobal';
+import './injectWindow';
 import { createApp } from 'vue';
 import App from '@kungfu-trader/kungfu-app/src/renderer/pages/index/App.vue';
 import router from '@kungfu-trader/kungfu-app/src/renderer/pages/index/router';
@@ -64,8 +64,6 @@ import {
 import VueVirtualScroller from 'vue-virtual-scroller';
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
 import { useComponenets } from './useComponents';
-import { GlobalCategoryRegister } from '@kungfu-trader/kungfu-js-api/utils/extraLocationUtils';
-import { PrefixRegister } from '@kungfu-trader/kungfu-js-api/utils/prefixUtils';
 import globalBus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
@@ -108,9 +106,6 @@ app
 
 app.config.globalProperties.$globalBus = globalBus;
 app.config.globalProperties.$tradingDataSubject = tradingDataSubject;
-app.config.globalProperties.$globalCategoryRegister =
-  new GlobalCategoryRegister();
-app.config.globalProperties.$prefixRegister = new PrefixRegister();
 
 app.use(VueI18n);
 useComponenets(app, router).then(() => {

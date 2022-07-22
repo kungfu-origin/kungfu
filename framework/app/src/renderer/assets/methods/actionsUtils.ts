@@ -33,6 +33,7 @@ import {
   getAppStateStatusName,
   buildExtTypeMap,
   dealCategory,
+  dealAssetsByHolderUID,
   getAvailDaemonList,
   removeNoDefaultStrategyFolders,
   getStrategyStateStatusName,
@@ -81,7 +82,6 @@ import {
 import { storeToRefs } from 'pinia';
 import { ipcRenderer } from 'electron';
 import { throttleTime } from 'rxjs';
-import { useExtraCategory } from '@kungfu-trader/kungfu-js-api/utils/extraLocationUtils';
 import { useGlobalStore } from '../../pages/index/store/global';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import { messagePrompt } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
@@ -292,7 +292,6 @@ export const useDealExportHistoryTradingData = (): {
   const exportDateModalVisible = ref<boolean>(false);
   const exportEventData = ref<KfEvent.ExportTradingDataEvent>();
   const exportDataLoading = ref<boolean>(false);
-  const { getTradingDataByLocation } = useExtraCategory();
 
   const dealTradingDataItemResolved = (
     isShowOriginData = false,
@@ -398,18 +397,16 @@ export const useDealExportHistoryTradingData = (): {
       return Promise.resolve();
     }
 
-    const exportDatas = getTradingDataByLocation(
-      app?.proxy?.$globalCategoryRegister?.globalRegistedCategories?.[
-        currentKfLocation.category
-      ] || null,
-      tradingData[tradingDataType as KungfuApi.TradingDataTypeName] as
-        | KungfuApi.DataTable<KungfuApi.Order>
-        | KungfuApi.DataTable<KungfuApi.Trade>
-        | KungfuApi.DataTable<KungfuApi.Position>,
-      currentKfLocation,
-      window.watcher,
-      tradingDataType.toLowerCase(),
-    );
+    const exportDatas =
+      globalThis.HookKeeper.getHooks().dealTradingData.trigger(
+        window.watcher,
+        currentKfLocation,
+        tradingData[tradingDataType as KungfuApi.TradingDataTypeName] as
+          | KungfuApi.DataTable<KungfuApi.Order>
+          | KungfuApi.DataTable<KungfuApi.Trade>
+          | KungfuApi.DataTable<KungfuApi.Position>,
+        tradingDataType.toLowerCase(),
+      );
 
     return writeCSV(filename, exportDatas, dealTradingDataItemResolved())
       .then(() => {
@@ -1159,7 +1156,6 @@ export const useCurrentGlobalKfLocation = (
   ): string;
 } => {
   const { currentGlobalKfLocation } = storeToRefs(useGlobalStore());
-  const app = getCurrentInstance();
 
   const setCurrentGlobalKfLocation = (
     kfLocation:
@@ -1207,10 +1203,7 @@ export const useCurrentGlobalKfLocation = (
     }
 
     const extraCategory: Record<string, KungfuApi.KfTradeValueCommonData> =
-      app?.proxy
-        ? app?.proxy.$globalCategoryRegister.getExtraCategoryMap()
-        : {};
-
+      globalThis.HookKeeper.getHooks().dealTradingData.getCategoryMap();
     return dealCategory(currentGlobalKfLocation.value?.category, extraCategory);
   });
 
@@ -1360,6 +1353,61 @@ export const useAssets = (): {
   };
 };
 
+export const useAssetMargins = () => {
+  const app = getCurrentInstance();
+  const assetMagins = ref<Record<string, KungfuApi.AssetMargin>>({});
+
+  const getAssetMarginsByKfConfig = (
+    kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig,
+  ): KungfuApi.AssetMargin => {
+    const processId = getProcessIdByKfLocation(kfConfig);
+    return assetMagins.value[processId] || ({} as KungfuApi.AssetMargin);
+  };
+
+  const getAssetMarginsByTdGroup = (
+    tdGroup: KungfuApi.KfExtraLocation,
+  ): KungfuApi.AssetMargin => {
+    const children = (tdGroup.children || []) as KungfuApi.KfConfig[];
+    const assetMarginsList = children
+      .map((item) => getAssetMarginsByKfConfig(item))
+      .filter((item) => Object.keys(item).length);
+
+    return assetMarginsList.reduce((allAssetMargins, assetMagin) => {
+      return {
+        ...allAssetMargins,
+        margin: (allAssetMargins.margin || 0) + assetMagin.margin,
+        avail_margin:
+          (allAssetMargins.avail_margin || 0) + assetMagin.avail_margin,
+        market_value: (allAssetMargins.cash_debt || 0) + assetMagin.cash_debt,
+        avail: (allAssetMargins.total_asset || 0) + assetMagin.total_asset,
+      };
+    }, {} as KungfuApi.AssetMargin);
+  };
+
+  onMounted(() => {
+    if (app?.proxy) {
+      const subscription = app.proxy.$tradingDataSubject.subscribe(
+        (watcher: KungfuApi.Watcher) => {
+          assetMagins.value = dealAssetsByHolderUID<KungfuApi.AssetMargin>(
+            watcher,
+            watcher.ledger.AssetMargin,
+          );
+        },
+      );
+
+      onBeforeUnmount(() => {
+        subscription.unsubscribe();
+      });
+    }
+  });
+
+  return {
+    assetMagins,
+    getAssetMarginsByKfConfig,
+    getAssetMarginsByTdGroup,
+  };
+};
+
 export const playSound = (): void => {
   const soundPath = path.join(
     `${path.join(KUNGFU_RESOURCES_DIR, 'music/ding.mp3')}`,
@@ -1376,7 +1424,6 @@ export const useCurrentPositionList = (
   const { currentGlobalKfLocation } = useCurrentGlobalKfLocation(
     window.watcher,
   );
-  const { getTradingDataByLocation } = useExtraCategory();
   const currentPositionList = ref<KungfuApi.Position[]>([]);
 
   onMounted(() => {
@@ -1387,15 +1434,13 @@ export const useCurrentPositionList = (
             return;
           }
 
-          const positions = getTradingDataByLocation(
-            app?.proxy?.$globalCategoryRegister?.globalRegistedCategories?.[
-              currentGlobalKfLocation.value.category
-            ] || null,
-            watcher.ledger.Position,
-            currentGlobalKfLocation.value,
-            window.watcher,
-            'position',
-          ) as KungfuApi.Position[];
+          const positions =
+            globalThis.HookKeeper.getHooks().dealTradingData.trigger(
+              window.watcher,
+              currentGlobalKfLocation.value,
+              watcher.ledger.Position,
+              'position',
+            ) as KungfuApi.Position[];
 
           currentPositionList.value = toRaw(
             positions.reverse().map((item) => dealPosition(watcher, item)),

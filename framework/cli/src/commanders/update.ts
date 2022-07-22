@@ -23,7 +23,15 @@ export const updateMdTdStrategy = async () => {
   if (kfLocation.category === 'md') {
     const targetMd = getTargetKfConfig(md, kfLocation);
     const initValue = JSON.parse(targetMd?.value || '{}');
-    const extConfig = extConfigs['md'][kfLocation.group];
+    const extConfig =
+      await globalThis.HookKeeper.getHooks().resolveExtConfig.trigger(
+        {
+          category: 'md',
+          group: kfLocation.group,
+          name: '*',
+        },
+        extConfigs['md'][kfLocation.group],
+      );
     const settings = extConfig?.settings;
 
     if (settings === undefined) {
@@ -39,7 +47,15 @@ export const updateMdTdStrategy = async () => {
     }
 
     const initValue = JSON.parse(targetTd.value || '{}');
-    const extConfig = extConfigs['td'][kfLocation.group];
+    const extConfig =
+      await await globalThis.HookKeeper.getHooks().resolveExtConfig.trigger(
+        {
+          category: 'td',
+          group: kfLocation.group,
+          name: '*',
+        },
+        extConfigs['td'][kfLocation.group],
+      );
     const settings = extConfig?.settings;
 
     if (settings === undefined) {

@@ -4,7 +4,7 @@
     "name": "kungfu-trader",
     "email": "info@kungfu.link"
   },
-  "version": "2.4.0-alpha.106",
+  "version": "2.4.0-alpha.107",
   "description": "Toolchain for Kungfu Development (babel/cmake-js/node-gyp/webpack/yarn/etc).",
   "license": "Apache-2.0",
   "main": "package.json",
@@ -15,7 +15,7 @@
     "registry": "https://npm.pkg.github.com"
   },
   "engines": {
-    "node": ">=14 <15",
+    "node": ">=14",
     "yarn": "^1.18.0"
   },
   "dependencies": {

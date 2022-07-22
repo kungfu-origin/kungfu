@@ -7,7 +7,7 @@ import {
   MenuItemConstructorOptions,
   shell,
 } from 'electron';
-import * as remoteMain from '@electron/remote/main';
+import { initialize, enable as enableRemote } from '@electron/remote/main';
 import path from 'path';
 import os from 'os';
 import {
@@ -46,7 +46,7 @@ let SecheduleReloading = false;
 const isDev = process.env.NODE_ENV === 'development';
 const isMac = os.platform() === 'darwin';
 
-remoteMain.initialize();
+initialize();
 setMenu();
 initKfConfig();
 initKfDefaultInstruments();
@@ -84,7 +84,7 @@ async function createWindow(
     backgroundColor: '#000',
   });
 
-  remoteMain.enable(MainWindow.webContents);
+  enableRemote(MainWindow.webContents);
 
   if (isDev) {
     MainWindow.loadURL('http://localhost:9090/index.html');
@@ -225,6 +225,10 @@ app.on('will-quit', (e) => {
   }
 
   e.preventDefault();
+});
+
+app.on('browser-window-created', (_, window) => {
+  enableRemote(window.webContents);
 });
 
 // In this file you can include the rest of your app's specific main process
