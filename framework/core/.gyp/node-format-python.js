@@ -4,6 +4,7 @@ const { shell } = require('../lib');
 function main(argv) {
   shell.run('poetry', ['--version'], false);
   shell.run('poetry', ['lock', '-n', '-q', '--no-update'], false);
+  shell.run('git', ['--no-pager', 'diff']);
 
   shell.run('black', ['--version'], false);
   shell.runAndExit('black', argv);
