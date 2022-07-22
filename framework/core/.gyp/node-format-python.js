@@ -15,7 +15,7 @@ function main(argv) {
   shell.runAndExit(blackPath, argv);
 
   process.chdir(path.dirname(__dirname));
-  shell.run('pipenv', ['run', 'black'].concat(argv));
+  shell.run('pipenv', ['run', 'black'].concat(argv), true, { tolerant: true });
 }
 
 module.exports.main = main;

@@ -162,7 +162,7 @@ const runAndCollect = (cmd, argv = [], opts = {}) => {
     windowsHide: true,
     ...opts,
   });
-  result.out = result.stdout.toString().trimEnd();
+  result.out = result.stdout.toString().trim();
   return result;
 };
 
