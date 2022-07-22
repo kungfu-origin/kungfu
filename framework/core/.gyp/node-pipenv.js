@@ -1,4 +1,4 @@
-const { exitOnError, run } = require('./node-lib.js');
+const { shell } = require('../lib');
 
 const cli = require('sywac')
   // options
@@ -19,10 +19,10 @@ async function main() {
   ];
   const pipenv_args = [...bare_opt, ...python_opt, ...pypi_opt, ...argv._];
 
-  run('pipenv', pipenv_args);
+  shell.run('pipenv', pipenv_args);
 }
 
 module.exports.cli = cli;
 module.exports.main = main;
 
-if (require.main === module) main().catch(exitOnError);
+if (require.main === module) main().catch(shell.exitOnError);

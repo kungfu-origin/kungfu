@@ -185,7 +185,10 @@ function resAsset(packet: Pm2PacketMain) {
   }
 
   const kfLocation = fromPacketToKfLocation(packet);
-  const assets = dealAssetsByHolderUID(watcher, watcher.ledger.Asset);
+  const assets = dealAssetsByHolderUID<KungfuApi.Asset>(
+    watcher,
+    watcher.ledger.Asset,
+  );
   const processId = getProcessIdByKfLocation(kfLocation);
   const assetsResolved = [assets[processId] || {}];
   turnBigIntToString(assetsResolved);

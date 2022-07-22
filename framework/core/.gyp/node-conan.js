@@ -1,8 +1,6 @@
-const { exitOnError, getConfigValue } = require('./node-lib.js');
-const { shell } = require('../lib/index');
-const electron = require('electron');
 const fse = require('fs-extra');
 const path = require('path');
+const { shell } = require('../lib');
 
 function conan(cmd) {
   const pipenv_args = ['run', 'conan', ...cmd];
@@ -13,26 +11,18 @@ function getNodeVersionOptions() {
   const packageJson = fse.readJsonSync(
     path.resolve(path.dirname(__dirname), 'package.json'),
   );
-  const electronArch = shell
-    .runAndCollect(electron, [path.resolve(__dirname, 'electron-version.js')])
-    .stdout.toString()
-    .trim();
   const electronVersion = packageJson.devDependencies['electron'];
   const nodeVersion = packageJson.devDependencies['@kungfu-trader/libnode'];
   return [
     '-o',
-    `electron_arch=${electronArch}`,
-    '-o',
     `electron_version=${electronVersion}`,
-    '-o',
-    `node_arch=${process.arch}`,
     '-o',
     `node_version=${nodeVersion}`,
   ];
 }
 
 function makeConanSetting(name) {
-  return ['-s', `${name}=${getConfigValue(name)}`];
+  return ['-s', `${name}=${shell.getConfigValue(name)}`];
 }
 
 function makeConanSettings(names) {
@@ -40,7 +30,7 @@ function makeConanSettings(names) {
 }
 
 function makeConanOption(name) {
-  return ['-o', `${name}=${getConfigValue(name)}`];
+  return ['-o', `${name}=${shell.getConfigValue(name)}`];
 }
 
 function makeConanOptions(names) {
@@ -121,4 +111,4 @@ async function main() {
 module.exports.cli = cli;
 module.exports.main = main;
 
-if (require.main === module) main().catch(exitOnError);
+if (require.main === module) main().catch(shell.exitOnError);

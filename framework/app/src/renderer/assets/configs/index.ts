@@ -1,4 +1,3 @@
-import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 const { t } = VueI18n.global;
 
@@ -86,47 +85,3 @@ export const getIndexBoardsMap = (): KfLayout.BoardsMap | null => {
 
   return storedBoardsMap;
 };
-
-export const coreForScheduleTasksOptions: Array<{
-  label: string;
-  value: string;
-  category: KfCategoryTypes;
-}> = [
-  {
-    label: t('globalSettingConfig.master'),
-    value: 'system',
-    category: 'system',
-  },
-];
-
-export const modeForScheduleTasksOptions: Array<{
-  label: string;
-  value: KungfuApi.ScheduleTaskMode;
-}> = [
-  {
-    label: t('globalSettingConfig.start'),
-    value: 'start',
-  },
-  {
-    label: t('globalSettingConfig.stop'),
-    value: 'stop',
-  },
-];
-
-export const modeForCoreScheduleTasksOptions: Array<{
-  label: string;
-  value: KungfuApi.ScheduleTaskMode;
-}> = [
-  {
-    label: t('globalSettingConfig.restart'),
-    value: 'restart',
-  },
-  {
-    label: t('globalSettingConfig.start'),
-    value: 'start',
-  },
-  {
-    label: t('globalSettingConfig.stop'),
-    value: 'stop',
-  },
-];

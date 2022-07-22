@@ -7,6 +7,7 @@ export const getColumns = (
   sorter: (
     dataIndex: string,
   ) => (a: KungfuApi.KfConfig, b: KungfuApi.KfConfig) => number,
+  isShowAssetMargin: boolean,
 ): AntTableColumns => [
   {
     title: t('tdConfig.account_name'),
@@ -73,6 +74,39 @@ export const getColumns = (
     },
     width: 110,
   },
+
+  ...(isShowAssetMargin
+    ? [
+        {
+          title: t('tdConfig.avail_margin'),
+          dataIndex: 'avail_margin',
+          align: 'right',
+          sorter: {
+            compare: sorter('avail_margin'),
+          },
+          width: 110,
+        },
+        {
+          title: t('tdConfig.cash_debt'),
+          dataIndex: 'cash_debt',
+          align: 'right',
+          sorter: {
+            compare: sorter('cash_debt'),
+          },
+          width: 110,
+        },
+        {
+          title: t('tdConfig.total_asset'),
+          dataIndex: 'total_asset',
+          align: 'right',
+          sorter: {
+            compare: sorter('total_asset'),
+          },
+          width: 110,
+        },
+      ]
+    : []),
+
   {
     title: t('tdConfig.actions'),
     dataIndex: 'actions',

@@ -9,12 +9,44 @@ const GithubBinaryHost = 'https://prebuilt.libkungfu.io';
 
 const defined = (e) => e;
 
-const getScope = (npmConfigValue) =>
-  npmConfigValue === 'undefined' ? '[package.json]' : '[user]';
+const getScope = (npmConfigValue) => {
+  return npmConfigValue === 'undefined' ? '[package.json]' : '[user]';
+};
+
+const getElectronArch = () => {
+  try {
+    const electron = require('electron');
+    const electronVersionScript = path.resolve(
+      path.dirname(__dirname),
+      '.gyp',
+      'electron-version.js',
+    );
+    const isLinux = process.platform === 'linux';
+    const electronArgs = isLinux ? ['--no-sandbox'] : [];
+    const result = runAndCollect(
+      electron,
+      [...electronArgs, electronVersionScript],
+      {
+        silent: true,
+      },
+    ).out;
+    const resolveHeadless = (arch) => {
+      return arch || getTargetArch();
+    };
+    return isLinux ? resolveHeadless(result) : result;
+  } catch (e) {
+    return undefined;
+  }
+};
+
+const getTargetArch = () => {
+  return getPackageJson('@kungfu-trader/kungfu-core').config.arch;
+};
 
 const getPackageJson = (packageName) => {
-  const toJSON = (filepath) =>
-    JSON.parse(fs.readFileSync(filepath, 'utf8').toString());
+  const toJSON = (filepath) => {
+    return JSON.parse(fs.readFileSync(filepath, 'utf8').toString());
+  };
   if (!packageName) {
     return toJSON(path.resolve(process.cwd(), 'package.json'));
   }
@@ -25,11 +57,12 @@ const getPackageJson = (packageName) => {
   }
 };
 
+const getConfigValue = (name) => {
+  return process.env[`npm_package_config_${name}`];
+};
+
 const getNpmConfigValue = (key) => {
-  return spawnSync('npm', ['config', 'get', key], spawnOptsPipe)
-    .output.filter((e) => e && e.length > 0)
-    .toString()
-    .trimEnd();
+  return runAndCollect('npm', ['config', 'get', key], { silent: true }).out;
 };
 
 const exitOnError = (error) => {
@@ -37,8 +70,10 @@ const exitOnError = (error) => {
   process.exit(-1);
 };
 
-const getConfigValue = (name) => {
-  return process.env[`npm_package_config_${name}`];
+const trace = (cmd, argv, opts) => {
+  if (!opts.silent) {
+    console.log(`$ ${cmd} ${argv.join(' ')}`);
+  }
 };
 
 const isGithubEnv = () => process.env.CI && process.env.GITHUB_ACTIONS;
@@ -52,9 +87,60 @@ const npmCall = (npmArgs) => {
   }
 };
 
+const verifyElectron = () => {
+  const electronArch = getElectronArch();
+  const targetArch = getTargetArch();
+  if (electronArch === targetArch) {
+    return;
+  }
+  console.error(
+    `Electron arch ${electronArch} does not match target ${targetArch}`,
+  );
+  console.log(`Try to fix it by reinstall electron [${targetArch}]`);
+  try {
+    const electronModulePath = path.dirname(
+      require.resolve('electron/package.json'),
+    );
+    const yarnIntegrityPath = path.join(
+      path.dirname(electronModulePath),
+      '.yarn-integrity',
+    );
+    fs.rmSync(electronModulePath, {
+      force: true,
+      recursive: true,
+    });
+    fs.rmSync(yarnIntegrityPath, { force: true });
+  } catch (e) {
+    console.warn('Failed to remove electron module');
+  }
+  run(
+    'yarn',
+    ['install', '--frozen-lockfile', '--network-timeout=1000000', '--silent'],
+    true,
+    {
+      silent: true,
+      env: {
+        ...process.env,
+        npm_config_arch: targetArch,
+      },
+    },
+  );
+  const reinstalledElectronArch = getElectronArch();
+  console.log(`Reinstall electron [${reinstalledElectronArch}] done`);
+  if (reinstalledElectronArch !== targetArch) {
+    console.error(
+      `Reinstall electron [${reinstalledElectronArch}] failed to match [${targetArch}]`,
+    );
+    console.error(
+      `Please fix it manually by yarn install with environment variable npm_config_arch set to ${targetArch}`,
+    );
+    process.exit(-1);
+  }
+};
+
 const run = (cmd, argv = [], check = true, opts = {}) => {
   const real_cwd = fs.realpathSync(path.resolve(process.cwd()));
-  console.log(`$ ${cmd} ${argv.join(' ')}`);
+  trace(cmd, argv, opts);
   const result = spawnSync(cmd, argv, {
     shell: true,
     stdio: 'inherit',
@@ -63,18 +149,21 @@ const run = (cmd, argv = [], check = true, opts = {}) => {
     ...opts,
   });
   if (check && result.status !== 0) {
-    process.exit(result.status);
+    process.exit(opts.tolerant ? 0 : result.status);
   }
   return result;
 };
 
 const runAndCollect = (cmd, argv = [], opts = {}) => {
-  return spawnSync(cmd, argv, {
+  trace(cmd, argv, opts);
+  const result = spawnSync(cmd, argv, {
     shell: true,
     stdio: 'pipe',
     windowsHide: true,
     ...opts,
   });
+  result.out = result.stdout.toString().trim();
+  return result;
 };
 
 const runAndExit = (cmd, argv = [], opts = {}) => {
@@ -177,10 +266,13 @@ const showAutoConfig = () => {
 };
 
 module.exports = {
+  getElectronArch: getElectronArch,
+  getTargetArch: getTargetArch,
   getPackageJson: getPackageJson,
   exitOnError: exitOnError,
   getConfigValue: getConfigValue,
   npmCall: npmCall,
+  verifyElectron: verifyElectron,
   run: run,
   runAndCollect: runAndCollect,
   runAndExit: runAndExit,

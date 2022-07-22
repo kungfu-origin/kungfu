@@ -6,7 +6,7 @@ import {
   BoxElementResolved,
   ListElementResolved,
   TableOption,
-} from 'src/typings';
+} from '../../typings';
 
 class Table {
   headers: string[];
