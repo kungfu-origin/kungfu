@@ -548,6 +548,7 @@ const getKfCliExtensionConfigByExtKey = (
       const extPath = extConfig.extPath;
       const cliConfig = extConfig['cli_config'];
       const exhibit = cliConfig?.exhibit || ({} as KungfuApi.KfExhibitConfig);
+      const components = cliConfig?.components || null;
       const daemon = cliConfig?.daemon || ({} as Record<string, string>);
       const script = cliConfig?.script || '';
 
@@ -555,6 +556,7 @@ const getKfCliExtensionConfigByExtKey = (
         name: extName,
         extPath,
         exhibit,
+        components,
         daemon,
         script,
       };

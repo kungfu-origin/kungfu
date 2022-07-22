@@ -16,10 +16,11 @@ import {
   BrokerStateStatus,
   Pm2ProcessStatus,
 } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
-import { PromptInputType, PromptQuestion } from 'src/typings';
+import { PromptInputType, PromptQuestion } from '../../typings';
 import { startExtDaemon } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import { Proc } from 'pm2';
 import { globalState } from '../actions/globalState';
+import { program } from 'commander';
 
 export const parseToString = (
   targetList: (string | number)[],
@@ -378,6 +379,13 @@ interface KfExtModule {
   install: (gs: unknown) => void;
 }
 
+const indexUse = (ext: KfExtModule) => {
+  const { install } = ext;
+  if (install) {
+    install(program);
+  }
+};
+
 const dzxyUse = (ext: KfExtModule) => {
   const { install } = ext;
   if (install) {
@@ -386,8 +394,8 @@ const dzxyUse = (ext: KfExtModule) => {
 };
 
 export const useAllExtScript = () => {
-  getKfCliExtensionConfig()
-    .then((allConfigs: KungfuApi.KfCliExtConfigs) =>
+  return getKfCliExtensionConfig()
+    .then((allConfigs) =>
       Promise.all(
         Object.values(allConfigs).map((config) => {
           const { extPath, script } = config;
@@ -409,4 +417,34 @@ export const useAllExtScript = () => {
         }
       });
     });
+};
+
+export const useAllExtComponentByPosition = async (
+  curPosition: 'index' | 'dzxy',
+) => {
+  const allConfigs = await getKfCliExtensionConfig();
+  for (const config of Object.values(allConfigs)) {
+    const { components, extPath } = config;
+    if (components) {
+      for (const key of Object.keys(components)) {
+        const { entry, position } = components[key];
+
+        if (position !== curPosition) continue;
+
+        const componentPath = path.join(extPath, entry);
+        if (entry && fse.pathExistsSync(componentPath)) {
+          const extModule = <Record<string, KfExtModule>>(
+            await __non_webpack_require__(componentPath)
+          );
+          if (extModule) {
+            if (curPosition === 'index') {
+              indexUse(extModule['default']);
+            } else if (curPosition === 'dzxy') {
+              dzxyUse(extModule['default']);
+            }
+          }
+        }
+      }
+    }
+  }
 };

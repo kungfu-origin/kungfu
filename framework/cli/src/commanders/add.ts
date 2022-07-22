@@ -15,7 +15,7 @@ import {
   getPrimaryKeyFromKfConfigItem,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { setKfConfig } from '@kungfu-trader/kungfu-js-api/kungfu/store';
-import { PromptAnswer } from 'src/typings';
+import { PromptAnswer } from '../typings';
 
 inquirer.registerPrompt('autocomplete', autocompletePrompt);
 inquirer.registerPrompt('path', PathPrompt);
