@@ -2,11 +2,13 @@ import { PreStartProcessHooks } from './preStartProcessHook';
 import resolveStartOptionsHook from './resolveStartProcessOptionsHook';
 import { DealTradingDataHooks } from './dealTradingDataHook';
 import resolveExtConfigHook from './resolveExtConfigHook';
+import { PrefixHooks } from './prefixHooks';
 export interface KfHooks {
   prestart: PreStartProcessHooks;
   resolveStartOptions: typeof resolveStartOptionsHook;
   dealTradingData: DealTradingDataHooks;
   resolveExtConfig: typeof resolveExtConfigHook;
+  prefix: PrefixHooks;
 }
 
 export class KfHookKeeper {
@@ -18,6 +20,7 @@ export class KfHookKeeper {
       dealTradingData: new DealTradingDataHooks(),
       resolveStartOptions: resolveStartOptionsHook,
       resolveExtConfig: resolveExtConfigHook,
+      prefix: new PrefixHooks(),
     };
   }
 

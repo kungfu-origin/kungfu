@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, toRefs, Ref, onMounted, getCurrentInstance } from 'vue';
+import { ref, computed, toRefs, Ref } from 'vue';
 
 import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboardItem.vue';
@@ -38,9 +38,7 @@ import {
 import path from 'path';
 import KfBlinkNum from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfBlinkNum.vue';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
-import { usePrefix } from '@kungfu-trader/kungfu-js-api/utils/prefixUtils';
 
-const app = getCurrentInstance();
 const { t } = VueI18n.global;
 const { success, error } = messagePrompt();
 
@@ -85,17 +83,8 @@ const columns = getColumns((dataIndex) => {
   };
 });
 
-const { builtPrefixMap } = usePrefix();
-const prefixMap = ref({});
-
-onMounted(() => {
-  if (app?.proxy) {
-    prefixMap.value = builtPrefixMap(
-      app.proxy.$prefixRegister,
-      tableData.value.map((item) => getProcessIdByKfLocation(item)),
-    );
-  }
-});
+const getPrefixByLocation = (kfLocation: KungfuApi.KfLocation) =>
+  globalThis.HookKeeper.getHooks().prefix.trigger(kfLocation);
 
 function handleOpenSetStrategyDialog(
   type: KungfuApi.ModalChangeType,
@@ -206,12 +195,9 @@ function handleRemoveStrategy(record: KungfuApi.KfConfig) {
           <template v-if="column.dataIndex === 'name'">
             <span>{{ record[column.dataIndex] }}</span>
             <Icon
-              v-if="
-                prefixMap[getProcessIdByKfLocation(record)]?.prefixType ===
-                'icon'
-              "
-              :component="prefixMap[getProcessIdByKfLocation(record)].prefix"
-              style="font-size: 14px; margin-left: 5px"
+              v-if="getPrefixByLocation(record).prefixType === 'icon'"
+              :component="getPrefixByLocation(record).prefix"
+              style="font-size: 12px; margin-left: 7px"
             />
           </template>
           <template v-else-if="column.dataIndex === 'strategyFile'">
