@@ -93,7 +93,7 @@ declare global {
 //for td processId
 String.prototype.toAccountId = function (): string {
   if (this.indexOf('_') === -1) return this.toString();
-  if (this.split('_').length === 3) return this.toString();
+  if (this.split('_').length !== 3) return this.toString();
   return this.split('_').slice(1).join('_');
 };
 
