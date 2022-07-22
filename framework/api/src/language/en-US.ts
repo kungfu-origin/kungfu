@@ -304,6 +304,9 @@ export default {
     marked_value: 'marked_value',
     margin: 'margin',
     avail_money: 'avail_money',
+    avail_margin: 'avail_margin',
+    cash_debt: 'cash_debt',
+    total_asset: 'total_asset',
     actions: 'actions',
 
     add_td: 'Add',
@@ -466,6 +469,8 @@ export default {
     close_threshold: 'Close Threshold',
     set_close_threshold:
       'Set the threshold for triggering an close(percentage)',
+    asset_margin: 'AssetMargin',
+    show_asset_margin: 'AssetMargin Mode',
 
     code_editor: 'Editor',
     tab_space_type: 'Indentation Category',

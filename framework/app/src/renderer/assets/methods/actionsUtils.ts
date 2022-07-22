@@ -33,6 +33,7 @@ import {
   getAppStateStatusName,
   buildExtTypeMap,
   dealCategory,
+  dealAssetsByHolderUID,
   getAvailDaemonList,
   removeNoDefaultStrategyFolders,
   getStrategyStateStatusName,
@@ -1357,6 +1358,61 @@ export const useAssets = (): {
     assets,
     getAssetsByKfConfig,
     getAssetsByTdGroup,
+  };
+};
+
+export const useAssetMargins = () => {
+  const app = getCurrentInstance();
+  const assetMagins = ref<Record<string, KungfuApi.AssetMargin>>({});
+
+  const getAssetMarginsByKfConfig = (
+    kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig,
+  ): KungfuApi.AssetMargin => {
+    const processId = getProcessIdByKfLocation(kfConfig);
+    return assetMagins.value[processId] || ({} as KungfuApi.AssetMargin);
+  };
+
+  const getAssetMarginsByTdGroup = (
+    tdGroup: KungfuApi.KfExtraLocation,
+  ): KungfuApi.AssetMargin => {
+    const children = (tdGroup.children || []) as KungfuApi.KfConfig[];
+    const assetMarginsList = children
+      .map((item) => getAssetMarginsByKfConfig(item))
+      .filter((item) => Object.keys(item).length);
+
+    return assetMarginsList.reduce((allAssetMargins, assetMagin) => {
+      return {
+        ...allAssetMargins,
+        margin: (allAssetMargins.margin || 0) + assetMagin.margin,
+        avail_margin:
+          (allAssetMargins.avail_margin || 0) + assetMagin.avail_margin,
+        market_value: (allAssetMargins.cash_debt || 0) + assetMagin.cash_debt,
+        avail: (allAssetMargins.total_asset || 0) + assetMagin.total_asset,
+      };
+    }, {} as KungfuApi.AssetMargin);
+  };
+
+  onMounted(() => {
+    if (app?.proxy) {
+      const subscription = app.proxy.$tradingDataSubject.subscribe(
+        (watcher: KungfuApi.Watcher) => {
+          assetMagins.value = dealAssetsByHolderUID<KungfuApi.AssetMargin>(
+            watcher,
+            watcher.ledger.AssetMargin,
+          );
+        },
+      );
+
+      onBeforeUnmount(() => {
+        subscription.unsubscribe();
+      });
+    }
+  });
+
+  return {
+    assetMagins,
+    getAssetMarginsByKfConfig,
+    getAssetMarginsByTdGroup,
   };
 };
 

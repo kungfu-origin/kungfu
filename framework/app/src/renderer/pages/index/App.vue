@@ -57,7 +57,10 @@ const tradingDataSubscription = tradingDataSubject.subscribe(
   (watcher: KungfuApi.Watcher) => {
     const appStates = dealAppStates(watcher, watcher.appStates);
     store.setAppStates(appStates);
-    const assets = dealAssetsByHolderUID(watcher, watcher.ledger.Asset);
+    const assets = dealAssetsByHolderUID<KungfuApi.Asset>(
+      watcher,
+      watcher.ledger.Asset,
+    );
     store.setAssets(assets);
     const strategyStates = dealStrategyStates(watcher, watcher.strategyStates);
     store.setStrategyStates(strategyStates);

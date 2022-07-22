@@ -1413,12 +1413,14 @@ export const dealStrategyStates = (
   );
 };
 
-export const dealAssetsByHolderUID = (
+export const dealAssetsByHolderUID = <
+  T extends KungfuApi.Asset | KungfuApi.AssetMargin,
+>(
   watcher: KungfuApi.Watcher | null,
-  assets: KungfuApi.DataTable<KungfuApi.Asset>,
-): Record<string, KungfuApi.Asset> => {
+  assets: KungfuApi.DataTable<T>,
+): Record<string, T> => {
   if (!watcher) {
-    return {} as Record<string, KungfuApi.Asset>;
+    return {} as Record<string, T>;
   }
 
   return Object.values(assets).reduce((assetsResolved, asset) => {
@@ -1427,7 +1429,7 @@ export const dealAssetsByHolderUID = (
     const processId = getProcessIdByKfLocation(kfLocation);
     assetsResolved[processId] = asset;
     return assetsResolved;
-  }, {} as Record<string, KungfuApi.Asset>);
+  }, {} as Record<string, T>);
 };
 
 export const dealOrderTradingData = (
