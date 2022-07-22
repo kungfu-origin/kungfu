@@ -74,6 +74,8 @@ export class PreStartProcessHooks {
   trigger(kfLocation: KungfuApi.DerivedKfLocation) {
     const { category, group, name } = kfLocation;
     const key = `${category}_${group}_${name}`;
-    return Promise.all(this.hooks[key].map((method) => method(kfLocation)));
+    return Promise.all(
+      Reflect.get(this.hooks, key).map((method) => method(kfLocation)),
+    );
   }
 }

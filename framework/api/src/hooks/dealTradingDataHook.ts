@@ -230,7 +230,7 @@ export class DealTradingDataHooks {
 
     const { category, group, name } = kfLocation;
     const key = `${category}_${group}_${name}`;
-    const getter = this.hooks[key][tradingDataType].getter;
+    const getter = Reflect.get(this.hooks, key)[tradingDataType].getter;
     return getter(
       watcher,
       dataSource as KungfuApi.MergedTradingDataTable,
@@ -242,7 +242,7 @@ export class DealTradingDataHooks {
     return Object.keys(this.hooks).reduce((pre, key) => {
       const [category, group, name] = key.split('_');
       if (group === name && group === '*') {
-        pre[category] = this.hooks[key].commonData;
+        pre[category] = Reflect.get(this.hooks, key).commonData;
       }
       return pre;
     }, {});

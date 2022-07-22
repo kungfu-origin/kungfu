@@ -382,7 +382,7 @@ interface KfExtModule {
 const indexUse = (ext: KfExtModule) => {
   const { install } = ext;
   if (install) {
-    install(program);
+    install(program, globalThis);
   }
 };
 

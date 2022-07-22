@@ -86,7 +86,7 @@ onMounted(() => {
   }
 });
 
-function handleOpenSetMdDialog(
+async function handleOpenSetMdDialog(
   type = 'add' as KungfuApi.ModalChangeType,
   selectedSource: string,
   mdConfig?: KungfuApi.KfConfig,
@@ -103,7 +103,15 @@ function handleOpenSetMdDialog(
   currentSelectedSourceId.value = selectedSource;
   setMdConfigPayload.value.type = type;
   setMdConfigPayload.value.title = `${selectedSource} ${t('Md')}`;
-  setMdConfigPayload.value.config = extConfig;
+  setMdConfigPayload.value.config =
+    await globalThis.HookKeeper.getHooks().resolveExtConfig.trigger(
+      {
+        category: 'md',
+        group: selectedSource,
+        name: '*',
+      },
+      extConfig,
+    );
   setMdConfigPayload.value.initValue = undefined;
 
   if (type === 'update') {

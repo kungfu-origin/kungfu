@@ -187,7 +187,7 @@ onMounted(() => {
   });
 });
 
-function handleOpenSetTdModal(
+async function handleOpenSetTdModal(
   type = 'add' as KungfuApi.ModalChangeType,
   selectedSource: string,
   tdConfig?: KungfuApi.KfConfig,
@@ -208,7 +208,15 @@ function handleOpenSetTdModal(
   currentSelectedSourceId.value = selectedSource;
   setTdConfigPayload.value.type = type;
   setTdConfigPayload.value.title = `${selectedSource} ${t('Td')}`;
-  setTdConfigPayload.value.config = extConfig;
+  setTdConfigPayload.value.config =
+    await globalThis.HookKeeper.getHooks().resolveExtConfig.trigger(
+      {
+        category: 'td',
+        group: selectedSource,
+        name: '*',
+      },
+      extConfig,
+    );
   setTdConfigPayload.value.initValue = undefined;
 
   if (type === 'update') {
