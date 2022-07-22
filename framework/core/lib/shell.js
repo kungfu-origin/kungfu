@@ -2,9 +2,6 @@ const { spawnSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-const spawnOptsPipe = { shell: true, stdio: 'pipe', windowsHide: true };
-const spawnOptsInherit = { shell: true, stdio: 'inherit', windowsHide: true };
-
 const GithubBinaryHost = 'https://prebuilt.libkungfu.io';
 
 const defined = (e) => e;
@@ -78,14 +75,7 @@ const trace = (cmd, argv, opts) => {
 
 const isGithubEnv = () => process.env.CI && process.env.GITHUB_ACTIONS;
 
-const npmCall = (npmArgs) => {
-  console.log(`$ npm ${npmArgs.join(' ')}`);
-  const result = spawnSync('npm', npmArgs, spawnOptsInherit);
-  if (result.status !== 0) {
-    console.error(`Failed with status ${result.status}`);
-    process.exit(result.status);
-  }
-};
+const npmCall = (npmArgs) => run('npm', npmArgs);
 
 const verifyElectron = () => {
   const electronArch = getElectronArch();
