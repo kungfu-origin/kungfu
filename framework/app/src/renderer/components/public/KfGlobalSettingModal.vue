@@ -8,15 +8,7 @@ import {
   useModalVisible,
   useTableSearchKeyword,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
-import {
-  computed,
-  ComputedRef,
-  onMounted,
-  onUnmounted,
-  reactive,
-  ref,
-  toRefs,
-} from 'vue';
+import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
 import KfConfigSettingsForm from './KfConfigSettingsForm.vue';
 import {
   getKfCommission,
@@ -25,41 +17,17 @@ import {
 import {
   CommissionMode,
   ExchangeIds,
-  KfCategory,
 } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
-import { KfCategoryEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { DeleteOutlined } from '@ant-design/icons-vue';
 import { longfist } from '@kungfu-trader/kungfu-js-api/kungfu';
 import {
-  getScheduleTasks,
-  setScheduleTasks,
-} from '@kungfu-trader/kungfu-js-api/actions';
-import {
   dealCommissionMode,
-  getProcessIdByKfLocation,
   initFormStateByConfig,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import dayjs, { Dayjs } from 'dayjs';
-import customParseFormat from 'dayjs/plugin/advancedFormat';
-import {
-  coreForScheduleTasksOptions,
-  modeForCoreScheduleTasksOptions,
-  modeForScheduleTasksOptions,
-} from '@kungfu-trader/kungfu-app/src/renderer/assets/configs';
-import { ipcRenderer } from 'electron';
-import {
-  useAllKfConfigData,
-  useExtConfigsRelated,
-} from '../../assets/methods/actionsUtils';
+import { useExtConfigsRelated } from '../../assets/methods/actionsUtils';
 import globalBus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 import { useGlobalStore } from '../../pages/index/store/global';
 import { storeToRefs } from 'pinia';
-
-interface ScheduleTaskFormItem {
-  timeValue: Dayjs;
-  mode: KungfuApi.ScheduleTaskMode;
-  processId: string;
-}
 
 const props = withDefaults(
   defineProps<{
@@ -74,8 +42,6 @@ defineEmits<{
   (e: 'update:visible', visible: boolean): void;
   (e: 'close'): void;
 }>();
-
-dayjs.extend(customParseFormat);
 
 const store = useGlobalStore();
 const { globalSetting } = storeToRefs(store);
@@ -102,23 +68,6 @@ const commissions = ref<KungfuApi.Commission[]>([]);
 const { searchKeyword, tableData } =
   useTableSearchKeyword<KungfuApi.Commission>(commissions, ['product_id']);
 
-const { td, md, strategy } = toRefs(useAllKfConfigData());
-
-const kfConfigForScheduleTasksOptions: ComputedRef<
-  Array<{ label: string; value: string; category: string }>
-> = computed(() => {
-  return [...td.value, ...md.value, ...strategy.value].map((item) => ({
-    label: getProcessIdByKfLocation(item),
-    value: getProcessIdByKfLocation(item),
-    category: item.category,
-  }));
-});
-
-const scheduleTask = reactive<{
-  active?: boolean;
-  tasks?: ScheduleTaskFormItem[];
-}>({});
-
 onMounted(() => {
   globalBus.next({
     tag: 'open:globalSetting',
@@ -126,36 +75,6 @@ onMounted(() => {
 
   getKfCommission().then((res) => {
     commissions.value = res;
-  });
-
-  getScheduleTasks().then((res) => {
-    scheduleTask.active = !!res.active;
-    scheduleTask.tasks = !res.tasks
-      ? [
-          {
-            processId: 'system',
-            mode: 'restart',
-            timeValue: dayjs('08:00:00', 'HH:mm:ss'),
-          },
-          {
-            processId: 'system',
-            mode: 'restart',
-            timeValue: dayjs('20:00:00', 'HH:mm:ss'),
-          },
-        ]
-      : (res.tasks || [])
-          .sort((item1, item2) =>
-            item1.processId.localeCompare(item2.processId),
-          )
-          .map((item) => {
-            return {
-              ...item,
-              timeValue: dayjs(
-                `${item.hour}:${item.minute}:${item.second}`,
-                'HH:mm:ss',
-              ),
-            };
-          });
   });
 });
 
@@ -169,20 +88,6 @@ onUnmounted(() => {
   });
 
   setKfCommission(commissions.value);
-  setScheduleTasks({
-    active: scheduleTask.active || false,
-    tasks: (scheduleTask.tasks || [])
-      .filter((item) => !!item.processId)
-      .map((item) => ({
-        hour: dayjs(item.timeValue, 'HH:mm:ss').hour().toString(),
-        minute: dayjs(item.timeValue, 'HH:mm:ss').minute().toString(),
-        second: dayjs(item.timeValue, 'HH:mm:ss').second().toString(),
-        mode: item.mode,
-        processId: item.processId,
-      })),
-  }).then(() => {
-    ipcRenderer.send('schedule-setting-refresh');
-  });
 });
 
 function initGlobalSettingsFromStates(
@@ -218,22 +123,6 @@ function handleRemoveCommission(commission: KungfuApi.Commission) {
 function handleAddCommission() {
   const newCommission = longfist.Commission();
   commissions.value.unshift(newCommission);
-}
-
-function handleAddScheduleTask() {
-  if (scheduleTask.tasks) {
-    scheduleTask.tasks.push({
-      processId: '',
-      mode: 'start',
-      timeValue: dayjs(),
-    });
-  }
-}
-
-function handleRemoveScheduleTask(index: number) {
-  if (scheduleTask.tasks) {
-    scheduleTask.tasks.splice(index, 1);
-  }
 }
 </script>
 <template>
@@ -370,107 +259,6 @@ function handleRemoveScheduleTask(index: number) {
               </div>
             </a-tab-pane>
             <a-tab-pane
-              key="schedule"
-              :tab="$t('globalSettingConfig.timing_rev_top')"
-            >
-              <div class="global-setting-item">
-                <div
-                  class="label"
-                  :title="$t('globalSettingConfig.use_timing_rev_top')"
-                >
-                  {{ $t('globalSettingConfig.use_timing_rev_top') }}
-                </div>
-                <div class="value">
-                  <a-switch
-                    size="small"
-                    v-model:checked="scheduleTask.active"
-                  ></a-switch>
-                </div>
-              </div>
-              <div class="global-setting-item">
-                <div class="label">
-                  {{ $t('globalSettingConfig.timing_task_list') }}
-                </div>
-                <a-button
-                  style="margin-bottom: 16px"
-                  @click="handleAddScheduleTask"
-                >
-                  {{ $t('globalSettingConfig.add_timing') }}
-                </a-button>
-                <div
-                  class="value schedule-setting__warp"
-                  v-for="(task, index) in scheduleTask.tasks || []"
-                >
-                  <a-row>
-                    <a-col>
-                      <div class="title">
-                        {{ $t('globalSettingConfig.target_process') }}
-                      </div>
-                      <a-select
-                        style="width: 220px"
-                        v-model:value="task.processId"
-                        :disabled="task.processId === 'system'"
-                        option-label-prop="label"
-                      >
-                        <a-select-option
-                          v-for="item in task.processId === 'system'
-                            ? coreForScheduleTasksOptions
-                            : kfConfigForScheduleTasksOptions"
-                          :value="item.value"
-                          :label="item.label"
-                        >
-                          <a-tag
-                            :color="
-                              KfCategory[KfCategoryEnum[item.category]].color
-                            "
-                          >
-                            {{ KfCategory[KfCategoryEnum[item.category]].name }}
-                          </a-tag>
-                          {{ item.label }}
-                        </a-select-option>
-                      </a-select>
-                    </a-col>
-                    <a-col>
-                      <div class="title">
-                        {{ $t('globalSettingConfig.manner') }}
-                      </div>
-                      <a-select
-                        style="width: 120px"
-                        v-model:value="task.mode"
-                        :disabled="task.processId === 'system'"
-                      >
-                        <a-select-option
-                          v-for="item in task.processId === 'system'
-                            ? modeForCoreScheduleTasksOptions
-                            : modeForScheduleTasksOptions"
-                          :value="item.value"
-                        >
-                          {{ item.label }}
-                        </a-select-option>
-                      </a-select>
-                    </a-col>
-                    <a-col>
-                      <div class="title">
-                        {{ $t('globalSettingConfig.daily_time') }}
-                      </div>
-                      <a-time-picker
-                        style="width: 120px"
-                        v-model:value="task.timeValue"
-                      ></a-time-picker>
-                    </a-col>
-                    <a-col v-if="task.processId !== 'system'">
-                      <div class="title"></div>
-                      <DeleteOutlined
-                        class="kf-hover"
-                        style="font-size: 14px"
-                        @click="handleRemoveScheduleTask(index)"
-                      />
-                    </a-col>
-                  </a-row>
-                </div>
-              </div>
-            </a-tab-pane>
-            <a-tab-pane
               v-for="config in globalSettingComponentConfigs"
               :key="config.key"
               :tab="config.name"
@@ -546,28 +334,6 @@ function handleRemoveScheduleTask(index: number) {
           .label {
             padding-bottom: 8px;
             font-size: 18px;
-          }
-
-          .value {
-            &.schedule-setting__warp {
-              .ant-row {
-                margin-bottom: 10px;
-
-                .ant-col {
-                  display: flex;
-                  align-items: center;
-                  margin-right: 20px;
-                }
-              }
-
-              .title {
-                font-size: 12px;
-                color: rgba(255, 255, 255, 0.45);
-                margin-bottom: 4px;
-                margin-right: 8px;
-                padding-left: 11px;
-              }
-            }
           }
         }
       }

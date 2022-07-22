@@ -145,6 +145,13 @@ declare namespace KungfuApi {
     };
     cli_config?: {
       exhibit?: KfExhibitConfig;
+      components?: Record<
+        string,
+        {
+          position: 'index' | 'dzxy';
+          entry: string;
+        }
+      >;
       daemon?: Record<string, string>;
       script?: string;
     };
@@ -207,6 +214,13 @@ declare namespace KungfuApi {
       extPath: string;
       exhibit: KfExhibitConfig;
       daemon: Record<string, string>;
+      components: Record<
+        string,
+        {
+          position: 'index' | 'dzxy';
+          entry: string;
+        }
+      > | null;
       script: string;
     }
   >;

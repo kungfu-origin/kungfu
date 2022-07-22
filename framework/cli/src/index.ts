@@ -24,6 +24,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { setGlobalSetting, showGlobalSetting } from './commanders/config';
 import { exportTradingDataPrompt } from './commanders/export';
+import { useAllExtComponentByPosition } from './assets/methods/utils';
 import { useAllExtScript } from './assets/methods/utils';
 
 useAllExtScript();
@@ -231,4 +232,8 @@ program.on('command:*', function () {
   process.exit(invalidCommand ? 1 : 0);
 });
 
-program.parse(process.argv);
+useAllExtComponentByPosition('index')
+  .catch((err) => console.error(err))
+  .finally(() => {
+    program.parse(process.argv);
+  });
