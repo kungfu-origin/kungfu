@@ -4,6 +4,11 @@ const fs = require('fs');
 const glob = require('glob');
 const path = require('path');
 
+function build() {
+  shell.showAutoConfig();
+  callPrebuilt(['configure', 'build']);
+}
+
 function clean() {
   fs.rmSync('dist', { recursive: true, force: true });
   fs.rmSync('build', { recursive: true, force: true });
@@ -24,14 +29,11 @@ module.exports = require('../lib/sywac')(module, (cli) => {
         fallbackBuild,
       );
     })
-    .command('build', () => {
-      shell.showAutoConfig();
-      callPrebuilt(['configure', 'build']);
-    })
+    .command('build', () => build())
     .command('clean', () => clean())
     .command('rebuild', () => {
       clean();
-      callPrebuilt(['configure', 'build']);
+      build();
     })
     .command('package', () => {
       callPrebuilt(['package']).onSuccess(() => {

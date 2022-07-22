@@ -346,12 +346,12 @@ exports.format = () => {
   const packageJson = shell.getPackageJson();
   const srcArgv = ['src'];
   if (hasSourceFor(packageJson, 'cpp')) {
-    require('@kungfu-trader/kungfu-core/.gyp/node-format-cpp')(srcArgv);
+    require('@kungfu-trader/kungfu-core/.gyp/run-format-cpp')(srcArgv);
   }
   if (hasSourceFor(packageJson, 'python')) {
-    require('@kungfu-trader/kungfu-core/.gyp/node-format-python')(srcArgv);
+    require('@kungfu-trader/kungfu-core/.gyp/run-format-python')(srcArgv);
   }
   if (packageJson.kungfuConfig && packageJson.kungfuConfig.ui_config) {
-    require('@kungfu-trader/kungfu-core/.gyp/node-format-js')(srcArgv);
+    require('@kungfu-trader/kungfu-core/.gyp/run-format-js')(srcArgv);
   }
 };
