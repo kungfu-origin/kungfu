@@ -21,7 +21,10 @@ const getElectronArch = () => {
       '.gyp',
       'electron-version.js',
     );
-    return runAndCollect(electron, [electronVersionScript], { silent: true })
+    const electronArgs = process.platform === 'linux' ? ['--no-sandbox'] : [];
+    return runAndCollect(electron, [...electronArgs, electronVersionScript], {
+      silent: false,
+    })
       .stdout.toString()
       .trim();
   } catch (e) {
