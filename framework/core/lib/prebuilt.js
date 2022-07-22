@@ -48,7 +48,7 @@ const main = (...argv) => {
     console.error(err);
     process.exit(-1);
   };
-  proto.success = () => process.exit(0);
+  proto.success = () => true;
   proto.onFailure = function (cb) {
     this.failure = cb;
     return this;
