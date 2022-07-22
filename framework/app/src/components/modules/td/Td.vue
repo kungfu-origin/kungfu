@@ -68,6 +68,15 @@ const isShowAssetMargin = computed(() => {
   return !!globalSetting.value?.trade?.assetMargin;
 });
 
+globalThis.HookKeeper.getHooks().dealTradingData.register(
+  {
+    category: categoryRegisterConfig.category,
+    group: '*',
+    name: '*',
+  },
+  categoryRegisterConfig,
+);
+
 const app = getCurrentInstance();
 const setSourceModalVisible = ref<boolean>(false);
 const setTdModalVisible = ref<boolean>(false);
@@ -167,8 +176,6 @@ const prefixMap = ref({});
 
 onMounted(() => {
   if (app?.proxy) {
-    app.proxy.$globalCategoryRegister.register(categoryRegisterConfig);
-
     prefixMap.value = builtPrefixMap(
       app.proxy.$prefixRegister,
       tableDataResolved.value.map((item) => getProcessIdByKfLocation(item)),

@@ -32,6 +32,15 @@ import {
   useInstruments,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 
+globalThis.HookKeeper.getHooks().dealTradingData.register(
+  {
+    category: categoryRegisterConfig.category,
+    group: '*',
+    name: '*',
+  },
+  categoryRegisterConfig,
+);
+
 const app = getCurrentInstance();
 const pos = ref<KungfuApi.Position[]>([]);
 const { dashboardBodyHeight, handleBodySizeChange } = useDashboardBodySize();
@@ -59,8 +68,6 @@ onMounted(() => {
     onBeforeUnmount(() => {
       subscription.unsubscribe();
     });
-
-    app.proxy.$globalCategoryRegister.register(categoryRegisterConfig);
   }
 });
 

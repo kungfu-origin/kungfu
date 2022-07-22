@@ -1049,12 +1049,15 @@ export const buildIdByKeysFromKfConfigSettings = (
     .join('_');
 };
 
-const startProcessByKfLocation = (
-  kfLocation:
-    | KungfuApi.KfLocation
-    | KungfuApi.KfConfig
-    | KungfuApi.KfExtraLocation,
+const startProcessByKfLocation = async (
+  kfLocation: KungfuApi.DerivedKfLocation,
 ) => {
+  try {
+    await globalThis.HookKeeper.getHooks().prestart.trigger(kfLocation);
+  } catch (err) {
+    console.error(err);
+  }
+
   switch (kfLocation.category) {
     case 'system':
       if (kfLocation.name === 'master') {
@@ -1066,9 +1069,9 @@ const startProcessByKfLocation = (
       }
 
     case 'td':
-      return startTd(getIdByKfLocation(kfLocation));
+      return startTd(getIdByKfLocation(kfLocation), kfLocation);
     case 'md':
-      return startMd(getIdByKfLocation(kfLocation));
+      return startMd(getIdByKfLocation(kfLocation), kfLocation);
     case 'strategy':
       const strategyPath =
         JSON.parse((kfLocation as KungfuApi.KfConfig)?.value || '{}')
@@ -1090,10 +1093,7 @@ const startProcessByKfLocation = (
 
 export const switchKfLocation = (
   watcher: KungfuApi.Watcher | null,
-  kfLocation:
-    | KungfuApi.KfLocation
-    | KungfuApi.KfConfig
-    | KungfuApi.KfExtraLocation,
+  kfLocation: KungfuApi.DerivedKfLocation,
   targetStatus: boolean,
 ): Promise<void | Proc> => {
   const processId = getProcessIdByKfLocation(kfLocation);
