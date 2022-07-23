@@ -1,4 +1,3 @@
-import './injectGlobal';
 import {
   ensureKungfuKey,
   initKfConfig,
