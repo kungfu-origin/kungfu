@@ -277,9 +277,9 @@ function noZeroValidator(_rule: RuleObject, value: number): Promise<void> {
     return Promise.reject(new Error(t('validate.no_zero_number')));
   }
 
-  if (+value < 0) {
-    return Promise.reject(new Error(t('validate.no_negative_number')));
-  }
+  // if (+value < 0) {
+  //   return Promise.reject(new Error(t('validate.no_negative_number')));
+  // }
 
   return Promise.resolve();
 }
