@@ -1,7 +1,7 @@
 import kungfu
 
 from collections import namedtuple
-from kungfu.yijinjing.log import create_logger
+from kungfu.yijinjing.log import get_logger
 from . import mdmaker
 
 
@@ -21,9 +21,8 @@ class MarketDataSim(wc.MarketData):
             base=200.0, bound=1000, samples=1000, variation=4, randseed=6
         )
         self.orderbooks = {}
-        self.logger = create_logger(
-            "sim_md",
-            "info",
+        self.logger = get_logger(
+            "_".join(('md', self.home.group, self.home.name))
         )
 
     def on_start(self):

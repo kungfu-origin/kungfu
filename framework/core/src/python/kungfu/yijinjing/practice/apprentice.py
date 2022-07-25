@@ -29,7 +29,6 @@ class Apprentice(yjj.apprentice):
     def go(self):
         kfio.checkin(self.ctx, self.io_device)
         yjj.apprentice.go(self)
-        # kfio.checkout(self._ctx, self.logger, self._io_device)
 
     def exit_gracefully(self, signum, frame):
         self.stop()

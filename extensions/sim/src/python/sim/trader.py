@@ -6,7 +6,7 @@ import sys
 
 from dotted_dict import DottedDict
 from collections import namedtuple
-from kungfu.yijinjing.log import create_logger
+from kungfu.yijinjing.log import get_logger
 from kungfu.yijinjing import time as kft
 
 lf = kungfu.__binding__.longfist
@@ -30,9 +30,8 @@ OrderRecord = namedtuple("OrderRecord", ["source", "dest", "order"])
 class TraderSim(wc.Trader):
     def __init__(self, vendor):
         wc.Trader.__init__(self, vendor)
-        self.logger = create_logger(
-            "_".join(("td", self.home.group, self.home.name)),
-            "info",
+        self.logger = get_logger(
+            "_".join(('td', self.home.group, self.home.name))
         )
 
     def on_start(self):
