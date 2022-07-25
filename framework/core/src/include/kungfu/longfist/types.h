@@ -538,6 +538,7 @@ KF_DEFINE_PACK_TYPE(                                        //
 
     (bool, is_last),              // 是否为本次查询的最后一条记录
     (HistoryDataType, data_type), // 标记本数据是正常数据, 本页最后一条数据, 全部数据的最后一条
+    (bool, is_withdraw),          // 是否是撤单流水
 
     (InstrumentType, instrument_type), // 合约类型
 
