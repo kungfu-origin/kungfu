@@ -195,8 +195,8 @@ python-versions = "*"
 
 [package.extras]
 test = [
-    "flake8 (==3.7.8)",
     "hypothesis (==3.55.3)",
+    "flake8 (==3.7.8)",
 ]
 
 [[package]]
@@ -515,9 +515,9 @@ six = "*"
 
 [package.extras]
 test = [
-    "pytest",
-    "pytest-cov",
     "scipy",
+    "pytest-cov",
+    "pytest",
 ]
 
 [[package]]
@@ -617,13 +617,13 @@ optional = false
 python-versions = ">=3.6"
 
 [package.extras]
-dev = [
-    "pre-commit",
-    "tox",
-]
 testing = [
-    "pytest",
     "pytest-benchmark",
+    "pytest",
+]
+dev = [
+    "tox",
+    "pre-commit",
 ]
 
 [[package]]
@@ -726,27 +726,27 @@ optional = false
 python-versions = ">=3.6"
 
 [package.extras]
-crypto = [
-    "cryptography (>=3.3.1)",
-]
-dev = [
-    "sphinx",
-    "sphinx-rtd-theme",
-    "zope.interface",
-    "cryptography (>=3.3.1)",
-    "pytest (>=6.0.0,<7.0.0)",
+tests = [
     "coverage[toml] (==5.0.4)",
-    "mypy",
-    "pre-commit",
+    "pytest (>=6.0.0,<7.0.0)",
 ]
 docs = [
-    "sphinx",
-    "sphinx-rtd-theme",
     "zope.interface",
+    "sphinx-rtd-theme",
+    "sphinx",
 ]
-tests = [
-    "pytest (>=6.0.0,<7.0.0)",
+dev = [
+    "pre-commit",
+    "mypy",
     "coverage[toml] (==5.0.4)",
+    "pytest (>=6.0.0,<7.0.0)",
+    "cryptography (>=3.3.1)",
+    "zope.interface",
+    "sphinx-rtd-theme",
+    "sphinx",
+]
+crypto = [
+    "cryptography (>=3.3.1)",
 ]
 
 [[package]]
@@ -896,28 +896,28 @@ optional = false
 python-versions = "*"
 
 [package.extras]
-examples = [
-    "html5lib",
+test = [
+    "pytest",
     "packaging",
-    "pygraphviz",
-    "requests",
-]
-lint = [
-    "black",
-    "flake8",
-    "mypy",
-    "isort",
-    "types-requests",
+    "commentjson",
 ]
 release = [
-    "build",
-    "towncrier",
     "twine",
+    "towncrier",
+    "build",
 ]
-test = [
-    "commentjson",
+lint = [
+    "types-requests",
+    "isort",
+    "mypy",
+    "flake8",
+    "black",
+]
+examples = [
+    "requests",
+    "pygraphviz",
     "packaging",
-    "pytest",
+    "html5lib",
 ]
 
 [[package]]

@@ -1,14 +1,17 @@
 import tomli
 import tomli_w
+import sys
 
 
 def format_toml(filename):
-    with open(filename, "rb") as poetry_lock_file:
-        poetry_lock = tomli.load(poetry_lock_file)
+    with open(filename, "rb") as target_toml_file:
+        target_toml = tomli.load(target_toml_file)
 
-    with open(filename, "wb") as poetry_lock_file:
-        tomli_w.dump(poetry_lock, poetry_lock_file)
+    with open(filename, "wb") as target_toml_file:
+        tomli_w.dump(target_toml, target_toml_file)
 
 
 if __name__ == "__main__":
-    format_toml("poetry.lock")
+    if len(sys.argv) != 2:
+        raise IndexError('Expected one argument: filename')
+    format_toml(sys.argv[1])

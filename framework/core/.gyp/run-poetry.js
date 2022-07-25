@@ -13,11 +13,21 @@ function tryRunWithPipenv(rawCmd, pipenvCmd, args) {
 }
 
 function poetry(args) {
-  tryRunWithPipenv('poetry', ['python', '-m', 'poetry'], args);
+  tryRunWithPipenv('poetry', ['python', '-m', 'poetry'], [...args, '-n']);
 }
 
 function python(args) {
   tryRunWithPipenv('python', ['python'], args);
+}
+
+function toPoetryArgs(argv) {
+  return argv.quiet ? ['-q'] : [];
+}
+
+function setupPoetryArgs(sywac) {
+  sywac
+    .option('-q, --quiet', {type: 'boolean', default: false})
+    .help();
 }
 
 module.exports = require('../lib/sywac')(
@@ -26,15 +36,14 @@ module.exports = require('../lib/sywac')(
     cli
       .command('clear', () => poetry(['cache', 'clear', '--all', 'pypi']))
       .command('lock', {
-        setup: (sywac) => {
-          sywac
-            .option('-q, --quiet', { type: 'boolean', default: false })
-            .help();
-        },
+        setup: setupPoetryArgs,
+        run: (argv) => poetry(['lock', '--no-update', ...toPoetryArgs(argv)]),
+      })
+      .command('install', {
+        setup: setupPoetryArgs,
         run: (argv) => {
-          const poetryArgs = argv.quiet ? ['--quiet'] : [];
-          poetry(['lock', '-n', '--no-update', ...poetryArgs]);
-          python([path.join(shell.getCoreGypDir(), 'format-toml.py')]);
+          poetry(['install', ...toPoetryArgs(argv)]);
+          python([path.join(shell.getCoreGypDir(), 'format-toml.py'), 'poetry.lock']);
         },
       })
       .command('*', {

@@ -43,5 +43,8 @@ def create_logger(name, level, location=None):
     return logger
 
 
-def get_logger(name):
-    return logging.getLogger(name)
+def find_logger(location, level="info"):
+    logger = logging.getLogger(location.name)
+    if logger.hasHandlers():
+        return logger
+    return create_logger(location.name, level, location)
