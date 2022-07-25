@@ -13,5 +13,5 @@ def format_toml(filename):
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        raise IndexError('Expected one argument: filename')
+        raise IndexError("Expected one argument: filename")
     format_toml(sys.argv[1])

@@ -25,9 +25,7 @@ function toPoetryArgs(argv) {
 }
 
 function setupPoetryArgs(sywac) {
-  sywac
-    .option('-q, --quiet', {type: 'boolean', default: false})
-    .help();
+  sywac.option('-q, --quiet', { type: 'boolean', default: false }).help();
 }
 
 module.exports = require('../lib/sywac')(
@@ -43,7 +41,10 @@ module.exports = require('../lib/sywac')(
         setup: setupPoetryArgs,
         run: (argv) => {
           poetry(['install', ...toPoetryArgs(argv)]);
-          python([path.join(shell.getCoreGypDir(), 'format-toml.py'), 'poetry.lock']);
+          python([
+            path.join(shell.getCoreGypDir(), 'format-toml.py'),
+            'poetry.lock',
+          ]);
         },
       })
       .command('*', {
