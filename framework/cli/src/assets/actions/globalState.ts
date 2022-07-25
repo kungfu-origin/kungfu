@@ -26,21 +26,23 @@ const timer = setTimeout(() => {
   clearTimeout(timer);
 }, 1000);
 
-pm2LaunchBus((err: Error, pm2_bus: Pm2Bus) => {
-  if (err) {
-    console.error('pm2 launchBus Error', err);
-    return;
-  }
+if (process.env.RENDERER_ID !== 'dzxy') {
+  pm2LaunchBus((err: Error, pm2_bus: Pm2Bus) => {
+    if (err) {
+      console.error('pm2 launchBus Error', err);
+      return;
+    }
 
-  pm2_bus &&
-    pm2_bus.on('process:msg', (packet: Pm2Packet) => {
-      const processData = packet.process;
-      globalState.DZXY_PM_ID = processData.pm_id;
+    pm2_bus &&
+      pm2_bus.on('process:msg', (packet: Pm2Packet) => {
+        const processData = packet.process;
+        globalState.DZXY_PM_ID = processData.pm_id;
 
-      if (packet.data.type === 'WATCHER_IS_LIVE') {
-        globalState.DZXY_WATCHER_IS_LIVE = !!packet.data.body;
-      }
+        if (packet.data.type === 'WATCHER_IS_LIVE') {
+          globalState.DZXY_WATCHER_IS_LIVE = !!packet.data.body;
+        }
 
-      globalState.DZXY_SUBJECT.next(packet);
-    });
-});
+        globalState.DZXY_SUBJECT.next(packet);
+      });
+  });
+}
