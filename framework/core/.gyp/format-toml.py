@@ -10,5 +10,5 @@ def format_toml(filename):
         tomli_w.dump(poetry_lock, poetry_lock_file)
 
 
-if __name__ == 'main':
+if __name__ == "__main__":
     format_toml("poetry.lock")

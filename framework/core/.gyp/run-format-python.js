@@ -1,4 +1,3 @@
-const fs = require('fs');
 const path = require('path');
 const { shell } = require('../lib');
 
@@ -6,12 +5,13 @@ function main(argv) {
   const cwd = process.cwd();
   const coreDir = path.dirname(__dirname);
 
-  if (
-    process.env.KUNGFU_CHECK_LOCK &&
-    fs.existsSync(path.join(cwd, 'poetry.lock'))
-  ) {
-    shell.run('poetry', ['--version'], false);
-    shell.run('poetry', ['lock', '-n', '-q', '--no-update'], false);
+  if (process.env.CI && process.env.GITHUB_ACTIONS) {
+    process.env.DISABLE_PIPENV = 'on';
+  }
+
+  if (!process.env.SKIP_POETRY_LOCK_CHECK) {
+    const poetryScript = path.join(shell.getCoreGypDir(), 'run-poetry.js');
+    shell.run('node', [poetryScript, 'lock', '-q'], false);
     shell.run('git', ['--no-pager', 'diff', 'poetry.lock']);
   }
 
