@@ -194,8 +194,10 @@ export const processListObservable = () =>
 
       const mdList: ProcessListItem[] = md.map((item) => {
         const processId = getProcessIdByKfLocation(item);
+        const prefixProps =
+          globalThis.HookKeeper.getHooks().prefix.trigger(item);
         const prefix =
-          globalState.PREFIX_REGISTER.getPrefixDataBykey(processId).prefix;
+          prefixProps.prefixType === 'text' ? prefixProps.prefix : '';
         return {
           processId,
           processName: prefix + processId,
@@ -216,8 +218,10 @@ export const processListObservable = () =>
 
       const tdList: ProcessListItem[] = td.map((item) => {
         const processId = getProcessIdByKfLocation(item);
+        const prefixProps =
+          globalThis.HookKeeper.getHooks().prefix.trigger(item);
         const prefix =
-          globalState.PREFIX_REGISTER.getPrefixDataBykey(processId).prefix;
+          prefixProps.prefixType === 'text' ? prefixProps.prefix : '';
         return {
           processId,
           processName: prefix + processId,
@@ -238,8 +242,10 @@ export const processListObservable = () =>
 
       const strategyList: ProcessListItem[] = strategy.map((item) => {
         const processId = getProcessIdByKfLocation(item);
+        const prefixProps =
+          globalThis.HookKeeper.getHooks().prefix.trigger(item);
         const prefix =
-          globalState.PREFIX_REGISTER.getPrefixDataBykey(processId).prefix;
+          prefixProps.prefixType === 'text' ? prefixProps.prefix : '';
         return {
           processId,
           processName: prefix + processId,
@@ -256,8 +262,10 @@ export const processListObservable = () =>
 
       const daemonList: ProcessListItem[] = daemon.map((item) => {
         const processId = getProcessIdByKfLocation(item);
+        const prefixProps =
+          globalThis.HookKeeper.getHooks().prefix.trigger(item);
         const prefix =
-          globalState.PREFIX_REGISTER.getPrefixDataBykey(processId).prefix;
+          prefixProps.prefixType === 'text' ? prefixProps.prefix : '';
         return {
           processId,
           processName: prefix + (dealProcessName(processId) || processId),
@@ -274,8 +282,16 @@ export const processListObservable = () =>
         };
       });
 
+      const masterPrefixProps = globalThis.HookKeeper.getHooks().prefix.trigger(
+        {
+          category: 'system',
+          group: 'master',
+          name: 'master',
+          mode: 'live',
+        },
+      );
       const masterPrefix =
-        globalState.PREFIX_REGISTER.getPrefixDataBykey('system').prefix;
+        masterPrefixProps.prefixType === 'text' ? masterPrefixProps.prefix : '';
 
       return [
         {
@@ -413,6 +429,7 @@ export const switchProcess = (
         );
         return;
       }
+
       sendDataToProcessIdByPm2('SWITCH_KF_LOCATION', globalState.DZXY_PM_ID, {
         category,
         group,

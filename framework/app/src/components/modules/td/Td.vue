@@ -1,12 +1,5 @@
 <script setup lang="ts">
-import {
-  ref,
-  computed,
-  toRefs,
-  getCurrentInstance,
-  onMounted,
-  toRaw,
-} from 'vue';
+import { ref, computed, toRefs, onMounted, toRaw } from 'vue';
 
 import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboardItem.vue';
@@ -57,7 +50,6 @@ import SetTdGroupModal from './SetTdGroupModal.vue';
 import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
 import { messagePrompt } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
-import { usePrefix } from '@kungfu-trader/kungfu-js-api/utils/prefixUtils';
 import { storeToRefs } from 'pinia';
 
 const { t } = VueI18n.global;
@@ -77,7 +69,6 @@ globalThis.HookKeeper.getHooks().dealTradingData.register(
   categoryRegisterConfig,
 );
 
-const app = getCurrentInstance();
 const setSourceModalVisible = ref<boolean>(false);
 const setTdModalVisible = ref<boolean>(false);
 const setTdConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
@@ -170,18 +161,12 @@ const columns = computed(() =>
   }, isShowAssetMargin.value),
 );
 
+const getPrefixByLocation = (kfLocation: KungfuApi.KfLocation) =>
+  globalThis.HookKeeper.getHooks().prefix.trigger(kfLocation);
+
 const { setTdGroups } = useGlobalStore();
-const { builtPrefixMap } = usePrefix();
-const prefixMap = ref({});
 
 onMounted(() => {
-  if (app?.proxy) {
-    prefixMap.value = builtPrefixMap(
-      app.proxy.$prefixRegister,
-      tableDataResolved.value.map((item) => getProcessIdByKfLocation(item)),
-    );
-  }
-
   setTdGroups().then(() => {
     tdGroupDataLoaded.value = true;
   });
@@ -396,12 +381,9 @@ function handleRemoveTd(item: KungfuApi.KfConfig) {
                 {{ record.name }}
               </span>
               <Icon
-                v-if="
-                  prefixMap[getProcessIdByKfLocation(record)]?.prefixType ===
-                  'icon'
-                "
-                :component="prefixMap[getProcessIdByKfLocation(record)].prefix"
-                style="font-size: 14px; margin-left: 5px"
+                v-if="getPrefixByLocation(record).prefixType === 'icon'"
+                :component="getPrefixByLocation(record).prefix"
+                style="font-size: 12px; margin-left: 7px"
               />
             </div>
           </template>

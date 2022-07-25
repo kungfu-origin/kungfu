@@ -2,7 +2,7 @@
 # Then let poetry to manage the other dependencies.
 
 [packages]
-poetry = "==1.1.13"
+poetry = "==1.1.14"
 pip = "==21.3.1"
 setuptools = "==59.8.0"
 virtualenv = "==20.14.1"

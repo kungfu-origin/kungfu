@@ -32,7 +32,6 @@ import {
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
-import { usePrefix } from '@kungfu-trader/kungfu-js-api/utils/prefixUtils';
 
 const { t } = VueI18n.global;
 
@@ -146,30 +145,18 @@ function handleOpenProcessControllerBoard(): void {
   processControllerBoardVisible.value = true;
 }
 
-const { builtPrefixMap } = usePrefix();
 const prefixMap = ref({});
 
 watch(
   () => allKfConfigData,
   () => {
-    if (app?.proxy) {
-      const processIds = categoryList.reduce<string[]>(
-        (list, category: string) => {
-          return [
-            ...list,
-            ...allKfConfigData[category].map((item) =>
-              getProcessIdByKfLocation(item),
-            ),
-          ];
-        },
-        [],
-      );
-      prefixMap.value = builtPrefixMap(app.proxy.$prefixRegister, processIds);
-      if (app.proxy.$prefixRegister.isRegistered('system')) {
-        prefixMap.value['master'] =
-          app.proxy.$prefixRegister.getPrefixDataBykey('system');
-      }
-    }
+    prefixMap.value = categoryList.reduce((map, category) => {
+      allKfConfigData[category].forEach((location) => {
+        map[getProcessIdByKfLocation(location)] =
+          globalThis.HookKeeper.getHooks().prefix.trigger(location);
+      });
+      return map;
+    }, {});
   },
   { deep: true },
 );
@@ -264,7 +251,7 @@ onMounted(() => {
                   :component="
                     prefixMap[getProcessIdByKfLocation(config)].prefix
                   "
-                  style="font-size: 14px"
+                  style="font-size: 12px"
                 />
               </div>
               <div class="state-status">

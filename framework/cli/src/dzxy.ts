@@ -1,4 +1,5 @@
-import './assets/methods/setDzxyEnv';
+import './setDzxyEnv';
+import './injectGlobal';
 import path from 'path';
 import { triggerStartStep } from '@kungfu-trader/kungfu-js-api/kungfu/tradingData';
 import {
