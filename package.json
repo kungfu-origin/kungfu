@@ -32,7 +32,8 @@
     "build:cli": "yarn workspace @kungfu-trader/kungfu-cli build",
     "build:core": "yarn workspace @kungfu-trader/kungfu-core build",
     "rebuild:core": "yarn workspace @kungfu-trader/kungfu-core rebuild",
-    "poetry:clear": "yarn workspace @kungfu-trader/kungfu-core poetry:clear"
+    "poetry:clear": "yarn workspace @kungfu-trader/kungfu-core poetry:clear",
+    "poetry:lock": "yarn workspace @kungfu-trader/kungfu-core poetry:lock"
   },
   "dependencies": {
     "core-js": "^3.20.0",
