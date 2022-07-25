@@ -5,15 +5,15 @@ function main(argv) {
   const cwd = process.cwd();
   const coreDir = path.dirname(__dirname);
 
-  if (process.env.CI && process.env.GITHUB_ACTIONS) {
-    process.env.DISABLE_PIPENV = 'on';
-  }
-
-  if (!process.env.SKIP_POETRY_LOCK_CHECK) {
-    const poetryScript = path.join(shell.getCoreGypDir(), 'run-poetry.js');
-    shell.run('node', [poetryScript, 'lock', '-q'], false);
-    shell.run('git', ['--no-pager', 'diff', 'poetry.lock']);
-  }
+  // if (process.env.CI && process.env.GITHUB_ACTIONS) {
+  //   process.env.DISABLE_PIPENV = 'on';
+  // }
+  //
+  // if (!process.env.SKIP_POETRY_LOCK_CHECK) {
+  //   const poetryScript = path.join(shell.getCoreGypDir(), 'run-poetry.js');
+  //   shell.run('node', [poetryScript, 'lock', '-q'], false);
+  //   shell.run('git', ['--no-pager', 'diff', 'poetry.lock']);
+  // }
 
   shell.run('black', ['--version'], false);
   shell.runAndExit('black', argv);
