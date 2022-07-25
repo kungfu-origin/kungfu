@@ -27,6 +27,7 @@ const timer = setTimeout(() => {
 }, 1000);
 
 pm2LaunchBus((err: Error, pm2_bus: Pm2Bus) => {
+  console.warn('Pm2LaunchBus');
   if (err) {
     console.error('pm2 launchBus Error', err);
     return;
