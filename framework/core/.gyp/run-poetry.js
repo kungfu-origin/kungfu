@@ -1,23 +1,7 @@
-const fs = require('fs');
-const path = require('path');
 const { shell } = require('../lib');
 
-function tryRunWithPipenv(rawCmd, pipenvCmd, args) {
-  const enable = !process.env.DISABLE_PIPENV;
-  const hasLock = fs.existsSync(path.join(process.cwd(), 'Pipfile.lock'));
-  if (enable && hasLock) {
-    shell.run('pipenv', ['run', ...pipenvCmd, ...args]);
-  } else {
-    shell.run(rawCmd, [...args]);
-  }
-}
-
 function poetry(args) {
-  tryRunWithPipenv('poetry', ['python', '-m', 'poetry'], [...args, '-n']);
-}
-
-function python(args) {
-  tryRunWithPipenv('python', ['python'], args);
+  shell.run('pipenv', ['run', 'python', '-m', 'poetry', ...args, '-n']);
 }
 
 function toPoetryArgs(argv) {
@@ -28,6 +12,19 @@ function setupPoetryArgs(sywac) {
   sywac.option('-q, --quiet', { type: 'boolean', default: false }).help();
 }
 
+function shouldLock() {
+  // handle the issue that poetry lock doesn't keep same order across platforms
+  const code =
+    'from poetry.factory import Factory;' +
+    "print(Factory().create_poetry('.').locker.is_fresh())";
+  const test = shell.runAndCollect(
+    'pipenv',
+    ['run', 'python', '-c', `"${code}"`],
+    { silent: true },
+  );
+  return test.out !== 'True';
+}
+
 module.exports = require('../lib/sywac')(
   module,
   (cli) => {
@@ -35,23 +32,17 @@ module.exports = require('../lib/sywac')(
       .command('clear', () => poetry(['cache', 'clear', '--all', 'pypi']))
       .command('lock', {
         setup: setupPoetryArgs,
-        run: (argv) => poetry(['lock', '--no-update', ...toPoetryArgs(argv)]),
+        run: (argv) =>
+          shouldLock() &&
+          poetry(['lock', '--no-update', ...toPoetryArgs(argv)]),
       })
       .command('install', {
         setup: setupPoetryArgs,
-        run: (argv) => {
-          poetry(['install', ...toPoetryArgs(argv)]);
-          python([
-            path.join(shell.getCoreGypDir(), 'format-toml.py'),
-            'poetry.lock',
-          ]);
-        },
+        run: (argv) => poetry(['install', ...toPoetryArgs(argv)]),
       })
       .command('*', {
         setup: (sywac) => sywac.strict(false),
-        run: () => {
-          poetry(process.argv.slice(2));
-        },
+        run: () => poetry(process.argv.slice(2)),
       });
   },
   { silent: true, help: false, version: false },
