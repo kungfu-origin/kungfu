@@ -102,7 +102,7 @@ class KungfuCoreConan(ConanFile):
 
     def package(self):
         build_type = self.__get_build_type()
-        self.__clean_kfc_dir()
+        self.__clean_dist_dir()
         self.__run_freeze(build_type)
         self.__show_build_info(build_type)
 
@@ -134,15 +134,15 @@ class KungfuCoreConan(ConanFile):
             os.remove(build_info_path)
             self.output.info("Deleted kungfubuildinfo.json")
 
-    def __clean_kfc_dir(self):
-        if path.exists(self.kfc_dir):
+    def __clean_dist_dir(self):
+        if path.exists(self.dist_dir):
 
             def redo_with_write(redo_func, path, err):
                 os.chmod(path, stat.S_IWRITE)
                 redo_func(path)
 
-            shutil.rmtree(self.kfc_dir, onerror=redo_with_write)
-            self.output.info("Deleted kfc directory")
+            shutil.rmtree(self.dist_dir, onerror=redo_with_write)
+            self.output.info("Deleted dist directory")
 
     def __gen_build_info(self, build_type):
         git = tools.Git()
