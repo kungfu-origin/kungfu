@@ -14,6 +14,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import {
   delayMilliSeconds,
+  deleteNNFiles,
   kfLogger,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
@@ -74,7 +75,11 @@ function KillAll(): Promise<void> {
                 killExtra()
                   .catch((err) => kfLogger.error(err.message))
                   .finally(() => {
-                    resolve();
+                    deleteNNFiles()
+                      .catch((err) => kfLogger.error(err.message))
+                      .finally(() => {
+                        resolve();
+                      });
                   });
               });
           });

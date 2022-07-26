@@ -41,3 +41,10 @@ def create_logger(name, level, location=None):
     logger.addHandler(SpdlogHandler())
     logger.setLevel(LOG_LEVELS[level])
     return logger
+
+
+def find_logger(location, level="info"):
+    logger = logging.getLogger(location.name)
+    if logger.hasHandlers():
+        return logger
+    return create_logger(location.name, level, location)

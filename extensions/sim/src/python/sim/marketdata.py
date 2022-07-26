@@ -1,9 +1,8 @@
 import kungfu
 
 from collections import namedtuple
-from kungfu.yijinjing.log import create_logger
+from kungfu.yijinjing.log import find_logger
 from . import mdmaker
-
 
 lf = kungfu.__binding__.longfist
 wc = kungfu.__binding__.wingchun
@@ -21,10 +20,7 @@ class MarketDataSim(wc.MarketData):
             base=200.0, bound=1000, samples=1000, variation=4, randseed=6
         )
         self.orderbooks = {}
-        self.logger = create_logger(
-            "sim_md",
-            "info",
-        )
+        self.logger = find_logger(self.home)
 
     def on_start(self):
         self.add_time_interval(500 * 1000 * 1000, lambda e: self.update_orderbooks())

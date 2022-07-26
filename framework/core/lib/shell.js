@@ -62,6 +62,11 @@ const getNpmConfigValue = (key) => {
   return runAndCollect('npm', ['config', 'get', key], { silent: true }).out;
 };
 
+const getCoreGypDir = () => {
+  const local = process.cwd() === path.dirname(__dirname);
+  return local ? '.gyp' : path.resolve(__dirname);
+};
+
 const exitOnError = (error) => {
   console.error(error);
   process.exit(-1);
@@ -265,6 +270,7 @@ module.exports = {
   getPackageJson: getPackageJson,
   exitOnError: exitOnError,
   getConfigValue: getConfigValue,
+  getCoreGypDir: getCoreGypDir,
   npmCall: npmCall,
   verifyElectron: verifyElectron,
   run: run,
