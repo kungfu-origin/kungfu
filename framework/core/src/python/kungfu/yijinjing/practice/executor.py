@@ -7,7 +7,7 @@ import kungfu
 
 from kungfu.console import site
 from kungfu.yijinjing import journal as kfj
-from kungfu.yijinjing.log import create_logger
+from kungfu.yijinjing.log import find_logger
 from kungfu.yijinjing.practice.master import Master
 from kungfu.yijinjing.practice.coloop import KungfuEventLoop
 from kungfu.wingchun.strategy import Runner, Strategy
@@ -30,6 +30,16 @@ class ExecutorRegistry:
             "td": {},
             "strategy": {"default": ExtensionLoader(self.ctx, None, None)},
         }
+
+        location = yjj.location(
+            kfj.MODES[ctx.mode],
+            kfj.CATEGORIES[ctx.category],
+            ctx.group,
+            ctx.name,
+            ctx.runtime_locator,
+        )
+        self.ctx.logger = find_logger(location, ctx.log_level)
+
         if ctx.extension_path:
             deque(map(self.register_extensions, ctx.extension_path.split(path.pathsep)))
         elif ctx.path:
@@ -129,21 +139,21 @@ class ExtensionExecutor:
             ctx.name,
             ctx.runtime_locator,
         )
-        logger = create_logger(ctx.name, ctx.log_level, location)
+
         if loader.extension_dir:
             site.setup(loader.extension_dir)
             sys.path.insert(0, loader.extension_dir)
         module = importlib.import_module(ctx.group)
-        logger.info(f"loading {ctx.group} from {loader.extension_dir}")
+        self.ctx.logger.info(f"loading {ctx.group} from {loader.extension_dir}")
         vendor = vendor_builder(
             ctx.runtime_locator, ctx.group, ctx.name, ctx.low_latency
         )
         service_builder = getattr(module, ctx.category)
-        logger.debug(f"loaded service builder")
+        self.ctx.logger.debug(f"loaded service builder")
         service = service_builder(vendor)
-        logger.debug("set service for vendor")
+        self.ctx.logger.debug("set service for vendor")
         vendor.set_service(service)
-        logger.info(f"vendor {location.uname} ready to run")
+        self.ctx.logger.info(f"vendor {location.uname} ready to run")
         vendor.run()
 
     def run_market_data(self):
@@ -170,7 +180,6 @@ class ExtensionExecutor:
             ctx.name,
             ctx.runtime_locator,
         )
-        ctx.logger = create_logger(ctx.name, ctx.log_level, ctx.location)
         if loader.config is None:
             ctx.strategy = load_strategy(ctx, ctx.path, loader.config)
         else:

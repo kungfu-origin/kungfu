@@ -1,3 +1,3 @@
-import gyp_action_lib as lib
+from gyp_action_lib import Shell
 
-lib.run(["yarn", *lib.extract_argv()])
+Shell.run(["yarn", *Shell.extract_argv()])

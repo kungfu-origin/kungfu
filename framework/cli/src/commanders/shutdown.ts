@@ -1,37 +1,11 @@
-import { KF_HOME } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 import {
   killExtra,
   killKfc,
   pm2Kill,
   pm2KillGodDaemon,
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
-import glob from 'glob';
-import path from 'path';
-import fse from 'fs-extra';
 import 'console-success';
-
-export function deleteNNFiles(rootPathName = KF_HOME) {
-  return new Promise((resolve, reject) => {
-    glob(
-      '**/*.nn',
-      {
-        cwd: rootPathName,
-      },
-      (err: Error | null, files: string[]) => {
-        if (err) {
-          reject(err);
-        }
-
-        files.forEach((file: string) => {
-          console.log('Deleting ', path.join(rootPathName, file));
-          fse.unlinkSync(path.join(rootPathName, file));
-        });
-
-        resolve(true);
-      },
-    );
-  });
-}
+import { deleteNNFiles } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 
 export const shutdown = async () => {
   try {

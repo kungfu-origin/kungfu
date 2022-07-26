@@ -5,6 +5,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
   delayMilliSeconds,
+  deleteNNFiles,
   getAvailCliDaemonList,
   getProcessIdByKfLocation,
   kfLogger,
@@ -494,6 +495,7 @@ const switchMaster = async (status: boolean): Promise<void> => {
     if (process.env.NODE_ENV === 'production') {
       await killKungfu();
     }
+    await deleteNNFiles();
   } else {
     await startMaster(false);
     await delayMilliSeconds(1000);

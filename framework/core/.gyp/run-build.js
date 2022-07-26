@@ -1,8 +1,7 @@
-const prebuilt = require('../lib/prebuilt');
-const shell = require('../lib/shell');
 const fs = require('fs');
 const glob = require('glob');
 const path = require('path');
+const { prebuilt, shell } = require('../lib');
 
 function build() {
   shell.showAutoConfig();

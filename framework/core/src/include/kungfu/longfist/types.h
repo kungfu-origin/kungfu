@@ -74,14 +74,14 @@ KF_DEFINE_DATA_TYPE(                                      //
     (std::string, value)                                  //
 );
 
-KF_DEFINE_PACK_TYPE(                                               //
-    StrategyStateUpdate, 20002, PK(state), TIMESTAMP(update_time), //
-    (StrategyState, state),                                        //
-    (int64_t, update_time),                                        //
-    (kungfu::array<char, JSON_STR_LEN>, info_a),                   //
-    (kungfu::array<char, JSON_STR_LEN>, info_b),                   //
-    (kungfu::array<char, JSON_STR_LEN>, info_c),                   //
-    (kungfu::array<char, JSON_STR_LEN>, value)                     //
+KF_DEFINE_PACK_TYPE(                                                     //
+    StrategyStateUpdate, 20002, PK(update_time), TIMESTAMP(update_time), //
+    (StrategyState, state),                                              //
+    (int64_t, update_time),                                              //
+    (kungfu::array<char, JSON_STR_LEN>, info_a),                         //
+    (kungfu::array<char, JSON_STR_LEN>, info_b),                         //
+    (kungfu::array<char, JSON_STR_LEN>, info_c),                         //
+    (kungfu::array<char, JSON_STR_LEN>, value)                           //
 );
 
 KF_DEFINE_PACK_TYPE(                                             //
@@ -538,6 +538,7 @@ KF_DEFINE_PACK_TYPE(                                        //
 
     (bool, is_last),              // 是否为本次查询的最后一条记录
     (HistoryDataType, data_type), // 标记本数据是正常数据, 本页最后一条数据, 全部数据的最后一条
+    (bool, is_withdraw),          // 是否是撤单流水
 
     (InstrumentType, instrument_type), // 合约类型
 

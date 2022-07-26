@@ -26,8 +26,10 @@ import { watcher } from '@kungfu-trader/kungfu-js-api/kungfu/watcher';
 import { HistoryDateEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { writeCSV } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import { Row } from '@fast-csv/format';
+import { useAllExtComponentByPosition } from './assets/methods/utils';
 
 triggerStartStep();
+useAllExtComponentByPosition('dzxy');
 
 setTimerPromiseTask((): Promise<void> => {
   return new Promise((resolve) => {

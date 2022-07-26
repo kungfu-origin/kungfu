@@ -62,6 +62,11 @@ const getNpmConfigValue = (key) => {
   return runAndCollect('npm', ['config', 'get', key], { silent: true }).out;
 };
 
+const getCoreGypDir = () => {
+  const local = process.cwd() === path.dirname(__dirname);
+  return local ? '.gyp' : path.resolve(__dirname);
+};
+
 const exitOnError = (error) => {
   console.error(error);
   process.exit(-1);
@@ -259,12 +264,19 @@ const showAutoConfig = () => {
   findBinaryDependency(packageJson).map(showBinaryHostConfig);
 };
 
+const touch = (filename, dirname = process.cwd()) => {
+  const now = new Date();
+  const filepath = path.resolve(dirname, filename);
+  fs.utimesSync(filepath, now, now);
+};
+
 module.exports = {
   getElectronArch: getElectronArch,
   getTargetArch: getTargetArch,
   getPackageJson: getPackageJson,
   exitOnError: exitOnError,
   getConfigValue: getConfigValue,
+  getCoreGypDir: getCoreGypDir,
   npmCall: npmCall,
   verifyElectron: verifyElectron,
   run: run,
@@ -272,4 +284,5 @@ module.exports = {
   runAndExit: runAndExit,
   setAutoConfig: setAutoConfig,
   showAutoConfig: showAutoConfig,
+  touch: touch,
 };

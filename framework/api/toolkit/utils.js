@@ -156,7 +156,7 @@ exports.getExtensionDirs = (production = false) => {
 
   const extdirs = [
     ...Object.keys(packageJSON.dependencies || {}),
-    ...Object.keys(packageJSON.optionalDependencies || {}),
+    ...Object.keys(packageJSON.dependencies || {}),
     ...(production ? [] : Object.keys(packageJSON.devDependencies || {})),
   ]
     .map((name) => {

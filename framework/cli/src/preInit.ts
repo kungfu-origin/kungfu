@@ -1,7 +1,4 @@
-import {
-  ensureKungfuKey,
-  initKfConfig,
-} from '@kungfu-trader/kungfu-js-api/config';
+import './injectGlobal';
+import { initKfConfig } from '@kungfu-trader/kungfu-js-api/config';
 
 initKfConfig();
-ensureKungfuKey();

@@ -2,9 +2,11 @@ import path from 'path';
 import dayjs from 'dayjs';
 import fse, { Stats } from 'fs-extra';
 import log4js from 'log4js';
+import glob from 'glob';
 import {
   buildProcessLogPath,
   EXTENSION_DIRS,
+  KF_HOME,
   KF_RUNTIME_DIR,
 } from '../config/pathConfig';
 import {
@@ -65,6 +67,7 @@ import { Proc } from 'pm2';
 import { listDir, removeTargetFilesInFolder } from './fileUtils';
 import minimist from 'minimist';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
+import { unlinkSync } from 'fs-extra';
 const { t } = VueI18n.global;
 interface SourceAccountId {
   source: string;
@@ -1886,3 +1889,25 @@ export function dealTradingTaskName(
 export const isBrokerStateReady = (state: BrokerStateStatusTypes) => {
   return state === 'Ready' || state === 'Idle';
 };
+
+export function deleteNNFiles(rootPathName = KF_HOME) {
+  return new Promise((resolve, reject) => {
+    glob(
+      '**/*.nn',
+      {
+        cwd: rootPathName,
+      },
+      (err: Error | null, files: string[]) => {
+        if (err) {
+          reject(err);
+        }
+
+        files.forEach((file: any) => {
+          unlinkSync(path.join(rootPathName, file));
+        });
+
+        resolve(true);
+      },
+    );
+  });
+}

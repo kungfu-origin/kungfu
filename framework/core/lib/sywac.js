@@ -16,8 +16,14 @@ module.exports = function (module, setup, opts = {}) {
     opts.tolerant || process.exit(-1);
   };
   setup(cli);
-  opts.noHelp || cli.help('-h, --help');
-  opts.noVersion || cli.version('-v, --version');
-  require.main === module && cli.parse().then(exitHandler).catch(errorHandler);
+  if (opts.help === undefined || opts.help) {
+    cli.help('-h, --help');
+  }
+  if (opts.version === undefined || opts.version) {
+    cli.version('-v, --version');
+  }
+  if (require.main === module) {
+    cli.parse().then(exitHandler).catch(errorHandler);
+  }
   return cli;
 };
