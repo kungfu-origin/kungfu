@@ -699,6 +699,7 @@ export const startMd = async (
         args,
         max_restarts: 3,
         autorestart: true,
+        force: true,
       },
     );
 
@@ -732,6 +733,7 @@ export const startTd = async (
         args,
         max_restarts: 3,
         autorestart: true,
+        force: true,
       },
     );
 
@@ -761,6 +763,7 @@ export const startTask = async (
     env: {
       CONFIG_SETTING: JSON.stringify(configSettings),
     },
+    force: true,
   }).catch((err) => {
     kfLogger.error(err.message);
   });
@@ -801,6 +804,7 @@ export const startStrategyByLocalPython = async (
     args,
     cwd: `'${pythonFolder}'`,
     script: `'${pythonFile}'`,
+    force: true,
   }).catch((err) => {
     kfLogger.error(err.message);
   });
@@ -825,6 +829,7 @@ export const startStrategy = (
     return startProcess({
       name: `strategy_${strategyId}`,
       args,
+      force: true,
     }).catch((err) => {
       kfLogger.error(err.message);
     });
