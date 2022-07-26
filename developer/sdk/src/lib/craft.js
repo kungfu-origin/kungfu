@@ -52,3 +52,7 @@ exports.cli = () => {
     windowsHide: true,
   });
 };
+
+exports.upgrade = () => {
+  shell.run('yarn upgrade', ['--scope', '@kungfu-trader']);
+};
