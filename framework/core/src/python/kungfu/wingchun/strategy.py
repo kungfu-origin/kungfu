@@ -70,6 +70,12 @@ class Strategy(wc.Strategy):
         self._on_history_trade = getattr(
             self._module, "on_history_trade", lambda ctx, history_trade, location: None
         )
+        self._on_req_history_order_error = getattr(
+            self._module, "on_req_history_order_error", lambda ctx, error, location: None
+        )
+        self._on_req_history_trade_error = getattr(
+            self._module, "on_req_history_trade_error", lambda ctx, error, location: None
+        )
         self._on_order_action_error = getattr(
             self._module, "on_order_action_error", lambda ctx, error, location: None
         )
@@ -132,16 +138,16 @@ class Strategy(wc.Strategy):
         return self.ctx.wc_context.bookkeeper.get_book(location.uid)
 
     async def __async_insert_order(
-        self,
-        side,
-        instrument_id,
-        exchange_id,
-        source_id,
-        account_id,
-        price,
-        volume,
-        price_type=PriceType.Any,
-        status_set=None,
+            self,
+            side,
+            instrument_id,
+            exchange_id,
+            source_id,
+            account_id,
+            price,
+            volume,
+            price_type=PriceType.Any,
+            status_set=None,
     ):
         if status_set is None:
             status_set = [
@@ -223,6 +229,12 @@ class Strategy(wc.Strategy):
     def on_history_trade(self, wc_context, history_trade, location):
         self.__call_proxy(self._on_history_trade, self.ctx, history_trade, location)
 
+    def on_req_history_order_error(self, wc_context, error, location):
+        self.__call_proxy(self._on_req_history_order_error, self.ctx, error, location)
+
+    def on_req_history_trade_error(self, wc_context, error, location):
+        self.__call_proxy(self._on_req_history_trade_error, self.ctx, error, location)
+
     def on_trading_day(self, wc_context, daytime):
         self.ctx.trading_day = kft.to_datetime(daytime)
         self.__call_proxy(self._on_trading_day, self.ctx, daytime)
@@ -234,7 +246,7 @@ class Strategy(wc.Strategy):
         self.__call_proxy(self._on_asset_sync_reset, self.ctx, old_asset, new_asset)
 
     def on_asset_margin_sync_reset(
-        self, wc_context, old_asset_margin, new_asset_margin
+            self, wc_context, old_asset_margin, new_asset_margin
     ):
         self.__call_proxy(
             self._on_asset_margin_sync_reset,

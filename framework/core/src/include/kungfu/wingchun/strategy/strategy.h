@@ -73,6 +73,15 @@ public:
   //@param history_order     历史订单成交数据
   virtual void on_history_trade(Context_ptr &context, const longfist::types::HistoryTrade &history_trade,
                                 const kungfu::yijinjing::data::location_ptr &location){};
+  // 历史订单查询报错回调
+  //@param error              报错信息
+  virtual void on_req_history_order_error(Context_ptr &context, const longfist::types::RequestHistoryOrderError &error,
+                                          const kungfu::yijinjing::data::location_ptr &location){};
+
+  // 历史成交查询报错回调
+  //@param error              报错信息
+  virtual void on_req_history_trade_error(Context_ptr &context, const longfist::types::RequestHistoryTradeError &error,
+                                          const kungfu::yijinjing::data::location_ptr &location){};
 
   // 同步柜台资金持仓信息回调
   //@param old_book          更新前本地维护的旧数据

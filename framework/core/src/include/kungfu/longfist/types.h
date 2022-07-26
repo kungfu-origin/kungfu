@@ -677,6 +677,21 @@ KF_DEFINE_PACK_TYPE(                                                       //
     (uint64_t, trigger_time),                                              // 触发时间
     (uint32_t, query_num)                                                  // 请求查询的数量
 );
+
+KF_DEFINE_PACK_TYPE(                                                           //
+    RequestHistoryOrderError, 10031, PK(trigger_time), TIMESTAMP(insert_time), //
+    (int32_t, error_id),                                                       // 错误ID
+    (kungfu::array<char, ERROR_MSG_LEN>, error_msg),                           // 错误信息
+    (int64_t, trigger_time)                                                    // 写入时间
+);
+
+KF_DEFINE_PACK_TYPE(                                                           //
+    RequestHistoryTradeError, 10032, PK(trigger_time), TIMESTAMP(insert_time), //
+    (int32_t, error_id),                                                       // 错误ID
+    (kungfu::array<char, ERROR_MSG_LEN>, error_msg),                           // 错误信息
+    (int64_t, trigger_time)                                                    // 写入时间
+);
+
 } // namespace kungfu::longfist::types
 
 #endif // KUNGFU_LONGFIST_TYPES_H
