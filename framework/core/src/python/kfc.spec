@@ -153,10 +153,7 @@ kfc_a = Analysis(
     runtime_hooks=get_runtimehooks(),
     cipher=block_cipher,
 )
-kfs_a = Analysis(
-    scripts=["kfc.py"],
-    pathex=extra_python_paths
-)
+kfs_a = Analysis(scripts=["kfc.py"], pathex=extra_python_paths)
 
 MERGE((kfc_a, kfc_name, kfc_name), (kfs_a, kfs_name, kfs_name))
 
@@ -170,7 +167,9 @@ kfc_exe = EXE(
     exclude_binaries=True,
     strip=False,
 )
-kfc_coll = COLLECT(kfc_exe, kfc_a.binaries, kfc_a.zipfiles, kfc_a.datas, name=kfc_name, strip=False)
+kfc_coll = COLLECT(
+    kfc_exe, kfc_a.binaries, kfc_a.zipfiles, kfc_a.datas, name=kfc_name, strip=False
+)
 
 kfs_pyz = PYZ(kfs_a.pure, kfs_a.zipped_data, cipher=block_cipher)
 kfs_exe = EXE(
@@ -182,4 +181,6 @@ kfs_exe = EXE(
     exclude_binaries=True,
     strip=False,
 )
-kfs_coll = COLLECT(kfs_exe, kfs_a.binaries, kfs_a.zipfiles, kfs_a.datas, name=kfs_name, strip=False)
+kfs_coll = COLLECT(
+    kfs_exe, kfs_a.binaries, kfs_a.zipfiles, kfs_a.datas, name=kfs_name, strip=False
+)
