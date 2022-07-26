@@ -1,8 +1,9 @@
 const { shell } = require('../lib');
 
 function main() {
-  const tryFormat = (lang) =>
+  const tryFormat = (lang) => {
     shell.run('yarn', ['-s', `format:${lang}`], false, { silent: true });
+  };
   try {
     tryFormat('cpp');
     tryFormat('python');

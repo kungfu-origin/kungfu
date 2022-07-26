@@ -7,7 +7,7 @@ import kungfu
 
 from kungfu.console import site
 from kungfu.yijinjing import journal as kfj
-from kungfu.yijinjing.log import create_logger
+from kungfu.yijinjing.log import find_logger
 from kungfu.yijinjing.practice.master import Master
 from kungfu.yijinjing.practice.coloop import KungfuEventLoop
 from kungfu.wingchun.strategy import Runner, Strategy
@@ -38,9 +38,7 @@ class ExecutorRegistry:
             ctx.name,
             ctx.runtime_locator,
         )
-        self.ctx.logger = create_logger(
-            ("_").join((ctx.category, ctx.group, ctx.name)), ctx.log_level, location
-        )
+        self.ctx.logger = find_logger(location, ctx.log_level)
 
         if ctx.extension_path:
             deque(map(self.register_extensions, ctx.extension_path.split(path.pathsep)))
