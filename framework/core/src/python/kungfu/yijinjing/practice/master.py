@@ -5,8 +5,6 @@ import psutil
 import functools
 import traceback
 
-from kungfu.yijinjing import journal as kfj
-from kungfu.yijinjing import log
 from kungfu.wingchun import default_commissions
 from kungfu.wingchun.calendar import Calendar
 
@@ -35,13 +33,7 @@ class Master(yjj.master):
     def __init__(self, ctx):
         yjj.master.__init__(
             self,
-            yjj.location(
-                kfj.MODES["live"],
-                kfj.CATEGORIES["system"],
-                "master",
-                "master",
-                ctx.runtime_locator,
-            ),
+            ctx.location,
             ctx.low_latency,
         )
         self.ctx = ctx

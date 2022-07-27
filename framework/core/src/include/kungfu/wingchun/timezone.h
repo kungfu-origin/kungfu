@@ -4,6 +4,8 @@
 #include <chrono>
 #include <ctime>
 #include <memory>
+
+//////////////////////////////////////////////////////////////////////////////
 #include "common.h"
 
 namespace kungfu::wingchun {
@@ -61,13 +63,13 @@ time_t TranslateLocalTimeToGMTime(time_t local_seconds, LocationTimeType loc_typ
 std::shared_ptr<LocalTimeInfo> TranslateGMTimeToLocalTime(time_t gmt, LocationTimeType loc_type);
 } // namespace TimeUtil
 
-// ¸ù¾Ý±ê×¼Ê±¼ä´Á×ª»»³É½»Ò×ËùËùÔÚÇøÓòµÄÊ±¼ä
-// param1:Ê±¼ä´Á(¾«È·µ½Ãë)
-// param2:½»Ò×Ëùid£¬exchangeid
-// params3: ·µ»ØÊ±¼ä¸ñÊ½YYYYMMDD
+// ï¿½ï¿½ï¿½Ý±ï¿½×¼Ê±ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½É½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
+// param1:Ê±ï¿½ï¿½ï¿½(ï¿½ï¿½È·ï¿½ï¿½ï¿½ï¿½)
+// param2:ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½idï¿½ï¿½exchangeid
+// params3: ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½Ê½YYYYMMDD
 inline std::string translate_GMTime_to_localdate_by_exchange_id(time_t lTime, const std::string &exchangeId,
                                                                 const std::string strformat = "%Y%m%d") {
-  // ExchangeIdÓë¶ÔÓ¦µÄLocationTimeÀàÐÍ
+  // ExchangeIdï¿½ï¿½ï¿½Ó¦ï¿½ï¿½LocationTimeï¿½ï¿½ï¿½ï¿½
   static const std::unordered_map<std::string, LocationTimeType> location_time_exchange_id_map = {
       {EXCHANGE_US, LocationTimeType::AmericaEastern},   //
       {EXCHANGE_HK, LocationTimeType::Beijing},          //
