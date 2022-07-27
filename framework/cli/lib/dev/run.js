@@ -74,6 +74,26 @@ function startCli(argv) {
   });
 }
 
+function startDzxy(argv) {
+  const dzxyConfig = require('../webpack/webpack.dzxy.config')(argv);
+  return new Promise((resolve) => {
+    const compiler = webpack(dzxyConfig);
+    compiler.watch({}, (err, stats) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+
+      logStats('Dzxy', stats);
+    });
+
+    compiler.hooks.done.tap('components-compile-done', (stats) => {
+      logStats('Dzxy', stats);
+      resolve();
+    });
+  });
+}
+
 const run = (distDir, distName = 'cli') => {
   greeting();
   const cliDir = getCliDir();
@@ -93,7 +113,7 @@ const run = (distDir, distName = 'cli') => {
     distName: distName,
   };
 
-  return startCli(argv);
+  return Promise.all([startCli(argv), startDzxy(argv)]);
 };
 
 module.exports = run;

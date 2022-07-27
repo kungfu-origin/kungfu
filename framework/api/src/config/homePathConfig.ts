@@ -17,33 +17,25 @@ const getHomePath = () => {
   }
 };
 
+if (process.env.APP_TYPE === 'main' || process.env.APP_TYPE === 'renderer') {
+  // global.__kfResourcesPath 是一个容易出错的问题, 需要每个调用pathconfig的进程都需要注册这个值
+  global.__kfResourcesPath = process.resourcesPath;
+} else {
+  // cli + uiExtension are in the same way
+  global.__kfResourcesPath = path
+    .resolve(__dirname, '..', '..', '..')
+    .replace(/\\/g, '\\\\');
+}
+
 if (process.env.NODE_ENV === 'development') {
   global.__publicResources = `${__resources}`;
 } else {
-  global.__publicResources = path
-    .resolve(__dirname, '../public')
-    .replace(/\\/g, '\\\\');
-}
-
-if (
-  process.env.APP_TYPE === 'main' ||
-  process.env.APP_TYPE === 'renderer' ||
-  process.env.APP_TYPE === 'component'
-) {
-  //global.__kfResourcesPath 是一个容易出错的问题, 需要每个调用pathconfig的进程都需要注册这个值
-  global.__kfResourcesPath = process.resourcesPath;
-}
-
-if (process.env.APP_TYPE === 'cli') {
-  global.__kfResourcesPath = path
-    .resolve(__dirname, '..', '..', '..')
-    .replace(/\\/g, '\\\\');
-}
-
-if (process.env.APP_TYPE === 'daemon') {
-  global.__kfResourcesPath = path
-    .resolve(__dirname, '..', '..', '..')
-    .replace(/\\/g, '\\\\');
+  global.__publicResources = path.join(
+    global.__kfResourcesPath,
+    'app',
+    'dist',
+    'public',
+  );
 }
 
 export const KF_HOME_BASE_DIR_RESOLVE: string = getHomePath();

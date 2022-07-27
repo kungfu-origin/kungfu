@@ -73,11 +73,12 @@ const run = (distDir, distName = 'cli') => {
     };
 
     const cliConfig = require('./webpack.cli.config');
+    const dzxyConfig = require('./webpack.dzxy.config');
 
     const errorLog = chalk.bgRed.white(' ERROR ') + ' ';
     const okayLog = chalk.bgBlue.white(' OKAY ') + ' ';
 
-    const tasks = ['cli'];
+    const tasks = ['cli', 'dzxy'];
     const spinner = new Multispinner(tasks, {
       preText: 'building',
       postText: 'process',
@@ -109,6 +110,18 @@ const run = (distDir, distName = 'cli') => {
       .catch((err) => {
         spinner.error('cli');
         console.log(`\n  ${errorLog}failed to build cli process`);
+        console.error(`\n${err}\n`);
+        process.exit(1);
+      });
+
+    pack(dzxyConfig(argv))
+      .then((result) => {
+        results += result + '\n\n';
+        spinner.success('dzxy');
+      })
+      .catch((err) => {
+        spinner.error('dzxy');
+        console.log(`\n  ${errorLog}failed to build dzxy process`);
         console.error(`\n${err}\n`);
         process.exit(1);
       });

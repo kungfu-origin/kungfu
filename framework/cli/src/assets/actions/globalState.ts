@@ -26,7 +26,7 @@ const timer = setTimeout(() => {
   clearTimeout(timer);
 }, 1000);
 
-if (process.env.RENDERER_ID !== 'dzxy') {
+if (process.env.APP_TYPE === 'cli') {
   pm2LaunchBus((err: Error, pm2_bus: Pm2Bus) => {
     if (err) {
       console.error('pm2 launchBus Error', err);

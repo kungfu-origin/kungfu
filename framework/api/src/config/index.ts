@@ -2,12 +2,9 @@ import fse, { ensureFileSync } from 'fs-extra';
 import {
   KF_CONFIG_DEFAULT_PATH,
   KF_CONFIG_PATH,
-  KF_HOME,
   KF_INSTRUMENTS_DEFAULT_PATH,
   KF_INSTRUMENTS_PATH,
-  KUNGFU_RESOURCES_DIR,
 } from './pathConfig';
-import path from 'path';
 
 export const initKfConfig = () => {
   if (!fse.existsSync(KF_CONFIG_PATH)) {
