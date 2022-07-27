@@ -52,6 +52,7 @@ def run(ctx, mode, category, group, name, low_latency, reference, arguments):
     elif reference in cheatsheet:
         cheatsheet[reference](mode, low_latency)
     else:
+        registry.setup_log()
         registry[category][group][name](mode, low_latency)
 
 

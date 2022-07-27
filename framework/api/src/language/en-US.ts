@@ -194,7 +194,7 @@ export default {
     INE: 'INE',
 
     HK: 'HK',
-    HKOPT: 'HKOPT',
+    HKFUT: 'HKFUT',
     US: 'US',
     GLFX: 'GLFX',
     IPE: 'IPE',

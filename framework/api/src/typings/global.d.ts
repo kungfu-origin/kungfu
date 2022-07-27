@@ -14,9 +14,11 @@ declare global {
   namespace NodeJS {
     interface ProcessEnv {
       LANG_ENV: 'zh-CN' | 'en-US' | 'zh-HK' | undefined;
-      APP_TYPE: 'cli' | 'renderer' | 'component' | 'daemon' | 'main' | 'script';
-      DAEMON_ID: string;
-      RENDERER_ID: string;
+      APP_TYPE: 'cli' | 'renderer' | 'main' | 'daemon';
+      UI_EXT_TYPE: 'component' | 'script';
+      APP_ID: string;
+      // DAEMON_ID: string;
+      // RENDERER_ID: string;
       EXTENSION_DIRS: string;
       KFC_DIR: string;
       ELECTRON_RUN_AS_NODE: boolean;

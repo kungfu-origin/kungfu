@@ -1,5 +1,8 @@
 import workers from '@kungfu-trader/kungfu-app/src/renderer/assets/workers';
-import { watcher } from '@kungfu-trader/kungfu-js-api/kungfu/watcher';
+import {
+  getWatcherId,
+  watcher,
+} from '@kungfu-trader/kungfu-js-api/kungfu/watcher';
 import { kf } from '@kungfu-trader/kungfu-js-api/kungfu';
 import { KF_RUNTIME_DIR } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 
@@ -9,10 +12,6 @@ window.kungfu = kf;
 
 window.testCase = {};
 window.testCase.crashTheWatcher = () => {
-  const id = [
-    process.env.APP_TYPE || '',
-    process.env.DAEMON_ID || process.env.RENDERER_ID || '',
-  ].join('');
-
+  const id = getWatcherId();
   return kf.watcher(KF_RUNTIME_DIR, kf.formatStringToHashHex(id), false, false);
 };

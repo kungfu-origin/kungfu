@@ -71,8 +71,6 @@ onMounted(() => {
 });
 
 document.addEventListener('keydown', (e) => {
-  if (process.env.RENDERER_ID !== 'logview') return;
-
   const ctrlCmd = platform() === 'darwin' ? e.metaKey : e.ctrlKey;
   if (ctrlCmd && e.key === 'f') {
     searchKeyword.value = clipboard.readText();

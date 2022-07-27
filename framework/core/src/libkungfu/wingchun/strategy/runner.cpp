@@ -84,6 +84,12 @@ void Runner::post_start() {
       $$(invoke(&Strategy::on_history_order, event->data<HistoryOrder>(), get_location(event->source())));
   events_ | is(HistoryTrade::tag) |
       $$(invoke(&Strategy::on_history_trade, event->data<HistoryTrade>(), get_location(event->source())));
+  events_ | is(RequestHistoryOrderError::tag) |
+      $$(invoke(&Strategy::on_req_history_order_error, event->data<RequestHistoryOrderError>(),
+                get_location(event->source())));
+  events_ | is(RequestHistoryTradeError::tag) |
+      $$(invoke(&Strategy::on_req_history_trade_error, event->data<RequestHistoryTradeError>(),
+                get_location(event->source())));
   events_ | is(OrderActionError::tag) |
       $$(invoke(&Strategy::on_order_action_error, event->data<OrderActionError>(), get_location(event->source())));
   events_ | is_own<Deregister>(context_->get_broker_client()) |

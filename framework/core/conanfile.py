@@ -1,5 +1,4 @@
 import json
-import atexit
 import getpass
 import os
 import psutil
@@ -16,6 +15,7 @@ from conans import tools
 from distutils import sysconfig
 from os import environ
 from os import path
+from wcmatch import glob
 
 with open(path.join("package.json"), "r") as package_json_file:
     package_json = json.load(package_json_file)
@@ -69,6 +69,7 @@ class KungfuCoreConan(ConanFile):
     build_extensions_dir = path.join(build_dir, "build_extensions")
     dist_dir = path.join(conanfile_dir, "dist")
     kfc_dir = path.join(dist_dir, "kfc")
+    kfs_dir = path.join(dist_dir, "kfs")
 
     def configure(self):
         if tools.detected_os() != "Windows":
@@ -276,6 +277,11 @@ class KungfuCoreConan(ConanFile):
                     path.join(".", "src", "python", "kfc.spec"),
                 ]
             )
+
+        for file in glob.glob("*kfs*", flags=glob.EXTGLOB, root_dir=self.kfs_dir):
+            shutil.copy(path.join(self.kfs_dir, file), self.kfc_dir)
+        shutil.rmtree(self.kfs_dir)
+
         self.output.success("PyInstaller done")
 
     def __run_nuitka(self, build_type):
@@ -286,10 +292,12 @@ class KungfuCoreConan(ConanFile):
                 "--output-dir=build",
                 path.join("src", "python", "kfc.py"),
             )
+
         kfc_dist_dir = path.join(self.build_dir, "kfc.dist")
         shutil.copytree(build_type, kfc_dist_dir)
         tools.rmdir(self.kfc_dir)
         shutil.move(kfc_dist_dir, self.kfc_dir)
+
         self.output.success("Nuitka done")
 
     def __run_freeze(self, build_type):

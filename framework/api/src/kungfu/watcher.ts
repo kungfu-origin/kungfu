@@ -9,50 +9,34 @@ import {
   // statTimeEnd,
 } from '../utils/busiUtils';
 
+export const getWatcherId = () => {
+  return `${process.env.APP_TYPE || ''}-${
+    process.env.UI_EXT_TYPE || ''
+  }-${kf.formatStringToHashHex(process.env.APP_ID || '')}`;
+};
+
 export const watcher = ((): KungfuApi.Watcher | null => {
   kfLogger.info(
     'Init Watcher',
     'APP_TYPE',
     process.env.APP_TYPE || 'undefined',
-    'RENDERER_ID',
-    process.env.RENDERER_ID || 'undefined',
-    'DAEMON_ID',
-    process.env.DAEMON_ID || 'undefined',
-  );
-
-  console.log(
-    'Init Watcher',
-    'APP_TYPE',
-    process.env.APP_TYPE || 'undefined',
-    'RENDERER_ID',
-    process.env.RENDERER_ID || 'undefined',
-    'DAEMON_ID',
-    process.env.DAEMON_ID || 'undefined',
+    'UI_EXT_TYPE',
+    process.env.UI_EXT_TYPE || 'undefined',
+    'APP_ID',
+    process.env.APP_ID || 'undefined',
   );
 
   if (process.env.APP_TYPE !== 'renderer') {
-    if (process.env.APP_TYPE !== 'cli') {
-      if (process.env.APP_TYPE !== 'daemon') {
-        return null;
-      }
+    if (process.env.APP_TYPE !== 'daemon') {
+      return null;
     }
   }
 
   if (process.env.APP_TYPE === 'renderer') {
-    if (process.env.RENDERER_ID !== 'app') {
+    if (process.env.APP_ID !== 'app') {
       return null;
     }
   }
-
-  if (process.env.APP_TYPE === 'cli') {
-    if (process.env.RENDERER_ID !== 'dzxy') {
-      return null;
-    }
-  }
-
-  const id = `${process.env.APP_TYPE || ''}-${kf.formatStringToHashHex(
-    process.env.DAEMON_ID || process.env.RENDERER_ID || '',
-  )}`;
 
   const bypassRestore = booleanProcessEnv(
     process.env.RELOAD_AFTER_CRASHED || process.env.BY_PASS_RESTORE || '',
@@ -67,7 +51,7 @@ export const watcher = ((): KungfuApi.Watcher | null => {
 
   return kf.watcher(
     KF_RUNTIME_DIR,
-    id,
+    getWatcherId(),
     !!bypassRestore,
     !!bypassAccounting,
     !!bypassTradingData,

@@ -70,6 +70,16 @@ class Strategy(wc.Strategy):
         self._on_history_trade = getattr(
             self._module, "on_history_trade", lambda ctx, history_trade, location: None
         )
+        self._on_req_history_order_error = getattr(
+            self._module,
+            "on_req_history_order_error",
+            lambda ctx, error, location: None,
+        )
+        self._on_req_history_trade_error = getattr(
+            self._module,
+            "on_req_history_trade_error",
+            lambda ctx, error, location: None,
+        )
         self._on_order_action_error = getattr(
             self._module, "on_order_action_error", lambda ctx, error, location: None
         )
@@ -222,6 +232,12 @@ class Strategy(wc.Strategy):
 
     def on_history_trade(self, wc_context, history_trade, location):
         self.__call_proxy(self._on_history_trade, self.ctx, history_trade, location)
+
+    def on_req_history_order_error(self, wc_context, error, location):
+        self.__call_proxy(self._on_req_history_order_error, self.ctx, error, location)
+
+    def on_req_history_trade_error(self, wc_context, error, location):
+        self.__call_proxy(self._on_req_history_trade_error, self.ctx, error, location)
 
     def on_trading_day(self, wc_context, daytime):
         self.ctx.trading_day = kft.to_datetime(daytime)
