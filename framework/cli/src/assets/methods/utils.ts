@@ -333,7 +333,7 @@ export const getCategoryName = (category: KfCategoryTypes) => {
   if (category === 'md') {
     return colors.yellow('Md');
   } else if (category === 'td') {
-    return colors.cyan('td');
+    return colors.cyan('Td');
   } else if (category === 'strategy') {
     return colors.blue('Strat');
   } else if (category === 'daemon') {

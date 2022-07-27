@@ -153,7 +153,7 @@ kfc_a = Analysis(
     runtime_hooks=get_runtimehooks(),
     cipher=block_cipher,
 )
-kfs_a = Analysis(scripts=["kfc.py"], pathex=extra_python_paths)
+kfs_a = Analysis(scripts=["kfs.py"], pathex=extra_python_paths, cipher=block_cipher)
 
 MERGE((kfc_a, kfc_name, kfc_name), (kfs_a, kfs_name, kfs_name))
 
