@@ -196,9 +196,8 @@ const ResumePolicy &AutoClient::get_resume_policy() const { return resume_policy
 
 bool AutoClient::is_custom_subscribed(uint32_t md_location_uid) const { return false; }
 
-std::string AutoClient::get_custom_exchange(uint32_t md_location_uid) const { return "0"; }
-bool AutoClient::is_custom_instrument_type_subscribed(uint32_t md_location_uid,
-                                                      InstrumentType kf_instrument_type) const {
+bool AutoClient::is_custom_subscribed_all(uint32_t md_location_uid, kungfu::longfist::enums::SubscribeDataType secu_dt,
+                                          const std::string &exchange, InstrumentType kf_instrument_type) const {
   return false;
 }
 
@@ -232,42 +231,54 @@ bool PassiveClient::is_custom_subscribed(uint32_t md_location_uid) const {
   return should_connect_md(app_.get_location(md_location_uid)) and enrolled_md_locations_.at(md_location_uid);
 }
 
-std::string PassiveClient::get_custom_exchange(uint32_t md_location_uid) const {
+bool PassiveClient::is_custom_subscribed_all(uint32_t md_location_uid,
+                                             kungfu::longfist::enums::SubscribeDataType secu_dt,
+                                             const std::string &exchange, InstrumentType kf_instrument_type) const {
   if (should_connect_md(app_.get_location(md_location_uid)) and enrolled_md_locations_.at(md_location_uid)) {
     auto &custom_sub = custom_subs_.at(md_location_uid);
-    switch (custom_sub.market_type) {
-    case MarketType::BSE:
-      return std::string(EXCHANGE_BSE);
-    case MarketType::SHFE:
-      return std::string(EXCHANGE_SHFE);
-    case MarketType::CFFEX:
-      return std::string(EXCHANGE_CFFEX);
-    case MarketType::DCE:
-      return std::string(EXCHANGE_DCE);
-    case MarketType::CZCE:
-      return std::string(EXCHANGE_CZCE);
-    case MarketType::INE:
-      return std::string(EXCHANGE_INE);
-    case MarketType::SSE:
-      return std::string(EXCHANGE_SSE);
-    case MarketType::SZSE:
-      return std::string(EXCHANGE_SZE);
-    case MarketType::All:
-      return std::string("");
-    default:
-      return std::string("0");
-    }
-  }
-  return std::string("0");
-}
 
-bool PassiveClient::is_custom_instrument_type_subscribed(uint32_t md_location_uid,
-                                                         InstrumentType kf_instrument_type) const {
-  if (custom_subs_.find(md_location_uid) != custom_subs_.end()) {
-    auto &custom_sub = custom_subs_.at(md_location_uid);
     SubscribeInstrumentType custom_type = instrument_type_to_subscribe_instrument_type(kf_instrument_type);
-    return (custom_type == SubscribeInstrumentType::All) ||
-           ((uint64_t(custom_type) & uint64_t(custom_sub.instrument_type)) != 0);
+
+    for (auto it : custom_sub) {
+      std::string custom_exchange("0");
+      switch (it.market_type) {
+      case MarketType::BSE:
+        custom_exchange = std::string(EXCHANGE_BSE);
+        break;
+      case MarketType::SHFE:
+        custom_exchange = std::string(EXCHANGE_SHFE);
+        break;
+      case MarketType::CFFEX:
+        custom_exchange = std::string(EXCHANGE_CFFEX);
+        break;
+      case MarketType::DCE:
+        custom_exchange = std::string(EXCHANGE_DCE);
+        break;
+      case MarketType::CZCE:
+        custom_exchange = std::string(EXCHANGE_CZCE);
+        break;
+      case MarketType::INE:
+        custom_exchange = std::string(EXCHANGE_INE);
+        break;
+      case MarketType::SSE:
+        custom_exchange = std::string(EXCHANGE_SSE);
+        break;
+      case MarketType::SZSE:
+        custom_exchange = std::string(EXCHANGE_SZE);
+        break;
+      case MarketType::All:
+        custom_exchange = std::string("");
+        break;
+      default:
+        custom_exchange = std::string("0");
+        break;
+      }
+      if ((it.data_type == SubscribeDataType::All or (uint64_t(it.data_type) & uint64_t(secu_dt)) != 0) and
+          (custom_exchange.empty() || custom_exchange.compare(exchange) == 0) and
+          ((uint64_t(custom_type) & uint64_t(it.instrument_type)) != 0)) {
+        return true;
+      }
+    }
   }
   return false;
 }
@@ -275,8 +286,12 @@ bool PassiveClient::is_custom_instrument_type_subscribed(uint32_t md_location_ui
 bool PassiveClient::is_all_subscribed(uint32_t md_location_uid) const {
   if (should_connect_md(app_.get_location(md_location_uid))) {
     auto &custom_sub = custom_subs_.at(md_location_uid);
-    return custom_sub.market_type == MarketType::All and custom_sub.instrument_type == SubscribeInstrumentType::All and
-           custom_sub.data_type == SubscribeDataType::All;
+    for (auto it : custom_sub) {
+      if (it.market_type == MarketType::All and it.instrument_type == SubscribeInstrumentType::All and
+          it.data_type == SubscribeDataType::All) {
+        return true;
+      }
+    }
   }
 
   return false;
@@ -297,14 +312,19 @@ void PassiveClient::subscribe_all(const location_ptr &md_location, uint8_t marke
   custrom_sub.market_type = MarketType(market_type);
   custrom_sub.instrument_type = SubscribeInstrumentType(instrument_type);
   custrom_sub.data_type = SubscribeDataType(data_type);
-  custom_subs_.emplace(md_location->uid, custrom_sub);
+  if (custom_subs_.find(md_location->uid) == custom_subs_.end()) {
+    custom_subs_.emplace(md_location->uid, std::vector<CustomSubscribe>{});
+  }
+  custom_subs_[md_location->uid].push_back(custrom_sub);
 }
 
 void PassiveClient::renew(int64_t trigger_time, const location_ptr &md_location) {
   if (is_custom_subscribed(md_location->uid)) {
-    auto writer = app_.get_writer(md_location->uid);
     auto &custrom_sub = custom_subs_.at(md_location->uid);
-    writer->write(trigger_time, custrom_sub);
+    for (auto it : custrom_sub) {
+      auto writer = app_.get_writer(md_location->uid);
+      writer->write(trigger_time, it);
+    }
   } else {
     Client::renew(trigger_time, md_location);
   }
