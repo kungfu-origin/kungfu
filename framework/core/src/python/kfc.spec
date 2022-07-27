@@ -13,7 +13,7 @@ from os.path import (
     curdir as cwd,
     join as make_path,
 )
-from PyInstaller.building.api import COLLECT, EXE, PYZ
+from PyInstaller.building.api import COLLECT, EXE, PYZ, MERGE
 from PyInstaller.building.build_main import Analysis
 from PyInstaller.utils.hooks import collect_data_files
 from PyInstaller.utils.hooks import collect_submodules
@@ -101,9 +101,12 @@ def get_runtimehooks():
 
 
 ###############################################################################
-name = "kfc"
 block_cipher = None
-a = Analysis(
+
+kfc_name = "kfc"
+kfs_name = "kfs"
+
+kfc_a = Analysis(
     scripts=["kfc.py"],
     pathex=extra_python_paths,
     binaries=[],
@@ -150,14 +153,34 @@ a = Analysis(
     runtime_hooks=get_runtimehooks(),
     cipher=block_cipher,
 )
-pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
-exe = EXE(
-    pyz,
-    a.scripts,
-    name=name,
+kfs_a = Analysis(scripts=["kfs.py"], pathex=extra_python_paths, cipher=block_cipher)
+
+MERGE((kfc_a, kfc_name, kfc_name), (kfs_a, kfs_name, kfs_name))
+
+kfc_pyz = PYZ(kfc_a.pure, kfc_a.zipped_data, cipher=block_cipher)
+kfc_exe = EXE(
+    kfc_pyz,
+    kfc_a.scripts,
+    name=kfc_name,
     console=True,
     debug=False,
     exclude_binaries=True,
     strip=False,
 )
-coll = COLLECT(exe, a.binaries, a.zipfiles, a.datas, name=name, strip=False)
+kfc_coll = COLLECT(
+    kfc_exe, kfc_a.binaries, kfc_a.zipfiles, kfc_a.datas, name=kfc_name, strip=False
+)
+
+kfs_pyz = PYZ(kfs_a.pure, kfs_a.zipped_data, cipher=block_cipher)
+kfs_exe = EXE(
+    kfs_pyz,
+    kfs_a.scripts,
+    name=kfs_name,
+    console=True,
+    debug=False,
+    exclude_binaries=True,
+    strip=False,
+)
+kfs_coll = COLLECT(
+    kfs_exe, kfs_a.binaries, kfs_a.zipfiles, kfs_a.datas, name=kfs_name, strip=False
+)

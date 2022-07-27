@@ -264,6 +264,12 @@ const showAutoConfig = () => {
   findBinaryDependency(packageJson).map(showBinaryHostConfig);
 };
 
+const touch = (filename, dirname = process.cwd()) => {
+  const now = new Date();
+  const filepath = path.resolve(dirname, filename);
+  fs.utimesSync(filepath, now, now);
+};
+
 module.exports = {
   getElectronArch: getElectronArch,
   getTargetArch: getTargetArch,
@@ -278,4 +284,5 @@ module.exports = {
   runAndExit: runAndExit,
   setAutoConfig: setAutoConfig,
   showAutoConfig: showAutoConfig,
+  touch: touch,
 };

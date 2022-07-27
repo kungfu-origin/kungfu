@@ -1099,17 +1099,9 @@ export const switchKfLocation = (
   kfLocation: KungfuApi.DerivedKfLocation,
   targetStatus: boolean,
 ): Promise<void | Proc> => {
-  const processId = getProcessIdByKfLocation(kfLocation);
-
   if (!watcher) return Promise.reject(new Error('Watcher is NULL'));
 
   if (!targetStatus) {
-    if (isTdMdStrategy(kfLocation.category)) {
-      if (!watcher.isReadyToInteract(kfLocation)) {
-        return Promise.reject(new Error(t('未就绪', { processId })));
-      }
-    }
-
     return graceDeleteProcess(watcher, kfLocation);
   }
 

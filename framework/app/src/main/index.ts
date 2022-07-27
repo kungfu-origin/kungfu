@@ -34,7 +34,6 @@ import {
 import {
   initKfConfig,
   initKfDefaultInstruments,
-  ensureKungfuKey,
 } from '@kungfu-trader/kungfu-js-api/config';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 const { t } = VueI18n.global;
@@ -50,7 +49,6 @@ initialize();
 setMenu();
 initKfConfig();
 initKfDefaultInstruments();
-ensureKungfuKey();
 
 async function createWindow(
   reloadAfterCrashed = false,
