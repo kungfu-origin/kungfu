@@ -551,8 +551,8 @@ export const ExchangeIds: Record<string, KungfuApi.KfTradeValueCommonData> = {
     name: t('tradingConfig.HK'),
     color: InstrumentType[InstrumentTypeEnum.stock].color,
   },
-  HKOPT: {
-    name: t('tradingConfig.HKOPT'),
+  HKFUT: {
+    name: t('tradingConfig.HKFUT'),
     color: InstrumentType[InstrumentTypeEnum.stockoption].color,
   },
   US: {
