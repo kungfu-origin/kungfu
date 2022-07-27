@@ -255,9 +255,8 @@ inline longfist::enums::InstrumentType get_instrument_type_by_exchange_hk(const 
       return iter.type;
     }
   }
-}
 
-return longfist::enums::InstrumentType::Stock;
+  return longfist::enums::InstrumentType::Stock;
 }
 
 inline longfist::enums::InstrumentType get_instrument_type(const std::string &exchange_id,
