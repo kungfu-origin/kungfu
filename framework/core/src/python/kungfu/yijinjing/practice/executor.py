@@ -31,19 +31,20 @@ class ExecutorRegistry:
             "strategy": {"default": ExtensionLoader(self.ctx, None, None)},
         }
 
-        location = yjj.location(
-            kfj.MODES[ctx.mode],
-            kfj.CATEGORIES[ctx.category],
-            ctx.group,
-            ctx.name,
-            ctx.runtime_locator,
-        )
-        self.ctx.logger = find_logger(location, ctx.log_level)
-
         if ctx.extension_path:
             deque(map(self.register_extensions, ctx.extension_path.split(path.pathsep)))
         elif ctx.path:
             self.read_config(os.path.join(os.path.dirname(ctx.path), "package.json"))
+
+    def setup_log(self):
+        self.ctx.location = yjj.location(
+            kfj.MODES[self.ctx.mode],
+            kfj.CATEGORIES[self.ctx.category],
+            self.ctx.group,
+            self.ctx.name,
+            self.ctx.runtime_locator,
+        )
+        self.ctx.logger = find_logger(self.ctx.location, self.ctx.log_level)
 
     def register_extensions(self, root):
         for child in os.listdir(root):
@@ -86,18 +87,43 @@ class ExecutorRegistry:
 class MasterLoader(dict):
     def __init__(self, ctx):
         super().__init__()
-        self["master"] = lambda mode, low_latency: Master(ctx).run()
+        self.ctx = ctx
+        self["master"] = self.run
+
+    def run(self, mode: str, low_latency: bool):
+        self.ctx.location = yjj.location(
+            kfj.MODES[mode],
+            lf.enums.category.SYSTEM,
+            "master",
+            "master",
+            self.ctx.runtime_locator,
+        )
+        self.ctx.logger = find_logger(self.ctx.location, self.ctx.log_level)
+        Master(self.ctx).run()
 
 
 class ServiceLoader(dict):
     def __init__(self, ctx):
         super().__init__()
-        self["cached"] = lambda mode, low_latency: yjj.cached(
-            ctx.runtime_locator, kfj.MODES[ctx.mode], ctx.low_latency
-        ).run()
-        self["ledger"] = lambda mode, low_latency: wc.Ledger(
-            ctx.runtime_locator, kfj.MODES[ctx.mode], ctx.low_latency
-        ).run()
+        self.ctx = ctx
+        self["cached"] = self.create_service("cached", yjj.cached)
+        self["ledger"] = self.create_service("ledger", wc.Ledger)
+
+    def create_service(self, name, service):
+        def run(mode: str, low_latency: bool):
+            self.ctx.location = yjj.location(
+                kfj.MODES[mode],
+                lf.enums.category.SYSTEM,
+                "service",
+                name,
+                self.ctx.runtime_locator,
+            )
+            self.ctx.logger = find_logger(self.ctx.location, self.ctx.log_level)
+            service(
+                self.ctx.runtime_locator, kfj.MODES[self.ctx.mode], low_latency
+            ).run()
+
+        return run
 
 
 class ExtensionLoader:

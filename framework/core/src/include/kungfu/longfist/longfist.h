@@ -75,7 +75,11 @@ constexpr auto AllTypes = boost::hana::make_map( //
     TYPE_PAIR(AssetMargin),                      //
     TYPE_PAIR(Position),                         //
     TYPE_PAIR(PositionEnd),                      //
-    TYPE_PAIR(OrderStat)                         //
+    TYPE_PAIR(OrderStat),                        //
+    TYPE_PAIR(RequestHistoryOrder),              //
+    TYPE_PAIR(RequestHistoryOrderError),         //
+    TYPE_PAIR(RequestHistoryTrade),              //
+    TYPE_PAIR(RequestHistoryTradeError)          //
 );
 
 constexpr auto AllDataTypes = boost::hana::make_map( //

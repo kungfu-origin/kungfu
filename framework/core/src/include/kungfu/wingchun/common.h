@@ -10,7 +10,6 @@
 
 #include <kungfu/common.h>
 #include <kungfu/longfist/longfist.h>
-#include <kungfu/wingchun/timezone.h>
 #include <kungfu/yijinjing/practice/apprentice.h>
 #include <kungfu/yijinjing/time.h>
 #include <kungfu/yijinjing/util/util.h>
@@ -189,20 +188,21 @@ inline int get_repo_expire_days(const std::string &instrument_id) {
 }
 
 // 标的代码和类型
-struct StruCodeType {
+struct HKCodeRule {
   int beg = 0;
   int end = 0;
   longfist::enums::InstrumentType type;
 };
+
 // 获取港股标的类型
 inline longfist::enums::InstrumentType get_instrument_type_by_exchange_hk(const std::string &instrument_id) {
   // 查看地址：https://www.hkex.com.hk/-/media/HKEX-Market/Products/Securities/Stock-Code-Allocation-Plan/scap_c.pdf
-  static std::vector<StruCodeType> hk_code_type_def_ = {
+  static std::vector<HKCodeRule> hk_code_type_def = {
       {1, 2799, longfist::enums::InstrumentType::Stock},
       {2800, 2849, longfist::enums::InstrumentType::Fund}, // 交易所買賣基金
       {3000, 3199, longfist::enums::InstrumentType::Fund},
       {3400, 3499, longfist::enums::InstrumentType::Fund},
-      {4000, 4199, longfist::enums::InstrumentType::Bond}, //香港金融管理局的外匯基金債券
+      {4000, 4199, longfist::enums::InstrumentType::Bond}, // 香港金融管理局的外匯基金債券
       {4200, 4299, longfist::enums::InstrumentType::Bond},
       {4300, 4329, longfist::enums::InstrumentType::Bond},
       {4400, 4599, longfist::enums::InstrumentType::Bond},
@@ -214,43 +214,43 @@ inline longfist::enums::InstrumentType get_instrument_type_by_exchange_hk(const 
       {6200, 6299, longfist::enums::InstrumentType::Stock},
       {6300, 6399, longfist::enums::InstrumentType::Stock},
       {6750, 6799, longfist::enums::InstrumentType::Bond},  // 中華人民共和國財政部債券
-      {7200, 7399, longfist::enums::InstrumentType::Stock}, //槓桿及反向產品
+      {7200, 7399, longfist::enums::InstrumentType::Stock}, // 槓桿及反向產品
       {7500, 7599, longfist::enums::InstrumentType::Stock},
       {7800, 7999, longfist::enums::InstrumentType::Stock}, // SPAC 股份
       {8000, 8999, longfist::enums::InstrumentType::Stock},
-      {9000, 9199, longfist::enums::InstrumentType::Fund}, //交易所買賣基金(以美元買賣)
+      {9000, 9199, longfist::enums::InstrumentType::Fund}, // 交易所買賣基金(以美元買賣)
       {9400, 9499, longfist::enums::InstrumentType::Fund},
       {9800, 9849, longfist::enums::InstrumentType::Fund},
-      {9200, 9399, longfist::enums::InstrumentType::Stock}, //槓桿及反向產品(以美元
+      {9200, 9399, longfist::enums::InstrumentType::Stock}, // 槓桿及反向產品(以美元
       {9500, 9599, longfist::enums::InstrumentType::Stock},
-      {10000, 29999, longfist::enums::InstrumentType::StockOption}, //衍生權證
-      {30000, 39999, longfist::enums::InstrumentType::Stock},       //供日後使用
-      {41000, 46999, longfist::enums::InstrumentType::Stock},       //供日後使用
-      {47000, 48999, longfist::enums::InstrumentType::Warrant},     //界內證
-      {49000, 49999, longfist::enums::InstrumentType::Stock},       //供日後使用
+      {10000, 29999, longfist::enums::InstrumentType::StockOption}, // 衍生權證
+      {30000, 39999, longfist::enums::InstrumentType::Stock},       // 供日後使用
+      {41000, 46999, longfist::enums::InstrumentType::Stock},       // 供日後使用
+      {47000, 48999, longfist::enums::InstrumentType::Warrant},     // 界內證
+      {49000, 49999, longfist::enums::InstrumentType::Stock},       // 供日後使用
       {50000, 69999, longfist::enums::InstrumentType::Warrant},
-      {70000, 79999, longfist::enums::InstrumentType::Stock}, //供日後使用
-      {82800, 82849, longfist::enums::InstrumentType::Fund},  //交易所買賣基金
+      {70000, 79999, longfist::enums::InstrumentType::Stock}, // 供日後使用
+      {82800, 82849, longfist::enums::InstrumentType::Fund},  // 交易所買賣基金
       {83000, 83199, longfist::enums::InstrumentType::Fund},
       {83400, 83499, longfist::enums::InstrumentType::Fund},
-      {84300, 84329, longfist::enums::InstrumentType::Bond}, //僅售予專業投資者的債務證券
+      {84300, 84329, longfist::enums::InstrumentType::Bond}, // 僅售予專業投資者的債務證券
       {84400, 84599, longfist::enums::InstrumentType::Bond},
       {85000, 85743, longfist::enums::InstrumentType::Bond},
       {85901, 86029, longfist::enums::InstrumentType::Bond},
-      {84600, 84699, longfist::enums::InstrumentType::Stock}, //僅售予專業投資者優先股
+      {84600, 84699, longfist::enums::InstrumentType::Stock}, // 僅售予專業投資者優先股
       {85744, 85900, longfist::enums::InstrumentType::Stock},
-      {86600, 86799, longfist::enums::InstrumentType::Bond}, //中華人民共和國財政部債券
+      {86600, 86799, longfist::enums::InstrumentType::Bond}, // 中華人民共和國財政部債券
       {87000, 87099,
-       longfist::enums::InstrumentType::Fund}, //房地產投資信託基金及交易所買賣基金以外的單位信託 / 互惠基金
-      {87200, 87399, longfist::enums::InstrumentType::Stock},       //槓桿及反向產品
-      {87500, 87599, longfist::enums::InstrumentType::Stock},       //槓桿及反向產品
-      {89000, 89999, longfist::enums::InstrumentType::StockOption}, //衍生權證
-      {90000, 99999, longfist::enums::InstrumentType::Stock},       //供日後使用
+       longfist::enums::InstrumentType::Fund}, // 房地產投資信託基金及交易所買賣基金以外的單位信託 / 互惠基金
+      {87200, 87399, longfist::enums::InstrumentType::Stock},       // 槓桿及反向產品
+      {87500, 87599, longfist::enums::InstrumentType::Stock},       // 槓桿及反向產品
+      {89000, 89999, longfist::enums::InstrumentType::StockOption}, // 衍生權證
+      {90000, 99999, longfist::enums::InstrumentType::Stock},       // 供日後使用
   };
 
   int nId = atoi(instrument_id.c_str());
 
-  for (auto &iter : hk_code_type_def_) {
+  for (auto &iter : hk_code_type_def) {
     if (nId >= iter.beg && nId <= iter.end) {
       return iter.type;
     }
@@ -496,59 +496,6 @@ inline void order_from_input(const longfist::types::OrderInput &input, longfist:
   order.price_type = input.price_type;
   order.volume_condition = input.volume_condition;
   order.time_condition = input.time_condition;
-}
-
-/*****************************************************************************
-*  @Copyright (c) 2022, Marsjliu
-*  @All rights reserved
-
-*  @date     : 2022/06/06 17:15
-*  @brief    :根据exchangeid和时间戳转换成本地YYYYMMDD
-*****************************************************************************/
-
-// 根据标准时间戳转换成交易所所在区域的时间
-// param1:时间戳(精确到秒)
-// param2:交易所id，exchangeid
-// params3: 返回时间格式YYYYMMDD
-inline std::string TranslateGMTimeToLocalDateByExchangeId(time_t lTime, const std::string &exchangeId,
-                                                          const std::string strformat = "%Y%m%d") {
-  // ExchangeId与对应的LocationTime类型
-  static const std::unordered_map<std::string, LocationTimeType> g_mapLocationTimeExchangeId = {
-      {EXCHANGE_US, LocationTimeType::AmericaEastern},   //
-      {EXCHANGE_HK, LocationTimeType::Beijing},          //
-      {EXCHANGE_SSE, LocationTimeType::Beijing},         //
-      {EXCHANGE_SZE, LocationTimeType::Beijing},         //
-      {EXCHANGE_BSE, LocationTimeType::Beijing},         //
-      {EXCHANGE_SHFE, LocationTimeType::Beijing},        //
-      {EXCHANGE_HK_FUTURE, LocationTimeType::Beijing},   //
-      {EXCHANGE_GLFX, LocationTimeType::Beijing},        //
-      {EXCHANGE_IPE, LocationTimeType::London},          //
-      {EXCHANGE_CBOT, LocationTimeType::AmericaEastern}, //
-      {EXCHANGE_CEC, LocationTimeType::AmericaEastern},  //
-      {EXCHANGE_LIFE, LocationTimeType::AmericaEastern}, //
-      {EXCHANGE_MTIF, LocationTimeType::AmericaEastern}, //
-      {EXCHANGE_NYCE, LocationTimeType::AmericaEastern}, //
-      {EXCHANGE_CMX, LocationTimeType::AmericaEastern},  //
-      {EXCHANGE_SIME, LocationTimeType::AmericaEastern}, //
-      {EXCHANGE_CME, LocationTimeType::AmericaEastern},  //
-      {EXCHANGE_IMM, LocationTimeType::AmericaEastern},  //
-      {EXCHANGE_WIDX, LocationTimeType::AmericaEastern}, //
-      {EXCHANGE_FREX, LocationTimeType::AmericaEastern}, //
-      {EXCHANGE_METL, LocationTimeType::AmericaEastern}, //
-      {EXCHANGE_IPM, LocationTimeType::London}           //
-  };
-  LocationTimeType type = LocationTimeType::Beijing;
-  auto it = g_mapLocationTimeExchangeId.find(exchangeId);
-
-  if (it != g_mapLocationTimeExchangeId.end()) {
-    type = it->second;
-  }
-
-  time_t local_time = TimeUtil::TranslateGMTimeToLocalTime(lTime, type)->seconds;
-
-  char datebuf[256] = {0};
-  strftime(datebuf, 256, strformat.c_str(), gmtime(&local_time));
-  return datebuf;
 }
 
 } // namespace kungfu::wingchun
