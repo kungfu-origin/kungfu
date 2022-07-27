@@ -507,31 +507,6 @@ inline void order_from_input(const longfist::types::OrderInput &input, longfist:
 *  @date     : 2022/06/06 17:15
 *  @brief    :根据exchangeid和时间戳转换成本地YYYYMMDD
 *****************************************************************************/
-// ExchangeId与对应的LocationTime类型
-static const std::unordered_map<std::string, LocationTimeType> g_mapLocationTimeExchangeId = {
-    {EXCHANGE_US, LocationTimeType::AmericaEastern},   //
-    {EXCHANGE_HK, LocationTimeType::Beijing},          //
-    {EXCHANGE_SSE, LocationTimeType::Beijing},         //
-    {EXCHANGE_SZE, LocationTimeType::Beijing},         //
-    {EXCHANGE_BSE, LocationTimeType::Beijing},         //
-    {EXCHANGE_SHFE, LocationTimeType::Beijing},        //
-    {EXCHANGE_HK_FUTURE, LocationTimeType::Beijing},   //
-    {EXCHANGE_GLFX, LocationTimeType::Beijing},        //
-    {EXCHANGE_IPE, LocationTimeType::London},          //
-    {EXCHANGE_CBOT, LocationTimeType::AmericaEastern}, //
-    {EXCHANGE_CEC, LocationTimeType::AmericaEastern},  //
-    {EXCHANGE_LIFE, LocationTimeType::AmericaEastern}, //
-    {EXCHANGE_MTIF, LocationTimeType::AmericaEastern}, //
-    {EXCHANGE_NYCE, LocationTimeType::AmericaEastern}, //
-    {EXCHANGE_CMX, LocationTimeType::AmericaEastern},  //
-    {EXCHANGE_SIME, LocationTimeType::AmericaEastern}, //
-    {EXCHANGE_CME, LocationTimeType::AmericaEastern},  //
-    {EXCHANGE_IMM, LocationTimeType::AmericaEastern},  //
-    {EXCHANGE_WIDX, LocationTimeType::AmericaEastern}, //
-    {EXCHANGE_FREX, LocationTimeType::AmericaEastern}, //
-    {EXCHANGE_METL, LocationTimeType::AmericaEastern}, //
-    {EXCHANGE_IPM, LocationTimeType::London}           //
-};
 
 // 根据标准时间戳转换成交易所所在区域的时间
 // param1:时间戳(精确到秒)
@@ -539,8 +514,33 @@ static const std::unordered_map<std::string, LocationTimeType> g_mapLocationTime
 // params3: 返回时间格式YYYYMMDD
 inline std::string TranslateGMTimeToLocalDateByExchangeId(time_t lTime, const std::string &exchangeId,
                                                           const std::string strformat = "%Y%m%d") {
+  // ExchangeId与对应的LocationTime类型
+  static const std::unordered_map<std::string, LocationTimeType> g_mapLocationTimeExchangeId = {
+      {EXCHANGE_US, LocationTimeType::AmericaEastern},   //
+      {EXCHANGE_HK, LocationTimeType::Beijing},          //
+      {EXCHANGE_SSE, LocationTimeType::Beijing},         //
+      {EXCHANGE_SZE, LocationTimeType::Beijing},         //
+      {EXCHANGE_BSE, LocationTimeType::Beijing},         //
+      {EXCHANGE_SHFE, LocationTimeType::Beijing},        //
+      {EXCHANGE_HK_FUTURE, LocationTimeType::Beijing},   //
+      {EXCHANGE_GLFX, LocationTimeType::Beijing},        //
+      {EXCHANGE_IPE, LocationTimeType::London},          //
+      {EXCHANGE_CBOT, LocationTimeType::AmericaEastern}, //
+      {EXCHANGE_CEC, LocationTimeType::AmericaEastern},  //
+      {EXCHANGE_LIFE, LocationTimeType::AmericaEastern}, //
+      {EXCHANGE_MTIF, LocationTimeType::AmericaEastern}, //
+      {EXCHANGE_NYCE, LocationTimeType::AmericaEastern}, //
+      {EXCHANGE_CMX, LocationTimeType::AmericaEastern},  //
+      {EXCHANGE_SIME, LocationTimeType::AmericaEastern}, //
+      {EXCHANGE_CME, LocationTimeType::AmericaEastern},  //
+      {EXCHANGE_IMM, LocationTimeType::AmericaEastern},  //
+      {EXCHANGE_WIDX, LocationTimeType::AmericaEastern}, //
+      {EXCHANGE_FREX, LocationTimeType::AmericaEastern}, //
+      {EXCHANGE_METL, LocationTimeType::AmericaEastern}, //
+      {EXCHANGE_IPM, LocationTimeType::London}           //
+  };
   LocationTimeType type = LocationTimeType::Beijing;
-  std::unordered_map<std::string, LocationTimeType>::const_iterator it = g_mapLocationTimeExchangeId.find(exchangeId);
+  auto it = g_mapLocationTimeExchangeId.find(exchangeId);
 
   if (it != g_mapLocationTimeExchangeId.end()) {
     type = it->second;
