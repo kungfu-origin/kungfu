@@ -202,7 +202,7 @@ inline longfist::enums::InstrumentType get_instrument_type_by_exchange_hk(const 
       {2800, 2849, longfist::enums::InstrumentType::Fund}, // 交易所買賣基金
       {3000, 3199, longfist::enums::InstrumentType::Fund},
       {3400, 3499, longfist::enums::InstrumentType::Fund},
-      {4000, 4199, longfist::enums::InstrumentType::Bond}, //香港金融管理局的外匯基金債券
+      {4000, 4199, longfist::enums::InstrumentType::Bond}, // 香港金融管理局的外匯基金債券
       {4200, 4299, longfist::enums::InstrumentType::Bond},
       {4300, 4329, longfist::enums::InstrumentType::Bond},
       {4400, 4599, longfist::enums::InstrumentType::Bond},
@@ -214,38 +214,38 @@ inline longfist::enums::InstrumentType get_instrument_type_by_exchange_hk(const 
       {6200, 6299, longfist::enums::InstrumentType::Stock},
       {6300, 6399, longfist::enums::InstrumentType::Stock},
       {6750, 6799, longfist::enums::InstrumentType::Bond},  // 中華人民共和國財政部債券
-      {7200, 7399, longfist::enums::InstrumentType::Stock}, //槓桿及反向產品
+      {7200, 7399, longfist::enums::InstrumentType::Stock}, // 槓桿及反向產品
       {7500, 7599, longfist::enums::InstrumentType::Stock},
       {7800, 7999, longfist::enums::InstrumentType::Stock}, // SPAC 股份
       {8000, 8999, longfist::enums::InstrumentType::Stock},
-      {9000, 9199, longfist::enums::InstrumentType::Fund}, //交易所買賣基金(以美元買賣)
+      {9000, 9199, longfist::enums::InstrumentType::Fund}, // 交易所買賣基金(以美元買賣)
       {9400, 9499, longfist::enums::InstrumentType::Fund},
       {9800, 9849, longfist::enums::InstrumentType::Fund},
-      {9200, 9399, longfist::enums::InstrumentType::Stock}, //槓桿及反向產品(以美元
+      {9200, 9399, longfist::enums::InstrumentType::Stock}, // 槓桿及反向產品(以美元
       {9500, 9599, longfist::enums::InstrumentType::Stock},
-      {10000, 29999, longfist::enums::InstrumentType::StockOption}, //衍生權證
-      {30000, 39999, longfist::enums::InstrumentType::Stock},       //供日後使用
-      {41000, 46999, longfist::enums::InstrumentType::Stock},       //供日後使用
-      {47000, 48999, longfist::enums::InstrumentType::Warrant},     //界內證
-      {49000, 49999, longfist::enums::InstrumentType::Stock},       //供日後使用
+      {10000, 29999, longfist::enums::InstrumentType::StockOption}, // 衍生權證
+      {30000, 39999, longfist::enums::InstrumentType::Stock},       // 供日後使用
+      {41000, 46999, longfist::enums::InstrumentType::Stock},       // 供日後使用
+      {47000, 48999, longfist::enums::InstrumentType::Warrant},     // 界內證
+      {49000, 49999, longfist::enums::InstrumentType::Stock},       // 供日後使用
       {50000, 69999, longfist::enums::InstrumentType::Warrant},
-      {70000, 79999, longfist::enums::InstrumentType::Stock}, //供日後使用
-      {82800, 82849, longfist::enums::InstrumentType::Fund},  //交易所買賣基金
+      {70000, 79999, longfist::enums::InstrumentType::Stock}, // 供日後使用
+      {82800, 82849, longfist::enums::InstrumentType::Fund},  // 交易所買賣基金
       {83000, 83199, longfist::enums::InstrumentType::Fund},
       {83400, 83499, longfist::enums::InstrumentType::Fund},
-      {84300, 84329, longfist::enums::InstrumentType::Bond}, //僅售予專業投資者的債務證券
+      {84300, 84329, longfist::enums::InstrumentType::Bond}, // 僅售予專業投資者的債務證券
       {84400, 84599, longfist::enums::InstrumentType::Bond},
       {85000, 85743, longfist::enums::InstrumentType::Bond},
       {85901, 86029, longfist::enums::InstrumentType::Bond},
-      {84600, 84699, longfist::enums::InstrumentType::Stock}, //僅售予專業投資者優先股
+      {84600, 84699, longfist::enums::InstrumentType::Stock}, // 僅售予專業投資者優先股
       {85744, 85900, longfist::enums::InstrumentType::Stock},
-      {86600, 86799, longfist::enums::InstrumentType::Bond}, //中華人民共和國財政部債券
+      {86600, 86799, longfist::enums::InstrumentType::Bond}, // 中華人民共和國財政部債券
       {87000, 87099,
-       longfist::enums::InstrumentType::Fund}, //房地產投資信託基金及交易所買賣基金以外的單位信託 / 互惠基金
-      {87200, 87399, longfist::enums::InstrumentType::Stock},       //槓桿及反向產品
-      {87500, 87599, longfist::enums::InstrumentType::Stock},       //槓桿及反向產品
-      {89000, 89999, longfist::enums::InstrumentType::StockOption}, //衍生權證
-      {90000, 99999, longfist::enums::InstrumentType::Stock},       //供日後使用
+       longfist::enums::InstrumentType::Fund}, // 房地產投資信託基金及交易所買賣基金以外的單位信託 / 互惠基金
+      {87200, 87399, longfist::enums::InstrumentType::Stock},       // 槓桿及反向產品
+      {87500, 87599, longfist::enums::InstrumentType::Stock},       // 槓桿及反向產品
+      {89000, 89999, longfist::enums::InstrumentType::StockOption}, // 衍生權證
+      {90000, 99999, longfist::enums::InstrumentType::Stock},       // 供日後使用
   };
 
   int nId = atoi(instrument_id.c_str());
