@@ -31,7 +31,7 @@
 
 // 全市场exchange id定义
 #define EXCHANGE_HK "HK"           // 港股: 4（香港交易所）
-#define EXCHANGE_HK_OPTION "HKOPT" // 港股期货: 5（香港交易所）
+#define EXCHANGE_HK_FUTURE "HKFUT" // 港股期货: 5（香港交易所）
 #define EXCHANGE_US "US"           // 美股: 29（纳斯达克交易所）
 #define EXCHANGE_GLFX "GLFX"       // 全球外汇: 41
 #define EXCHANGE_IPE "IPE"         // LME\IPE: 45(LME（伦敦金属交易所）、ICE)
@@ -436,7 +436,7 @@ static const std::unordered_map<std::string, LocationTimeType> g_mapLocationTime
     {EXCHANGE_SZE, LocationTimeType::Beijing},         //
     {EXCHANGE_BSE, LocationTimeType::Beijing},         //
     {EXCHANGE_SHFE, LocationTimeType::Beijing},        //
-    {EXCHANGE_HK_OPTION, LocationTimeType::Beijing},   //
+    {EXCHANGE_HK_FUTURE, LocationTimeType::Beijing},   //
     {EXCHANGE_GLFX, LocationTimeType::Beijing},        //
     {EXCHANGE_IPE, LocationTimeType::London},          //
     {EXCHANGE_CBOT, LocationTimeType::AmericaEastern}, //

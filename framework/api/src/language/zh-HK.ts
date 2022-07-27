@@ -195,7 +195,7 @@ export default {
     INE: '能源中心',
 
     HK: '港股',
-    HKOPT: '港股期货',
+    HKFUT: '港股期货',
     US: '美股',
     GLFX: '全球外汇',
     IPE: 'IPE',
