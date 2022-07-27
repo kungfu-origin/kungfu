@@ -24,26 +24,3 @@ export const initKfDefaultInstruments = () => {
     fse.outputJsonSync(KF_INSTRUMENTS_PATH, kfInstrumentsJSON);
   }
 };
-
-export const ensureKungfuKey = () => {
-  const rootKey = path.join(KF_HOME, 'kungfu-root.key');
-  const sourceRootKey = path.join(
-    KUNGFU_RESOURCES_DIR,
-    'key',
-    'kungfu-root.key',
-  );
-  const traderKey = path.join(KF_HOME, 'kungfu-trader.key');
-  const sourceTraderKey = path.join(
-    KUNGFU_RESOURCES_DIR,
-    'key',
-    'kungfu-trader.key',
-  );
-
-  if (!fse.existsSync(rootKey) && fse.existsSync(sourceRootKey)) {
-    fse.copyFileSync(sourceRootKey, rootKey);
-  }
-
-  if (!fse.existsSync(traderKey) && fse.existsSync(sourceTraderKey)) {
-    fse.copyFileSync(sourceTraderKey, traderKey);
-  }
-};
