@@ -10,7 +10,6 @@
 
 #include <kungfu/common.h>
 #include <kungfu/longfist/longfist.h>
-#include <kungfu/wingchun/timezone.h>
 #include <kungfu/yijinjing/practice/apprentice.h>
 #include <kungfu/yijinjing/time.h>
 #include <kungfu/yijinjing/util/util.h>
@@ -189,16 +188,17 @@ inline int get_repo_expire_days(const std::string &instrument_id) {
 }
 
 // 标的代码和类型
-struct StruCodeType 
+struct HKCodeRule 
 {
   int beg = 0;
   int end = 0;
   longfist::enums::InstrumentType type;
 };
+
 // 获取港股标的类型
 inline longfist::enums::InstrumentType get_instrument_type_by_exchange_hk(const std::string &instrument_id) {
     // 查看地址：https://www.hkex.com.hk/-/media/HKEX-Market/Products/Securities/Stock-Code-Allocation-Plan/scap_c.pdf
-    static std::vector<StruCodeType> hk_code_type_def_ = {
+  static std::vector<HKCodeRule> hk_code_type_def = {
         {1, 2799, longfist::enums::InstrumentType::Stock},
         {2800, 2849, longfist::enums::InstrumentType::Fund},// 交易所買賣基金
         {3000, 3199, longfist::enums::InstrumentType::Fund},
@@ -250,7 +250,7 @@ inline longfist::enums::InstrumentType get_instrument_type_by_exchange_hk(const 
 
     int nId = atoi(instrument_id.c_str());
 
-    for (auto &iter : hk_code_type_def_)
+    for (auto &iter : hk_code_type_def)
     {
         if (nId >= iter.beg && nId <= iter.end)
         {
@@ -498,59 +498,6 @@ inline void order_from_input(const longfist::types::OrderInput &input, longfist:
   order.price_type = input.price_type;
   order.volume_condition = input.volume_condition;
   order.time_condition = input.time_condition;
-}
-
-/*****************************************************************************
-*  @Copyright (c) 2022, Marsjliu
-*  @All rights reserved
-
-*  @date     : 2022/06/06 17:15
-*  @brief    :根据exchangeid和时间戳转换成本地YYYYMMDD
-*****************************************************************************/
-
-// 根据标准时间戳转换成交易所所在区域的时间
-// param1:时间戳(精确到秒)
-// param2:交易所id，exchangeid
-// params3: 返回时间格式YYYYMMDD
-inline std::string TranslateGMTimeToLocalDateByExchangeId(time_t lTime, const std::string &exchangeId,
-                                                          const std::string strformat = "%Y%m%d") {
-  // ExchangeId与对应的LocationTime类型
-  static const std::unordered_map<std::string, LocationTimeType> g_mapLocationTimeExchangeId = {
-      {EXCHANGE_US, LocationTimeType::AmericaEastern},   //
-      {EXCHANGE_HK, LocationTimeType::Beijing},          //
-      {EXCHANGE_SSE, LocationTimeType::Beijing},         //
-      {EXCHANGE_SZE, LocationTimeType::Beijing},         //
-      {EXCHANGE_BSE, LocationTimeType::Beijing},         //
-      {EXCHANGE_SHFE, LocationTimeType::Beijing},        //
-      {EXCHANGE_HK_FUTURE, LocationTimeType::Beijing},   //
-      {EXCHANGE_GLFX, LocationTimeType::Beijing},        //
-      {EXCHANGE_IPE, LocationTimeType::London},          //
-      {EXCHANGE_CBOT, LocationTimeType::AmericaEastern}, //
-      {EXCHANGE_CEC, LocationTimeType::AmericaEastern},  //
-      {EXCHANGE_LIFE, LocationTimeType::AmericaEastern}, //
-      {EXCHANGE_MTIF, LocationTimeType::AmericaEastern}, //
-      {EXCHANGE_NYCE, LocationTimeType::AmericaEastern}, //
-      {EXCHANGE_CMX, LocationTimeType::AmericaEastern},  //
-      {EXCHANGE_SIME, LocationTimeType::AmericaEastern}, //
-      {EXCHANGE_CME, LocationTimeType::AmericaEastern},  //
-      {EXCHANGE_IMM, LocationTimeType::AmericaEastern},  //
-      {EXCHANGE_WIDX, LocationTimeType::AmericaEastern}, //
-      {EXCHANGE_FREX, LocationTimeType::AmericaEastern}, //
-      {EXCHANGE_METL, LocationTimeType::AmericaEastern}, //
-      {EXCHANGE_IPM, LocationTimeType::London}           //
-  };
-  LocationTimeType type = LocationTimeType::Beijing;
-  auto it = g_mapLocationTimeExchangeId.find(exchangeId);
-
-  if (it != g_mapLocationTimeExchangeId.end()) {
-    type = it->second;
-  }
-
-  time_t local_time = TimeUtil::TranslateGMTimeToLocalTime(lTime, type)->seconds;
-
-  char datebuf[256] = {0};
-  strftime(datebuf, 256, strformat.c_str(), gmtime(&local_time));
-  return datebuf;
 }
 
 } // namespace kungfu::wingchun
