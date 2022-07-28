@@ -17,7 +17,9 @@ const extensionDirs = getExtensionDirs(true);
 
 const extensions = extensionDirs.map((fullpath) => {
   const extensionDir = path.resolve(fullpath, 'dist');
-  console.log(`-- found kungfu extension: [${fse.readdirSync(extensionDir).join(', ')}]`);
+  console.log(
+    `-- found kungfu extension: [${fse.readdirSync(extensionDir).join(', ')}]`,
+  );
   return {
     from: extensionDir,
     to: 'app/kungfu-extensions',
