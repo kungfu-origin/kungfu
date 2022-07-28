@@ -156,7 +156,7 @@ exports.getExtensionDirs = (production = false) => {
 
   return [
     ...Object.keys(packageJSON.dependencies || {}),
-    ...Object.keys(packageJSON.dependencies || {}),
+    ...Object.keys(packageJSON.optionalDependencies || {}),
     ...(production ? [] : Object.keys(packageJSON.devDependencies || {})),
   ]
     .map((name) => {
