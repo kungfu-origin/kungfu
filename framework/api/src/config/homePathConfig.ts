@@ -30,12 +30,9 @@ if (process.env.APP_TYPE === 'main' || process.env.APP_TYPE === 'renderer') {
 if (process.env.NODE_ENV === 'development') {
   global.__publicResources = `${__resources}`;
 } else {
-  global.__publicResources = path.join(
-    global.__kfResourcesPath,
-    'app',
-    'dist',
-    'public',
-  );
+  global.__publicResources =
+    process.env.APP_PUBLIC_DIR ||
+    path.join(global.__kfResourcesPath, 'app', 'dist', 'public');
 }
 
 export const KF_HOME_BASE_DIR_RESOLVE: string = getHomePath();

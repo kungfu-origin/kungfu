@@ -181,10 +181,12 @@ exports.getKungfuConfigKey = () => {
 
 exports.buildDevArgv = (distDir, distName) => {
   const cliDir = exports.getCliDir();
+  const appDir = exports.getAppDir();
   const kfcDir = exports.getKfcDir();
   const extdirs = exports.getExtensionDirs();
 
   process.env.KFC_DIR = kfcDir;
+  process.env.APP_PUBLIC_DIR = path.join(appDir, 'public');
   process.env.CLI_DIR = path.join(cliDir, 'dist', 'cli');
   process.env.KFC_DEV = 'true';
   process.env.EXTENSION_DIRS = [distDir, ...extdirs].join(path.delimiter);
