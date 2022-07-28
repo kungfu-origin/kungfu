@@ -1,0 +1,27 @@
+{
+  "name": "@kungfu-trader/examples-strategy-cpp",
+  "author": "kungfu-trader",
+  "version": "2.4.0-alpha.115",
+  "description": "KungFu Strategy 101 - C++ Demo",
+  "license": "Apache-2.0",
+  "private": true,
+  "main": "index.js",
+  "binary": {
+    "module_name": "kungfu101",
+    "module_path": "dist/kungfu101",
+    "host": "https://prebuilt.libkungfu.cc"
+  },
+  "kungfuBuild": {
+    "cpp": {
+      "target": "bind/python"
+    }
+  },
+  "kungfuConfig": {
+    "key": "kungfu101"
+  },
+  "scripts": {
+    "clean": "kfs strategy clean",
+    "build": "kfs strategy build",
+    "package": "kfs strategy package"
+  }
+}

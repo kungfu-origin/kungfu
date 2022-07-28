@@ -11,8 +11,9 @@
   "workspaces": {
     "packages": [
       "framework/*",
-      "extensions/*",
       "developer/*",
+      "extensions/*",
+      "examples/*",
       "artifact"
     ]
   },
