@@ -16,6 +16,7 @@ const coreDir = getCoreDir();
 const extdirs = getExtensionDirs(true);
 
 const extras = extdirs.map((fullpath) => {
+  console.log(`found extension ${path.basename(fullpath)}`);
   return {
     from: path.resolve(fullpath, 'dist'),
     to: 'app/kungfu-extensions',

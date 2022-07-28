@@ -154,9 +154,9 @@ exports.getExtensionDirs = (production = false) => {
     path.resolve(process.cwd(), 'package.json'),
   );
 
-  const extdirs = [
+  return [
     ...Object.keys(packageJSON.dependencies || {}),
-    ...Object.keys(packageJSON.dependencies || {}),
+    ...Object.keys(packageJSON.optionalDependencies || {}),
     ...(production ? [] : Object.keys(packageJSON.devDependencies || {})),
   ]
     .map((name) => {
@@ -171,12 +171,29 @@ exports.getExtensionDirs = (production = false) => {
       return fullPath;
     })
     .filter((fullpath) => !!fullpath);
-
-  return extdirs;
 };
 
 exports.getKungfuConfigKey = () => {
   return require(path.join(process.cwd(), 'package.json'))['kungfuConfig'][
     'key'
   ];
+};
+
+exports.buildDevArgv = (distDir, distName) => {
+  const cliDir = exports.getCliDir();
+  const appDir = exports.getAppDir();
+  const kfcDir = exports.getKfcDir();
+  const extdirs = exports.getExtensionDirs();
+
+  process.env.KFC_DIR = kfcDir;
+  process.env.APP_PUBLIC_DIR = path.join(appDir, 'public');
+  process.env.CLI_DIR = path.join(cliDir, 'dist', 'cli');
+  process.env.KFC_DEV = 'true';
+  process.env.EXTENSION_DIRS = [distDir, ...extdirs].join(path.delimiter);
+
+  return {
+    mode: 'development',
+    distDir: distDir,
+    distName: distName,
+  };
 };

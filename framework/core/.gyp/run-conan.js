@@ -57,26 +57,6 @@ function conanBuild() {
   conan(['build', '.', '-bf', 'build', ...settings]);
 }
 
-function conanBuildWithClang() {
-  const resetBuild = () => fse.removeSync(path.join('build', 'CMakeCache.txt'));
-
-  // Build pykungfu with Clang
-  process.env.CONAN_VS_TOOLSET = 'ClangCL';
-  process.env.KUNGFU_BUILD_SKIP_RUNTIME_ELECTRON = true;
-  resetBuild();
-  conanInstall();
-  conanBuild();
-
-  // Build kungfu_node with MSVC
-  delete process.env.KUNGFU_BUILD_SKIP_RUNTIME_ELECTRON;
-  process.env.CONAN_VS_TOOLSET = 'auto';
-  process.env.LIBKUNGFU_NAME = 'kungfu-node';
-  process.env.KUNGFU_BUILD_SKIP_RUNTIME_NODE = true;
-  resetBuild();
-  conanInstall();
-  conanBuild();
-}
-
 function conanPackage() {
   const conanSettings = makeConanSettings(['build_type']);
   conan([
@@ -111,4 +91,4 @@ async function main() {
 module.exports.cli = cli;
 module.exports.main = main;
 
-if (require.main === module) main().catch(shell.exitOnError);
+if (require.main === module) main().catch(shell.utils.exitOnError);

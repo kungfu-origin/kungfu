@@ -4,4 +4,4 @@ set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)  # enable msvc to generate kungfu.lib
 add_library(${LIBKUNGFU_NAME} SHARED ${SOURCE_FILES})
 set_target_properties(${LIBKUNGFU_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 set_target_properties(${LIBKUNGFU_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${KUNGFU_BUILD_DIR})
-target_link_libraries(${LIBKUNGFU_NAME} sqlite ${CONAN_LIBS})
+target_link_libraries(${LIBKUNGFU_NAME} ${CONAN_LIBS})

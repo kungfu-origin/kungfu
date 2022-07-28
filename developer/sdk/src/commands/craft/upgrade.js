@@ -1,5 +1,4 @@
-const fse = require('fs-extra');
-const path = require('path');
+const sdk = require('@kungfu-trader/kungfu-sdk');
 
 module.exports = {
   flags: 'upgrade',

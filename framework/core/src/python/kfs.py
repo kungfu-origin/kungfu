@@ -30,14 +30,6 @@
 # nuitka-project: --no-progress
 ###########################################################
 
-import pykungfu
-import sys
+from kungfu import __tool__ as origin
 
-
-def main(**kwargs):
-    sdk_args = ["-e", "require('@kungfu-trader/kungfu-sdk').cli()"]
-    pykungfu.libnode.run(*sys.argv + sdk_args, **kwargs)
-
-
-if __name__ == "__main__":
-    main()
+origin.sdk()

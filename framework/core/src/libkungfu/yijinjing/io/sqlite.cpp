@@ -36,8 +36,6 @@ int wal_hook(void *NotUsed, sqlite3 *db, const char *name, int page_nb) {
   return 0;
 }
 
-int xConflict(void *pCtx, int eConflict, sqlite3_changeset_iter *pIter) { return 0; }
-
 struct sqlite_initilize {
   sqlite_initilize() {
     int rc = sqlite3_config(SQLITE_CONFIG_LOG, sqlite3_log, nullptr);

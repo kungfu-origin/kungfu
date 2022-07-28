@@ -4,62 +4,13 @@ const chalk = require('chalk');
 const electron = require('electron');
 const fse = require('fs-extra');
 const path = require('path');
-const { say } = require('cfonts');
 const { spawn } = require('child_process');
 const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
-const {
-  getAppDefaultDistDir,
-  getAppDir,
-  getKfcDir,
-  getExtensionDirs,
-  getCliDir,
-} = require('@kungfu-trader/kungfu-js-api/toolkit/utils');
-const defaultDistDir = getAppDefaultDistDir();
+const { shell, utils } = require('@kungfu-trader/kungfu-js-api/toolkit');
 
 let electronProcess = null;
 let manualRestart = false;
-
-function greeting() {
-  const cols = process.stdout.columns;
-  let text = '';
-
-  if (cols > 104) text = '';
-  else if (cols > 76) text = 'kungfu';
-  else text = false;
-
-  if (text) {
-    say(text, {
-      colors: ['yellow'],
-      font: 'simple3d',
-      space: false,
-    });
-  } else console.log(chalk.yellow.bold('\n  kungfu-dev'));
-  console.log(chalk.blue('  getting ready...') + '\n');
-}
-
-function logStats(proc, data) {
-  let log = '';
-  log += chalk.yellow.bold(
-    `┏ ${proc} Process ${new Array(19 - proc.length + 1).join('-')}`,
-  );
-  log += '\n\n';
-  if (typeof data === 'object') {
-    data
-      .toString({
-        colors: true,
-        chunks: false,
-      })
-      .split(/\r?\n/)
-      .forEach((line) => {
-        log += '  ' + line + '\n';
-      });
-  } else {
-    log += `  ${data}\n`;
-  }
-  log += '\n' + chalk.yellow.bold(`┗ ${new Array(28 + 1).join('-')}`) + '\n';
-  console.log(log);
-}
 
 const electronLog = (data, color, type = 'Kungfu') => {
   let log = '';
@@ -101,11 +52,11 @@ function startRenderer(argv) {
         return;
       }
 
-      logStats('Renderer', stats);
+      shell.logStats('Renderer', stats);
     });
 
     compiler.hooks.done.tap('renderer-compile-done', (stats) => {
-      logStats('Renderer', stats);
+      shell.logStats('Renderer', stats);
       resolve();
     });
   });
@@ -113,7 +64,7 @@ function startRenderer(argv) {
 
 function startMain(argv) {
   const mainConfig = require('../webpack/webpack.main.config')(argv);
-  const appDir = getAppDir();
+  const appDir = utils.getAppDir();
   const indexJs = path.resolve(appDir, 'src', 'main', 'index.dev.ts');
   mainConfig.entry.main = [indexJs].concat(mainConfig.entry.main);
 
@@ -125,7 +76,7 @@ function startMain(argv) {
         return;
       }
 
-      logStats('Main', stats);
+      shell.logStats('Main', stats);
       if (electronProcess && electronProcess.kill) {
         manualRestart = true;
         process.kill(electronProcess.pid, 'SIGINT');
@@ -142,21 +93,23 @@ function startMain(argv) {
     });
 
     compiler.hooks.done.tap('main-compile-done', (stats) => {
-      logStats('Main', stats);
+      shell.logStats('Main', stats);
       resolve();
     });
   });
 }
 
 function copyWebpackDist(argv) {
-  const srcDir = path.join(getAppDir(), 'dist', 'app');
-  const publicDir = path.join(getAppDir(), 'public');
+  const srcDir = path.join(utils.getAppDir(), 'dist', 'app');
+  const publicDir = path.join(utils.getAppDir(), 'public');
   const targetDir = path.join(argv.distDir, argv.distName);
   const publicTargetDir = path.join(argv.distDir, 'public');
-  logStats('Builder', `copy from ${srcDir} to ${targetDir}`);
+
+  shell.logStats('Builder', `copy from ${srcDir} to ${targetDir}`);
   fse.removeSync(targetDir);
   fse.copySync(srcDir, targetDir);
-  logStats('Builder', `copy from ${publicDir} to ${publicTargetDir}`);
+
+  shell.logStats('Builder', `copy from ${publicDir} to ${publicTargetDir}`);
   fse.removeSync(publicTargetDir);
   fse.copySync(publicDir, publicTargetDir);
 }
@@ -192,12 +145,11 @@ function startElectron(argv) {
 }
 
 const run = (distDir, distName = 'app', withWebpack) => {
-  greeting();
+  shell.greeting();
 
-  const appDir = getAppDir();
-  const extdirs = getExtensionDirs();
-  const kfcDir = getKfcDir();
-  const cliDir = getCliDir();
+  const appDir = utils.getAppDir();
+  const argv = utils.buildDevArgv(distDir, distName);
+  const tasks = withWebpack ? [startRenderer, startMain] : [copyWebpackDist];
 
   if (withWebpack) {
     process.chdir(appDir);
@@ -205,25 +157,11 @@ const run = (distDir, distName = 'app', withWebpack) => {
     process.chdir(process.cwd());
   }
 
-  process.env.KFC_DIR = kfcDir;
-  process.env.CLI_DIR = path.join(cliDir, 'dist', 'cli');
-  process.env.KFC_DEV = true;
-  process.env.EXTENSION_DIRS = [distDir, ...extdirs].join(path.delimiter);
-
-  const argv = {
-    mode: 'development',
-    distDir: distDir,
-    distName: distName,
-  };
-
-  const tasks = withWebpack ? [startRenderer, startMain] : [copyWebpackDist];
-
   return Promise.all(tasks.map((f) => f(argv))).then(() => startElectron(argv));
 };
 
 module.exports = run;
 
 if (require.main === module) {
-  fse.ensureDirSync(defaultDistDir);
-  run(defaultDistDir).catch(console.error);
+  shell.runDist(utils.getAppDefaultDistDir(), run);
 }

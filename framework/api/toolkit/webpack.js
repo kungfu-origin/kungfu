@@ -2,7 +2,6 @@ const path = require('path');
 const TerserPlugin = require('terser-webpack-plugin');
 const ESLintPlugin = require('eslint-webpack-plugin');
 const { isProduction, getAppDir } = require('./utils');
-const appDir = getAppDir();
 
 module.exports = {
   makeConfig: (argv) => {
@@ -20,7 +19,7 @@ module.exports = {
             ? []
             : [
                 {
-                  test: /\.(t|j)s$/,
+                  test: /\.[tj]s$/,
                   exclude: /node_modules/,
                   use: [
                     {
@@ -29,7 +28,7 @@ module.exports = {
                   ],
                 },
                 {
-                  test: /\.(t|j)s$/,
+                  test: /\.[tj]s$/,
                   exclude: /node_modules/,
                   use: [
                     {
@@ -105,7 +104,7 @@ module.exports = {
           fix: true /* 自动帮助修复 */,
           extensions: ['js', 'json', 'ts', 'json', 'css', 'less'],
           exclude: 'node_modules',
-          failOnWarning: production ? false : true,
+          failOnWarning: !production,
         }),
       ],
       resolve: {
@@ -116,7 +115,7 @@ module.exports = {
             ),
             'src',
           ),
-          '@kungfu-trader/kungfu-app': appDir,
+          '@kungfu-trader/kungfu-app': getAppDir(),
         },
 
         extensions: ['.js', '.ts', '.d.ts', '.vue', '.json', '.css', '.node'],

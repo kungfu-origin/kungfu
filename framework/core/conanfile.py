@@ -31,9 +31,9 @@ class KungfuCoreConan(ConanFile):
         "nlohmann_json/3.10.5",
         "nng/1.5.2",
         "rxcpp/4.1.1",
-        # "sqlite3/3.37.2",
-        "sqlite_orm/1.7",
-        "spdlog/1.9.2",
+        "sqlite3/3.39.2",
+        "sqlite_orm/1.7.1",
+        "spdlog/1.10.0",
         "tabulate/1.4",
     ]
     settings = "os", "compiler", "build_type", "arch"
@@ -48,7 +48,12 @@ class KungfuCoreConan(ConanFile):
     default_options = {
         "fmt:header_only": "True",
         "spdlog:header_only": "True",
+        "spdlog:shared": "False",
+        "sqlite3:enable_column_metadata": "True",
         "sqlite3:enable_json1": "True",
+        "sqlite3:enable_preupdate_hook": "True",
+        "sqlite3:enable_dbstat_vtab": "True",
+        "sqlite3:shared": "False",
         "nng:http": "False",
         "log_level": "info",
         "arch": "x64",
