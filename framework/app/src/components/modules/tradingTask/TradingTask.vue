@@ -41,7 +41,7 @@ import { messagePrompt } from '@kungfu-trader/kungfu-app/src/renderer/assets/met
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import { useTradingTask } from './utils';
 
-import { ProcessStatusTypes } from '@kungfu-trader/kungfu-js-api/src/typings/enums';
+import { ProcessStatusTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
 
 const { t } = VueI18n.global;
 const { success, error } = messagePrompt();
