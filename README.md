@@ -32,12 +32,12 @@ Apache License 2.0
 # Setup 编译及运行环境
 
 功夫的编译依赖以下工具：
-支持 C++20 的编译器
-cmake (>=3.15)
-Node.js (^14.x)
-yarn (^1.x)
-Python 3 (~3.9)
-pipenv
+* 支持 C++20 的编译器
+* [cmake](https://cmake.org/) (>=3.15)
+* [Node.js](https://nodejs.org/) (^14.x)
+* [yarn](https://classic.yarnpkg.com/) (^1.x)
+* [Python 3](https://www.python.org/) (~3.9)
+* [pipenv](https://pipenv.pypa.io/) (^1.x)
 
 开始编译前，请先确保安装以上工具，且正确设置 PATH 环境变量。
 
