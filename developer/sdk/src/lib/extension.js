@@ -193,6 +193,11 @@ exports.installSingleLib = async (
 
   const libInfo = sourceLibs[libName][libVersion];
 
+  if (!(platform in libInfo.lib)) {
+    console.warn(`-- ${libName}@${libVersion} does not support ${platform}`);
+    return;
+  }
+
   const downloadFiles = async (localDir, files, buildRemoteURL, onFinish) => {
     for (const file of files) {
       const remoteFileURL = buildRemoteURL(file);
