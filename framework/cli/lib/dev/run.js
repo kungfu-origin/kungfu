@@ -1,124 +1,40 @@
 'use strict';
 
-const chalk = require('chalk');
-const fse = require('fs-extra');
-const { say } = require('cfonts');
-const webpack = require('webpack');
-const path = require('path');
-const {
-  getCliDir,
-  getKfcDir,
-  getExtensionDirs,
-  getCliDefaultDistDir,
-} = require('@kungfu-trader/kungfu-js-api/toolkit/utils');
-const defaultDistDir = getCliDefaultDistDir();
+const { shell, utils } = require('@kungfu-trader/kungfu-js-api/toolkit');
 
-function greeting() {
-  const cols = process.stdout.columns;
-  let text = '';
-
-  if (cols > 104) text = '';
-  else if (cols > 76) text = 'kungfu';
-  else text = false;
-
-  if (text) {
-    say(text, {
-      colors: ['yellow'],
-      font: 'simple3d',
-      space: false,
-    });
-  } else console.log(chalk.yellow.bold('\n  kungfu-dev'));
-  console.log(chalk.blue('  getting ready...') + '\n');
-}
-
-function logStats(proc, data) {
-  let log = '';
-  log += chalk.yellow.bold(
-    `┏ ${proc} Process ${new Array(19 - proc.length + 1).join('-')}`,
-  );
-  log += '\n\n';
-  if (typeof data === 'object') {
-    data
-      .toString({
-        colors: true,
-        chunks: false,
-      })
-      .split(/\r?\n/)
-      .forEach((line) => {
-        log += '  ' + line + '\n';
-      });
-  } else {
-    log += `  ${data}\n`;
-  }
-  log += '\n' + chalk.yellow.bold(`┗ ${new Array(28 + 1).join('-')}`) + '\n';
-  console.log(log);
-}
-
-function startCli(argv) {
-  const cliConfig = require('../webpack/webpack.cli.config')(argv);
+function start(argv, name) {
   return new Promise((resolve) => {
-    const compiler = webpack(cliConfig);
+    const config = require(`../webpack/webpack.${name}.config`)(argv);
+    const compiler = require('webpack')(config);
     compiler.watch({}, (err, stats) => {
       if (err) {
         console.log(err);
         return;
       }
 
-      logStats('Cli', stats);
+      shell.logStats(name, stats);
     });
 
     compiler.hooks.done.tap('components-compile-done', (stats) => {
-      logStats('Cli', stats);
-      resolve();
-    });
-  });
-}
-
-function startDzxy(argv) {
-  const dzxyConfig = require('../webpack/webpack.dzxy.config')(argv);
-  return new Promise((resolve) => {
-    const compiler = webpack(dzxyConfig);
-    compiler.watch({}, (err, stats) => {
-      if (err) {
-        console.log(err);
-        return;
-      }
-
-      logStats('Dzxy', stats);
-    });
-
-    compiler.hooks.done.tap('components-compile-done', (stats) => {
-      logStats('Dzxy', stats);
+      shell.logStats(name, stats);
       resolve();
     });
   });
 }
 
 const run = (distDir, distName = 'cli') => {
-  greeting();
-  const cliDir = getCliDir();
+  shell.greeting();
+
+  const argv = utils.buildDevArgv(distDir, distName);
+  const cliDir = utils.getCliDir();
+
   process.chdir(cliDir);
 
-  const kfcDir = getKfcDir();
-  const extdirs = getExtensionDirs();
-
-  process.env.KFC_DIR = kfcDir;
-  process.env.CLI_DIR = path.join(cliDir, 'dist', 'cli');
-  process.env.KFC_DEV = true;
-  process.env.EXTENSION_DIRS = [distDir, ...extdirs].join(path.delimiter);
-
-  const argv = {
-    mode: 'development',
-    distDir: distDir,
-    distName: distName,
-  };
-
-  return Promise.all([startCli(argv), startDzxy(argv)]);
+  return Promise.all([start(argv, 'cli'), start(argv, 'dzxy')]);
 };
 
 module.exports = run;
 
 if (require.main === module) {
-  fse.ensureDirSync(defaultDistDir);
-  run(defaultDistDir).catch(console.error);
+  shell.runDist(utils.getCliDefaultDistDir(), run);
 }
