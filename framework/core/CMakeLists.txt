@@ -31,15 +31,6 @@ add_compile_definitions(SPDLOG_ACTIVE_LEVEL=${SPDLOG_LOG_LEVEL_COMPILE})
 add_compile_definitions(SPDLOG_NO_NAME)
 add_compile_definitions(SPDLOG_NO_ATOMIC_LEVELS)
 
-add_compile_definitions(SQLITE_ENABLE_COLUMN_METADATA)
-add_compile_definitions(SQLITE_ENABLE_JSON1)
-add_compile_definitions(SQLITE_ENABLE_SESSION)
-add_compile_definitions(SQLITE_ENABLE_PREUPDATE_HOOK)
-add_compile_definitions(SQLITE_ENABLE_DBSTAT_VTAB)
-
-add_compile_definitions(SQLITE_MAX_MMAP_SIZE=134217728)
-add_compile_definitions(SQLITE_DEFAULT_MMAP_SIZE=1048576)
-
 ##########################################################################
 
 option(NNG_TESTS "" OFF)
@@ -72,7 +63,6 @@ endif()
 
 if (NOT DEFINED ENV{KUNGFU_BUILD_SKIP_LIBKUNGFU} OR NOT $ENV{KUNGFU_BUILD_SKIP_LIBKUNGFU})
   message(STATUS "Enabled libkungfu")
-  add_subdirectory(.deps/sqlite3-3.33.0)
   add_subdirectory(src/libkungfu)
 endif()
 
