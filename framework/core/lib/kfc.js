@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-const { spawnSync } = require('child_process');
-const executable = require('./executable.js');
 const path = require('path');
+const { kfc } = require('./executable');
+const shell = require('./shell');
 
 function getCliDir() {
   try {
@@ -12,14 +12,11 @@ function getCliDir() {
   }
 }
 
-const result = spawnSync(executable, process.argv.slice(2), {
-  stdio: 'inherit',
-  windowsHide: true,
+shell.run(kfc, process.argv.slice(2), true, {
+  silent: true,
   env: {
     KF_CLI_DEV_PATH: path.resolve(getCliDir(), 'lib', 'dev', 'cli.dev.js'),
     KF_LOG_LEVEL: 'trace',
     ...process.env,
   },
 });
-
-process.exit(result.status);
