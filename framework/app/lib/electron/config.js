@@ -13,12 +13,15 @@ const appDir = getAppDir();
 
 const kfcDir = getKfcDir();
 const coreDir = getCoreDir();
-const extdirs = getExtensionDirs(true);
+const extensionDirs = getExtensionDirs(true);
 
-const extras = extdirs.map((fullpath) => {
-  console.log(`found extension ${path.basename(fullpath)}`);
+const extensions = extensionDirs.map((fullpath) => {
+  const extensionDir = path.resolve(fullpath, 'dist');
+  console.log(
+    `-- found kungfu extension: [${fse.readdirSync(extensionDir).join(', ')}]`,
+  );
   return {
-    from: path.resolve(fullpath, 'dist'),
+    from: extensionDir,
     to: 'app/kungfu-extensions',
   };
 });
@@ -82,7 +85,7 @@ module.exports = {
       to: 'app',
       filter: ['package.json'],
     },
-    ...extras,
+    ...extensions,
   ],
   asar: false,
   dmg: {
@@ -117,6 +120,7 @@ module.exports = {
   linux: {
     icon: `${appDir}/public/logo/icon.icns`,
     target: ['rpm', 'appimage'],
+    executableName: 'kungfu-app',
   },
   nsis: {
     oneClick: false,

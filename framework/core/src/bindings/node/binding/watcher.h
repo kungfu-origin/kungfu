@@ -261,11 +261,15 @@ private:
   template <typename DataType>
   std::enable_if_t<std::is_same_v<DataType, longfist::types::Instrument>>
   UpdateLedger(const boost::hana::basic_type<DataType> &type) {
-    for (auto &pair : data_bank_[type]) {
-      auto &state = pair.second;
+    using DataTypeMap = std::unordered_map<uint64_t, state<DataType>>;
+    auto &instrument_map = const_cast<DataTypeMap &>(data_bank_[type]);
+    auto iter = instrument_map.begin();
+
+    while (iter != instrument_map.end() and instrument_map.size() > 0) {
+      auto &state = iter->second;
       update_ledger(state.update_time, state.source, state.dest, state.data);
+      iter = instrument_map.erase(iter);
     }
-    const_cast<std::unordered_map<uint64_t, state<DataType>> &>(data_bank_[type]).clear();
   }
 
   template <typename DataType> void UpdateOrder(const boost::hana::basic_type<DataType> &type) {
