@@ -42,6 +42,7 @@ setTimerPromiseTask((): Promise<void> => {
         },
       });
 
+    console.log('Heartbeat watcher living', watcher?.isLive());
     process.send &&
       process.send({
         type: 'process:msg',
