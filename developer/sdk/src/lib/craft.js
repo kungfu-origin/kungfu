@@ -28,10 +28,10 @@ exports.build = () => {
   shell.verifyElectron();
 
   fse.removeSync(targetDistDir);
-  fse.copySync(appDistDir, targetAppDistDir);
-  fse.copySync(publicDir, targetPublicDistDir);
-  fse.copySync(cliDistDir, targetCliDistDir);
-  fse.copySync(publicDir, targetCliDistPublicDir);
+  fse.copySync(appDistDir, targetAppDistDir, {});
+  fse.copySync(publicDir, targetPublicDistDir, {});
+  fse.copySync(cliDistDir, targetCliDistDir, {});
+  fse.copySync(publicDir, targetCliDistPublicDir, {});
 };
 
 exports.package = async () => {

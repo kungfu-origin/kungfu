@@ -30,5 +30,6 @@ const run = (distDir) => {
 module.exports = run;
 
 if (require.main === module) {
-  run(require('@kungfu-trader/kungfu-app').defaultDistDir).catch(console.error);
+  const app = require('@kungfu-trader/kungfu-app');
+  run(app.defaultDistDir).catch(console.error);
 }

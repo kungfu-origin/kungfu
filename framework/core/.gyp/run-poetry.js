@@ -1,11 +1,11 @@
 const { shell } = require('../lib');
 
 function poetry(args) {
-  shell.run('pipenv', ['run', 'python', '-m', 'poetry', ...args, '-n']);
+  shell.run('pipenv', ['run', 'python', '-m', 'poetry', ...args]);
 }
 
 function toPoetryArgs(argv) {
-  return argv.quiet ? ['-q'] : [];
+  return argv.quiet ? ['-q', '-n'] : [];
 }
 
 function setupPoetryArgs(sywac) {
