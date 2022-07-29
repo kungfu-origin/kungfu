@@ -7,7 +7,7 @@ function updatePackageJson(packageJson) {
   packageJson.binary = {
     module_name: config.key,
     module_path: `dist/${config.key}`,
-    host: 'localhost'
+    host: 'localhost',
   };
   packageJson.main = 'package.json';
   return packageJson;
@@ -26,8 +26,8 @@ exports.package = () => {
   versioning.evaluate = (packageJson, options, napiBuildVersion) => {
     updatePackageJson(packageJson);
     return evaluate(packageJson, options, napiBuildVersion);
-  }
+  };
 
   project.makeBinary(updatePackageJson(packageJson));
   prebuilt('package');
-}
+};

@@ -71,7 +71,7 @@ function generateCMakeFiles(projectName, kungfuBuild) {
     'bind/node': 'add_library',
   };
 
-  kungfuBuild = kungfuBuild || { cpp: { target: 'bind/python'}};
+  kungfuBuild = kungfuBuild || { cpp: { target: 'bind/python' } };
 
   const cppSources = [kungfuBuild.cpp.src || ['src/cpp']].flat();
 
