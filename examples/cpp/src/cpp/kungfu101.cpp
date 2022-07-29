@@ -1,6 +1,6 @@
+#include <kungfu/wingchun/extension.h>
 #include <kungfu/wingchun/strategy/context.h>
 #include <kungfu/wingchun/strategy/strategy.h>
-#include <kungfu/wingchun/extension.h>
 
 using namespace kungfu::longfist::enums;
 using namespace kungfu::longfist::types;
