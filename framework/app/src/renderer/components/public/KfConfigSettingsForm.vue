@@ -837,5 +837,9 @@ export default defineComponent({
       line-height: 2;
     }
   }
+
+  .ant-form-item-extra {
+    white-space: pre-line;
+  }
 }
 </style>
