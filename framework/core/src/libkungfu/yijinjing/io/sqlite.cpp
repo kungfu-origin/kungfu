@@ -22,18 +22,8 @@ int sql_callback(void *NotUsed, int argc, char **argv, char **azColName) {
   return 0;
 }
 
-void exec_sql(sqlite3 *db, char **db_error_msg, const std::string &sql, const std::string &error_tip) {
-  int rc = sqlite3_exec(db, sql.c_str(), sql_callback, nullptr, db_error_msg);
-  handle_sql_error(rc, error_tip);
-}
-
 void sqlite3_log(void *callback, int result_code, const char *msg) {
   SPDLOG_WARN("[sqlite3] [{}] {}", result_code, msg);
-}
-
-int wal_hook(void *NotUsed, sqlite3 *db, const char *name, int page_nb) {
-  SPDLOG_DEBUG("wal committed to {} with page number {}", name, page_nb);
-  return 0;
 }
 
 struct sqlite_initilize {
