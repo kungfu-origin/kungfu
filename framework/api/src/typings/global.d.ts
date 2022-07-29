@@ -23,6 +23,8 @@ declare global {
       KFC_DIR: string;
       ELECTRON_RUN_AS_NODE: boolean;
       ELECTRON_ENABLE_STACK_DUMPING: boolean;
+      RELOAD_AFTER_CRASHED: boolean;
+      BY_PASS_RESTORE: boolean;
     }
 
     interface Process {
