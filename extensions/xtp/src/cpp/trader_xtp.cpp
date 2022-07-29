@@ -60,6 +60,13 @@ void TraderXTP::on_start() {
   }
 }
 
+void TraderXTP::on_exit() {
+  if (api_ != nullptr and session_id_ > 0) {
+    auto result = api_->Logout(session_id_);
+    SPDLOG_INFO("Logout with return code {}", result);
+  }
+}
+
 void TraderXTP::on_trading_day(const event_ptr &event, int64_t daytime) {
   trading_day_ = yijinjing::time::strftime(daytime, KUNGFU_TRADING_DAY_FORMAT);
 }

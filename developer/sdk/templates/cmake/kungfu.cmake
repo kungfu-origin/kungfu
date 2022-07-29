@@ -3,7 +3,7 @@ macro(kungfu_setup MODULE_NAME)
   
   add_compile_definitions(FMT_HEADER_ONLY)
   
-  if (${CMAKE_CXX_COMPILER_ID} MATCHES GNU AND ${CMAKE_BUILD_TYPE} MATCHES Release)
+  if (${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
     set(CMAKE_CXX_FLAGS_RELEASE "-O")
   endif ()
 

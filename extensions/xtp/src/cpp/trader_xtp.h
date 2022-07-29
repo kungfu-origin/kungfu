@@ -22,6 +22,10 @@ public:
 
   void on_trading_day(const event_ptr &event, int64_t daytime) override;
 
+  void on_start() override;
+
+  void on_exit() override;
+
   bool insert_order(const event_ptr &event) override;
 
   bool cancel_order(const event_ptr &event) override;
@@ -192,9 +196,6 @@ public:
   ///@remark 需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线
   void OnQueryIPOQuotaInfo(XTPQueryIPOQuotaRsp *quota_info, XTPRI *error_info, int request_id, bool is_last,
                            uint64_t session_id) override{};
-
-protected:
-  void on_start() override;
 
 private:
   XTP::API::TraderApi *api_{};
