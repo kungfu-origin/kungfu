@@ -1,9 +1,10 @@
 {
-  "version": "2.4.0-alpha.117",
+  "version": "2.4.0-alpha.118",
   "packages": [
     "framework/*",
     "developer/*",
     "extensions/*",
+    "examples/*",
     "artifact"
   ],
   "command": {

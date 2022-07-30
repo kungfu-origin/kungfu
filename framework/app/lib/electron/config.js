@@ -121,7 +121,7 @@ module.exports = {
   linux: {
     icon: `${appDir}/public/logo/icon.icns`,
     target: ['rpm', 'appimage'],
-    executableName: 'kungfu-app',
+    executableName: 'Kungfu.app',
   },
   nsis: {
     oneClick: false,

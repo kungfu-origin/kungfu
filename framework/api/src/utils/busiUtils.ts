@@ -1556,7 +1556,9 @@ export const transformSearchInstrumentResultToInstrument = (
   };
 };
 
-export const booleanProcessEnv = (val: string | undefined): boolean => {
+export const booleanProcessEnv = (
+  val: string | boolean | undefined,
+): boolean => {
   if (val === undefined) {
     return false;
   }
