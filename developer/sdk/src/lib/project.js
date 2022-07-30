@@ -1,4 +1,3 @@
-const findWorkspaceRoot = require('find-yarn-workspace-root');
 const fse = require('fs-extra');
 const path = require('path');
 const { prebuilt, shell } = require('@kungfu-trader/kungfu-core');
@@ -12,6 +11,7 @@ exports.configure = (writePackageJson = false, writeWorkflows = true) => {
   }
   if (writeWorkflows) {
     console.log('> write workflows');
+    const findWorkspaceRoot = require('find-yarn-workspace-root');
     const projectDir = findWorkspaceRoot() || process.cwd();
     const srcDir = path.dirname(
       require.resolve(
@@ -24,8 +24,7 @@ exports.configure = (writePackageJson = false, writeWorkflows = true) => {
   }
 };
 
-exports.package = () => {
-  const packageJson = shell.getPackageJson();
+exports.makeBinary = (packageJson = shell.getPackageJson()) => {
   const outputDir = path.resolve(packageJson.binary.module_path);
 
   fse.copySync(
@@ -33,5 +32,9 @@ exports.package = () => {
     path.join(outputDir, `${packageJson.binary.module_name}.node`),
     {},
   );
+};
+
+exports.package = () => {
+  exports.makeBinary();
   prebuilt('package');
 };

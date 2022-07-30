@@ -7,8 +7,10 @@ function main(argv) {
     '.prettierrc.js',
   );
   const prettierArgs = ['-l', '-w', '--config', prettierConfig];
-  shell.run('prettier', ['--version'], false);
-  shell.runAndExit('prettier', prettierArgs.concat(argv));
+  const test = shell.run('prettier', ['--version'], false);
+  if (test.status === 0) {
+    shell.runAndExit('prettier', prettierArgs.concat(argv));
+  }
   shell.run('yarn', ['run', 'prettier'].concat(prettierArgs).concat(argv));
 }
 

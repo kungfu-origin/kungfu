@@ -23,6 +23,8 @@ declare global {
       KFC_DIR: string;
       ELECTRON_RUN_AS_NODE: boolean;
       ELECTRON_ENABLE_STACK_DUMPING: boolean;
+      RELOAD_AFTER_CRASHED: 'true' | 'false' | undefined; // 需要作为pm2 env参数传递，为了统一识别，用string
+      BY_PASS_RESTORE: boolean;
     }
 
     interface Process {

@@ -50,7 +50,11 @@ function detectPlatform() {
 exports.detectPlatform = detectPlatform;
 
 function hasSourceFor(packageJson, language) {
-  return packageJson.kungfuBuild && packageJson.kungfuBuild[language];
+  const config = packageJson.kungfuBuild;
+  const hasConfig = config && config[language];
+  const source = glob.sync(`src/${language}/**/*.*`);
+  const hasSource = source.length > 0;
+  return hasConfig || hasSource;
 }
 
 function getProjectName(packageJson) {
@@ -66,6 +70,8 @@ function generateCMakeFiles(projectName, kungfuBuild) {
     'bind/python': 'pybind11_add_module',
     'bind/node': 'add_library',
   };
+
+  kungfuBuild = kungfuBuild || { cpp: { target: 'bind/python' } };
 
   const cppSources = [kungfuBuild.cpp.src || ['src/cpp']].flat();
 
