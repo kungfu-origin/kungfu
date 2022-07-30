@@ -41,6 +41,7 @@ module.exports = {
   files: [
     'dist/app/**/*',
     'dist/cli/**/*',
+    'dist/kfs/**/*',
     '!**/@kungfu-trader/kfx-*/**/*',
     '!**/@kungfu-trader/kungfu-core/*',
     '!**/@kungfu-trader/kungfu-core/**/*',

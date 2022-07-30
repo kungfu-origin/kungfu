@@ -147,6 +147,12 @@ exports.getKfcDir = () => {
   );
 };
 
+exports.getKfsDir = () => {
+  return path.dirname(
+    require.resolve('@kungfu-trader/kungfu-sdk/package.json'),
+  );
+};
+
 exports.isProduction = (argv) => argv.mode === 'production';
 
 exports.getExtensionDirs = (production = false) => {

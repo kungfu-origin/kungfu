@@ -13,10 +13,9 @@ exports.configure = (writePackageJson = false, writeWorkflows = true) => {
   if (writeWorkflows) {
     console.log('> write workflows');
     const projectDir = findWorkspaceRoot() || process.cwd();
-    const srcDir = path.dirname(
-      require.resolve(
-        '@kungfu-trader/kungfu-sdk/templates/workflows/bump-major-version.yml',
-      ),
+    const srcDir = path.join(
+      require.resolve('@kungfu-trader/kungfu-sdk'),
+      '../../templates/workflows',
     );
     const targetDir = path.join(projectDir, '.github', 'workflows');
     fse.mkdirSync(path.dirname(targetDir), { recursive: true });

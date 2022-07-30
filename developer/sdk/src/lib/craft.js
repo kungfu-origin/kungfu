@@ -13,16 +13,19 @@ exports.build = () => {
   const {
     getAppDir,
     getCliDir,
+    getKfsDir,
   } = require('@kungfu-trader/kungfu-js-api/toolkit/utils');
 
   const appDistDir = path.join(getAppDir(), 'dist', 'app');
   const publicDir = path.resolve(getAppDir(), 'public');
   const cliDistDir = path.join(getCliDir(), 'dist', 'cli');
+  const kfsDistDir = path.join(getKfsDir(), 'dist', 'sdk');
 
   const targetDistDir = ensureDir(process.cwd(), 'dist');
   const targetAppDistDir = ensureDir(targetDistDir, 'app');
   const targetPublicDistDir = ensureDir(targetDistDir, 'public');
   const targetCliDistDir = ensureDir(targetDistDir, 'cli');
+  const targetKfsDistDir = ensureDir(targetDistDir, 'kfs');
   const targetCliDistPublicDir = ensureDir(getCliDir(), 'dist', 'public');
 
   shell.verifyElectron();
@@ -31,6 +34,7 @@ exports.build = () => {
   fse.copySync(appDistDir, targetAppDistDir, {});
   fse.copySync(publicDir, targetPublicDistDir, {});
   fse.copySync(cliDistDir, targetCliDistDir, {});
+  fse.copySync(kfsDistDir, targetKfsDistDir, {});
   fse.copySync(publicDir, targetCliDistPublicDir, {});
 };
 

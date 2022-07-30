@@ -78,7 +78,10 @@ function generateCMakeFiles(projectName, kungfuBuild) {
   fse.ensureDirSync(buildDir);
 
   ejs.renderFile(
-    require.resolve('@kungfu-trader/kungfu-sdk/templates/cmake/kungfu.cmake'),
+    path.join(
+      require.resolve('@kungfu-trader/kungfu-sdk'),
+      '../../templates/cmake/kungfu.cmake',
+    ),
     {
       kfcDir: path
         .dirname(
@@ -105,7 +108,10 @@ function generateCMakeFiles(projectName, kungfuBuild) {
   }
 
   ejs.renderFile(
-    require.resolve('@kungfu-trader/kungfu-sdk/templates/cmake/CMakeLists.txt'),
+    path.join(
+      require.resolve('@kungfu-trader/kungfu-sdk'),
+      '../../templates/cmake/CMakeLists.txt',
+    ),
     {
       projectName: projectName,
     },

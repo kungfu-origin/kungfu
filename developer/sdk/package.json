@@ -19,6 +19,7 @@
   },
   "scripts": {
     "kfs": "node src/kfs.js",
+    "build": "node lib/webpack/build.js",
     "format": "prettier -l -w --config ../../framework/core/.prettierrc.js ."
   },
   "dependencies": {
