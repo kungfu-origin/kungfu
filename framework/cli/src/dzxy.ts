@@ -48,7 +48,7 @@ setTimerPromiseTask((): Promise<void> => {
         type: 'process:msg',
         data: {
           type: 'WATCHER_IS_LIVE',
-          body: watcher ? !!watcher.isLive() : false,
+          body: watcher ? watcher.isLive() && watcher.isStarted() : false,
         },
       });
 

@@ -41,7 +41,10 @@ import {
   preStartAll,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
-import { delayMilliSeconds } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import {
+  booleanProcessEnv,
+  delayMilliSeconds,
+} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
   Pm2ProcessStatusDetailData,
   Pm2ProcessStatusData,
@@ -111,7 +114,7 @@ useComponenets(app, router).then(() => {
 
 const globalStore = useGlobalStore();
 
-if (!process.env.RELOAD_AFTER_CRASHED) {
+if (!booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED)) {
   preStartAll()
     .then(() => {
       return startArchiveMakeTask((archiveStatus: Pm2ProcessStatusTypes) => {

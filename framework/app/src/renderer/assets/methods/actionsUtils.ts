@@ -41,6 +41,7 @@ import {
   dealKfNumber,
   dealKfPrice,
   transformSearchInstrumentResultToInstrument,
+  booleanProcessEnv,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { writeCSV } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import {
@@ -692,7 +693,7 @@ export const usePreStartAndQuitApp = (): {
   };
 
   onMounted(() => {
-    if (process.env.RELOAD_AFTER_CRASHED) {
+    if (booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED)) {
       preStartSystemLoadingData.archive = 'done';
       preStartSystemLoadingData.extraResourcesLoading = 'done';
     }
