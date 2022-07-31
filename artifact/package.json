@@ -25,7 +25,8 @@
     "@kungfu-trader/kfx-broker-sim": "^2.4.0-alpha.118",
     "@kungfu-trader/kfx-broker-xtp-demo": "^2.4.0-alpha.118",
     "@kungfu-trader/kungfu-app": "^2.4.0-alpha.118",
-    "@kungfu-trader/kungfu-cli": "^2.4.0-alpha.118"
+    "@kungfu-trader/kungfu-cli": "^2.4.0-alpha.118",
+    "@kungfu-trader/kungfu-core": "^2.4.0-alpha.118"
   },
   "devDependencies": {
     "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.118"

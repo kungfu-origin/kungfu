@@ -22,6 +22,7 @@ module.exports = function (module, setup, opts = {}) {
   if (opts.version === undefined || opts.version) {
     cli.version('-v, --version');
   }
+  console.log(require.main, module);
   if (require.main === module) {
     cli.parse().then(exitHandler).catch(errorHandler);
   }
