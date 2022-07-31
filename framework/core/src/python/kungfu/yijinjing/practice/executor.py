@@ -262,6 +262,6 @@ def try_load_cpp_strategy(ctx, path, key):
         module = importlib.import_module(ctx.group)
         return module.strategy()
     except Exception as e:
-        ctx.logger.info(f'fallback to python loader due to: {e}')
+        ctx.logger.info(f"fallback to python loader due to: {e}")
         ctx.path = os.path.join(os.path.dirname(path), key)
         return Strategy(ctx)
