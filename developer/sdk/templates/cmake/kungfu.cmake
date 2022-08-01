@@ -1,6 +1,7 @@
 macro(kungfu_setup MODULE_NAME)
   include(<%- kfcDir -%>/cmake/compiler.cmake)
-  
+
+  add_compile_definitions(KUNGFU_MODULE_NAME=${MODULE_NAME})
   add_compile_definitions(FMT_HEADER_ONLY)
   
   if (${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
