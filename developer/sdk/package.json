@@ -17,10 +17,18 @@
   "bin": {
     "kfs": "src/kfs.js"
   },
+  "binary": {
+    "module_name": "kungfu-sdk",
+    "module_path": "dist/sdk",
+    "remote_path": "{module_name}/v{major}/v{version}",
+    "package_name": "{module_name}-v{version}-{platform}-{arch}-{configuration}.tar.gz",
+    "host": "https://prebuilt.libkungfu.cc"
+  },
   "scripts": {
     "kfs": "node src/kfs.js",
     "build": "node lib/webpack/build.js",
     "dev": "node lib/dev/run.js",
+    "install": "node -e \"require('@kungfu-trader/kungfu-core').prebuilt('install')\"",
     "format": "prettier -l -w --config ../../framework/core/.prettierrc.js ."
   },
   "dependencies": {
