@@ -8,6 +8,7 @@ const { glob } = require('glob');
 const { promisify } = require('util');
 const { finished } = require('stream');
 const { shell } = require('@kungfu-trader/kungfu-core');
+const { customResolve } = require('../utils');
 
 const pypackages = '__pypackages__';
 const kungfulibs = '__kungfulibs__';
@@ -84,11 +85,11 @@ function generateCMakeFiles(projectName, kungfuBuild) {
   fse.ensureDirSync(buildDir);
 
   ejs.renderFile(
-    require.resolve('@kungfu-trader/kungfu-sdk/templates/cmake/kungfu.cmake'),
+    customResolve('@kungfu-trader/kungfu-sdk/templates/cmake/kungfu.cmake'),
     {
       kfcDir: path
         .dirname(
-          require.resolve(
+          customResolve(
             '@kungfu-trader/kungfu-core/dist/kfc/kungfubuildinfo.json',
           ),
         )
@@ -111,7 +112,7 @@ function generateCMakeFiles(projectName, kungfuBuild) {
   }
 
   ejs.renderFile(
-    require.resolve('@kungfu-trader/kungfu-sdk/templates/cmake/CMakeLists.txt'),
+    customResolve('@kungfu-trader/kungfu-sdk/templates/cmake/CMakeLists.txt'),
     {
       projectName: projectName,
     },
