@@ -45,7 +45,7 @@ export const buildProcessLogPath = (processId: string) => {
 
 //================== config & resouces start =================================
 
-export const KUNGFU_RESOURCES_DIR = global.__publicResources;
+export const KUNGFU_RESOURCES_DIR = globalThis.__publicResources;
 
 export const KF_CONFIG_DIR = path.join(KF_HOME, 'config');
 
@@ -91,7 +91,7 @@ export const PY_WHL_DIR = path.join(KUNGFU_RESOURCES_DIR, 'python');
 // process.env.CLI_DIR = path.dirname(xxxx/dzxy.js);
 const staticDevCliDir = path.resolve('..', 'cli', 'dist', 'cli');
 export const CLI_PARENT_DIR = production
-  ? path.join(global.__kfResourcesPath, 'app', 'dist')
+  ? path.join(globalThis.__kfResourcesPath, 'app', 'dist')
   : path.dirname(process.env.CLI_DIR || staticDevCliDir);
 export const CLI_DIR = process.env.CLI_DIR || path.join(CLI_PARENT_DIR, 'cli');
 process.env.CLI_DIR = CLI_DIR;
@@ -101,7 +101,7 @@ process.env.CLI_DIR = CLI_DIR;
 //================== kfc start ====================================
 const staticDevKfcDir = path.resolve('..', 'core', 'dist', 'kfc');
 export const KFC_PARENT_DIR = production
-  ? global.__kfResourcesPath
+  ? globalThis.__kfResourcesPath
   : path.dirname(process.env.KFC_DIR || staticDevKfcDir);
 export const KFC_DIR = process.env.KFC_DIR || path.join(KFC_PARENT_DIR, 'kfc');
 process.env.KFC_DIR = KFC_DIR;
@@ -109,7 +109,7 @@ process.env.KFC_DIR = KFC_DIR;
 export const KFC_EXECUTABLE = process.platform === 'win32' ? 'kfc.exe' : 'kfc';
 export const EXTENSION_DIRS: string[] = production
   ? [
-      path.join(global.__kfResourcesPath, 'app', 'kungfu-extensions'),
+      path.join(globalThis.__kfResourcesPath, 'app', 'kungfu-extensions'),
       ...((process.env.EXTENSION_DIRS || '').split(path.delimiter) || []),
     ]
   : [
