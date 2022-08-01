@@ -31,30 +31,42 @@ class ExecutorRegistry:
             "strategy": {"default": ExtensionLoader(self.ctx, None, None)},
         }
 
+    def setup_log(self):
+        ctx = self.ctx
+        ctx.location = yjj.location(
+            kfj.MODES[ctx.mode],
+            kfj.CATEGORIES[ctx.category],
+            ctx.group,
+            ctx.name,
+            ctx.runtime_locator,
+        )
+        ctx.logger = find_logger(ctx.location, ctx.log_level)
+
+    def load_extensions(self):
+        self.setup_log()
+
+        ctx = self.ctx
+        ctx.logger.debug(f"finding kungfu extension for {ctx.location}")
+
         if ctx.extension_path:
             deque(map(self.register_extensions, ctx.extension_path.split(path.pathsep)))
         elif ctx.path:
-            self.read_config(os.path.join(os.path.dirname(ctx.path), "package.json"))
-
-    def setup_log(self):
-        self.ctx.location = yjj.location(
-            kfj.MODES[self.ctx.mode],
-            kfj.CATEGORIES[self.ctx.category],
-            self.ctx.group,
-            self.ctx.name,
-            self.ctx.runtime_locator,
-        )
-        self.ctx.logger = find_logger(self.ctx.location, self.ctx.log_level)
+            self.read_config(os.path.dirname(ctx.path))
 
     def register_extensions(self, root):
         for child in os.listdir(root):
             extension_dir = path.abspath(path.join(root, child))
-            config_path = path.join(extension_dir, "package.json")
-            self.read_config(config_path)
+            self.read_config(extension_dir)
 
-    def read_config(self, config_path):
+    def read_config(self, extension_dir):
+        config_path = os.path.join(extension_dir, "package.json")
+
+        def report(reason):
+            self.ctx.logger.info(
+                f"kungfu extension not found in {extension_dir}: {reason}"
+            )
+
         if path.exists(config_path):
-            extension_dir = config_path[:-13]
             with open(config_path, mode="r", encoding="utf8") as config_file:
                 config = json.load(config_file)
                 if "kungfuConfig" in config:
@@ -73,6 +85,15 @@ class ExecutorRegistry:
                                 self.executors[category][group] = ExtensionLoader(
                                     self.ctx, extension_dir, config
                                 )
+                    elif "key" in config["kungfuConfig"]:
+                        group = config["kungfuConfig"]["key"]
+                        self.executors["strategy"][group] = ExtensionLoader(
+                            self.ctx, extension_dir, config
+                        )
+                    else:
+                        report("missing key/config in kungfuConfig")
+                else:
+                    report("missing kungfuConfig")
 
     def __getitem__(self, category):
         return self.executors[category]
@@ -228,15 +249,19 @@ def load_strategy(ctx, path, key):
     if path.endswith(".py"):
         return Strategy(ctx)  # keep strategy alive for pybind11
     elif key is not None and (path.endswith(".so") or path.endswith(".pyd")):
-        ctx.path = os.path.join(os.path.dirname(path), key)
-        return Strategy(ctx)
+        return try_load_cpp_strategy(ctx, path, key)
     elif key is not None and path.endswith(key):
         return Strategy(ctx)
     else:
-        spec = spec_from_file_location(os.path.basename(path).split(".")[0], path)
-        try:
-            module_cpp = module_from_spec(spec)
-            spec.loader.exec_module(module_cpp)
-            return module_cpp.strategy()
-        except:
-            return Strategy(ctx)
+        ctx.path = os.path.join(os.path.dirname(path), key)
+        return Strategy(ctx)
+
+
+def try_load_cpp_strategy(ctx, path, key):
+    try:
+        module = importlib.import_module(ctx.group)
+        return module.strategy()
+    except Exception as e:
+        ctx.logger.info(f"fallback to python loader due to: {e}")
+        ctx.path = os.path.join(os.path.dirname(path), key)
+        return Strategy(ctx)

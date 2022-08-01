@@ -164,6 +164,7 @@ def main():
     variants.enable("python")
     os.environ.update(
         {
+            "PDM_CHECK_UPDATE": "false",
             "PDM_USE_VENV": "0",
         }
     )

@@ -1,0 +1,20 @@
+{
+  "name": "@kungfu-trader/examples-strategy-cpp",
+  "author": "kungfu-trader",
+  "version": "2.4.0-alpha.118",
+  "description": "KungFu Strategy 101 - C++ Demo",
+  "license": "Apache-2.0",
+  "private": true,
+  "kungfuConfig": {
+    "key": "KungfuStrategy101Cpp"
+  },
+  "scripts": {
+    "clean": "kfs strategy clean",
+    "build": "kfs strategy build",
+    "package": "kfs strategy package",
+    "format": "node ../../framework/core/.gyp/run-format-cpp.js src"
+  },
+  "devDependencies": {
+    "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.118"
+  }
+}
