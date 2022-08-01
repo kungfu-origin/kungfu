@@ -105,10 +105,10 @@ exports.getWebpackExternals = () => {
     ? fs.readJSONSync(currentPackageJSONPath)
     : {};
   return Object.keys({
-    ...appPackageJSON.dependencies,
-    ...apiPackageJSON.dependencies,
-    ...corePackageJSON.dependencies,
-    ...sdkPackageJSON.dependencies,
+    ...(appPackageJSON.dependencies || {}),
+    ...(apiPackageJSON.dependencies || {}),
+    ...(corePackageJSON.dependencies || {}),
+    ...(sdkPackageJSON.dependencies || {}),
     ...(currentPackageJSON.dependencies || {}),
   }).filter(
     (item) =>
