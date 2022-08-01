@@ -9,8 +9,8 @@ import {
   App,
 } from 'vue';
 import {
+  buildProcessLogPath,
   KF_HOME,
-  LOG_DIR,
 } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 import {
   getInstrumentTypeData,
@@ -407,11 +407,7 @@ export const handleOpenLogview = (
   config: KungfuApi.KfConfig | KungfuApi.KfLocation,
 ): Promise<Electron.BrowserWindow | void> => {
   const hideloading = message.loading(t('open_window'));
-  const logPath = path.resolve(
-    LOG_DIR,
-    dayjs().format('YYYYMMDD'),
-    `${getProcessIdByKfLocation(config)}.log`,
-  );
+  const logPath = buildProcessLogPath(getProcessIdByKfLocation(config));
   return openLogView(logPath).finally(() => {
     hideloading();
   });
