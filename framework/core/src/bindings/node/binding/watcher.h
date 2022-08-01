@@ -81,6 +81,8 @@ public:
 
   Napi::Value IsReadyToInteract(const Napi::CallbackInfo &info);
 
+  Napi::Value IssueBlockMessage(const Napi::CallbackInfo &info);
+
   Napi::Value IssueOrder(const Napi::CallbackInfo &info);
 
   Napi::Value CancelOrder(const Napi::CallbackInfo &info);
