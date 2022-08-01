@@ -74,7 +74,7 @@ export const getUIComponents = (
           .reduce((cData, cName) => {
             return {
               ...cData,
-              [`${key}-${cName}`]: global.require(
+              [`${key}-${cName}`]: globalThis.require(
                 path.join(extPath, (components || {})[cName]),
               ).default as Component,
             };
@@ -98,7 +98,7 @@ export const loadExtScripts = async (
     components.map(({ extPath, script }) => {
       const scriptPath = path.join(extPath, script);
       if (script && fse.pathExistsSync(scriptPath)) {
-        return global.require(scriptPath);
+        return globalThis.require(scriptPath);
       }
     }),
   );

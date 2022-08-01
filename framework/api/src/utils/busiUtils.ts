@@ -248,14 +248,14 @@ export const setTimerPromiseTask = (fn: Function, interval = 500) => {
   var taskTimer: number | undefined = undefined;
   var clear = false;
   function timerPromiseTask(fn: Function, interval = 500) {
-    if (taskTimer) global.clearTimeout(taskTimer as unknown as NodeJS.Timeout);
+    if (taskTimer) globalThis.clearTimeout(taskTimer as unknown as NodeJS.Timeout);
     fn().finally(() => {
       if (clear) {
         if (taskTimer)
-          global.clearTimeout(taskTimer as unknown as NodeJS.Timeout);
+          globalThis.clearTimeout(taskTimer as unknown as NodeJS.Timeout);
         return;
       }
-      taskTimer = +global.setTimeout(() => {
+      taskTimer = +globalThis.setTimeout(() => {
         timerPromiseTask(fn, interval);
       }, interval);
     });
@@ -265,7 +265,7 @@ export const setTimerPromiseTask = (fn: Function, interval = 500) => {
     clearLoop: function () {
       clear = true;
       if (taskTimer != null)
-        global.clearTimeout(taskTimer as unknown as NodeJS.Timeout);
+        globalThis.clearTimeout(taskTimer as unknown as NodeJS.Timeout);
     },
   };
 };
