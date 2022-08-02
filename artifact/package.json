@@ -28,5 +28,8 @@
     "@kungfu-trader/kungfu-cli": "^2.4.0-alpha.118",
     "@kungfu-trader/kungfu-core": "^2.4.0-alpha.118",
     "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.118"
+  },
+  "devDependencies": {
+    "@kungfu-trader/kfx-task-condition": "~1.0.0-0 || ~1.0.0"
   }
 }

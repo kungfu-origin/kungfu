@@ -383,6 +383,7 @@ declare namespace KungfuApi {
 
   export interface Order {
     order_id: bigint; //订单ID
+    external_id: bigint; //外部委托ID
     insert_time: bigint; //订单写入时间
     update_time: bigint; //订单更新时间
 
@@ -555,6 +556,7 @@ declare namespace KungfuApi {
   export interface Trade {
     trade_id: bigint; //成交ID
     order_id: bigint; //订单ID
+    external_id: bigint; //外部委托ID
     trade_time: bigint; //成交时间
 
     trading_day: string; //交易日

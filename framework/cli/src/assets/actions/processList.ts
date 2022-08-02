@@ -7,7 +7,9 @@ import {
   delayMilliSeconds,
   deleteNNFiles,
   getAvailCliDaemonList,
+  getKfExtensionConfig,
   getProcessIdByKfLocation,
+  getTaskListFromProcessStatusData,
   kfLogger,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
@@ -26,6 +28,7 @@ import {
   startCacheD,
   processStatusDataObservable,
   Pm2Packet,
+  Pm2ProcessStatusDetail,
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import { combineLatest, filter, map, Observable } from 'rxjs';
 import { ProcessListItem } from '../../typings';
@@ -93,6 +96,14 @@ const getProcessStatus = (
   } else {
     return dealStatus(processStatus[processId] || '--');
   }
+};
+
+export const getExtConfigObservable = () => {
+  return new Observable<KungfuApi.KfExtConfigs>((observer) => {
+    getKfExtensionConfig().then((kfExtConfigs) => {
+      observer.next(kfExtConfigs);
+    });
+  });
 };
 
 export const specificProcessListObserver = (kfLocation: KungfuApi.KfConfig) =>
@@ -179,6 +190,7 @@ export const processListObservable = () =>
     mdTdStrategyDaemonObservable(),
     processStatusDataObservable(),
     appStatesObservable(),
+    getExtConfigObservable(),
     (
       mdTdStrategyDaemon: Record<
         KfCategoryTypes,
@@ -189,6 +201,7 @@ export const processListObservable = () =>
         processStatusWithDetail: Pm2ProcessStatusDetailData;
       },
       appStates: Record<string, BrokerStateStatusTypes>,
+      extConfigs: KungfuApi.KfExtConfigs,
     ): ProcessListItem[] => {
       const { md, td, strategy, daemon } = mdTdStrategyDaemon;
       const { processStatus, processStatusWithDetail } = ps;
@@ -283,6 +296,31 @@ export const processListObservable = () =>
         };
       });
 
+      const taskPrefixs: string[] = Object.keys(
+        extConfigs['strategy'] || {},
+      ).map((key) => `strategy_${key}`);
+      const taskList: Pm2ProcessStatusDetail[] =
+        getTaskListFromProcessStatusData(
+          taskPrefixs,
+          ps.processStatusWithDetail,
+        );
+      const taskListResolved: ProcessListItem[] = taskList.map((item) => {
+        return {
+          processId: item.name || '',
+          processName: `${item.name?.toKfGroup()}_${item.name?.toKfName()}`,
+          typeName: colors.magenta('Task'),
+          category: 'strategy',
+          group: item.name?.toKfGroup() || '',
+          name: item.name?.toKfName() || '',
+          value: '',
+          status: item.status || '--',
+          statusName: dealStatus(item.status || '--'),
+          monit: item.monit,
+          script: item.script,
+          cwd: item.cwd,
+        };
+      });
+
       const masterPrefixProps = globalThis.HookKeeper.getHooks().prefix.trigger(
         {
           category: 'system',
@@ -358,6 +396,7 @@ export const processListObservable = () =>
         ...daemonList,
         ...mdList,
         ...tdList,
+        ...taskListResolved,
         ...strategyList,
       ];
     },
