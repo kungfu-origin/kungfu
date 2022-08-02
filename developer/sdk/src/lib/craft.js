@@ -2,6 +2,7 @@ const fse = require('fs-extra');
 const path = require('path');
 const { spawnSync } = require('child_process');
 const { shell } = require('@kungfu-trader/kungfu-core');
+const { customResolve } = require('../utils');
 
 const ensureDir = (cwd, ...dirNames) => {
   const targetDir = path.join(cwd, ...dirNames);
@@ -13,13 +14,13 @@ exports.build = () => {
   const {
     getAppDir,
     getCliDir,
-    getKfsDir,
+    getSdkDir,
   } = require('@kungfu-trader/kungfu-js-api/toolkit/utils');
 
   const appDistDir = path.join(getAppDir(), 'dist', 'app');
   const publicDir = path.resolve(getAppDir(), 'public');
   const cliDistDir = path.join(getCliDir(), 'dist', 'cli');
-  const kfsDistDir = path.join(getKfsDir(), 'dist', 'sdk');
+  const kfsDistDir = path.join(getSdkDir(), 'dist', 'sdk');
 
   const targetDistDir = ensureDir(process.cwd(), 'dist');
   const targetAppDistDir = ensureDir(targetDistDir, 'app');
@@ -53,7 +54,7 @@ exports.dev = (withWebpack) => {
 };
 
 exports.cli = () => {
-  const cliPath = require.resolve('@kungfu-trader/kungfu-cli');
+  const cliPath = customResolve('@kungfu-trader/kungfu-cli');
   const runExecutable = path.join(cliPath, '..', 'dev', 'cli.dev.js');
   spawnSync('node', [runExecutable, ...process.argv.slice(4)], {
     stdio: 'inherit',

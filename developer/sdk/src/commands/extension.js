@@ -16,7 +16,7 @@ module.exports = {
   setup: (cli) => {
     if (process.env.NODE_ENV === 'production') {
       subcommands.forEach((subcommand) => {
-        const opt = require(`./craft/${subcommand}`);
+        const opt = require(`./extension/${subcommand}`);
         cli.command(opt);
       });
     } else {

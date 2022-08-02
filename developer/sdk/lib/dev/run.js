@@ -22,13 +22,13 @@ function start(argv, name) {
   });
 }
 
-const run = (distDir, distName = 'cli') => {
+const run = (distDir, distName = 'sdk') => {
   shell.greeting();
 
   const argv = utils.buildDevArgv(distDir, distName);
-  const cliDir = utils.getCliDir();
+  const sdkDir = utils.getSdkDir();
 
-  process.chdir(cliDir);
+  process.chdir(sdkDir);
 
   return Promise.all([start(argv, 'sdk')]);
 };
@@ -36,5 +36,5 @@ const run = (distDir, distName = 'cli') => {
 module.exports = run;
 
 if (require.main === module) {
-  shell.runDist(utils.getCliDefaultDistDir(), run);
+  shell.runDist(utils.getSdkDefaultDistDir(), run);
 }

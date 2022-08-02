@@ -10,9 +10,11 @@ shell.run(kfs, process.argv.slice(2), true, {
     KFS_PATH: path.join(
       require.resolve('@kungfu-trader/kungfu-sdk'),
       '..',
+      '..',
       'dist',
       'sdk',
       'kfs.js',
     ),
+    KFC_PATH: path.join(__dirname, '..', 'dist', 'kfc'),
   },
 });
