@@ -64,6 +64,7 @@ constexpr auto AllTypes = boost::hana::make_map( //
     TYPE_PAIR(Entrust),                          //
     TYPE_PAIR(Transaction),                      //
     TYPE_PAIR(Bar),                              //
+    TYPE_PAIR(BlockMessage),                     //
     TYPE_PAIR(OrderInput),                       //
     TYPE_PAIR(OrderAction),                      //
     TYPE_PAIR(OrderActionError),                 //
@@ -110,6 +111,7 @@ constexpr auto AllDataTypes = boost::hana::make_map( //
     TYPE_PAIR(Entrust),                              //
     TYPE_PAIR(Transaction),                          //
     TYPE_PAIR(Bar),                                  //
+    TYPE_PAIR(BlockMessage),                         //
     TYPE_PAIR(OrderInput),                           //
     TYPE_PAIR(OrderAction),                          //
     TYPE_PAIR(OrderActionError),                     //
@@ -146,6 +148,7 @@ constexpr auto StateDataTypes = boost::hana::make_map( //
     TYPE_PAIR(Instrument),          //
     TYPE_PAIR(Quote),               //
     TYPE_PAIR(OrderAction),         //
+    TYPE_PAIR(BlockMessage),        //
     TYPE_PAIR(OrderInput),          //
     TYPE_PAIR(Order),               //
     TYPE_PAIR(Trade),               //
@@ -156,6 +159,7 @@ constexpr auto StateDataTypes = boost::hana::make_map( //
 );
 
 constexpr auto TradingDataTypes = boost::hana::make_map( //
+    TYPE_PAIR(BlockMessage),                             //
     TYPE_PAIR(OrderInput),                               //
     TYPE_PAIR(Order),                                    //
     TYPE_PAIR(Trade),                                    //

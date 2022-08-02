@@ -8,10 +8,10 @@ import {
   KfModeTypes,
 } from '../typings/enums';
 import {
+  buildProcessLogPath,
   KF_RUNTIME_DIR,
   KF_SUBSCRIBED_INSTRUMENTS_JSON_PATH,
   KF_TD_GROUP_JSON_PATH,
-  LOG_DIR,
 } from '../config/pathConfig';
 import { pathExists, remove } from 'fs-extra';
 import {
@@ -114,10 +114,8 @@ export function removeKfLocation(
 }
 
 export function removeLog(kfLocation: KungfuApi.KfLocation): Promise<void> {
-  const logPath = path.resolve(
-    LOG_DIR,
-    `${getProcessIdByKfLocation(kfLocation)}.log`,
-  );
+  const processId = getProcessIdByKfLocation(kfLocation);
+  const logPath = buildProcessLogPath(processId);
   return pathExists(logPath).then((isExisted: boolean): Promise<void> => {
     if (isExisted) {
       return remove(logPath);

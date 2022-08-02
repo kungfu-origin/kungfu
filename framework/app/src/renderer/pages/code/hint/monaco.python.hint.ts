@@ -4,7 +4,7 @@ import path from 'path';
 
 export const kungfuFunctions = fse
   .readFileSync(
-    path.join(global.__publicResources, 'keywords', 'kungfuFunctions'),
+    path.join(globalThis.__publicResources, 'keywords', 'kungfuFunctions'),
   )
   .toString()
   .split('\n')
@@ -17,7 +17,7 @@ export const kungfuFunctions = fse
 
 export const kungfuProperties = fse
   .readFileSync(
-    path.join(global.__publicResources, 'keywords', 'kungfuProperties'),
+    path.join(globalThis.__publicResources, 'keywords', 'kungfuProperties'),
   )
   .toString()
   .split('\n')
@@ -30,7 +30,7 @@ export const kungfuProperties = fse
 
 export const kungfuKeywords = fse
   .readFileSync(
-    path.join(global.__publicResources, 'keywords', 'kungfuKeywords'),
+    path.join(globalThis.__publicResources, 'keywords', 'kungfuKeywords'),
   )
   .toString()
   .split('\n')
@@ -43,7 +43,7 @@ export const kungfuKeywords = fse
 
 export const pythonKeywords = fse
   .readFileSync(
-    path.join(global.__publicResources, 'keywords', 'pythonKeywords'),
+    path.join(globalThis.__publicResources, 'keywords', 'pythonKeywords'),
   )
   .toString()
   .split('\n')
