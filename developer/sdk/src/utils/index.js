@@ -29,6 +29,11 @@ const ModeMap = {
 
 const getCurrentMode = () => {
   if (isProduction()) {
+    console.log(
+      'process.env.KFC_PATH',
+      process.env.KFC_PATH,
+      typeof process.env.KFC_PATH,
+    );
     if (process.env.KFC_PATH) {
       return ModeMap.IN_CORE;
     } else {
@@ -83,16 +88,18 @@ const getCmakeCmdArgs = () => {
   return cmdMap[getCurrentMode()];
 };
 
-const parseByCli = (cli) => {
+const parseByCli = (cli, isRootCli = false) => {
   const tarCmds = cli.types.map((item) => item._aliases).flat(1);
 
   const exitHandler = (result) => {
     const checkError = () => {
-      if (result.output) {
-        console.log(result.output);
-        process.exit(result.code);
+      if (isRootCli) {
+        if (result.output) {
+          console.log(result.output);
+          process.exit(result.code);
+        }
+        if (result.code !== 0) process.exit(result.code);
       }
-      if (result.code !== 0) process.exit(result.code);
     };
 
     const curArg = result.details.args.slice(-1)[0];

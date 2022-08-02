@@ -11,7 +11,7 @@ module.exports = require('@kungfu-trader/kungfu-core').sywac(module, (cli) => {
       cli.command(opt);
     });
 
-    parseByCli(cli);
+    parseByCli(cli, true);
   } else {
     cli.commandDirectory('commands');
   }
