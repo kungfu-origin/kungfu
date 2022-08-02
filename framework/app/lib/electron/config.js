@@ -56,6 +56,7 @@ module.exports = {
     '!**/@kungfu-trader/kungfu-app/*',
     '!**/@kungfu-trader/kungfu-app/**/*',
     '**/@kungfu-trader/kungfu-app/lib/*',
+    '**/@kungfu-trader/kungfu-app/package.json',
     '!**/@kungfu-trader/kungfu-cli/*',
     '!**/@kungfu-trader/kungfu-cli/**/*',
     '!**/@kungfu-trader/kungfu-js-api/*',
