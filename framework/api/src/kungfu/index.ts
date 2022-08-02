@@ -211,12 +211,12 @@ export const kfRequestMarketData = (
   }
 
   if (!watcher.isLive()) {
-    return Promise.reject(new Error(`Master 进程未连接`));
+    return Promise.reject(new Error(`Watcher is not live`));
   }
 
   if (!watcher.isReadyToInteract(mdLocation)) {
     const sourceId = getIdByKfLocation(mdLocation);
-    return Promise.reject(new Error(`行情源 ${sourceId} 未就绪`));
+    return Promise.reject(new Error(`Md ${sourceId} not ready`));
   }
 
   return Promise.resolve(
@@ -233,7 +233,7 @@ export const kfCancelOrder = (
   }
 
   if (!watcher.isLive()) {
-    return Promise.reject(new Error(`Master 未连接`));
+    return Promise.reject(new Error(`Watcher is not live`));
   }
 
   const { order_id, dest, source } = order;
@@ -242,7 +242,7 @@ export const kfCancelOrder = (
 
   if (!watcher.isReadyToInteract(sourceLocation)) {
     const accountId = getIdByKfLocation(sourceLocation);
-    return Promise.reject(new Error(`交易账户 ${accountId} 未就绪`));
+    return Promise.reject(new Error(`Td ${accountId} not ready`));
   }
 
   const orderAction: KungfuApi.OrderAction = {
@@ -268,7 +268,7 @@ export const kfCancelAllOrders = (
   }
 
   if (!watcher.isLive()) {
-    return Promise.reject(new Error(`Master 未连接`));
+    return Promise.reject(new Error(`Watcher is not live`));
   }
 
   const cancelOrderTasks = orders.map(
@@ -291,12 +291,12 @@ export const kfMakeOrder = (
   }
 
   if (!watcher.isLive()) {
-    return Promise.reject(new Error(`Master 未连接`));
+    return Promise.reject(new Error(`Watcher is not live`));
   }
 
   if (!watcher.isReadyToInteract(tdLocation)) {
     const accountId = getIdByKfLocation(tdLocation);
-    return Promise.reject(new Error(`交易账户 ${accountId} 未就绪`));
+    return Promise.reject(new Error(`Td ${accountId} not ready`));
   }
 
   const now = watcher.now();
