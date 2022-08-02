@@ -1,3 +1,5 @@
+const { parseByCli } = require('../utils');
+
 const subcommands = [
   'build',
   'clean',
@@ -22,5 +24,7 @@ module.exports = {
     } else {
       cli.commandDirectory('extension');
     }
+
+    parseByCli(cli);
   },
 };

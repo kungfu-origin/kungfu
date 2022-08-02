@@ -83,10 +83,42 @@ const getCmakeCmdArgs = () => {
   return cmdMap[getCurrentMode()];
 };
 
+const parseByCli = (cli) => {
+  const tarCmds = cli.types.map((item) => item._aliases).flat(1);
+
+  const exitHandler = (result) => {
+    const checkError = () => {
+      if (result.output) {
+        console.log(result.output);
+        process.exit(result.code);
+      }
+      if (result.code !== 0) process.exit(result.code);
+    };
+
+    const curArg = result.details.args.slice(-1)[0];
+
+    if (tarCmds.indexOf(curArg) === -1) {
+      cli.showHelpByDefault().parseAndExit().then(checkError);
+    } else {
+      checkError();
+    }
+
+    return result.argv;
+  };
+
+  const errorHandler = (error) => {
+    console.error(error);
+    process.exit(-1);
+  };
+
+  cli.parse().then(exitHandler).catch(errorHandler);
+};
+
 module.exports = {
   isProduction,
   getKfcPath,
   getKfcCmdArgs,
   getCmakeCmdArgs,
   customResolve,
+  parseByCli,
 };
