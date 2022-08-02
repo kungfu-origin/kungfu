@@ -119,6 +119,7 @@ const parseByCli = (cli, isRootCli = false) => {
 
 module.exports = {
   isProduction,
+  kfcName,
   getKfcPath,
   getKfcCmdArgs,
   getCmakeCmdArgs,

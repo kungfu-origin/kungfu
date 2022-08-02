@@ -13,6 +13,7 @@ const {
   getKfcPath,
   getKfcCmdArgs,
   getCmakeCmdArgs,
+  kfcName,
 } = require('../utils');
 
 const pypackages = '__pypackages__';
@@ -93,6 +94,7 @@ function generateCMakeFiles(projectName, kungfuBuild) {
     customResolve('@kungfu-trader/kungfu-sdk/templates/cmake/kungfu.cmake'),
     {
       kfcDir: getKfcPath(),
+      kfcExec: path.join(getKfcPath(), kfcName).replace(/\\/g, '/'),
       includes: glob.sync(path.join(kungfuLibDirPattern, 'include')),
       links: glob.sync(path.join(kungfuLibDirPattern, 'lib')),
       sources: cppSources,
