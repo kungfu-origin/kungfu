@@ -8,7 +8,6 @@ const isWin = os.platform() === 'win32';
 const execSuffix = isWin ? '.exe' : '';
 
 const kfcName = 'kfc' + execSuffix;
-const cmakeName = 'cmake-js' + execSuffix;
 
 const prodNodeMoudlesDir = path.join(__dirname, '..', '..', 'node_modules');
 
@@ -47,7 +46,9 @@ const getCurrentMode = () => {
 const getKfcPath = () => {
   const pathMap = {
     [ModeMap.IN_CORE]: process.env.KFC_PATH,
-    [ModeMap.IN_PROD_APP]: path.join(__dirname, '..', '..', '..', 'kfc'),
+    [ModeMap.IN_PROD_APP]: path
+      .join(__dirname, '..', '..', '..', 'kfc')
+      .replace(/\\/g, '/'),
     [ModeMap.IN_SDK_SRC]: path
       .join(
         customResolve('@kungfu-trader/kungfu-core'),
@@ -79,8 +80,8 @@ const getCmakeCmdArgs = () => {
   const cmdMap = {
     [ModeMap.IN_CORE]: { cmd: 'yarn', args0: ['cmake-js'] },
     [ModeMap.IN_PROD_APP]: {
-      cmd: path.join(prodNodeMoudlesDir, 'cmake-js', 'bin', cmakeName),
-      args0: [],
+      cmd: 'node',
+      args0: [path.join(prodNodeMoudlesDir, 'cmake-js', 'bin', 'cmake-js')],
     },
     [ModeMap.IN_SDK_SRC]: { cmd: 'yarn', args0: ['cmake-js'] },
   };
