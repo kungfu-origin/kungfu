@@ -28,11 +28,6 @@ const ModeMap = {
 
 const getCurrentMode = () => {
   if (isProduction()) {
-    console.log(
-      'process.env.KFC_PATH',
-      process.env.KFC_PATH,
-      typeof process.env.KFC_PATH,
-    );
     if (process.env.KFC_PATH) {
       return ModeMap.IN_CORE;
     } else {
