@@ -1,7 +1,7 @@
 const fse = require('fs-extra');
 const path = require('path');
 const { prebuilt, shell } = require('@kungfu-trader/kungfu-core');
-const { customResolve } = require('../utils');
+const { customResolve, getKfcPath } = require('../utils');
 
 exports.configure = (writePackageJson = false, writeWorkflows = true) => {
   const packageJsonPath = path.join(process.cwd(), 'package.json');
@@ -27,7 +27,7 @@ exports.makeBinary = (packageJson = shell.getPackageJson()) => {
   const outputDir = path.resolve(packageJson.binary.module_path);
 
   fse.copySync(
-    customResolve('@kungfu-trader/kungfu-core/dist/kfc/drone.node'),
+    path.join(getKfcPath(), 'drone.node'),
     path.join(outputDir, `${packageJson.binary.module_name}.node`),
     {},
   );
