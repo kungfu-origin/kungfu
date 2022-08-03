@@ -25,12 +25,8 @@ macro(kungfu_setup MODULE_NAME)
 
   set(BUILD_OUTPUT_DIR "${PROJECT_BINARY_DIR}/target")
 
-  execute_process(
-    COMMAND
-    node -p "require('@kungfu-trader/kungfu-core').executable.kfc"
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    OUTPUT_VARIABLE KFC_EXECUTABLE
-  )
+  SET(KFC_EXECUTABLE "<%- kfcExec %>")
+
   string(REPLACE "\n" "" KFC_EXECUTABLE ${KFC_EXECUTABLE})
   string(REPLACE "\"" "" KFC_EXECUTABLE ${KFC_EXECUTABLE})
 
