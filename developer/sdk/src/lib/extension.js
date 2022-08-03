@@ -8,7 +8,12 @@ const { glob } = require('glob');
 const { promisify } = require('util');
 const { finished } = require('stream');
 const { shell } = require('@kungfu-trader/kungfu-core');
-const { customResolve } = require('../utils');
+const {
+  customResolve,
+  getKfcPath,
+  getKfcCmdArgs,
+  getCmakeCmdArgs,
+} = require('../utils');
 
 const pypackages = '__pypackages__';
 const kungfulibs = '__kungfulibs__';
@@ -87,13 +92,7 @@ function generateCMakeFiles(projectName, kungfuBuild) {
   ejs.renderFile(
     customResolve('@kungfu-trader/kungfu-sdk/templates/cmake/kungfu.cmake'),
     {
-      kfcDir: path
-        .dirname(
-          customResolve(
-            '@kungfu-trader/kungfu-core/dist/kfc/kungfubuildinfo.json',
-          ),
-        )
-        .replace(/\\/g, '/'),
+      kfcDir: getKfcPath(),
       includes: glob.sync(path.join(kungfuLibDirPattern, 'include')),
       links: glob.sync(path.join(kungfuLibDirPattern, 'lib')),
       sources: cppSources,
@@ -283,8 +282,9 @@ exports.installBatch = async (
     }
   }
   if (hasSourceFor(packageJson, 'python')) {
-    spawnExec('yarn', ['kfc', 'engage', 'pdm', 'makeup']);
-    spawnExec('yarn', ['kfc', 'engage', 'pdm', 'install']);
+    const { cmd, args0 } = getKfcCmdArgs();
+    spawnExec(cmd, [...args0, 'engage', 'pdm', 'makeup']);
+    spawnExec(cmd, [...args0, 'engage', 'pdm', 'install']);
   }
 };
 
@@ -315,7 +315,9 @@ exports.compile = () => {
 
   if (hasSourceFor(packageJson, 'python')) {
     const srcDir = path.join('src', 'python', extensionName);
-    const kfcArgs = ['kfc', 'engage', 'nuitka'];
+    const { cmd, args0 } = getKfcCmdArgs();
+
+    const kfcArgs = [...args0, 'engage', 'nuitka'];
     const nuitkaArgs = [
       '--module',
       '--assume-yes-for-downloads',
@@ -325,11 +327,12 @@ exports.compile = () => {
       `--output-dir=${outputDir}`,
       srcDir,
     ];
-    spawnExec('yarn', [...kfcArgs, ...nuitkaArgs]);
+    spawnExec(cmd, [...kfcArgs, ...nuitkaArgs]);
   }
 
   if (hasSourceFor(packageJson, 'cpp')) {
-    spawnExec('yarn', ['cmake-js', 'build']);
+    const { cmd, args0 } = getCmakeCmdArgs();
+    spawnExec(cmd, [...args0, 'build']);
   }
 
   const packageJsonPath = path.join(process.cwd(), 'package.json');

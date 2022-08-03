@@ -46,6 +46,8 @@ public:
 
   [[nodiscard]] virtual longfist::enums::AccountType get_account_type() const = 0;
 
+  virtual bool insert_block_message(const event_ptr &event) { return true; }
+
   virtual bool insert_order(const event_ptr &event) = 0;
 
   virtual bool cancel_order(const event_ptr &event) = 0;

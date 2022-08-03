@@ -21,6 +21,7 @@ void TraderVendor::set_service(Trader_ptr service) { service_ = std::move(servic
 void TraderVendor::on_start() {
   BrokerVendor::on_start();
 
+  events_ | is(BlockMessage::tag) | $$(service_->insert_block_message(event));
   events_ | is(OrderInput::tag) | $$(service_->insert_order(event));
   events_ | is(OrderAction::tag) | $$(service_->cancel_order(event));
   events_ | is(AssetRequest::tag) | $$(service_->req_account());

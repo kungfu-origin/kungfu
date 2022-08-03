@@ -12,6 +12,7 @@ namespace kungfu::longfist::types {
 using namespace kungfu::longfist::enums;
 
 static constexpr int INSTRUMENT_ID_LEN = 32;
+static constexpr int ACCOUNT_ID_LEN = 32;
 static constexpr int PRODUCT_ID_LEN = 32;
 static constexpr int DATE_LEN = 9;
 static constexpr int EXCHANGE_ID_LEN = 16;
@@ -392,8 +393,19 @@ KF_DEFINE_PACK_TYPE(                                       //
     (PriceType, price_type),             // 价格类型
     (VolumeCondition, volume_condition), // 成交量类型
     (TimeCondition, time_condition),     // 成交时间类型
+    (uint64_t, block_id),                // 大宗交易信息id, 非大宗交易则为0
 
     (int64_t, insert_time) // 写入时间
+);
+
+KF_DEFINE_PACK_TYPE(                                         //
+    BlockMessage, 207, PK(block_id), TIMESTAMP(insert_time), //
+    (uint64_t, block_id),      // 大宗交易信息id, 用于TD从OrderInput找到此数据
+    (uint32_t, opponent_seat), // 对手方席号
+    (uint64_t, match_number),  // 成交约定号
+    (kungfu::array<char, ACCOUNT_ID_LEN>, opponent_account), // 对手方股东账号
+    (kungfu::array<char, JSON_STR_LEN>, value),              // 联系人, 联系方式, 是否受限股份
+    (int64_t, insert_time)                                   // 写入时间
 );
 
 KF_DEFINE_PACK_TYPE(                                               //

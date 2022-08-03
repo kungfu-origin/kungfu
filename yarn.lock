@@ -1235,13 +1235,6 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@kungfu-trader/kfx-task-condition@~1.0.0-0 || ~1.0.0":
-  version "1.0.0-alpha.14"
-  resolved "https://npm.pkg.github.com/download/@kungfu-trader/kfx-task-condition/1.0.0-alpha.14/57c7a253af35e7c80497f08f3c79c6afad9f13ff8b7163c01be1aeda2609a3ca#e08713fad72575cd10fe7f8f6f34ac3b183d314e"
-  integrity sha512-8705apM2k5BLp893V0MpwsSbDNxRPIxngs5Qnjsn2GUEcZ3cOJKrPgWN0/CCRP0YCF6mC5WcpaHARRrvfGqJLQ==
-  dependencies:
-    "@kungfu-trader/kungfu-core" "~2.4.0-0 || ~2.4.0"
-
 "@kungfu-trader/libnode@16.14.2":
   version "16.14.2"
   resolved "https://npm.pkg.github.com/download/@kungfu-trader/libnode/16.14.2/6dd255853e2ad19282edab8c022af5044a74068971b6557a9b616c2dc02e9e1e#230e9411254587f1910625f28424ad7ba8c56fd3"

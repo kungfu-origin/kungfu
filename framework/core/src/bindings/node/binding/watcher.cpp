@@ -246,6 +246,11 @@ Napi::Value Watcher::IsReadyToInteract(const Napi::CallbackInfo &info) {
   return Napi::Boolean::New(info.Env(), account_location and has_writer(account_location->uid));
 }
 
+Napi::Value Watcher::IssueBlockMessage(const Napi::CallbackInfo &info) {
+  SPDLOG_INFO("issue block message manually");
+  return InteractWithTD<BlockMessage>(info, &BlockMessage::block_id);
+}
+
 Napi::Value Watcher::IssueOrder(const Napi::CallbackInfo &info) {
   SPDLOG_INFO("issue order manually");
   return InteractWithTD<OrderInput>(info, &OrderInput::order_id);
@@ -309,6 +314,7 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
                       InstanceMethod("getInstrumentUID", &Watcher::GetInstrumentUID),                   //
                       InstanceMethod("publishState", &Watcher::PublishState),                           //
                       InstanceMethod("isReadyToInteract", &Watcher::IsReadyToInteract),                 //
+                      InstanceMethod("issueBlockMessage", &Watcher::IssueBlockMessage),                 //
                       InstanceMethod("issueOrder", &Watcher::IssueOrder),                               //
                       InstanceMethod("cancelOrder", &Watcher::CancelOrder),                             //
                       InstanceMethod("requestMarketData", &Watcher::RequestMarketData),                 //

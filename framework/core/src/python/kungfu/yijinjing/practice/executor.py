@@ -227,8 +227,20 @@ class ExtensionExecutor:
             ctx.name,
             ctx.runtime_locator,
         )
+        os.environ["KF_STG_GROUP"] = ctx.group
+        os.environ["KF_STG_NAME"] = ctx.name
         if loader.config is None:
-            ctx.strategy = load_strategy(ctx, ctx.path, loader.config)
+            load = False
+            json_config = os.path.join(os.path.dirname(ctx.path), "package.json")
+            if path.exists(json_config):
+                with open(json_config, mode="r", encoding="utf8") as json_config_out:
+                    config = json.load(json_config_out)
+                    if "kungfuConfig" in config and "key" in config["kungfuConfig"]:
+                        key = config["kungfuConfig"]["key"]
+                        load = True
+                        ctx.strategy = load_strategy(ctx, ctx.path, key)
+            if not load:
+                ctx.strategy = load_strategy(ctx, ctx.path, loader.config)
         else:
             ctx.strategy = load_strategy(
                 ctx, ctx.path, loader.config["kungfuConfig"]["key"]
@@ -259,7 +271,7 @@ def load_strategy(ctx, path, key):
 
 def try_load_cpp_strategy(ctx, path, key):
     try:
-        module = importlib.import_module(ctx.group)
+        module = importlib.import_module(key)
         return module.strategy()
     except Exception as e:
         ctx.logger.info(f"fallback to python loader due to: {e}")

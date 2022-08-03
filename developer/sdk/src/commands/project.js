@@ -1,3 +1,5 @@
+const { parseByCli } = require('../utils');
+
 const subcommands = ['configure', 'install', 'package'];
 
 module.exports = {
@@ -14,5 +16,7 @@ module.exports = {
     } else {
       cli.commandDirectory('project');
     }
+
+    parseByCli(cli);
   },
 };
