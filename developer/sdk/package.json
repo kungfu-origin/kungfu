@@ -25,15 +25,15 @@
     "host": "https://prebuilt.libkungfu.cc"
   },
   "kungfuConfig": {
-    "name": "sdk",
     "key": "sdk"
   },
   "scripts": {
     "kfs": "node src/kfs.js",
     "build": "kfs extension build && node lib/webpack/build.js",
-    "package": "yarn kfs project package",
-    "dev": "node lib/dev/run.js",
+    "clean": "kfs extension clean",
     "install": "node -e \"require('@kungfu-trader/kungfu-core').prebuilt('install')\"",
+    "package": "kfs project package",
+    "dev": "node lib/dev/run.js",
     "format": "prettier -l -w --config ../../framework/core/.prettierrc.js ."
   },
   "dependencies": {
