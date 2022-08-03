@@ -98,9 +98,13 @@ const parseByCli = (cli, isRootCli = false) => {
       }
     };
 
-    const curArg = result.details.args.slice(-1)[0];
+    const curArgIndex =
+      result.details.args.findIndex((item) => item.indexOf('-') !== -1) - 1;
 
-    if (tarCmds.indexOf(curArg) === -1) {
+    if (
+      curArgIndex < 0 ||
+      tarCmds.indexOf(result.details.args[curArgIndex]) === -1
+    ) {
       cli.showHelpByDefault().parseAndExit().then(checkError);
     } else {
       checkError();
