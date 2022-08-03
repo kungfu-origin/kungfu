@@ -1878,6 +1878,22 @@ export const fromProcessArgsToKfConfigItems = (
   }
 };
 
+export const getTaskListFromProcessStatusData = (
+  taskPrefixs: string[],
+  psDetail: Pm2ProcessStatusDetailData,
+): Pm2ProcessStatusDetail[] => {
+  return Object.keys(psDetail)
+    .filter((processId) => {
+      return (
+        taskPrefixs.findIndex((cg) => {
+          return processId.indexOf(cg) === 0;
+        }) !== -1
+      );
+    })
+    .map((processId) => psDetail[processId])
+    .sort((a, b) => (b.created_at || 0) - (a.created_at || 0));
+};
+
 export function dealTradingTaskName(
   name: string,
   extConfigs: KungfuApi.KfExtConfigs,

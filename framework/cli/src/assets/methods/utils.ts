@@ -241,14 +241,14 @@ export const selectTargetKfConfig = async (
         )),
     ...td.map((item) =>
       parseToString(
-        [colors.blue('td'), getIdByKfLocation(item)],
+        [colors.cyan('td'), getIdByKfLocation(item)],
         [8, 'auto'],
         1,
       ),
     ),
     ...strategy.map((item) =>
       parseToString(
-        [colors.cyan('strategy'), getIdByKfLocation(item)],
+        [colors.blue('strategy'), getIdByKfLocation(item)],
         [8, 'auto'],
         1,
       ),

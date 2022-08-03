@@ -24,6 +24,7 @@ import {
   fromProcessArgsToKfConfigItems,
   kfConfigItemsToArgsByPrimaryForShow,
   dealTradingTaskName,
+  getTaskListFromProcessStatusData,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
   graceStopProcess,
@@ -59,20 +60,14 @@ const taskTypeKeys = computed(() => {
   return Object.keys(extConfigs.value['strategy'] || {});
 });
 const taskList = computed(() => {
-  const taskCGs = taskTypeKeys.value.map((item) => {
+  const taskPrefixs = taskTypeKeys.value.map((item) => {
     return `strategy_${item}`;
   });
 
-  return Object.keys(processStatusDetailData.value)
-    .filter((processId) => {
-      return (
-        taskCGs.findIndex((cg) => {
-          return processId.indexOf(cg) === 0;
-        }) !== -1
-      );
-    })
-    .map((processId) => processStatusDetailData.value[processId])
-    .sort((a, b) => (b.created_at || 0) - (a.created_at || 0));
+  return getTaskListFromProcessStatusData(
+    taskPrefixs,
+    processStatusDetailData.value,
+  );
 });
 const { searchKeyword, tableData } =
   useTableSearchKeyword<Pm2ProcessStatusDetail>(taskList, ['name', 'args']);

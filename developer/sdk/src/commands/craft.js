@@ -1,3 +1,5 @@
+const { parseByCli } = require('../utils');
+
 const subcommands = ['build', 'clean', 'cli', 'dev', 'package', 'upgrade'];
 
 module.exports = {
@@ -14,5 +16,7 @@ module.exports = {
     } else {
       cli.commandDirectory('craft');
     }
+
+    parseByCli(cli);
   },
 };

@@ -13,6 +13,7 @@ const {
   getKfcPath,
   getKfcCmdArgs,
   getCmakeCmdArgs,
+  kfcName,
 } = require('../utils');
 
 const pypackages = '__pypackages__';
@@ -93,6 +94,7 @@ function generateCMakeFiles(projectName, kungfuBuild) {
     customResolve('@kungfu-trader/kungfu-sdk/templates/cmake/kungfu.cmake'),
     {
       kfcDir: getKfcPath(),
+      kfcExec: path.join(getKfcPath(), kfcName).replace(/\\/g, '/'),
       includes: glob.sync(path.join(kungfuLibDirPattern, 'include')),
       links: glob.sync(path.join(kungfuLibDirPattern, 'lib')),
       sources: cppSources,
@@ -335,7 +337,8 @@ exports.compile = () => {
     spawnExec(cmd, [...args0, 'build']);
   }
 
-  const packageJsonPath = path.join(process.cwd(), 'package.json');
+  const cwd = process.cwd().toString(); // 这一步避免在打包中process.cwd()被替换
+  const packageJsonPath = path.resolve(cwd, 'package.json');
   fse.copyFile(packageJsonPath, path.join(outputDir, 'package.json'));
 
   const copyOutput = (pattern) => {

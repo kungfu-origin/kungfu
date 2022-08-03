@@ -223,6 +223,13 @@ function swithKfLocationResolved(data: SwitchKfLocationPacketData) {
     script,
   };
 
+  // task dealing logic
+  if (category === 'strategy' && group !== 'default') {
+    if (!value) {
+      return Promise.reject(new Error('Task cannot start in CLI'));
+    }
+  }
+
   return switchKfLocation(watcher, kfConfig, !status).catch((err) => {
     console.error(err.message);
   });
