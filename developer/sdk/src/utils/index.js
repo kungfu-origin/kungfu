@@ -100,7 +100,7 @@ const parseByCli = (cli, isRootCli = false) => {
 
     const curArgIndex =
       result.details.args.findIndex((item) => item.indexOf('-') !== -1) - 1;
-    
+
     if (
       curArgIndex < 0 ||
       tarCmds.indexOf(result.details.args[curArgIndex]) === -1
