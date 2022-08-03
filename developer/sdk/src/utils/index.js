@@ -98,13 +98,12 @@ const parseByCli = (cli, isRootCli = false) => {
       }
     };
 
+    const args = result.details.args;
+    const firstOptionIndex = args.findIndex((item) => item.indexOf('-') !== -1);
     const curArgIndex =
-      result.details.args.findIndex((item) => item.indexOf('-') !== -1) - 1;
+      firstOptionIndex === -1 ? args.length - 1 : firstOptionIndex - 1;
 
-    if (
-      curArgIndex < 0 ||
-      tarCmds.indexOf(result.details.args[curArgIndex]) === -1
-    ) {
+    if (curArgIndex < 0 || tarCmds.indexOf(args[curArgIndex]) === -1) {
       cli.showHelpByDefault().parseAndExit().then(checkError);
     } else {
       checkError();
