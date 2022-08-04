@@ -5,8 +5,7 @@ import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/p
 import KfConfigSettingsForm from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfConfigSettingsForm.vue';
 import { getConfigSettings } from './config';
 import { RuleObject } from 'ant-design-vue/lib/form';
-import { FutureArbitrageCodeEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
-import { makeOrderByOrderInput } from '@kungfu-trader/kungfu-js-api/kungfu';
+import { makeOrderByBlockMessage } from '@kungfu-trader/kungfu-js-api/kungfu';
 import {
   getProcessIdByKfLocation,
   initFormStateByConfig,
@@ -22,7 +21,7 @@ import {
   useDashboardBodySize,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
-import { dealOrderPlaceVNode } from '../makeOrder/utils';
+import { dealOrderPlaceVNode } from './utils';
 
 const { t } = VueI18n.global;
 const { error } = messagePrompt();
@@ -45,67 +44,27 @@ const configSettings = computed(() => {
   }
 
   const { category } = currentGlobalKfLocation.value;
-  return getConfigSettings(category, +formState.value.side);
+  return getConfigSettings(category);
 });
 
+function numberValidator(_rule: RuleObject, value: string) {
+  if (value === '' || !/^\d+$/.test(value)) {
+    return Promise.reject(t('blockTradeConfig.number_error'));
+  } else {
+    return Promise.resolve();
+  }
+}
+
 const rules = {
-  instrument_A: {
-    validator: arbitrageExchangeValidator,
+  opponent_seat: {
+    validator: numberValidator,
     trigger: 'change',
   },
-  instrument_B: {
-    validator: arbitrageExchangeValidator,
+  match_number: {
+    validator: numberValidator,
     trigger: 'change',
   },
 };
-
-function arbitrageExchangeValidator(
-  _rule: RuleObject,
-  value: number | string,
-): Promise<void> {
-  const instrumentResolved = transformSearchInstrumentResultToInstrument(
-    value.toString(),
-  );
-
-  if (!instrumentResolved) {
-    return Promise.resolve();
-  }
-
-  const { exchangeId } = instrumentResolved;
-
-  if (
-    formState.value.future_arbitrage_code === FutureArbitrageCodeEnum.SP ||
-    formState.value.future_arbitrage_code === FutureArbitrageCodeEnum.SPC
-  ) {
-    if (exchangeId !== 'CZCE') {
-      return Promise.reject(
-        new Error(
-          `${t('futureArbitrageConfig.only_corresponding')}
-            ${t('tradingConfig.CZCE')}
-            ${t('tradingConfig.instrument')},
-          `,
-        ),
-      );
-    }
-  }
-
-  if (
-    formState.value.future_arbitrage_code === FutureArbitrageCodeEnum.SPD ||
-    formState.value.future_arbitrage_code === FutureArbitrageCodeEnum.IPS
-  ) {
-    if (exchangeId !== 'DCE') {
-      return Promise.reject(
-        new Error(
-          `${t('futureArbitrageConfig.only_corresponding')} 
-          ${t('tradingConfig.DCE')} 
-          ${t('tradingConfig.instrument')}`,
-        ),
-      );
-    }
-  }
-
-  return Promise.resolve();
-}
 
 function handleResetMakeOrderForm() {
   const initFormState = initFormStateByConfig(configSettings.value, {});
@@ -121,23 +80,19 @@ function handleMakeOrder() {
   formRef.value
     .validate()
     .then(async () => {
-      const instrumentA = formState.value.instrument_A.toString();
-      const instrumentB = formState.value.instrument_B.toString();
-      const instrumnetResolved_A =
-        transformSearchInstrumentResultToInstrument(instrumentA);
-      const instrumnetResolved_B =
-        transformSearchInstrumentResultToInstrument(instrumentB);
+      const instrument = formState.value.instrument.toString();
+      const instrumnetResolved =
+        transformSearchInstrumentResultToInstrument(instrument);
 
-      if (!instrumnetResolved_A || !instrumnetResolved_B) {
+      if (!instrumnetResolved) {
         error(t('instrument_error'));
         return;
       }
 
-      const { exchangeId, instrumentType } = instrumnetResolved_A;
+      const { exchangeId, instrumentType, instrumentId } = instrumnetResolved;
 
       const {
         account_id,
-        future_arbitrage_code,
         limit_price,
         volume,
         price_type,
@@ -145,9 +100,14 @@ function handleMakeOrder() {
         offset,
         hedge_flag,
         is_swap,
+        opponent_seat,
+        opponent_account,
+        match_number,
+        linkman,
+        contact_way,
+        underweight_type,
       } = formState.value;
 
-      const instrumentId = `${future_arbitrage_code} ${instrumnetResolved_A.instrumentId}&${instrumnetResolved_B.instrumentId}`;
       const makeOrderInput: KungfuApi.MakeOrderInput = {
         instrument_id: instrumentId,
         instrument_type: +instrumentType,
@@ -159,6 +119,18 @@ function handleMakeOrder() {
         offset: +(offset !== undefined ? offset : +side === 0 ? 0 : 1),
         hedge_flag: +(hedge_flag || 0),
         is_swap: !!is_swap,
+      };
+
+      const blockMessage: KungfuApi.BlockMessage = {
+        opponent_seat: +opponent_seat || 0,
+        opponent_account: opponent_account || '',
+        match_number: match_number || '',
+        value: {
+          linkman: linkman || '',
+          contact_way: contact_way || '',
+          underweight_type: +underweight_type,
+        },
+        insert_time: 0n,
       };
 
       if (!currentGlobalKfLocation.value) {
@@ -180,11 +152,12 @@ function handleMakeOrder() {
 
       await confirmModal(
         t('tradingConfig.place_confirm'),
-        dealOrderPlaceVNode(makeOrderInput, 1, true),
+        dealOrderPlaceVNode({ ...makeOrderInput, ...blockMessage }, 1),
       );
 
-      makeOrderByOrderInput(
+      makeOrderByBlockMessage(
         window.watcher,
+        blockMessage,
         makeOrderInput,
         currentGlobalKfLocation.value,
         tdProcessId.toAccountId(),
@@ -216,7 +189,7 @@ function handleMakeOrder() {
       <template v-slot:header>
         <KfDashboardItem>
           <a-button size="small" @click="handleResetMakeOrderForm">
-            {{ $t('futureArbitrageConfig.reset_order') }}
+            {{ $t('blockTradeConfig.reset_order') }}
           </a-button>
         </KfDashboardItem>
       </template>
@@ -234,7 +207,7 @@ function handleMakeOrder() {
         </div>
         <div class="make-order-btns">
           <a-button size="small" @click="handleMakeOrder">
-            {{ $t('futureArbitrageConfig.place_order') }}
+            {{ $t('blockTradeConfig.place_order') }}
           </a-button>
         </div>
       </div>
