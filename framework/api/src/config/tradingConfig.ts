@@ -18,6 +18,7 @@ import {
   SpaceTabSettingEnum,
   SpaceSizeSettingEnum,
   StrategyExtTypes,
+  UnderweightEnum,
 } from '../typings/enums';
 
 import { Pm2ProcessStatusTypes } from '../utils/processUtils';
@@ -437,6 +438,20 @@ export const InstrumentType: Record<
     name: t('tradingConfig.multi'),
     color: 'green',
     level: 10,
+  },
+};
+
+export const UnderweightType: Record<
+  UnderweightEnum,
+  KungfuApi.KfTradeValueCommonData
+> = {
+  [UnderweightEnum.UnrestrictedShares]: {
+    name: t('blockTradeConfig.unrestricted_shares'),
+    color: 'default',
+  },
+  [UnderweightEnum.RestrictedShares]: {
+    name: t('blockTradeConfig.restricted_shares'),
+    color: 'default',
   },
 };
 

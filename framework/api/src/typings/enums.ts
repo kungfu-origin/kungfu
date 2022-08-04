@@ -134,6 +134,11 @@ export enum DirectionEnum {
   Short,
 }
 
+export enum UnderweightEnum {
+  UnrestrictedShares,
+  RestrictedShares,
+}
+
 export type DirectionTypes = keyof typeof DirectionEnum;
 
 export enum OrderStatusEnum {

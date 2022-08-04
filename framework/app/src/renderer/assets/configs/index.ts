@@ -45,7 +45,7 @@ export const defaultBoardsMap: KfLayout.BoardsMap = {
   '12': {
     paId: 10,
     direction: 'v',
-    contents: [t('MakeOrderDashboard'), t('FutureArbitrage')],
+    contents: [t('MakeOrderDashboard'), t('FutureArbitrage'), t('BlockTrade')],
     current: t('MakeOrderDashboard'),
     width: '56.721%',
   },

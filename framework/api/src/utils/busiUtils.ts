@@ -26,6 +26,7 @@ import {
   FutureArbitrageCodes,
   CommissionMode,
   StrategyExtType,
+  UnderweightType,
 } from '../config/tradingConfig';
 import {
   KfCategoryEnum,
@@ -49,6 +50,7 @@ import {
   CommissionModeEnum,
   StrategyStateStatusTypes,
   StrategyStateStatusEnum,
+  UnderweightEnum,
 } from '../typings/enums';
 import {
   graceDeleteProcess,
@@ -1222,6 +1224,10 @@ export const dealIsSwap = (isSwap: boolean) => {
   return { name: isSwap ? t('yes') : t('no') };
 };
 
+export const dealUnderweightType = (underweightType: UnderweightEnum) => {
+  return UnderweightType[+underweightType as UnderweightEnum];
+};
+
 export const getKfCategoryData = (
   category: KfCategoryTypes,
 ): KungfuApi.KfTradeValueCommonData => {
@@ -1596,6 +1602,7 @@ export const numberEnumSelectType: Record<
   side: Side,
   priceType: PriceType,
   instrumentType: InstrumentType,
+  underweightType: UnderweightType,
 };
 
 export const stringEnumSelectType: Record<
