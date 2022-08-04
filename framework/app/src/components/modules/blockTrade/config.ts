@@ -80,13 +80,13 @@ export const getConfigSettings = (
       key: 'linkman',
       name: t('blockTradeConfig.linkman'),
       type: 'str',
-      required: true,
+      required: false,
     },
     {
       key: 'contact_way',
       name: t('blockTradeConfig.contact_way'),
       type: 'str',
-      required: true,
+      required: false,
     },
     {
       key: 'underweight_type',
