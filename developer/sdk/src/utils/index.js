@@ -100,10 +100,11 @@ const parseByCli = (cli, isRootCli = false) => {
 
     const args = result.details.args;
     const firstOptionIndex = args.findIndex((item) => item.indexOf('-') !== -1);
-    const curArgIndex =
-      firstOptionIndex === -1 ? args.length - 1 : firstOptionIndex - 1;
+    const parsedArgIndex = args
+      .slice(0, firstOptionIndex === -1 ? args.length : firstOptionIndex)
+      .findIndex((item) => tarCmds.indexOf(item) !== -1);
 
-    if (curArgIndex < 0 || tarCmds.indexOf(args[curArgIndex]) === -1) {
+    if (parsedArgIndex === -1) {
       cli.showHelpByDefault().parseAndExit().then(checkError);
     } else {
       checkError();
