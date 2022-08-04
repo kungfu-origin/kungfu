@@ -16,6 +16,7 @@ declare namespace KungfuApi {
     SideEnum,
     OffsetEnum,
     HedgeFlagEnum,
+    UnderweightEnum,
     LedgerCategoryEnum,
     VolumeConditionEnum,
     TimeConditionEnum,
@@ -452,12 +453,27 @@ declare namespace KungfuApi {
     price_type: PriceTypeEnum; //价格类型
     volume_condition: VolumeConditionEnum; //成交量类型
     time_condition: TimeConditionEnum; //成交时间类型
+    block_id: bigint; // 大宗交易ID
 
     insert_time: bigint; //写入时间
 
     source: number;
     dest: number;
     uid_key: string;
+  }
+
+  export interface BlockMessage {
+    opponent_seat: number; // 对方手席位号
+    opponent_account: string; // 对方手账户
+    match_number: bigint; // 成交约定号
+    value:
+      | {
+          linkman: string; // 联系人
+          contact_way: string; // 联系方式
+          underweight_type: UnderweightEnum; // 减持类型
+        }
+      | string;
+    insert_time: bigint;
   }
 
   export interface OrderStat {
@@ -715,6 +731,10 @@ declare namespace KungfuApi {
       orderInput: OrderInput,
       tdLocation: KfLocation,
       strategyLocation?: KfLocation,
+    ): bigint;
+    issueBlockMessage(
+      blockMessage: BlockMessage,
+      tdLocation: KfLocation,
     ): bigint;
     now(): bigint;
   }

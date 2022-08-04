@@ -39,16 +39,28 @@ export function dealOrderPlaceVNode(
   const orderInputResolved: Record<string, KungfuApi.KfTradeValueCommonData> =
     dealOrderInputItem(orderData);
 
+  return createOrderPlaceVNode(
+    orderInputResolved,
+    currentOrderInputTrans,
+    orderCount,
+  );
+}
+
+export const createOrderPlaceVNode = (
+  orderInputResolved: Record<string, KungfuApi.KfTradeValueCommonData>,
+  orderInputTrans: Record<string, string>,
+  orderCount: number,
+) => {
   const vnode = Object.keys(orderInputResolved)
     .filter((key) => {
       if (orderInputResolved[key].name.toString() === '[object Object]') {
         return false;
       }
-      return orderInputResolved[key].name !== '' && currentOrderInputTrans[key];
+      return orderInputResolved[key].name !== '' && orderInputTrans[key];
     })
     .map((key) =>
       h('div', { class: 'trading-data-detail-row' }, [
-        h('span', { class: 'label' }, `${currentOrderInputTrans[key]}`),
+        h('span', { class: 'label' }, `${orderInputTrans[key]}`),
         h(
           'span',
           {
@@ -78,7 +90,7 @@ export function dealOrderPlaceVNode(
   const rootVNode: VNode = h('div', { class: 'modal-node' }, rootBox);
 
   return rootVNode;
-}
+};
 
 export const transformOrderInputToExtConfigForm = (
   orderInputFormState: Record<string, KungfuApi.KfConfigValue>,

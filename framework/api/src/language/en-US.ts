@@ -434,6 +434,31 @@ export default {
     only_corresponding: 'Can Only corresponding',
   },
 
+  blockTradeConfig: {
+    account_name: 'account_name',
+    instrument: 'instrument',
+    side: 'side',
+    offset: 'offset',
+    hedge_flag: 'hedge_flag',
+    is_swap: 'is_swap',
+    price_type: 'price_type',
+    limit_price: 'limit_price',
+    volume: 'volume',
+    opponent_seat: 'opponent_seat',
+    opponent_account: 'opponent_account',
+    match_number: 'match_number',
+    linkman: 'linkman',
+    contact_way: 'contact_way',
+    underweight_type: 'underweight_type',
+
+    unrestricted_shares: 'Unrestricted shares',
+    restricted_shares: 'Restricted shares',
+
+    place_order: 'Place Order',
+    reset_order: 'Resert',
+    number_error: 'can only number',
+  },
+
   globalSettingConfig: {
     global_setting_title: 'Global Setting',
     system: 'System',
