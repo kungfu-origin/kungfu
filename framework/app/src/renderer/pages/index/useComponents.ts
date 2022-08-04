@@ -129,6 +129,16 @@ export const useComponenets = (
     ),
   );
 
+  app.component(
+    t('BlockTrade'),
+    defineAsyncComponent(
+      () =>
+        import(
+          '@kungfu-trader/kungfu-app/src/components/modules/blockTrade/BlockTrade.vue'
+        ),
+    ),
+  );
+
   app.config.globalProperties.$availKfBoards = [
     t('Pos'),
     t('PosGlobal'),
@@ -142,6 +152,7 @@ export const useComponenets = (
     t('OrderBook'),
     t('MakeOrderDashboard'),
     t('FutureArbitrage'),
+    t('BlockTrade'),
   ];
 
   return useGlobalStore()

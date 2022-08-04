@@ -11,6 +11,7 @@ import {
   getProcessIdByKfLocation,
   getTaskListFromProcessStatusData,
   kfLogger,
+  removeJournal,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
   pm2KillGodDaemon,
@@ -41,6 +42,7 @@ import {
 } from '../methods/utils';
 import { globalState } from '../actions/globalState';
 import { dealProcessName } from '../methods/utils';
+import { KF_HOME } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 
 export const mdTdStrategyDaemonObservable = () => {
   return new Observable<
@@ -536,6 +538,7 @@ const switchMaster = async (status: boolean): Promise<void> => {
     }
     await deleteNNFiles();
   } else {
+    await removeJournal(KF_HOME);
     await startMaster(false);
     await delayMilliSeconds(1000);
     await startCacheD(false);

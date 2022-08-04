@@ -431,6 +431,31 @@ export default {
     only_corresponding: '只能对应',
   },
 
+  blockTradeConfig: {
+    account_name: '账户',
+    instrument: '标的',
+    side: '买卖',
+    offset: '开平',
+    hedge_flag: '套保',
+    is_swap: '互换',
+    price_type: '方式',
+    limit_price: '委托价格',
+    volume: '下单量',
+    opponent_seat: '对方席位',
+    opponent_account: '对方股东',
+    match_number: '约定序号',
+    linkman: '联系人',
+    contact_way: '联系方式',
+    underweight_type: '减持类型',
+
+    unrestricted_shares: '非受限股份',
+    restricted_shares: '受限股份',
+
+    place_order: '下单',
+    reset_order: '重置',
+    number_error: '该项只能为数字',
+  },
+
   globalSettingConfig: {
     global_setting_title: '全局设置',
     system: '系统',

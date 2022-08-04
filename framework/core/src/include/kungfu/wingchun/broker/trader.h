@@ -92,6 +92,7 @@ private:
   bool sync_position_ = false;
 
   void handle_asset_sync();
+  void handle_position_sync();
 };
 } // namespace kungfu::wingchun::broker
 
