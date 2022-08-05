@@ -603,7 +603,7 @@ export const startMaster = async (force = false): Promise<void> => {
 
   try {
     await preStartProcess(processName, force);
-    await killKfc();
+    if (force) await killKfc();
     const args = buildArgs('run -c system -g master -n master');
     await startProcess({
       name: processName,

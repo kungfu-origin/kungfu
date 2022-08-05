@@ -1057,6 +1057,7 @@ export const buildIdByKeysFromKfConfigSettings = (
 
 const startProcessByKfLocation = async (
   kfLocation: KungfuApi.DerivedKfLocation,
+  force?: boolean,
 ) => {
   try {
     await globalThis.HookKeeper.getHooks().prestart.trigger(kfLocation);
@@ -1064,14 +1065,16 @@ const startProcessByKfLocation = async (
     console.error(err);
   }
 
+  const isForce = force ?? true;
+
   switch (kfLocation.category) {
     case 'system':
       if (kfLocation.name === 'master') {
-        return startMaster(true);
+        return startMaster(isForce);
       } else if (kfLocation.name === 'ledger') {
-        return startLedger(true);
+        return startLedger(isForce);
       } else if (kfLocation.name === 'cached') {
-        return startCacheD(true);
+        return startCacheD(isForce);
       }
 
     case 'td':
@@ -1101,6 +1104,7 @@ export const switchKfLocation = (
   watcher: KungfuApi.Watcher | null,
   kfLocation: KungfuApi.DerivedKfLocation,
   targetStatus: boolean,
+  force?: boolean,
 ): Promise<void | Proc> => {
   if (!watcher) return Promise.reject(new Error('Watcher is NULL'));
 
@@ -1108,7 +1112,7 @@ export const switchKfLocation = (
     return graceDeleteProcess(watcher, kfLocation);
   }
 
-  return startProcessByKfLocation(kfLocation);
+  return startProcessByKfLocation(kfLocation, force);
 };
 
 export const dealKfNumber = (
