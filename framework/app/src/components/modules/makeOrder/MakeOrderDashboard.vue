@@ -31,6 +31,7 @@ import {
 import {
   InstrumentTypeEnum,
   OffsetEnum,
+  OrderInputKeyEnum,
   SideEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
@@ -38,6 +39,7 @@ import {
   useExtConfigsRelated,
   useInstruments,
   useProcessStatusDetailData,
+  useTradeLimit,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import {
   getExtConfigList,
@@ -92,6 +94,8 @@ const {
   getCurrentGlobalKfLocationId,
 } = useCurrentGlobalKfLocation(window.watcher);
 
+const { getValidatorByOrderInputKey } = useTradeLimit();
+
 const makeOrderInstrumentType = ref<InstrumentTypeEnum>(
   InstrumentTypeEnum.unknown,
 );
@@ -107,6 +111,26 @@ const configSettings = computed(() => {
     makeOrderInstrumentType.value,
     +formState.value.price_type,
   );
+});
+
+const rules = computed(() => {
+  const { instrument } = formState.value;
+  return {
+    volume: {
+      validator: getValidatorByOrderInputKey(
+        OrderInputKeyEnum.VOLUME,
+        instrument,
+      ),
+      trigger: 'change',
+    },
+    limit_price: {
+      validator: getValidatorByOrderInputKey(
+        OrderInputKeyEnum.PRICE,
+        instrument,
+      ),
+      trigger: 'change',
+    },
+  };
 });
 
 const isShowConfirmModal = ref<boolean>(false);
@@ -616,6 +640,7 @@ watch(
               changeType="add"
               :label-col="LABEL_COL"
               :wrapper-col="WRAPPER_COL"
+              :rules="rules"
             ></KfConfigSettingsForm>
             <div class="percent-group__wrap">
               <a-col :span="LABEL_COL + WRAPPER_COL">

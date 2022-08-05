@@ -49,7 +49,7 @@ const configSettings = computed(() => {
 
 function numberValidator(_rule: RuleObject, value: string) {
   if (value === '' || !/^\d+$/.test(value)) {
-    return Promise.reject(t('blockTradeConfig.number_error'));
+    return Promise.reject(t('blockTradeConfig.only_number'));
   } else {
     return Promise.resolve();
   }

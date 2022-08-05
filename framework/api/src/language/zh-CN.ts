@@ -410,6 +410,8 @@ export default {
     average_trade_latency: '平均成交延迟(μs)',
     max_trade_latency: '最大成交延迟(μs)',
     min_trade_latency: '最小成交延迟(μs)',
+
+    greater_than_limit_value: '当前标的下单{key}最大值为{value}',
   },
 
   futureArbitrageConfig: {
@@ -454,7 +456,7 @@ export default {
 
     place_order: '下单',
     reset_order: '重置',
-    number_error: '该项只能为数字',
+    only_number: '该项只能为数字',
   },
 
   globalSettingConfig: {
@@ -491,6 +493,10 @@ export default {
     set_fat_finger: '设置乌龙指触发阈值(百分比)',
     close_threshold: '平仓阈值',
     set_close_threshold: '设置平仓阈值(百分比)',
+    trade_limit: '交易限制',
+    set_trade_limit: '设置交易限制',
+    order_input_key: '限制属性',
+    limit_value: '最大值',
     asset_margin: '两融',
     show_asset_margin: '展示两融',
 
