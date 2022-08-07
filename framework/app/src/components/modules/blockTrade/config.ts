@@ -1,5 +1,4 @@
 import {
-  HedgeFlagEnum,
   KfCategoryTypes,
   PriceTypeEnum,
   SideEnum,
@@ -30,13 +29,6 @@ export const getConfigSettings = (
       name: t('blockTradeConfig.side'),
       type: 'side',
       default: SideEnum.Buy,
-      required: true,
-    },
-    {
-      key: 'hedge_flag',
-      name: t('blockTradeConfig.hedge_flag'),
-      type: 'hedgeFlag',
-      default: HedgeFlagEnum.Speculation,
       required: true,
     },
     {

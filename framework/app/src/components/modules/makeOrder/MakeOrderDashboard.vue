@@ -166,7 +166,11 @@ const makeOrderData = computed(() => {
 
 const availTradingTaskExtensionList = computed(() => {
   return getExtConfigList(extConfigs.value, 'strategy').filter((item) => {
-    return uiExtConfigs.value[item.key]?.position === 'make_order';
+    const curExtConfig = uiExtConfigs.value[item.key];
+    return (
+      curExtConfig?.position === 'make_order' &&
+      curExtConfig?.name !== 'ExcelTask'
+    );
   });
 });
 

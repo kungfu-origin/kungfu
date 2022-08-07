@@ -442,7 +442,7 @@ export default {
     hedge_flag: '套保',
     is_swap: '互换',
     price_type: '方式',
-    limit_price: '委托价格',
+    limit_price: '价格',
     volume: '下单量',
     opponent_seat: '对方席位',
     opponent_account: '对方股东',
