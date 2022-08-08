@@ -22,6 +22,7 @@ import {
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import { dealOrderPlaceVNode } from './utils';
+import { HedgeFlagEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 
 const { t } = VueI18n.global;
 const { error } = messagePrompt();
@@ -49,7 +50,7 @@ const configSettings = computed(() => {
 
 function numberValidator(_rule: RuleObject, value: string) {
   if (value === '' || !/^\d+$/.test(value)) {
-    return Promise.reject(t('blockTradeConfig.number_error'));
+    return Promise.reject(t('blockTradeConfig.only_number'));
   } else {
     return Promise.resolve();
   }
@@ -98,7 +99,6 @@ function handleMakeOrder() {
         price_type,
         side,
         offset,
-        hedge_flag,
         is_swap,
         opponent_seat,
         opponent_account,
@@ -117,7 +117,7 @@ function handleMakeOrder() {
         price_type: +price_type,
         side: +side,
         offset: +(offset !== undefined ? offset : +side === 0 ? 0 : 1),
-        hedge_flag: +(hedge_flag || 0),
+        hedge_flag: HedgeFlagEnum.Speculation,
         is_swap: !!is_swap,
       };
 

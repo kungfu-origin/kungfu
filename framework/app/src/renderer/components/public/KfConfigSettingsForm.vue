@@ -823,7 +823,17 @@ export default defineComponent({
           .ant-row.ant-form-item {
             margin-bottom: 8px;
           }
+
+          .ant-form-item-label > label,
+          .global-setting-item .label {
+            font-size: 12px;
+            min-width: 100px;
+          }
         }
+      }
+
+      .ant-divider-horizontal {
+        margin: 12px 0;
       }
     }
   }

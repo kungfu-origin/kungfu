@@ -22,6 +22,7 @@ import {
   ProcessStatusTypes,
   SideEnum,
   StrategyExtTypes,
+  OrderInputKeyEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
   getKfCategoryData,
@@ -71,6 +72,7 @@ import dayjs from 'dayjs';
 import { Row } from '@fast-csv/format';
 import {
   AbleSubscribeInstrumentTypesBySourceType,
+  OrderInputKeySetting,
   ShotableInstrumentTypes,
 } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import {
@@ -87,6 +89,7 @@ import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import { messagePrompt } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import sound from 'sound-play';
 import { KUNGFU_RESOURCES_DIR } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
+import { RuleObject } from 'ant-design-vue/lib/form';
 
 const { t } = VueI18n.global;
 const { success, error } = messagePrompt();
@@ -1730,5 +1733,105 @@ export const useMakeOrderInfo = (
     currentTradeAmount,
     currentResidueMoney,
     currentResiduePosVolume,
+  };
+};
+
+export const useTradeLimit = () => {
+  const store = useGlobalStore();
+  const app = getCurrentInstance();
+  const { globalSetting } = storeToRefs(store);
+  type LimitRuleType = {
+    instrument: string;
+    value: Record<OrderInputKeyEnum, number>;
+  };
+  type LimitRulesMapType = Record<string, LimitRuleType>;
+  const limitRulesMapRef = ref<LimitRulesMapType>({});
+
+  const setLimitRulesMap = () => {
+    limitRulesMapRef.value = (
+      globalSetting.value.trade.limit as KungfuApi.TradeLimitItem[]
+    ).reduce<LimitRulesMapType>((map, item) => {
+      const { instrument, orderInputKey, limitValue } = item;
+      if (map[instrument]?.value) {
+        const oldValue = map[instrument].value[orderInputKey]
+          ? map[instrument].value[orderInputKey]
+          : Infinity;
+        map[instrument].value[orderInputKey] = Math.min(limitValue, oldValue);
+      } else {
+        map[instrument] = {
+          instrument,
+          value: {
+            [orderInputKey]: limitValue,
+          } as LimitRuleType['value'],
+        };
+      }
+
+      return map;
+    }, {} as LimitRulesMapType);
+  };
+
+  const createValidatorByLimitRule = (
+    limitRule: LimitRuleType,
+    orderInputKey: OrderInputKeyEnum,
+  ) => {
+    const orderInputKeyName = OrderInputKeySetting[orderInputKey].name;
+    return function (_rule: RuleObject, value: string | number) {
+      if (Number.isNaN(+value))
+        return Promise.reject(new Error(t('blockTradeConfig.only_number')));
+      value = Number(value);
+
+      if (value < 0) {
+        return Promise.reject(new Error(t('validate.no_negative_number')));
+      }
+
+      const limitValue = limitRule?.value?.[orderInputKey];
+
+      if (limitValue !== undefined) {
+        if (limitValue < value) {
+          return Promise.reject(
+            new Error(
+              t('tradeConfig.greater_than_limit_value', {
+                key: orderInputKeyName,
+                value: limitValue,
+              }),
+            ),
+          );
+        }
+      }
+
+      return Promise.resolve();
+    };
+  };
+
+  const getValidatorByOrderInputKey = (
+    orderInputKey: OrderInputKeyEnum,
+    instrument: string,
+  ) => {
+    const currentLimitRule = limitRulesMapRef.value[instrument];
+
+    return createValidatorByLimitRule(currentLimitRule, orderInputKey);
+  };
+
+  onMounted(() => {
+    setLimitRulesMap();
+
+    if (app?.proxy) {
+      const subscription = app.proxy.$globalBus.subscribe(
+        (data: KfEvent.KfBusEvent) => {
+          if (data.tag === 'open:globalSetting') {
+            console.log(12345);
+            setLimitRulesMap();
+          }
+        },
+      );
+
+      onBeforeUnmount(() => {
+        subscription.unsubscribe();
+      });
+    }
+  });
+
+  return {
+    getValidatorByOrderInputKey,
   };
 };

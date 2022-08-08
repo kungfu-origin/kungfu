@@ -1,8 +1,16 @@
 import fse from 'fs-extra';
 import os from 'os';
-import { SpaceSizeSettingEnum, SpaceTabSettingEnum } from '../typings/enums';
+import {
+  OrderInputKeyEnum,
+  SpaceSizeSettingEnum,
+  SpaceTabSettingEnum,
+} from '../typings/enums';
 import { KF_CONFIG_PATH, PY_WHL_DIR } from './pathConfig';
-import { CodeSizeSetting, CodeTabSetting } from './tradingConfig';
+import {
+  CodeSizeSetting,
+  CodeTabSetting,
+  OrderInputKeySetting,
+} from './tradingConfig';
 // import {
 //   languageList,
 //   langDefault,
@@ -122,6 +130,42 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
         tip: t('globalSettingConfig.set_close_threshold'),
         default: '',
         type: 'percent',
+      },
+
+      {
+        key: 'limit',
+        name: t('globalSettingConfig.trade_limit'),
+        tip: t('globalSettingConfig.set_trade_limit'),
+        default: [],
+        type: 'table',
+        columns: [
+          {
+            key: 'instrument',
+            name: t('tradeConfig.instrument'),
+            type: 'instrument',
+          },
+          {
+            key: 'orderInputKey',
+            name: t('globalSettingConfig.order_input_key'),
+            type: 'select',
+            options: [
+              {
+                value: OrderInputKeyEnum.VOLUME,
+                label: OrderInputKeySetting[OrderInputKeyEnum.VOLUME].name,
+              },
+              {
+                value: OrderInputKeyEnum.PRICE,
+                label: OrderInputKeySetting[OrderInputKeyEnum.PRICE].name,
+              },
+            ],
+          },
+          {
+            key: 'limitValue',
+            name: t('globalSettingConfig.limit_value'),
+            default: 0,
+            type: 'float',
+          },
+        ],
       },
       {
         key: 'assetMargin',
