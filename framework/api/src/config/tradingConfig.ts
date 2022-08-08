@@ -19,6 +19,7 @@ import {
   SpaceSizeSettingEnum,
   StrategyExtTypes,
   UnderweightEnum,
+  OrderInputKeyEnum,
 } from '../typings/enums';
 
 import { Pm2ProcessStatusTypes } from '../utils/processUtils';
@@ -202,6 +203,14 @@ export const CodeSizeSetting: Record<
 > = {
   [SpaceSizeSettingEnum.FOURINDENT]: { name: '4' },
   [SpaceSizeSettingEnum.TWOINDENT]: { name: '2' },
+};
+
+export const OrderInputKeySetting: Record<
+  OrderInputKeyEnum,
+  KungfuApi.KfTradeValueCommonData
+> = {
+  [OrderInputKeyEnum.VOLUME]: { name: t('tradeConfig.volume') },
+  [OrderInputKeyEnum.PRICE]: { name: t('tradeConfig.price') },
 };
 
 export const Side: Record<SideEnum, KungfuApi.KfTradeValueCommonData> = {
