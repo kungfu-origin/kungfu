@@ -29,6 +29,7 @@ declare namespace KungfuApi {
     KfModeEnum,
     KfModeTypes,
     OrderActionFlagEnum,
+    OrderInputKeyEnum,
     KfExtConfigTypes,
   } from './enums';
   import { Dayjs } from 'dayjs';
@@ -841,6 +842,12 @@ declare namespace KungfuApi {
     second: string;
     mode: ScheduleTaskMode;
     processId: string;
+  }
+
+  export interface TradeLimitItem {
+    instrument: string;
+    orderInputKey: OrderInputKeyEnum;
+    limitValue: number;
   }
 }
 

@@ -412,6 +412,9 @@ export default {
     average_trade_latency: 'Average transaction delay(μs)',
     max_trade_latency: 'Max transaction delay(μs)',
     min_trade_latency: 'Min transaction delay(μs)',
+
+    greater_than_limit_value:
+      'The order propety {key}`s maximum for current instrument is {value}',
   },
 
   futureArbitrageConfig: {
@@ -456,7 +459,7 @@ export default {
 
     place_order: 'Place Order',
     reset_order: 'Resert',
-    number_error: 'can only number',
+    only_number: 'can only number',
   },
 
   globalSettingConfig: {
@@ -494,6 +497,10 @@ export default {
     close_threshold: 'Close Threshold',
     set_close_threshold:
       'Set the threshold for triggering an close(percentage)',
+    trade_limit: 'Trade Limit',
+    set_trade_limit: 'Set Trade limit value for price or volume property',
+    order_input_key: 'property',
+    limit_value: 'maximum',
     asset_margin: 'AssetMargin',
     show_asset_margin: 'AssetMargin Mode',
 

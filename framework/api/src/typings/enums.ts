@@ -209,3 +209,8 @@ export enum SpaceSizeSettingEnum {
   FOURINDENT = 'FOURINDENT',
   TWOINDENT = 'TWOINDENT',
 }
+
+export enum OrderInputKeyEnum {
+  VOLUME = 'VOLUME',
+  PRICE = 'PRICE',
+}
