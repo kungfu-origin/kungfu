@@ -14,12 +14,13 @@ exports.configure = (writePackageJson = false, writeWorkflows = true) => {
     console.log('> write workflows');
     const findWorkspaceRoot = require('find-yarn-workspace-root');
     const projectDir = findWorkspaceRoot() || process.cwd();
-    const srcDir = customResolve(
-      '@kungfu-trader/kungfu-sdk/templates/workflows',
+    const sdkDir = path.dirname(
+      path.dirname(customResolve('@kungfu-trader/kungfu-sdk')),
     );
+    const templatesDir = path.join(sdkDir, 'templates', 'workflows');
     const targetDir = path.join(projectDir, '.github', 'workflows');
     fse.mkdirSync(path.dirname(targetDir), { recursive: true });
-    fse.copySync(srcDir, targetDir, { overwrite: true });
+    fse.copySync(templatesDir, targetDir, { overwrite: true });
   }
 };
 
