@@ -1749,8 +1749,8 @@ export const useTradeLimit = () => {
 
   const setLimitRulesMap = () => {
     limitRulesMapRef.value = (
-      globalSetting.value.trade.limit as KungfuApi.TradeLimitItem[]
-    ).reduce<LimitRulesMapType>((map, item) => {
+      (globalSetting?.value?.trade?.limit || []) as KungfuApi.TradeLimitItem[]
+    ).reduce((map, item) => {
       const { instrument, orderInputKey, limitValue } = item;
       if (map[instrument]?.value) {
         const oldValue = map[instrument].value[orderInputKey]
