@@ -29,9 +29,37 @@ export const getExtraLanguage = () => {
   }
 };
 
+export const getMergeCNLanguage = () => {
+  const languagePath = path.join(
+    globalThis.__publicResources,
+    'language',
+    'zh-CN.json',
+  );
+  if (!fse.existsSync(languagePath)) {
+    return null;
+  } else {
+    return fse.readJSONSync(languagePath, { throws: false });
+  }
+};
+
+export const getMergeENLanguage = () => {
+  const languagePath = path.join(
+    globalThis.__publicResources,
+    'language',
+    'en-US.json',
+  );
+  if (!fse.existsSync(languagePath)) {
+    return null;
+  } else {
+    return fse.readJSONSync(languagePath, { throws: false });
+  }
+};
+
 // 默认语言
 export const langDefault = process.env.LANG_ENV ?? 'zh-CN';
 const extraLanguage = getExtraLanguage();
+const mergeCNLanguage = getMergeCNLanguage();
+const mergeENLanguage = getMergeENLanguage();
 
 const i18n = createI18n({
   locale: extraLanguage ? 'extra' : langDefault, //默认显示的语言
@@ -40,6 +68,8 @@ const i18n = createI18n({
     extra: extraLanguage || {},
   },
 });
+
+console.log(mergeCNLanguage, mergeENLanguage, i18n);
 
 export default i18n;
 globalThis.i18n = i18n;
