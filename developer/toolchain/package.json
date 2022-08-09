@@ -53,6 +53,7 @@
     "eslint-webpack-plugin": "^3.1.1",
     "fast-stats": "^0.0.6",
     "file-loader": "^6.2.0",
+    "find-root": "^1.1.0",
     "find-yarn-workspace-root": "^2.0.0",
     "fs-extra": "^10.0.1",
     "html-webpack-plugin": "^5.5.0",

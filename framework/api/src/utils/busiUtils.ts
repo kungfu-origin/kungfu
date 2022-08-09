@@ -153,31 +153,31 @@ Array.prototype.removeRepeat = function () {
 
 Array.prototype.kfForEach = function (cb) {
   if (!cb) return;
-  const t = this;
-  const len = t.length;
+  const self = this;
+  const len = self.length;
   let i = 0;
 
   while (i < len) {
-    cb.call(t, t[i], i);
+    cb.call(self, self[i], i);
     i++;
   }
 };
 
 Array.prototype.kfReverseForEach = function (cb) {
   if (!cb) return;
-  const t = this;
-  let i = t.length;
+  const self = this;
+  let i = self.length;
   while (i--) {
-    cb.call(t, t[i], i);
+    cb.call(self, self[i], i);
   }
 };
 
 Array.prototype.kfForEachAsync = function (cb) {
   if (!cb) return;
-  const t = this;
-  const len = t.length;
+  const self = this;
+  const len = self.length;
   return new Promise((resolve) => {
-    setImmediateIter(t, 0, len, cb, () => {
+    setImmediateIter(self, 0, len, cb, () => {
       resolve(true);
     });
   });
