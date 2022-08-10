@@ -9,6 +9,7 @@ import {
   App,
 } from 'vue';
 import {
+  ARCHIVE_DIR,
   buildProcessLogPath,
   KF_HOME,
 } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
@@ -22,6 +23,7 @@ import {
   loopToRunProcess,
   resolveInstrumentValue,
   transformSearchInstrumentResultToInstrument,
+  removeArchiveBeforeToday,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import { BrowserWindow, getCurrentWindow, dialog } from '@electron/remote';
@@ -205,6 +207,12 @@ export const useTableSearchKeyword = <T>(
   };
 };
 
+const removeArchiveBeforeStartAll = (): Promise<void> => {
+  return removeArchiveBeforeToday(ARCHIVE_DIR).then(() => {
+    kfLogger.info('Clear Archive Done');
+  });
+};
+
 const removeJournalBeforeStartAll = (): Promise<void> => {
   const needClearJournalStr = localStorage.getItem('needClearJournal');
   const needClearJournal = !!(needClearJournalStr && +needClearJournalStr);
@@ -236,7 +244,11 @@ const removeDBBeforeStartAll = (): Promise<void> => {
 };
 
 export const preStartAll = async (): Promise<(void | Proc)[]> => {
-  return Promise.all([removeJournalBeforeStartAll(), removeDBBeforeStartAll()]);
+  return Promise.all([
+    removeJournalBeforeStartAll(),
+    removeDBBeforeStartAll(),
+    removeArchiveBeforeStartAll(),
+  ]);
 };
 
 export const postStartAll = async (): Promise<(void | Proc)[]> => {
