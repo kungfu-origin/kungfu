@@ -6,7 +6,7 @@ const {
   getKfcDir,
   getCoreDir,
   getExtensionDirs,
-  findPackageRoot,
+  // findPackageRoot,
 } = require('@kungfu-trader/kungfu-js-api/toolkit/utils');
 
 const appDir = getAppDir();
@@ -14,9 +14,10 @@ const appDir = getAppDir();
 const kfcDir = getKfcDir();
 const coreDir = getCoreDir();
 const extensionDirs = getExtensionDirs(true);
-const root = findPackageRoot();
-const languageDir = path.join(root, 'language');
-const languageFile = path.join(languageDir, 'locale.json');
+// const root = findPackageRoot();
+// console.log(root);
+// const languageDir = path.join(root, 'language');
+// const languageFile = path.join(languageDir, 'locale.json');
 
 const extensions = extensionDirs.map((fullpath) => {
   const extensionDir = path.resolve(fullpath, 'dist');
@@ -29,9 +30,9 @@ const extensions = extensionDirs.map((fullpath) => {
   };
 });
 
-if (fse.existsSync(languageFile)) {
-  console.log(`-- found language locale ${languageFile}`);
-}
+// if (fse.existsSync(languageFile)) {
+//   console.log(`-- found language locale ${languageFile}`);
+// }
 
 module.exports = {
   generateUpdatesFilesForAllChannels: true,
@@ -98,12 +99,12 @@ module.exports = {
       to: 'app',
       filter: ['package.json'],
     },
-    fse.existsSync(languageFile)
-      ? {
-          from: languageFile,
-          to: 'app/dist/public/language/locale.json',
-        }
-      : {},
+    // fse.existsSync(languageFile)
+    //   ? {
+    //       from: languageFile,
+    //       to: 'app/dist/public/language/locale.json',
+    //     }
+    //   : {},
     ...extensions,
   ],
   asar: false,
