@@ -1,4 +1,5 @@
 import { StartOptions } from 'pm2';
+import { I18n } from 'vue-i18n';
 import { KfHookKeeper } from '../hooks';
 
 declare global {
@@ -17,8 +18,6 @@ declare global {
       APP_TYPE: 'cli' | 'renderer' | 'main' | 'daemon';
       UI_EXT_TYPE: 'component' | 'script';
       APP_ID: string;
-      // DAEMON_ID: string;
-      // RENDERER_ID: string;
       EXTENSION_DIRS: string;
       KFC_DIR: string;
       ELECTRON_RUN_AS_NODE: boolean;
@@ -56,6 +55,7 @@ declare module globalThis {
   const __kfResourcesPath: string;
   const pm2: any;
   const HookKeeper: KfHookKeeper;
+  const i18n: I18n;
 }
 
 export interface Pm2StartOptions extends StartOptions {

@@ -1,6 +1,7 @@
 const fs = require('fs-extra');
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const findRoot = require('find-root');
 
 exports.getKungfuBuildInfo = () => {
   try {
@@ -218,4 +219,12 @@ exports.buildDevArgv = (distDir, distName) => {
     distDir: distDir,
     distName: distName,
   };
+};
+
+exports.findPackageRoot = () => {
+  const cwd = process.cwd();
+  if (cwd.includes('node_modules')) {
+    return findRoot(path.resolve(cwd.split('node_modules')[0]));
+  }
+  return findRoot(path.resolve(cwd));
 };
