@@ -11,6 +11,7 @@ import {
   getProcessIdByKfLocation,
   getTaskListFromProcessStatusData,
   kfLogger,
+  removeArchiveBeforeToday,
   removeJournal,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
@@ -42,7 +43,10 @@ import {
 } from '../methods/utils';
 import { globalState } from '../actions/globalState';
 import { dealProcessName } from '../methods/utils';
-import { KF_HOME } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
+import {
+  ARCHIVE_DIR,
+  KF_HOME,
+} from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 
 export const mdTdStrategyDaemonObservable = () => {
   return new Observable<
@@ -539,6 +543,7 @@ const switchMaster = async (status: boolean): Promise<void> => {
     await deleteNNFiles();
   } else {
     await removeJournal(KF_HOME);
+    await removeArchiveBeforeToday(ARCHIVE_DIR);
     await startMaster(false);
     await delayMilliSeconds(1000);
     await startCacheD(false);

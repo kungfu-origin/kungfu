@@ -26,6 +26,10 @@ addFileSync('', NODE_DIR, 'folder');
 export const LOG_DIR = path.join(KF_HOME, 'logview');
 addFileSync('', LOG_DIR, 'folder');
 
+//archive
+export const ARCHIVE_DIR = path.join(KF_HOME, 'archive');
+addFileSync('', ARCHIVE_DIR, 'folder');
+
 //================= global db start ==============================
 
 //BASE_DB_DIR strategys, accounts, tasks

@@ -736,6 +736,24 @@ export const hidePasswordByLogger = (config: string) => {
   return JSON.stringify(configCopy);
 };
 
+export const dealDateDayOrMonth = (val: number) => {
+  return val < 10 ? `0${val}` : `${val}`;
+};
+
+export const removeArchiveBeforeToday = (
+  targetFolder: string,
+): Promise<void> => {
+  const today = dayjs();
+  const year = today.year();
+  const month = today.month() + 1;
+  const day = today.date();
+  const todayArchive = `KFA-${year}-${dealDateDayOrMonth(
+    month,
+  )}-${dealDateDayOrMonth(day)}.zip`;
+  console.log(todayArchive);
+  return removeTargetFilesInFolder(targetFolder, ['.zip'], [todayArchive]);
+};
+
 export const removeJournal = (targetFolder: string): Promise<void> => {
   return removeTargetFilesInFolder(targetFolder, ['.journal']);
 };
