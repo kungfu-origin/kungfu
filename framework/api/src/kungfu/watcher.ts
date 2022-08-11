@@ -18,7 +18,7 @@ export const getWatcherId = () => {
   ]
     .filter((str) => !!str)
     .join('-');
-  console.log(`Watcher Id is ${watcherId}`);
+  console.log(`WatcherId ${watcherId}`);
   return watcherId;
 };
 
