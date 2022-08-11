@@ -750,7 +750,6 @@ export const removeArchiveBeforeToday = (
   const todayArchive = `KFA-${year}-${dealDateDayOrMonth(
     month,
   )}-${dealDateDayOrMonth(day)}.zip`;
-  console.log(todayArchive);
   return removeTargetFilesInFolder(targetFolder, ['.zip'], [todayArchive]);
 };
 
