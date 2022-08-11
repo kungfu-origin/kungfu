@@ -499,8 +499,9 @@ export default {
       'Set the threshold for triggering an close(percentage)',
     trade_limit: 'Trade Limit',
     set_trade_limit: 'Set Trade limit value for price or volume property',
-    order_input_key: 'property',
-    limit_value: 'maximum',
+    order_input_key: 'Property',
+    single_price: 'Single Price',
+    limit_value: 'Maximum',
     asset_margin: 'AssetMargin',
     show_asset_margin: 'AssetMargin Mode',
 

@@ -496,6 +496,7 @@ export default {
     trade_limit: '交易限制',
     set_trade_limit: '设置交易限制',
     order_input_key: '限制属性',
+    single_price: '单笔成交价',
     limit_value: '最大值',
     asset_margin: '两融',
     show_asset_margin: '展示两融',
