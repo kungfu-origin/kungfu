@@ -391,7 +391,6 @@ export default {
   },
 
   tradeConfig: {
-    instrument: '标的',
     trade_time_resolved: '成交时间',
     kf_time_resolved: '系统时间',
     instrument_id: '代码',

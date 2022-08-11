@@ -33,7 +33,7 @@ export const getColumns = (
   },
   {
     type: 'string',
-    name: t('tradeConfig.instrument_id'),
+    name: t('tradeConfig.instrument_id_id'),
     dataIndex: 'instrument_id',
     sorter: buildStrSorter('instrument_id'),
     width: 60,
@@ -95,7 +95,7 @@ export const getColumns = (
 
 export const statisColums: AntTableColumns = [
   {
-    title: t('tradeConfig.instrument'),
+    title: t('tradeConfig.instrument_id'),
     dataIndex: 'instrumentId_exchangeId',
   },
   {

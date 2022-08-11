@@ -393,7 +393,6 @@ export default {
   },
 
   tradeConfig: {
-    instrument: 'instrument',
     trade_time_resolved: 'trade_time',
     kf_time_resolved: 'kf_time',
     instrument_id: 'instrument_id',
