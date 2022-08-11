@@ -84,6 +84,9 @@ onUnmounted(() => {
   });
 
   setKfGlobalSettingsValue(globalSettingsFromStates).then(() => {
+    globalBus.next({
+      tag: 'saved:globalSetting',
+    });
     store.setKfGlobalSetting();
   });
 
