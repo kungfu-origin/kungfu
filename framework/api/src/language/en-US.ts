@@ -282,7 +282,7 @@ export default {
     entrust_statistical: 'Entrust Statistical',
     statistical_desc: 'Real-time (latest 100 pieces of data)',
     entrust_statistical_number: 'Entrust Statistical Number',
-    ntrust_statistical_price: 'Entrust Statistical Price',
+    entrust_statistical_price: 'Entrust Statistical Price',
     average_withdrawal_ratio:
       'Average withdrawal ratio (only partial withdrawal and total withdrawal of statistics Department)',
     average_system_latency: 'Average System Latency(μs)',

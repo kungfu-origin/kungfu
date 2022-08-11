@@ -200,7 +200,7 @@ const priceVolumeStats = computed(() => {
       </a-col>
     </a-row>
     <a-row style="margin-bottom: 30px" class="limit-price-stats-row">
-      <div class="title">{{ $t('orderConfig.ntrust_statistical_price') }}</div>
+      <div class="title">{{ $t('orderConfig.entrust_statistical_price') }}</div>
       <a-table
         v-if="priceVolumeStats"
         size="small"

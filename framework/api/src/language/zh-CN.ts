@@ -284,7 +284,7 @@ export default {
     entrust_statistical: '委托统计',
     statistical_desc: '实时(最新100条数据)',
     entrust_statistical_number: '委托统计数量',
-    ntrust_statistical_price: '委托价统计',
+    entrust_statistical_price: '委托价统计',
     average_withdrawal_ratio: '平均撤单比 (仅统计 部成部撤 和 全部撤单)',
     average_system_latency: '平均系统延迟(μs)',
     min_system_latency: '最小系统延迟(μs)',
