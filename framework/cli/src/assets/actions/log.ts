@@ -14,7 +14,7 @@ export class Log {
   logList: KungfuApi.KfNumList<string>;
   EXTRA_LINES: number;
 
-  constructor(lines = 10000) {
+  constructor(lines = 2000) {
     this.EXTRA_LINES = 1000;
     this.logTail = null;
     this.lines = lines;

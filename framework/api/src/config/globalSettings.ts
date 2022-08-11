@@ -141,7 +141,7 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
         columns: [
           {
             key: 'instrument',
-            name: t('tradeConfig.instrument'),
+            name: t('tradeConfig.instrument_id'),
             type: 'instrument',
           },
           {

@@ -282,7 +282,7 @@ export default {
     entrust_statistical: 'Entrust Statistical',
     statistical_desc: 'Real-time (latest 100 pieces of data)',
     entrust_statistical_number: 'Entrust Statistical Number',
-    ntrust_statistical_price: 'Entrust Statistical Price',
+    entrust_statistical_price: 'Entrust Statistical Price',
     average_withdrawal_ratio:
       'Average withdrawal ratio (only partial withdrawal and total withdrawal of statistics Department)',
     average_system_latency: 'Average System Latency(μs)',
@@ -393,7 +393,6 @@ export default {
   },
 
   tradeConfig: {
-    instrument: 'instrument',
     trade_time_resolved: 'trade_time',
     kf_time_resolved: 'kf_time',
     instrument_id: 'instrument_id',
@@ -439,7 +438,7 @@ export default {
 
   blockTradeConfig: {
     account_name: 'account_name',
-    instrument: 'instrument',
+    instrument_id: 'instrument',
     side: 'side',
     offset: 'offset',
     hedge_flag: 'hedge_flag',
@@ -499,8 +498,9 @@ export default {
       'Set the threshold for triggering an close(percentage)',
     trade_limit: 'Trade Limit',
     set_trade_limit: 'Set Trade limit value for price or volume property',
-    order_input_key: 'property',
-    limit_value: 'maximum',
+    order_input_key: 'Property',
+    single_price: 'Single Price',
+    limit_value: 'Maximum',
     asset_margin: 'AssetMargin',
     show_asset_margin: 'AssetMargin Mode',
 

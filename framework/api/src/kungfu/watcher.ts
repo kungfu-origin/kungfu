@@ -3,29 +3,26 @@ import { KF_RUNTIME_DIR } from '../config/pathConfig';
 import { getKfGlobalSettingsValue } from '@kungfu-trader/kungfu-js-api/config/globalSettings';
 import {
   booleanProcessEnv,
-  kfLogger,
   setTimerPromiseTask,
   // statTime,
   // statTimeEnd,
 } from '../utils/busiUtils';
 
 export const getWatcherId = () => {
-  return `${process.env.APP_TYPE || ''}-${
-    process.env.UI_EXT_TYPE || ''
-  }-${kf.formatStringToHashHex(process.env.APP_ID || '')}`;
+  const watcherId = [
+    process.env.APP_TYPE,
+    process.env.UI_EXT_TYPE,
+    (process.env.APP_ID || '').length > 16
+      ? kf.formatStringToHashHex(process.env.APP_ID || '')
+      : process.env.APP_ID,
+  ]
+    .filter((str) => !!str)
+    .join('-');
+  console.log(`WatcherId ${watcherId}`);
+  return watcherId;
 };
 
 export const watcher = ((): KungfuApi.Watcher | null => {
-  kfLogger.info(
-    'Init Watcher',
-    'APP_TYPE',
-    process.env.APP_TYPE || 'undefined',
-    'UI_EXT_TYPE',
-    process.env.UI_EXT_TYPE || 'undefined',
-    'APP_ID',
-    process.env.APP_ID || 'undefined',
-  );
-
   if (process.env.APP_TYPE !== 'renderer') {
     if (process.env.APP_TYPE !== 'daemon') {
       return null;
@@ -37,6 +34,17 @@ export const watcher = ((): KungfuApi.Watcher | null => {
       return null;
     }
   }
+
+  //for cli show
+  console.log(
+    'Init Watcher',
+    'APP_TYPE',
+    process.env.APP_TYPE || 'undefined',
+    'UI_EXT_TYPE',
+    process.env.UI_EXT_TYPE || 'undefined',
+    'APP_ID',
+    process.env.APP_ID || 'undefined',
+  );
 
   const bypassRestore =
     booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED) ||

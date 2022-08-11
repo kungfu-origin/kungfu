@@ -1818,8 +1818,7 @@ export const useTradeLimit = () => {
     if (app?.proxy) {
       const subscription = app.proxy.$globalBus.subscribe(
         (data: KfEvent.KfBusEvent) => {
-          if (data.tag === 'open:globalSetting') {
-            console.log(12345);
+          if (data.tag === 'saved:globalSetting') {
             setLimitRulesMap();
           }
         },

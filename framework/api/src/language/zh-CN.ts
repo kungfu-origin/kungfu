@@ -256,7 +256,7 @@ export default {
 
   orderConfig: {
     update_time: '更新时间',
-    instrument_id: '代码',
+    instrument_id: '标的',
     limit_price: '委托价',
     order_status: '订单状态',
     latency_system: '系统延迟μs',
@@ -284,7 +284,7 @@ export default {
     entrust_statistical: '委托统计',
     statistical_desc: '实时(最新100条数据)',
     entrust_statistical_number: '委托统计数量',
-    ntrust_statistical_price: '委托价统计',
+    entrust_statistical_price: '委托价统计',
     average_withdrawal_ratio: '平均撤单比 (仅统计 部成部撤 和 全部撤单)',
     average_system_latency: '平均系统延迟(μs)',
     min_system_latency: '最小系统延迟(μs)',
@@ -367,7 +367,7 @@ export default {
   },
 
   posGlobalConfig: {
-    instrument_id: '代码',
+    instrument_id: '标的',
     account_id_resolved: '持有账户',
     yesterday_volume: '昨',
     today_volume: '今',
@@ -391,10 +391,9 @@ export default {
   },
 
   tradeConfig: {
-    instrument: '标的',
     trade_time_resolved: '成交时间',
     kf_time_resolved: '系统时间',
-    instrument_id: '代码',
+    instrument_id: '标的',
     price: '成交价',
     volume: '成交量',
     latency_trade: '成交延迟(μs)',
@@ -436,7 +435,7 @@ export default {
 
   blockTradeConfig: {
     account_name: '账户',
-    instrument: '标的',
+    instrument_id: '标的',
     side: '买卖',
     offset: '开平',
     hedge_flag: '套保',
@@ -496,6 +495,7 @@ export default {
     trade_limit: '交易限制',
     set_trade_limit: '设置交易限制',
     order_input_key: '限制属性',
+    single_price: '单笔成交价',
     limit_value: '最大值',
     asset_margin: '两融',
     show_asset_margin: '展示两融',

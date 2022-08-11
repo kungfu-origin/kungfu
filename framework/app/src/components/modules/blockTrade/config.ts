@@ -20,7 +20,7 @@ export const getConfigSettings = (
         },
     {
       key: 'instrument',
-      name: t('blockTradeConfig.instrument'),
+      name: t('blockTradeConfig.instrument_id'),
       type: 'instrument',
       required: true,
     },

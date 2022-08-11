@@ -13,6 +13,7 @@ const {
   getKfcPath,
   getKfcCmdArgs,
   getCmakeCmdArgs,
+  getCmakeNextCmdArgs,
   kfcName,
 } = require('../utils');
 
@@ -333,8 +334,14 @@ exports.compile = () => {
   }
 
   if (hasSourceFor(packageJson, 'cpp')) {
-    const { cmd, args0 } = getCmakeCmdArgs();
-    spawnExec(cmd, [...args0, 'build']);
+    const { cmd, args } = getCmakeCmdArgs();
+    spawnExec(cmd, [...args]);
+
+    const nextCmdArgs = getCmakeNextCmdArgs();
+    if (nextCmdArgs) {
+      const { cmd, args } = nextCmdArgs;
+      spawnExec(cmd, [...args]);
+    }
   }
 
   const cwd = process.cwd().toString(); // 这一步避免在打包中process.cwd()被替换
