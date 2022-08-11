@@ -36,10 +36,8 @@ export const getMergeCNLanguage = () => {
     'zh-CN-merge.json',
   );
   if (!fse.existsSync(languagePath)) {
-    console.log(123);
     return null;
   } else {
-    console.log(24234);
     return fse.readJSONSync(languagePath, { throws: false });
   }
 };

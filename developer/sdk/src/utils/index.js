@@ -9,8 +9,6 @@ const execSuffix = isWin ? '.exe' : '';
 
 const kfcName = 'kfc' + execSuffix;
 
-const prodNodeMoudlesDir = path.join(__dirname, '..', '..', 'node_modules');
-
 const customResolve = (path) => {
   if (isProduction()) {
     // eslint-disable-next-line no-undef
@@ -73,12 +71,25 @@ const getKfcCmdArgs = () => {
 
 const getCmakeCmdArgs = () => {
   const cmdMap = {
-    [ModeMap.IN_CORE]: { cmd: 'yarn', args0: ['cmake-js'] },
+    [ModeMap.IN_CORE]: { cmd: 'yarn', args: ['cmake-js', 'build'] },
     [ModeMap.IN_PROD_APP]: {
-      cmd: 'node',
-      args0: [path.join(prodNodeMoudlesDir, 'cmake-js', 'bin', 'cmake-js')],
+      cmd: 'cmake',
+      args: ['-S', './', '-B', './build'],
     },
-    [ModeMap.IN_SDK_SRC]: { cmd: 'yarn', args0: ['cmake-js'] },
+    [ModeMap.IN_SDK_SRC]: { cmd: 'yarn', args: ['cmake-js', 'build'] },
+  };
+
+  return cmdMap[getCurrentMode()];
+};
+
+const getCmakeNextCmdArgs = () => {
+  const cmdMap = {
+    [ModeMap.IN_CORE]: null,
+    [ModeMap.IN_PROD_APP]: {
+      cmd: 'cmake',
+      args: ['--build', './build'],
+    },
+    [ModeMap.IN_SDK_SRC]: null,
   };
 
   return cmdMap[getCurrentMode()];
@@ -127,6 +138,7 @@ module.exports = {
   getKfcPath,
   getKfcCmdArgs,
   getCmakeCmdArgs,
+  getCmakeNextCmdArgs,
   customResolve,
   parseByCli,
 };
