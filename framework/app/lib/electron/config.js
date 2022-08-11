@@ -6,7 +6,7 @@ const {
   getKfcDir,
   getCoreDir,
   getExtensionDirs,
-  // findPackageRoot,
+  findPackageRoot,
 } = require('@kungfu-trader/kungfu-js-api/toolkit/utils');
 
 const appDir = getAppDir();
@@ -14,15 +14,17 @@ const appDir = getAppDir();
 const kfcDir = getKfcDir();
 const coreDir = getCoreDir();
 const extensionDirs = getExtensionDirs(true);
-// const root = findPackageRoot();
-// console.log(root);
-// const languageDir = path.join(root, 'language');
-// const languageFile = path.join(languageDir, 'locale.json');
+const root = findPackageRoot();
+console.log(`-- Package root ${root}`);
+const languageDir = path.join(root, 'language');
+const languageFile = path.join(languageDir, 'locale.json');
+const languageCNMergeFile = path.join(languageDir, 'zh-CN-merge.json');
+const languageENMergeFile = path.join(languageDir, 'en-US-merge.json');
 
 const extensions = extensionDirs.map((fullpath) => {
   const extensionDir = path.resolve(fullpath, 'dist');
   console.log(
-    `-- found kungfu extension: [${fse.readdirSync(extensionDir).join(', ')}]`,
+    `-- Found kungfu extension: [${fse.readdirSync(extensionDir).join(', ')}]`,
   );
   return {
     from: extensionDir,
@@ -30,9 +32,17 @@ const extensions = extensionDirs.map((fullpath) => {
   };
 });
 
-// if (fse.existsSync(languageFile)) {
-//   console.log(`-- found language locale ${languageFile}`);
-// }
+if (fse.existsSync(languageFile)) {
+  console.log(`-- Found language file ${languageFile}`);
+}
+
+if (fse.existsSync(languageCNMergeFile)) {
+  console.log(`-- Found language cn merge file ${languageCNMergeFile}`);
+}
+
+if (fse.existsSync(languageENMergeFile)) {
+  console.log(`-- Found language en merge file ${languageENMergeFile}`);
+}
 
 module.exports = {
   generateUpdatesFilesForAllChannels: true,
@@ -99,12 +109,15 @@ module.exports = {
       to: 'app',
       filter: ['package.json'],
     },
-    // fse.existsSync(languageFile)
-    //   ? {
-    //       from: languageFile,
-    //       to: 'app/dist/public/language/locale.json',
-    //     }
-    //   : {},
+    ...(fse.existsSync(languageDir)
+      ? [
+          {
+            from: languageDir,
+            to: 'app/dist/public/language',
+            filter: ['locale.json', 'zh-CN-merge.json', 'en-US-merge.json'],
+          },
+        ]
+      : []),
     ...extensions,
   ],
   asar: false,

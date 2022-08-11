@@ -33,11 +33,13 @@ export const getMergeCNLanguage = () => {
   const languagePath = path.join(
     globalThis.__publicResources,
     'language',
-    'zh-CN.json',
+    'zh-CN-merge.json',
   );
   if (!fse.existsSync(languagePath)) {
+    console.log(123);
     return null;
   } else {
+    console.log(24234);
     return fse.readJSONSync(languagePath, { throws: false });
   }
 };
@@ -46,7 +48,7 @@ export const getMergeENLanguage = () => {
   const languagePath = path.join(
     globalThis.__publicResources,
     'language',
-    'en-US.json',
+    'en-US-merge.json',
   );
   if (!fse.existsSync(languagePath)) {
     return null;
@@ -69,7 +71,19 @@ const i18n = createI18n({
   },
 });
 
-console.log(mergeCNLanguage, mergeENLanguage, i18n);
+if (extraLanguage) {
+  console.log('Found extra language');
+}
+
+if (mergeCNLanguage) {
+  console.log('Found cn merge language');
+  i18n.global.mergeLocaleMessage('zh-CN', mergeCNLanguage);
+}
+
+if (mergeENLanguage) {
+  console.log('Found en merge language');
+  i18n.global.mergeLocaleMessage('en-US', mergeENLanguage);
+}
 
 export default i18n;
 globalThis.i18n = i18n;
