@@ -256,7 +256,7 @@ export default {
 
   orderConfig: {
     update_time: '更新时间',
-    instrument_id: '代码',
+    instrument_id: '标的',
     limit_price: '委托价',
     order_status: '订单状态',
     latency_system: '系统延迟μs',
@@ -367,7 +367,7 @@ export default {
   },
 
   posGlobalConfig: {
-    instrument_id: '代码',
+    instrument_id: '标的',
     account_id_resolved: '持有账户',
     yesterday_volume: '昨',
     today_volume: '今',
@@ -393,7 +393,7 @@ export default {
   tradeConfig: {
     trade_time_resolved: '成交时间',
     kf_time_resolved: '系统时间',
-    instrument_id: '代码',
+    instrument_id: '标的',
     price: '成交价',
     volume: '成交量',
     latency_trade: '成交延迟(μs)',
@@ -435,7 +435,7 @@ export default {
 
   blockTradeConfig: {
     account_name: '账户',
-    instrument: '标的',
+    instrument_id: '标的',
     side: '买卖',
     offset: '开平',
     hedge_flag: '套保',

@@ -438,7 +438,7 @@ export default {
 
   blockTradeConfig: {
     account_name: 'account_name',
-    instrument: 'instrument',
+    instrument_id: 'instrument',
     side: 'side',
     offset: 'offset',
     hedge_flag: 'hedge_flag',
