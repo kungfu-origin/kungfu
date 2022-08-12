@@ -22,7 +22,7 @@ exports.build = () => {
   const cliDistDir = path.join(getCliDir(), 'dist', 'cli');
   const kfsDistDir = path.join(getSdkDir(), 'dist', 'sdk');
 
-  const targetDistDir = ensureDir(process.cwd(), 'dist');
+  const targetDistDir = ensureDir(process.cwd().toString(), 'dist');
   const targetAppDistDir = ensureDir(targetDistDir, 'app');
   const targetPublicDistDir = ensureDir(targetDistDir, 'public');
   const targetCliDistDir = ensureDir(targetDistDir, 'cli');
@@ -40,14 +40,14 @@ exports.build = () => {
 };
 
 exports.package = async () => {
-  const buildDir = ensureDir(process.cwd(), 'build');
+  const buildDir = ensureDir(process.cwd().toString(), 'build');
   await require('@kungfu-trader/kungfu-app').electronBuild(buildDir);
 };
 
 exports.dev = (withWebpack) => {
   shell.verifyElectron();
   require('@kungfu-trader/kungfu-app').devRun(
-    ensureDir(process.cwd(), 'dist'),
+    ensureDir(process.cwd().toString(), 'dist'),
     'app',
     withWebpack,
   );

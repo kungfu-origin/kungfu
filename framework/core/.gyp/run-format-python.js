@@ -3,7 +3,7 @@ const path = require('path');
 const { shell } = require('../lib');
 
 function main(argv) {
-  const cwd = process.cwd();
+  const cwd = process.cwd().toString();
   const coreDir = path.dirname(__dirname);
 
   const test = shell.run('black', ['--version'], false);

@@ -4,7 +4,7 @@ const { prebuilt, shell } = require('@kungfu-trader/kungfu-core');
 const { customResolve, getKfcPath } = require('../utils');
 
 exports.configure = (writePackageJson = false, writeWorkflows = true) => {
-  const packageJsonPath = path.join(process.cwd(), 'package.json');
+  const packageJsonPath = path.join(process.cwd().toString(), 'package.json');
   const packageJson = require(packageJsonPath);
   if (writePackageJson) {
     console.log('> write package.json');
@@ -13,7 +13,7 @@ exports.configure = (writePackageJson = false, writeWorkflows = true) => {
   if (writeWorkflows) {
     console.log('> write workflows');
     const findWorkspaceRoot = require('find-yarn-workspace-root');
-    const projectDir = findWorkspaceRoot() || process.cwd();
+    const projectDir = findWorkspaceRoot() || process.cwd().toString();
     const sdkDir = path.dirname(
       path.dirname(customResolve('@kungfu-trader/kungfu-sdk')),
     );

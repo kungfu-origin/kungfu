@@ -5,7 +5,7 @@ module.exports = {
   flags: 'clean',
   desc: 'Clean kungfu craft',
   run: () => {
-    fse.removeSync(path.join(process.cwd(), 'build'));
-    fse.removeSync(path.join(process.cwd(), 'dist'));
+    fse.removeSync(path.join(process.cwd().toString(), 'build'));
+    fse.removeSync(path.join(process.cwd().toString(), 'dist'));
   },
 };

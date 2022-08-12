@@ -97,7 +97,10 @@ exports.getWebpackExternals = () => {
   const sdkPackageJSONPath = require.resolve(
     '@kungfu-trader/kungfu-sdk/package.json',
   );
-  const currentPackageJSONPath = path.join(process.cwd(), 'package.json');
+  const currentPackageJSONPath = path.join(
+    process.cwd().toString(),
+    'package.json',
+  );
   const appPackageJSON = fs.readJSONSync(appPackageJSONPath);
   const apiPackageJSON = fs.readJSONSync(apiPackageJSONPath);
   const corePackageJSON = fs.readJSONSync(corePackageJSONPath);
@@ -174,7 +177,7 @@ exports.isProduction = (argv) => argv.mode === 'production';
 
 exports.getExtensionDirs = (production = false) => {
   const packageJSON = fs.readJSONSync(
-    path.resolve(process.cwd(), 'package.json'),
+    path.resolve(process.cwd().toString(), 'package.json'),
   );
 
   return [
@@ -197,9 +200,9 @@ exports.getExtensionDirs = (production = false) => {
 };
 
 exports.getKungfuConfigKey = () => {
-  return require(path.join(process.cwd(), 'package.json'))['kungfuConfig'][
-    'key'
-  ];
+  return require(path.join(process.cwd().toString(), 'package.json'))[
+    'kungfuConfig'
+  ]['key'];
 };
 
 exports.buildDevArgv = (distDir, distName) => {
@@ -222,7 +225,7 @@ exports.buildDevArgv = (distDir, distName) => {
 };
 
 exports.findPackageRoot = () => {
-  const cwd = process.cwd();
+  const cwd = process.cwd().toString();
   if (cwd.includes('node_modules')) {
     return findRoot(path.resolve(cwd.split('node_modules')[0]));
   }

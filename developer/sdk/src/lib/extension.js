@@ -24,7 +24,7 @@ const kungfuLibDirPattern = path.join(kungfulibs, '*', '*');
 const spawnOptsShell = {
   shell: true,
   windowsHide: true,
-  cwd: fse.realpathSync(path.resolve(process.cwd())),
+  cwd: fse.realpathSync(path.resolve(process.cwd().toString())),
 };
 
 const spawnOptsInherit = {
@@ -88,7 +88,7 @@ function generateCMakeFiles(projectName, kungfuBuild) {
     ? cppLinksOpt
     : cppLinksOpt[detectPlatform()];
 
-  const buildDir = path.join(process.cwd(), 'build');
+  const buildDir = path.join(process.cwd().toString(), 'build');
   fse.ensureDirSync(buildDir);
 
   ejs.renderFile(
@@ -120,7 +120,10 @@ function generateCMakeFiles(projectName, kungfuBuild) {
     },
     (err, str) => {
       logError(err) ||
-        fse.writeFileSync(path.join(process.cwd(), 'CMakeLists.txt'), str);
+        fse.writeFileSync(
+          path.join(process.cwd().toString(), 'CMakeLists.txt'),
+          str,
+        );
     },
   );
 }
@@ -292,8 +295,8 @@ exports.installBatch = async (
 };
 
 exports.clean = (keepLibs = true) => {
-  fse.removeSync(path.join(process.cwd(), 'build'));
-  fse.removeSync(path.join(process.cwd(), 'dist'));
+  fse.removeSync(path.join(process.cwd().toString(), 'build'));
+  fse.removeSync(path.join(process.cwd().toString(), 'dist'));
   if (!keepLibs) {
     const rm = (p) => fse.existsSync(p) && fse.removeSync(p);
     rm(pypackages);
