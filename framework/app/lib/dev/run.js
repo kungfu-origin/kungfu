@@ -154,7 +154,7 @@ const run = (distDir, distName = 'app', withWebpack) => {
   if (withWebpack) {
     process.chdir(appDir);
   } else {
-    process.chdir(process.cwd());
+    process.chdir(process.cwd().toString());
   }
 
   return Promise.all(tasks.map((f) => f(argv))).then(() => startElectron(argv));

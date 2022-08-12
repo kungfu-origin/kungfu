@@ -35,7 +35,7 @@ module.exports = {
                       loader: 'ts-loader',
                       options: {
                         configFile: path.resolve(
-                          process.cwd(),
+                          process.cwd().toString(),
                           'tsconfig.json',
                         ),
                         // 对应文件添加个.ts或.tsx后缀

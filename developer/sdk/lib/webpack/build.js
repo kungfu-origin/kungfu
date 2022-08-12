@@ -106,7 +106,7 @@ const run = (distDir, distName = 'sdk') => {
 module.exports = run;
 
 if (require.main === module) {
-  const distDir = path.join(process.cwd(), 'dist');
+  const distDir = path.join(process.cwd().toString(), 'dist');
   fse.ensureDirSync(distDir);
   run(distDir).catch(console.error);
 }
