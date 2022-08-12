@@ -56,6 +56,18 @@ public:
                      uint64_t data_type = 0) override;
 
   /**
+   * Insert Block Message
+   * @param opponent_seat
+   * @param match_number
+   * @param opponent_account
+   * @param value
+   * @return
+   */
+  uint64_t insert_block_message(const std::string &source, const std::string &account, uint32_t opponent_seat,
+                                uint64_t match_number, const std::string &opponent_account,
+                                const std::string &value = "") override;
+
+  /**
    *
    * @param instrument_id instrument ID
    * @param exchange_id exchange ID
@@ -67,32 +79,14 @@ public:
    * @param side side
    * @param offset offset, defaults to longfist::enums::Offset::Open
    * @param hedge_flag hedge_flag, defaults to longfist::enums::HedgeFlag::Speculation
+   * @param block_id BlockMessage id
    * @param is_swap boolean
    * @return
    */
   uint64_t insert_order(const std::string &instrument_id, const std::string &exchange_id, const std::string &source,
                         const std::string &account, double limit_price, int64_t volume, longfist::enums::PriceType type,
-                        longfist::enums::Side side, longfist::enums::Offset offset,
-                        longfist::enums::HedgeFlag hedge_flag, bool is_swap = false) override;
-
-  /**
-   *
-   * @param account_location_uid location uid of source ID and account ID
-   * @param instrument_id instrument
-   * @param exchange_id exchange ID
-   * @param account account ID
-   * @param limit_price limit price
-   * @param volume trade volume
-   * @param type price type
-   * @param side side
-   * @param offset offset, defaults to longfist::enums::Offset::Open
-   * @param hedge_flag hedge_flag, defaults to longfist::enums::HedgeFlag::Speculation
-   * @param is_swap boolean
-   * @return
-   */
-  uint64_t insert_order(uint32_t account_location_uid, const std::string &instrument_id, const std::string &exchange_id,
-                        double limit_price, int64_t volume, longfist::enums::PriceType type, longfist::enums::Side side,
-                        longfist::enums::Offset offset, longfist::enums::HedgeFlag hedge_flag, bool is_swap = false);
+                        longfist::enums::Side side, longfist::enums::Offset offset, uint64_t block_id = 0,
+                        longfist::enums::HedgeFlag hedge_flag = HedgeFlag::Speculation, bool is_swap = false) override;
 
   /**
    * Cancel order.

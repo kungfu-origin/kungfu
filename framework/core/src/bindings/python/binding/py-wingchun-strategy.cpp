@@ -148,7 +148,10 @@ void bind_strategy(pybind11::module &m) {
            py::arg("data_type") = SubscribeDataType::All)
       .def("insert_order", &strategy::Context::insert_order, py::arg("symbol"), py::arg("exchange"), py::arg("source"),
            py::arg("account"), py::arg("limit_price"), py::arg("volume"), py::arg("type"), py::arg("side"),
-           py::arg("offset") = Offset::Open, py::arg("hedge_flag") = HedgeFlag::Speculation, py::arg("is_swap") = false)
+           py::arg("offset") = Offset::Open, py::arg("block_id") = 0, py::arg("hedge_flag") = HedgeFlag::Speculation,
+           py::arg("is_swap") = false)
+      .def("insert_block_message", &strategy::Context::insert_block_message, py::arg("source"), py::arg("account"),
+           py::arg("opponent_seat"), py::arg("match_number"), py::arg("opponent_account"), py::arg("value") = "")
       .def("cancel_order", &strategy::Context::cancel_order)
       .def("req_history_order", &strategy::Context::req_history_order, py::arg("source"), py::arg("account"),
            py::arg("query_num") = 0)

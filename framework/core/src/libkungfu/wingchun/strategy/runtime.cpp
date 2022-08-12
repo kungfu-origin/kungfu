@@ -72,9 +72,30 @@ void RuntimeContext::subscribe_all(const std::string &source, uint8_t market_typ
   broker_client_.subscribe_all(find_md_location(source), market_type, instrument_type, data_type);
 }
 
-uint64_t RuntimeContext::insert_order(uint32_t account_location_uid, const std::string &instrument_id,
-                                      const std::string &exchange_id, double limit_price, int64_t volume,
-                                      PriceType type, Side side, Offset offset, HedgeFlag hedge_flag, bool is_swap) {
+uint64_t RuntimeContext::insert_block_message(const std::string &source, const std::string &account,
+                                              uint32_t opponent_seat, uint64_t match_number,
+                                              const std::string &opponent_account, const std::string &value) {
+  auto account_location_uid = get_td_location_uid(source, account);
+  if (not broker_client_.is_ready(account_location_uid)) {
+    SPDLOG_ERROR("account {} not ready", td_locations_.at(account_location_uid)->uname);
+    return 0;
+  }
+  auto writer = app_.get_writer(account_location_uid);
+  BlockMessage &msg = writer->open_data<BlockMessage>(app_.now());
+  msg.opponent_seat = opponent_seat;
+  msg.match_number = match_number;
+  strncpy(msg.opponent_account, opponent_account.c_str(), ACCOUNT_ID_LEN);
+  strncpy(msg.value, value.c_str(), JSON_STR_LEN);
+  msg.block_id = writer->current_frame_uid();
+  writer->close_data();
+  return msg.block_id;
+}
+
+uint64_t RuntimeContext::insert_order(const std::string &instrument_id, const std::string &exchange_id,
+                                      const std::string &source, const std::string &account, double limit_price,
+                                      int64_t volume, PriceType type, Side side, Offset offset, uint64_t block_id,
+                                      HedgeFlag hedge_flag, bool is_swap) {
+  auto account_location_uid = get_td_location_uid(source, account);
   auto insert_time = time::now_in_nano();
   if (not broker_client_.is_ready(account_location_uid)) {
     SPDLOG_ERROR("account {} not ready", td_locations_.at(account_location_uid)->uname);
@@ -99,20 +120,12 @@ uint64_t RuntimeContext::insert_order(uint32_t account_location_uid, const std::
   input.side = side;
   input.offset = offset;
   input.hedge_flag = hedge_flag;
+  input.block_id = block_id;
   input.is_swap = is_swap;
   input.insert_time = insert_time;
   writer->close_data();
   bookkeeper_.on_order_input(app_.now(), app_.get_home_uid(), account_location_uid, input);
   return input.order_id;
-}
-
-uint64_t RuntimeContext::insert_order(const std::string &instrument_id, const std::string &exchange_id,
-                                      const std::string &source, const std::string &account, double limit_price,
-                                      int64_t volume, PriceType type, Side side, Offset offset, HedgeFlag hedge_flag,
-                                      bool is_swap) {
-  auto account_location_uid = get_td_location_uid(source, account);
-  return insert_order(account_location_uid, instrument_id, exchange_id, limit_price, volume, type, side, offset,
-                      hedge_flag, is_swap);
 }
 
 uint64_t RuntimeContext::cancel_order(uint64_t order_id) {
@@ -201,4 +214,5 @@ void RuntimeContext::update_strategy_state(StrategyStateUpdate &state_update) {
   state_update.update_time = now();
   writer->write(state_update.update_time, state_update);
 }
+
 } // namespace kungfu::wingchun::strategy

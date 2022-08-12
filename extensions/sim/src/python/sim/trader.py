@@ -33,6 +33,7 @@ class TraderSim(wc.Trader):
         self.ctx = DottedDict()
         self.match_mode = None
         self.logger = find_logger(self.home)
+        self.map_block_msg = {}
 
     def on_start(self):
         config = json.loads(self.config)
@@ -56,6 +57,11 @@ class TraderSim(wc.Trader):
             self.ctx.req_position = getattr(impl, "req_position", lambda ctx: False)
 
         self.update_broker_state(lf.enums.BrokerState.Ready)
+
+    def insert_block_message(self, event):
+        block_msg = event.BlockMessage()
+        self.logger.info(f"{block_msg}")
+        self.map_block_msg[block_msg.block_id] = block_msg
 
     def insert_order(self, event):
         volume_traded = 0
@@ -105,6 +111,17 @@ class TraderSim(wc.Trader):
             else:
                 raise Exception("invalid match mode {}".format(self.match_mode))
             order.volume_left = order.volume - volume_traded
+
+            if order_input.block_id != 0:
+                if order_input.block_id in self.map_block_msg:
+                    self.logger.info(f"{self.map_block_msg[order_input.block_id]}")
+                else:
+                    self.logger.error(f"invalid block_id: {order_input.block_id}")
+                    order.status = lf.enums.OrderStatus.Error
+                    order.error_msg = "No Block Message"
+                    writer.write(event.gen_time, order)
+                    return False
+
             writer.write(event.gen_time, order)
             self.ctx.orders[order.order_id] = order
 
