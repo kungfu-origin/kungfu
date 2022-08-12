@@ -1,0 +1,54 @@
+[tool.poetry]
+name = "kungfu"
+version = "0.0.0"
+description = "Kungfu Core Library"
+license = "Apache-2.0"
+authors = ["Kungfu Trader <info@kungfu.link>"]
+homepage = "https://www.kungfu-trader.com"
+repository = "https://github.com/kungfu-trader/kungfu.git"
+packages = [
+    { include = "kungfu", from = "src/python" },
+]
+
+[[tool.poetry.source]]
+name = "aliyun"
+url = "https://mirrors.aliyun.com/pypi/simple"
+default = false
+secondary = true
+
+[tool.poetry.dependencies]
+python = "~3.9"
+
+#### Compiler #############################################
+black = "~22.3.0"
+nuitka = "~0.9.0"
+pdm = "~2.1.0"
+poetry-core = "^1.0.0"
+scons = "^4.3.0"
+tomli-w = "^1.0.0"
+
+#### Console ##############################################
+click = "^8.1.0"
+psutil = "^5.9.0"
+tabulate = "^0.8.10"
+wcmatch = "^8.0.0"
+
+#### Numeric ##############################################
+numpy = "^1.22.0"
+pandas = "^1.4.0"
+scipy = ">=1.7 <1.8"
+statsmodels = "^0.13.2"
+
+#### Dependencies #########################################
+ordered-set = "^4.0.0"
+pytest = "^7.1.0"
+railroad-diagrams = "^2.0.0"
+virtualenv = "20.14.1"
+
+[tool.poetry.dev-dependencies]
+conan = "^1.50.0"
+pyinstaller = "^5.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

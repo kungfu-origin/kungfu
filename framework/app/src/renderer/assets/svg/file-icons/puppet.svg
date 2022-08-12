@@ -1,0 +1,13 @@
+<svg version="1.1" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(0,-247)">
+<g transform="translate(-1.2905 -.064145)" fill="#fbc02d">
+<g stroke-width=".28317">
+<rect x="11.559" y="249.47" width="13.587" height="13.587"/>
+<rect x="27.435" y="265.06" width="13.587" height="13.587"/>
+<rect x="11.559" y="281.07" width="13.587" height="13.587"/>
+</g>
+<rect transform="rotate(45)" x="189.67" y="166.17" width="25.887" height="4.5767" stroke-width=".2565"/>
+<rect transform="rotate(135)" x="165.11" y="-218.61" width="25.887" height="4.5767" stroke-width=".2565"/>
+</g>
+</g>
+</svg>

@@ -1,0 +1,39 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "strict": true,
+    "noImplicitAny": false,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "strictFunctionTypes": true,
+    "strictPropertyInitialization": true,
+    "jsx": "preserve",
+    "importHelpers": true,
+    "strictNullChecks": true,
+    "noUnusedLocals": true,
+    "noImplicitReturns": true,
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+
+    "sourceMap": true,
+    "baseUrl": ".",
+    "types": ["jschardet"],
+    "typeRoots": [],
+    "paths": {
+      "@kungfu-trader/kungfu-js-api/*": ["../api/src/*"],
+      "@kungfu-trader/kungfu-app/*": ["./*"],
+      "pm2": ["../api/node_modules/pm2", "../kungfu-js-api/node_modules/pm2"]
+    },
+    "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    "../api/src/**/*.ts"
+  ]
+}

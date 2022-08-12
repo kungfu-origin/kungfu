@@ -1,12 +1,11 @@
 {
-  "version": "2.4.0-alpha.0",
+  "version": "2.4.0-alpha.130",
   "packages": [
-    "shared",
-    "core",
-    "kfext_task_timerTrader",
-    "kfext_task_backwards",
-    "cli2",
-    "app"
+    "framework/*",
+    "developer/*",
+    "extensions/*",
+    "examples/*",
+    "artifact"
   ],
   "command": {
     "version": {

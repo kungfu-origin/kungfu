@@ -1,0 +1,177 @@
+{
+  "name": "@kungfu-trader/kfx-broker-xtp-demo",
+  "author": {
+    "name": "Kungfu Trader",
+    "email": "info@kungfu.link"
+  },
+  "version": "2.4.0-alpha.130",
+  "description": "Kungfu Extension - XTP Demo",
+  "license": "Apache-2.0",
+  "main": "package.json",
+  "repository": {
+    "url": "https://github.com/kungfu-trader/kungfu.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "binary": {
+    "module_name": "kfx-broker-xtp-demo",
+    "module_path": "dist/xtp",
+    "remote_path": "{module_name}/v{major}/v{version}",
+    "package_name": "{module_name}-v{version}-{platform}-{arch}-{configuration}.tar.gz",
+    "host": "https://prebuilt.libkungfu.cc"
+  },
+  "scripts": {
+    "build": "kfs extension build",
+    "clean": "kfs extension clean",
+    "format": "node ../../framework/core/.gyp/run-format-cpp.js src",
+    "install": "node -e \"require('@kungfu-trader/kungfu-core').prebuilt('install')\"",
+    "package": "kfs project package"
+  },
+  "dependencies": {
+    "@kungfu-trader/kungfu-core": "^2.4.0-alpha.130"
+  },
+  "devDependencies": {
+    "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.130"
+  },
+  "kungfuDependencies": {
+    "xtp": "v2.2.32.2"
+  },
+  "kungfuBuild": {
+    "cpp": {
+      "target": "bind/python",
+      "links": [
+        "xtptraderapi",
+        "xtpquoteapi"
+      ]
+    }
+  },
+  "kungfuConfig": {
+    "key": "xtp",
+    "name": "XTP",
+    "config": {
+      "td": {
+        "type": [
+          "stock"
+        ],
+        "settings": [
+          {
+            "key": "account_name",
+            "name": "account_name",
+            "type": "str",
+            "tip": "请填写账户别名"
+          },
+          {
+            "key": "account_id",
+            "name": "account_id",
+            "type": "str",
+            "required": true,
+            "primary": true,
+            "tip": "请填写账户, 例如:1504091"
+          },
+          {
+            "key": "password",
+            "name": "password",
+            "type": "password",
+            "required": true,
+            "tip": "请填写密码, 例如:123456"
+          },
+          {
+            "key": "software_key",
+            "name": "software_key",
+            "type": "str",
+            "required": true,
+            "tip": "请填写, 例如:b8aa7173bba3470e390d787219b2112"
+          },
+          {
+            "key": "td_ip",
+            "name": "td_ip",
+            "type": "str",
+            "required": true,
+            "tip": "请填写交易IP, 例如:61.152.102.111"
+          },
+          {
+            "key": "td_port",
+            "name": "td_port",
+            "type": "int",
+            "required": true,
+            "tip": "请填写交易端口, 例如:8601"
+          },
+          {
+            "key": "client_id",
+            "name": "client_id",
+            "type": "int",
+            "required": true,
+            "tip": "请填写自定义多点登录ID 1-99整数,不同节点之间不要重复"
+          }
+        ]
+      },
+      "md": {
+        "type": [
+          "stock"
+        ],
+        "settings": [
+          {
+            "key": "account_id",
+            "name": "account_id",
+            "type": "str",
+            "required": true,
+            "tip": "请填写账户, 例如:1504091"
+          },
+          {
+            "key": "password",
+            "name": "password",
+            "type": "password",
+            "required": true,
+            "tip": "请填写密码, 例如:123456"
+          },
+          {
+            "key": "md_ip",
+            "name": "md_ip",
+            "type": "str",
+            "required": true,
+            "tip": "请填写行情IP, 例如:61.152.102.110"
+          },
+          {
+            "key": "md_port",
+            "name": "md_port",
+            "type": "int",
+            "required": true,
+            "tip": "请填写行情端口, 例如:8602"
+          },
+          {
+            "key": "protocol",
+            "name": "protocol",
+            "type": "select",
+            "options": [
+              {
+                "value": "tcp",
+                "label": "tcp"
+              },
+              {
+                "value": "udp",
+                "label": "udp"
+              }
+            ],
+            "required": false,
+            "tip": "请选择 protocol, tcp or udp"
+          },
+          {
+            "key": "buffer_size",
+            "name": "buffer_size",
+            "type": "int",
+            "tip": "请填写 buffer size(mb)",
+            "required": false
+          },
+          {
+            "key": "client_id",
+            "name": "client_id",
+            "type": "int",
+            "required": true,
+            "tip": "请填写自定义多点登录ID 1-99整数,不同节点之间不要重复"
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "name": "@kungfu-trader/kfx-broker-sim",
+  "author": {
+    "name": "Kungfu Trader",
+    "email": "info@kungfu.link"
+  },
+  "version": "2.4.0-alpha.130",
+  "description": "Kungfu Extension - SIM",
+  "license": "Apache-2.0",
+  "main": "package.json",
+  "repository": {
+    "url": "https://github.com/kungfu-trader/kungfu.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "binary": {
+    "module_name": "kfx-broker-sim",
+    "module_path": "dist/sim",
+    "remote_path": "{module_name}/v{major}/v{version}",
+    "package_name": "{module_name}-v{version}-{platform}-{arch}-{configuration}.tar.gz",
+    "host": "https://prebuilt.libkungfu.cc"
+  },
+  "scripts": {
+    "build": "kfs extension build",
+    "clean": "kfs extension clean",
+    "format": "node ../../framework/core/.gyp/run-format-python.js src",
+    "install": "node -e \"require('@kungfu-trader/kungfu-core').prebuilt('install')\"",
+    "package": "kfs project package"
+  },
+  "dependencies": {
+    "@kungfu-trader/kungfu-core": "^2.4.0-alpha.130"
+  },
+  "devDependencies": {
+    "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.130"
+  },
+  "kungfuBuild": {
+    "python": {
+      "dependencies": {
+        "dotted_dict": "~=1.1.0",
+        "recordclass": "~=0.17.0",
+        "sortedcontainers": "~=2.4.0"
+      }
+    }
+  },
+  "kungfuConfig": {
+    "key": "sim",
+    "name": "功夫模拟",
+    "config": {
+      "td": {
+        "type": "multi",
+        "settings": [
+          {
+            "key": "account_id",
+            "name": "account_id",
+            "type": "str",
+            "errMsg": "请填写账户 account_id",
+            "required": true,
+            "primary": true
+          },
+          {
+            "key": "match_mode",
+            "name": "match_mode",
+            "type": "select",
+            "options": [
+              {
+                "value": "reject",
+                "label": "Reject"
+              },
+              {
+                "value": "pend",
+                "label": "Pend"
+              },
+              {
+                "value": "cancel",
+                "label": "Cancel"
+              },
+              {
+                "value": "partialfillandcancel",
+                "label": "PartialFillAndCancel"
+              },
+              {
+                "value": "partialfill",
+                "label": "PartialFillAndPending"
+              },
+              {
+                "value": "fill",
+                "label": "Fill"
+              }
+            ],
+            "errMsg": "请选择撮合模式",
+            "required": true
+          }
+        ]
+      },
+      "md": {
+        "type": "multi"
+      }
+    }
+  }
+}
