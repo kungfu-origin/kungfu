@@ -32,5 +32,8 @@
     "ps-list": "~7.2",
     "vue": "^3.2.34",
     "vue-i18n": "9.1.10"
+  },
+  "devDependencies": {
+    "@types/find-root": "^1.1.2"
   }
 }

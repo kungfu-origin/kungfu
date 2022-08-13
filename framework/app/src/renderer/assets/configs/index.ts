@@ -1,15 +1,92 @@
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
+import { useBoardFilter } from '../methods/uiUtils';
 const { t } = VueI18n.global;
 
-export const defaultBoardsMap: KfLayout.BoardsMap = {
+const { getBoard } = useBoardFilter();
+
+const getBoardSizeNum = (size: string | number | undefined) => {
+  if (typeof size === 'string') {
+    if (size.endsWith('%')) {
+      return Number(size.slice(0, size.length - 1));
+    }
+  }
+
+  return 0;
+};
+
+const dealBoardMap = (boardsMap: KfLayout.BoardsMap) => {
+  const dealBoard = (numKey: number) => {
+    const currentBoard = boardsMap[numKey];
+
+    if (currentBoard) {
+      if (currentBoard.children) {
+        const childrenResolved = currentBoard.children
+          .map((childKey) => dealBoard(childKey))
+          .filter((item) => item !== -1);
+        if (!childrenResolved.length) {
+          return -1;
+        } else {
+          let residue = 0;
+          const curSizeKey =
+            currentBoard.direction === 'v' ? 'height' : 'width';
+
+          currentBoard.children = currentBoard.children.filter((childId) => {
+            if (childrenResolved.includes(childId)) {
+              return true;
+            } else {
+              const curSize = boardsMap[childId][curSizeKey];
+              residue += getBoardSizeNum(curSize);
+              delete boardsMap[childId];
+              return false;
+            }
+          });
+
+          const everySize = residue / currentBoard.children.length;
+
+          currentBoard.children.forEach((childKey) => {
+            const curChildBoardSize = getBoardSizeNum(
+              boardsMap[childKey][curSizeKey],
+            );
+            boardsMap[childKey][curSizeKey] = `${
+              curChildBoardSize + everySize
+            }%`;
+          });
+
+          return numKey;
+        }
+      }
+
+      if (currentBoard.contents?.length) {
+        const contentsResolved = currentBoard.contents
+          .map((contentId) => getBoard(contentId, t(contentId), ''))
+          .filter((item) => !!item);
+        if (!contentsResolved.length) {
+          return -1;
+        } else {
+          currentBoard.contents = contentsResolved;
+          currentBoard.current = contentsResolved[0];
+          return numKey;
+        }
+      }
+    }
+
+    return -1;
+  };
+
+  dealBoard(0);
+
+  return boardsMap;
+};
+
+const baseBoardsMap: KfLayout.BoardsMap = {
   '0': { paId: -1, direction: 'h', children: [1, 2] },
   '1': { paId: 0, direction: 'v', children: [4, 5], width: '64.620%' },
   '2': { paId: 0, direction: 'v', children: [8, 9, 10], width: '35.380%' },
   '4': {
     paId: 1,
     direction: 'h',
-    contents: [t('Td')],
-    current: t('Td'),
+    contents: ['Td'],
+    current: 'Td',
     height: '23.294%',
     width: 0,
   },
@@ -23,55 +100,57 @@ export const defaultBoardsMap: KfLayout.BoardsMap = {
   '8': {
     paId: 2,
     direction: 'h',
-    contents: [t('Md')],
-    current: t('Md'),
+    contents: ['Md'],
+    current: 'Md',
     height: '17.577%',
   },
   '9': {
     paId: 2,
     direction: 'h',
-    contents: [t('Pos')],
-    current: t('Pos'),
+    contents: ['Pos'],
+    current: 'Pos',
     height: '28.157%',
   },
   '10': { paId: 2, direction: 'h', children: [11, 12], height: '54.266%' },
   '11': {
     paId: 10,
     direction: 'v',
-    contents: [t('OrderBook')],
-    current: t('OrderBook'),
+    contents: ['OrderBook'],
+    current: 'OrderBook',
     width: '43.279%',
   },
   '12': {
     paId: 10,
     direction: 'v',
-    contents: [t('MakeOrderDashboard'), t('FutureArbitrage'), t('BlockTrade')],
-    current: t('MakeOrderDashboard'),
+    contents: ['MakeOrder'],
+    current: 'MakeOrder',
     width: '56.721%',
   },
   '13': {
     paId: 5,
     direction: 'v',
-    contents: [t('MarketData')],
-    current: t('MarketData'),
+    contents: ['MarketData'],
+    current: 'MarketData',
     width: '23.045%',
   },
   '14': { paId: 5, direction: 'v', width: '76.955%', children: [16, 15] },
   '15': {
     paId: 14,
     direction: 'h',
-    contents: [t('Order'), t('Trade')],
-    current: t('Order'),
-    width: 0,
-    height: 0,
+    contents: ['Order', 'Trade'],
+    current: 'Order',
+    height: '50%',
   },
   '16': {
     paId: 14,
     direction: 'h',
-    contents: [t('Strategy'), t('TradingTask'), t('PosGlobal')],
-    current: t('Strategy'),
+    contents: ['Strategy', 'TradingTask', 'PosGlobal'],
+    current: 'Strategy',
+    height: '50%',
   },
 };
+
+export const defaultBoardsMap = dealBoardMap(baseBoardsMap);
 
 export const getIndexBoardsMap = (): KfLayout.BoardsMap | null => {
   const data = localStorage.getItem('indexBoardsMap');
