@@ -2,6 +2,7 @@ import path from 'path';
 import fse from 'fs-extra';
 import * as csv from '@fast-csv/format';
 import { Row } from '@fast-csv/format';
+import findRoot from 'find-root';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 const { t } = VueI18n.global;
 
@@ -141,4 +142,29 @@ export const removeTargetFilesInFolder = (
   iterator(targetFolder);
 
   return Promise.resolve();
+};
+
+export const findPackageRoot = () => {
+  const cwd = process.cwd().toString();
+  const dirname = path.resolve(__dirname);
+  let searchPath = '';
+  if (process.env.NODE_ENV === 'production') {
+    searchPath = dirname;
+  } else {
+    searchPath = cwd;
+  }
+  if (searchPath.includes('node_modules')) {
+    return findRoot(path.resolve(searchPath.split('node_modules')[0]));
+  }
+  return findRoot(path.resolve(searchPath));
+};
+
+export const readRootPackageJsonSync = () => {
+  const rootDir = findPackageRoot();
+  const packageJsonPath = path.join(rootDir, 'package.json');
+  if (fse.existsSync(packageJsonPath)) {
+    return fse.readJSONSync(packageJsonPath);
+  }
+
+  return {};
 };
