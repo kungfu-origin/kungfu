@@ -28,20 +28,5 @@
     "@kungfu-trader/kungfu-cli": "^2.4.1-alpha.2",
     "@kungfu-trader/kungfu-core": "^2.4.1-alpha.2",
     "@kungfu-trader/kungfu-sdk": "^2.4.1-alpha.2"
-  },
-  "boardFilter": {
-    "MakeOrder": true,
-    "FutureArbitrage": true,
-    "BlockTrade": true,
-    "OrderBook": false,
-    "MarketData": false,
-    "TradingTask": false,
-    "Strategy": true,
-    "Md": true,
-    "Td": true,
-    "Trade": false,
-    "Order": true,
-    "PosGlobal": true,
-    "Pos": true
   }
 }
