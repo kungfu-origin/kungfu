@@ -2511,6 +2511,11 @@
     "@types/qs" "*"
     "@types/serve-static" "*"
 
+"@types/find-root@^1.1.2":
+  version "1.1.2"
+  resolved "https://registry.npmmirror.com/@types/find-root/-/find-root-1.1.2.tgz#32b05d0d9028866bbe29bb9eaaf00170017a9110"
+  integrity sha512-lGuMq71TL466jtCpvh7orGd+mrdBmo2h8ozvtOOTbq3ByfWpuN+UVxv4sOv3YpsD4NhW2k6ESGhnT/FIg4Ouzw==
+
 "@types/fs-extra@^9.0.11":
   version "9.0.13"
   resolved "https://registry.npmmirror.com/@types/fs-extra/-/fs-extra-9.0.13.tgz#7594fbae04fe7f1918ce8b3d213f74ff44ac1f45"

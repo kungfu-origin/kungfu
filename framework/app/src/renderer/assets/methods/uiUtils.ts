@@ -25,6 +25,7 @@ import {
   transformSearchInstrumentResultToInstrument,
   removeArchiveBeforeToday,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import { readRootPackageJsonSync } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import { BrowserWindow, getCurrentWindow, dialog } from '@electron/remote';
 import { ipcRenderer } from 'electron';
@@ -655,4 +656,19 @@ export const confirmModal = (
       },
     });
   });
+};
+
+export const useBoardFilter = () => {
+  const rootPackageJson = readRootPackageJsonSync();
+  const boardFilter: Record<string, boolean | undefined> | undefined =
+    rootPackageJson?.boardFilter;
+
+  const getBoard = <T>(boardName: string, ifTrue: T, ifFalse: T): T => {
+    return boardFilter ? (boardFilter[boardName] ? ifTrue : ifFalse) : ifTrue;
+  };
+
+  return {
+    boardFilter,
+    getBoard,
+  };
 };

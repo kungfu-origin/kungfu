@@ -69,7 +69,7 @@ export default {
     '{category} ID unique in the system. {changeTypeName} cannot be modified after it succeeds.',
   update_config_modal: 'Confirm {key} configurations',
 
-  MakeOrderDashboard: 'Order Dashboard',
+  MakeOrder: 'Order Dashboard',
   FutureArbitrage: 'Future Arbitrage',
   OrderBook: 'Order Book',
   MarketData: 'Market Data',

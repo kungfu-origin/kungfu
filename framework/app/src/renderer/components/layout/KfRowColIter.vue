@@ -396,4 +396,13 @@ export default defineComponent({
     }
   }
 }
+
+.ant-tabs-dropdown-menu-item {
+  min-width: 80px;
+
+  .ant-tabs-dropdown-menu-title-content {
+    display: flex;
+    justify-content: space-between;
+  }
+}
 </style>
