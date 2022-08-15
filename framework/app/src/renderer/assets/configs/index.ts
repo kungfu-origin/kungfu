@@ -117,14 +117,14 @@ const baseBoardsMap: KfLayout.BoardsMap = {
     direction: 'v',
     contents: ['OrderBook'],
     current: 'OrderBook',
-    width: '43.279%',
+    width: '41.424%',
   },
   '12': {
     paId: 10,
     direction: 'v',
     contents: ['MakeOrder'],
     current: 'MakeOrder',
-    width: '56.721%',
+    width: '58.576%',
   },
   '13': {
     paId: 5,
