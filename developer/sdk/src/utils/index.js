@@ -36,6 +36,10 @@ const getCurrentMode = () => {
   }
 };
 
+const dealPath = (pathname) => {
+  return pathname.replace(/\\/g, '/').replace(/ /g, '\\ '); //保持斜杠而不是反斜杠，跟cmake模板内路径一致
+};
+
 const getKfcPath = () => {
   const pathMap = {
     [ModeMap.IN_CORE]: process.env.KFC_PATH,
@@ -49,14 +53,14 @@ const getKfcPath = () => {
     ),
   };
 
-  return pathMap[getCurrentMode()].replace(/\\/g, '/'); //保持斜杠而不是反斜杠，跟cmake模板内路径一致
+  return pathMap[getCurrentMode()];
 };
 
 const getKfcCmdArgs = () => {
   const cmdMap = {
     [ModeMap.IN_CORE]: { cmd: 'yarn', args0: ['kfc'] },
     [ModeMap.IN_PROD_APP]: {
-      cmd: path.join(getKfcPath(), kfcName).replace(/\\/g, '/'), //保持斜杠而不是反斜杠，跟cmake模板内路径一致
+      cmd: dealPath(path.join(getKfcPath(), kfcName)),
       args0: [],
     },
     [ModeMap.IN_SDK_SRC]: { cmd: 'yarn', args0: ['kfc'] },
@@ -131,6 +135,7 @@ const parseByCli = (cli, isRootCli = false) => {
 module.exports = {
   isProduction,
   kfcName,
+  dealPath,
   getKfcPath,
   getKfcCmdArgs,
   getCmakeCmdArgs,

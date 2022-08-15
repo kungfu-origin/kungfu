@@ -15,13 +15,13 @@ const {
   getCmakeCmdArgs,
   getCmakeNextCmdArgs,
   kfcName,
+  dealPath,
 } = require('../utils');
 
 const pypackages = '__pypackages__';
 const kungfulibs = '__kungfulibs__';
 const kungfuLibDirPattern = path.resolve(kungfulibs, '*', '*');
 const cwd = process.cwd().toString();
-console.log('-- top cwd', cwd, path.join(process.cwd()));
 
 const spawnOptsShell = {
   shell: true,
@@ -93,12 +93,13 @@ function generateCMakeFiles(projectName, kungfuBuild) {
   const cwd = process.cwd().toString();
   const buildDir = path.join(cwd, 'build');
   fse.ensureDirSync(buildDir);
+  const kfcDir = getKfcPath();
 
   ejs.renderFile(
     customResolve('@kungfu-trader/kungfu-sdk/templates/cmake/kungfu.cmake'),
     {
-      kfcDir: getKfcPath(),
-      kfcExec: path.join(getKfcPath(), kfcName).replace(/\\/g, '/'), //保持斜杠而不是反斜杠，跟cmake模板内路径一致
+      kfcDir: dealPath(kfcDir),
+      kfcExec: dealPath(path.join(kfcDir, kfcName)),
       includes: glob.sync(path.join(kungfuLibDirPattern, 'include')),
       links: glob.sync(path.join(kungfuLibDirPattern, 'lib')),
       sources: cppSources,
