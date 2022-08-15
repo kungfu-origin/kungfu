@@ -231,3 +231,8 @@ exports.findPackageRoot = () => {
   }
   return findRoot(path.resolve(cwd));
 };
+
+exports.dealSpaceInPath = (pathname) => {
+  const normalizePath = path.normalize(pathname);
+  return normalizePath.replace(/ /g, ' ');
+};
