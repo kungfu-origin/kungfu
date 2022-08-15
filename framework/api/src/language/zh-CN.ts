@@ -69,7 +69,7 @@ export default {
     '{category}ID系统唯一, {changeTypeName} 成功后不可修改, 确认 {key}',
   update_config_modal: '确认{key} 相关配置',
 
-  MakeOrderDashboard: '下单面板',
+  MakeOrder: '下单面板',
   FutureArbitrage: '套利指令',
   BlockTrade: '大宗交易',
   OrderBook: '深度行情',

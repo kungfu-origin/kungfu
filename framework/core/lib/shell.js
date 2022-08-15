@@ -22,7 +22,7 @@ const utils = {
   },
 
   getCoreGypDir: function () {
-    const local = process.cwd() === path.dirname(__dirname);
+    const local = process.cwd().toString() === path.dirname(__dirname);
     return local ? '.gyp' : path.resolve(__dirname);
   },
 
@@ -131,7 +131,7 @@ const shell = {
       return JSON.parse(fs.readFileSync(filepath, 'utf8').toString());
     };
     if (!packageName) {
-      return toJSON(path.resolve(process.cwd(), 'package.json'));
+      return toJSON(path.resolve(process.cwd().toString(), 'package.json'));
     }
     try {
       return toJSON(require.resolve(`${packageName}/package.json`));
@@ -200,7 +200,7 @@ const shell = {
   },
 
   run: function (cmd, argv = [], check = true, opts = {}) {
-    const real_cwd = fs.realpathSync(path.resolve(process.cwd()));
+    const real_cwd = fs.realpathSync(path.resolve(process.cwd().toString()));
     utils.trace(cmd, argv, opts);
     const result = spawnSync(cmd, argv, {
       shell: true,
@@ -268,7 +268,7 @@ const shell = {
     utils.findBinaryDependency(packageJson).map(utils.showBinaryHostConfig);
   },
 
-  touch: function (filename, dirname = process.cwd()) {
+  touch: function (filename, dirname = process.cwd().toString()) {
     const now = new Date();
     const filepath = path.resolve(dirname, filename);
     fs.utimesSync(filepath, now, now);
