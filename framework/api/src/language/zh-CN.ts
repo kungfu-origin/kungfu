@@ -238,6 +238,7 @@ export default {
     side: '买卖',
     offset: '开平',
     limit_price: '下单价格',
+    algorithm: '算法',
 
     make_order_number: '下单次数',
     no_empty: '下单量不可为空',
