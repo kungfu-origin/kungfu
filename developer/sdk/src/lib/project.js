@@ -4,7 +4,8 @@ const { prebuilt, shell } = require('@kungfu-trader/kungfu-core');
 const { customResolve, getKfcPath } = require('../utils');
 
 exports.configure = (writePackageJson = false, writeWorkflows = true) => {
-  const packageJsonPath = path.join(process.cwd().toString(), 'package.json');
+  const cwd = process.cwd().toString();
+  const packageJsonPath = path.join(cwd.toString(), 'package.json');
   const packageJson = require(packageJsonPath);
   if (writePackageJson) {
     console.log('> write package.json');
@@ -13,7 +14,7 @@ exports.configure = (writePackageJson = false, writeWorkflows = true) => {
   if (writeWorkflows) {
     console.log('> write workflows');
     const findWorkspaceRoot = require('find-yarn-workspace-root');
-    const projectDir = findWorkspaceRoot() || process.cwd().toString();
+    const projectDir = findWorkspaceRoot() || cwd;
     const sdkDir = path.dirname(
       path.dirname(customResolve('@kungfu-trader/kungfu-sdk')),
     );
@@ -25,7 +26,7 @@ exports.configure = (writePackageJson = false, writeWorkflows = true) => {
 };
 
 exports.makeBinary = (packageJson = shell.getPackageJson()) => {
-  const outputDir = path.resolve(packageJson.binary.module_path);
+  const outputDir = path.join(packageJson.binary.module_path);
 
   fse.copySync(
     path.join(getKfcPath(), 'drone.node'),

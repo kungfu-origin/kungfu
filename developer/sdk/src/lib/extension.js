@@ -19,12 +19,14 @@ const {
 
 const pypackages = '__pypackages__';
 const kungfulibs = '__kungfulibs__';
-const kungfuLibDirPattern = path.join(kungfulibs, '*', '*');
+const kungfuLibDirPattern = path.resolve(kungfulibs, '*', '*');
+const cwd = process.cwd().toString();
+console.log('-- top cwd', cwd, path.join(process.cwd()));
 
 const spawnOptsShell = {
   shell: true,
   windowsHide: true,
-  cwd: fse.realpathSync(path.resolve(process.cwd().toString())),
+  cwd: fse.realpathSync(path.join(cwd)),
 };
 
 const spawnOptsInherit = {
@@ -88,14 +90,15 @@ function generateCMakeFiles(projectName, kungfuBuild) {
     ? cppLinksOpt
     : cppLinksOpt[detectPlatform()];
 
-  const buildDir = path.join(process.cwd().toString(), 'build');
+  const cwd = process.cwd().toString();
+  const buildDir = path.join(cwd, 'build');
   fse.ensureDirSync(buildDir);
 
   ejs.renderFile(
     customResolve('@kungfu-trader/kungfu-sdk/templates/cmake/kungfu.cmake'),
     {
       kfcDir: getKfcPath(),
-      kfcExec: path.join(getKfcPath(), kfcName).replace(/\\/g, '/'),
+      kfcExec: path.join(getKfcPath(), kfcName).replace(/\\/g, '/'), //保持斜杠而不是反斜杠，跟cmake模板内路径一致
       includes: glob.sync(path.join(kungfuLibDirPattern, 'include')),
       links: glob.sync(path.join(kungfuLibDirPattern, 'lib')),
       sources: cppSources,
@@ -119,11 +122,10 @@ function generateCMakeFiles(projectName, kungfuBuild) {
       projectName: projectName,
     },
     (err, str) => {
-      logError(err) ||
-        fse.writeFileSync(
-          path.join(process.cwd().toString(), 'CMakeLists.txt'),
-          str,
-        );
+      if (err) {
+        logError(err);
+      }
+      fse.writeFileSync(path.join(cwd, 'CMakeLists.txt'), str);
     },
   );
 }
@@ -181,7 +183,7 @@ exports.installSingleLib = async (
   platform = detectPlatform(),
   arch = os.arch(),
 ) => {
-  const localLibDir = path.resolve(kungfulibs, libName, libVersion);
+  const localLibDir = path.join(kungfulibs, libName, libVersion);
   if (fse.existsSync(localLibDir)) {
     console.log(
       `-- Lib ${libName}@${libVersion} exists at ${localLibDir}, skip downloading`,
@@ -348,7 +350,7 @@ exports.compile = () => {
   }
 
   const cwd = process.cwd().toString(); // 这一步避免在打包中process.cwd()被替换
-  const packageJsonPath = path.resolve(cwd, 'package.json');
+  const packageJsonPath = path.join(cwd, 'package.json');
   fse.copyFile(packageJsonPath, path.join(outputDir, 'package.json'));
 
   const copyOutput = (pattern) => {
@@ -357,14 +359,21 @@ exports.compile = () => {
     });
   };
 
+  console.log(
+    '-- buildTargetDir',
+    buildTargetDir,
+    fse.existsSync(buildTargetDir),
+  );
   if (fse.existsSync(buildTargetDir)) {
-    copyOutput(path.join(buildTargetDir, '*'));
+    copyOutput(path.resolve(buildTargetDir, '*'));
   }
 
+  console.log('-- kungfulibs', kungfulibs, fse.existsSync(kungfulibs));
   if (fse.existsSync(kungfulibs)) {
-    copyOutput(path.join(kungfuLibDirPattern, 'lib', '*'));
+    copyOutput(path.resolve(kungfuLibDirPattern, 'lib', '*'));
   }
 
+  console.log('-- pypackages', pypackages, fse.existsSync(pypackages));
   if (fse.existsSync(pypackages)) {
     fse.copySync(pypackages, path.join(outputDir, pypackages));
   }
