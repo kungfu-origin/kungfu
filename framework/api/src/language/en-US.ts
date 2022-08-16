@@ -236,6 +236,7 @@ export default {
     side: 'Side',
     offset: 'Offset',
     limit_price: 'LimitPrice',
+    algorithm: 'Algorithm',
 
     make_order_number: 'Order Number',
     no_empty: 'Order quantity cannot be empty',

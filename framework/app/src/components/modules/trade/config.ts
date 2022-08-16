@@ -33,7 +33,7 @@ export const getColumns = (
   },
   {
     type: 'string',
-    name: t('tradeConfig.instrument_id_id'),
+    name: t('tradeConfig.instrument_id'),
     dataIndex: 'instrument_id',
     sorter: buildStrSorter('instrument_id'),
     width: 60,

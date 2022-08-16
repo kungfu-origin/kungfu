@@ -630,7 +630,7 @@ watch(
           </a-button>
         </KfDashboardItem>
       </template>
-      <div class="make-order__warp">
+      <div class="make-order__wrap">
         <div class="make-order-content">
           <div class="make-order-form__warp">
             <KfConfigSettingsForm
@@ -708,6 +708,24 @@ watch(
                   }}
                 </a-col>
               </div>
+              <a-card
+                v-if="availTradingTaskExtensionList.length"
+                class="make-order-algorithm__wrap"
+                :title="$t('tradingConfig.algorithm')"
+                size="small"
+                :bodyStyle="{
+                  padding: '0 8px 8px 0',
+                  height: 'fit-content',
+                }"
+              >
+                <a-button
+                  class="make-order-algorithm-btns"
+                  v-for="item in availTradingTaskExtensionList"
+                  @click="handleOpenTradingTaskConfigModal(item)"
+                >
+                  {{ item.name }}
+                </a-button>
+              </a-card>
             </template>
           </div>
         </div>
@@ -717,12 +735,6 @@ watch(
           </a-button>
           <a-button @click="handleApartOrder">
             {{ $t('tradingConfig.apart_order') }}
-          </a-button>
-          <a-button
-            v-for="item in availTradingTaskExtensionList"
-            @click="handleOpenTradingTaskConfigModal(item)"
-          >
-            {{ item.name }}
           </a-button>
         </div>
       </div>
@@ -741,10 +753,10 @@ watch(
   width: 100%;
   height: 100%;
 
-  .make-order__warp {
+  .make-order__wrap {
+    height: 100%;
     display: flex;
     justify-content: space-between;
-    height: 100%;
 
     .make-order-content {
       flex: 1;
@@ -813,6 +825,15 @@ watch(
       }
     }
 
+    .make-order-algorithm__wrap {
+      width: 90%;
+      margin: 40px auto 8px;
+
+      .make-order-algorithm-btns {
+        margin: 8px 0 0 8px;
+      }
+    }
+
     .make-order-btns {
       width: 40px;
       height: 100%;
@@ -838,6 +859,7 @@ watch(
       }
     }
   }
+
   .green {
     color: @green-base !important;
   }

@@ -18,7 +18,7 @@ exports.build = () => {
   } = require('@kungfu-trader/kungfu-js-api/toolkit/utils');
 
   const appDistDir = path.join(getAppDir(), 'dist', 'app');
-  const publicDir = path.resolve(getAppDir(), 'public');
+  const publicDir = path.join(getAppDir(), 'public');
   const cliDistDir = path.join(getCliDir(), 'dist', 'cli');
   const kfsDistDir = path.join(getSdkDir(), 'dist', 'sdk');
 
