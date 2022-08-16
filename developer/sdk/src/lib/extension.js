@@ -360,21 +360,14 @@ exports.compile = () => {
     });
   };
 
-  console.log(
-    '-- buildTargetDir',
-    buildTargetDir,
-    fse.existsSync(buildTargetDir),
-  );
   if (fse.existsSync(buildTargetDir)) {
     copyOutput(path.resolve(buildTargetDir, '*'));
   }
 
-  console.log('-- kungfulibs', kungfulibs, fse.existsSync(kungfulibs));
   if (fse.existsSync(kungfulibs)) {
     copyOutput(path.resolve(kungfuLibDirPattern, 'lib', '*'));
   }
 
-  console.log('-- pypackages', pypackages, fse.existsSync(pypackages));
   if (fse.existsSync(pypackages)) {
     fse.copySync(pypackages, path.join(outputDir, pypackages));
   }
