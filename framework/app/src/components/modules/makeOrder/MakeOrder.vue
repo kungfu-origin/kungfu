@@ -624,128 +624,119 @@ watch(
         </span>
       </template>
       <template v-slot:header>
-        <KfDashboardItem
-          :class="{ 'with-scroller': !!availTradingTaskExtensionList.length }"
-        >
+        <KfDashboardItem>
           <a-button size="small" @click="handleResetMakeOrderForm">
             {{ $t('tradingConfig.reset_order') }}
           </a-button>
         </KfDashboardItem>
       </template>
-      <div
-        :class="{
-          'make-order__wrap': true,
-          'with-scroller': !!availTradingTaskExtensionList.length,
-        }"
-      >
-        <div class="make-order-base__warp">
-          <div class="make-order-content">
-            <div class="make-order-form__warp">
-              <KfConfigSettingsForm
-                ref="formRef"
-                v-model:formState="formState"
-                :configSettings="configSettings"
-                changeType="add"
-                :label-col="LABEL_COL"
-                :wrapper-col="WRAPPER_COL"
-                :rules="rules"
-              ></KfConfigSettingsForm>
-              <div class="percent-group__wrap">
-                <a-col :span="LABEL_COL + WRAPPER_COL">
-                  <a-button
-                    v-for="percent in percentList"
-                    :class="{
-                      'percent-button': true,
-                      'percent-button-active': currentPercent === percent,
-                    }"
-                    :key="percent"
-                    size="small"
-                    ghost
-                    @click="
-                      currentPercent !== percent && handlePercentChange(percent)
-                    "
-                  >
-                    {{ `${percent}%` }}
-                  </a-button>
+      <div class="make-order__wrap">
+        <div class="make-order-content">
+          <div class="make-order-form__warp">
+            <KfConfigSettingsForm
+              ref="formRef"
+              v-model:formState="formState"
+              :configSettings="configSettings"
+              changeType="add"
+              :label-col="LABEL_COL"
+              :wrapper-col="WRAPPER_COL"
+              :rules="rules"
+            ></KfConfigSettingsForm>
+            <div class="percent-group__wrap">
+              <a-col :span="LABEL_COL + WRAPPER_COL">
+                <a-button
+                  v-for="percent in percentList"
+                  :class="{
+                    'percent-button': true,
+                    'percent-button-active': currentPercent === percent,
+                  }"
+                  :key="percent"
+                  size="small"
+                  ghost
+                  @click="
+                    currentPercent !== percent && handlePercentChange(percent)
+                  "
+                >
+                  {{ `${percent}%` }}
+                </a-button>
+              </a-col>
+            </div>
+            <template v-if="isAccountOrInstrumentConfirmed">
+              <div class="make-order-position">
+                <a-col :span="LABEL_COL" class="position-label">
+                  {{
+                    showAmountOrPosition === 'amount'
+                      ? $t('可用资金')
+                      : $t('可用仓位')
+                  }}
+                </a-col>
+                <a-col :span="WRAPPER_COL" class="position-value">
+                  {{
+                    showAmountOrPosition === 'amount'
+                      ? currentAvailMoney
+                      : currentAvailPosVolume
+                  }}
                 </a-col>
               </div>
-              <template v-if="isAccountOrInstrumentConfirmed">
-                <div class="make-order-position">
-                  <a-col :span="LABEL_COL" class="position-label">
-                    {{
-                      showAmountOrPosition === 'amount'
-                        ? $t('可用资金')
-                        : $t('可用仓位')
-                    }}
-                  </a-col>
-                  <a-col :span="WRAPPER_COL" class="position-value">
-                    {{
-                      showAmountOrPosition === 'amount'
-                        ? currentAvailMoney
-                        : currentAvailPosVolume
-                    }}
-                  </a-col>
-                </div>
-                <div class="make-order-position">
-                  <a-col :span="LABEL_COL" class="position-label">
-                    {{
-                      shotable(instrumentResolved?.instrumentType)
-                        ? formState.offset === OffsetEnum.Open
-                          ? t('保证金占用')
-                          : t('保证金返还')
-                        : $t('交易金额')
-                    }}
-                  </a-col>
-                  <a-col :span="WRAPPER_COL" class="position-value">
-                    {{ currentTradeAmount }}
-                  </a-col>
-                </div>
-                <div class="make-order-position">
-                  <a-col :span="LABEL_COL" class="position-label">
-                    {{
-                      showAmountOrPosition === 'amount'
-                        ? $t('剩余资金')
-                        : $t('剩余仓位')
-                    }}
-                  </a-col>
-                  <a-col :span="WRAPPER_COL" class="position-value">
-                    {{
-                      showAmountOrPosition === 'amount'
-                        ? currentResidueMoney
-                        : currentResiduePosVolume
-                    }}
-                  </a-col>
-                </div>
-              </template>
-            </div>
-          </div>
-          <div class="make-order-btns">
-            <a-button class="make-order" @click="handleMakeOrder">
-              {{ $t('tradingConfig.place_order') }}
-            </a-button>
-            <a-button @click="handleApartOrder">
-              {{ $t('tradingConfig.apart_order') }}
-            </a-button>
+              <div class="make-order-position">
+                <a-col :span="LABEL_COL" class="position-label">
+                  {{
+                    shotable(instrumentResolved?.instrumentType)
+                      ? formState.offset === OffsetEnum.Open
+                        ? t('保证金占用')
+                        : t('保证金返还')
+                      : $t('交易金额')
+                  }}
+                </a-col>
+                <a-col :span="WRAPPER_COL" class="position-value">
+                  {{ currentTradeAmount }}
+                </a-col>
+              </div>
+              <div class="make-order-position">
+                <a-col :span="LABEL_COL" class="position-label">
+                  {{
+                    showAmountOrPosition === 'amount'
+                      ? $t('剩余资金')
+                      : $t('剩余仓位')
+                  }}
+                </a-col>
+                <a-col :span="WRAPPER_COL" class="position-value">
+                  {{
+                    showAmountOrPosition === 'amount'
+                      ? currentResidueMoney
+                      : currentResiduePosVolume
+                  }}
+                </a-col>
+              </div>
+              <a-card
+                v-if="availTradingTaskExtensionList.length"
+                class="make-order-algorithm__wrap"
+                :title="$t('tradingConfig.algorithm')"
+                size="small"
+                :bodyStyle="{
+                  padding: '0 8px 8px 0',
+                  height: 'fit-content',
+                }"
+              >
+                <a-button
+                  class="make-order-algorithm-btns"
+                  v-for="item in availTradingTaskExtensionList"
+                  @click="handleOpenTradingTaskConfigModal(item)"
+                >
+                  {{ item.name }}
+                </a-button>
+              </a-card>
+            </template>
           </div>
         </div>
-        <a-card
-          v-if="availTradingTaskExtensionList.length"
-          style="margin-bottom: 8px"
-          :title="$t('tradingConfig.algorithm')"
-          size="small"
-          :bodyStyle="{
-            padding: '0 8px 8px 0',
-            height: 'fit-content',
-          }"
-        >
-          <a-button
-            class="make-order-algorithm-btns"
-            v-for="item in availTradingTaskExtensionList"
-            @click="handleOpenTradingTaskConfigModal(item)"
-          >
-            {{ item.name }}
+        <div class="make-order-btns">
+          <a-button class="make-order" @click="handleMakeOrder">
+            {{ $t('tradingConfig.place_order') }}
           </a-button>
-        </a-card>
+          <a-button @click="handleApartOrder">
+            {{ $t('tradingConfig.apart_order') }}
+          </a-button>
+        </div>
       </div>
     </KfDashboard>
     <OrderConfirmModal
@@ -762,117 +753,110 @@ watch(
   width: 100%;
   height: 100%;
 
-  .with-scroller {
-    padding-right: 12px;
-  }
-
   .make-order__wrap {
     height: 100%;
     display: flex;
-    flex-direction: column;
-    overflow-y: overlay;
+    justify-content: space-between;
 
-    .make-order-base__warp {
+    .make-order-content {
       flex: 1;
+      height: 100%;
       display: flex;
-      justify-content: space-between;
-      margin-bottom: 8px;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
 
-      .make-order-content {
-        flex: 1;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
+    .make-order-form__warp {
+      height: 100%;
+      padding-top: 16px;
+      overflow-y: overlay;
+
+      .ant-form-item {
+        margin-bottom: 16px;
+
+        .ant-form-item-explain,
+        .ant-form-item-extra {
+          min-height: unset;
+        }
       }
 
-      .make-order-form__warp {
-        height: 100%;
-        padding-top: 16px;
-        overflow-y: overlay;
+      .percent-group__wrap {
+        margin: auto;
+        padding-right: 16px;
+        padding-left: 8px;
+        box-sizing: border-box;
 
-        .ant-form-item {
-          margin-bottom: 16px;
-
-          .ant-form-item-explain,
-          .ant-form-item-extra {
-            min-height: unset;
-          }
-        }
-
-        .percent-group__wrap {
+        .ant-col {
           margin: auto;
-          padding-right: 16px;
-          padding-left: 8px;
-          box-sizing: border-box;
-
-          .ant-col {
-            margin: auto;
-          }
-
-          .percent-button {
-            margin: 0px 8px 8px 0px;
-            color: @border-color-base;
-            border-color: @border-color-base;
-          }
-
-          .percent-button-active {
-            color: @primary-color;
-            border-color: @primary-color;
-          }
-        }
-      }
-
-      .make-order-position {
-        display: flex;
-        line-height: 1;
-        font-size: 12px;
-        color: @text-color-secondary;
-        font-weight: bold;
-        margin: 8px 0px;
-
-        .position-label {
-          padding-right: 8px;
-          text-align: right;
         }
 
-        .position-value {
-          font-weight: bold;
+        .percent-button {
+          margin: 0px 8px 8px 0px;
+          color: @border-color-base;
+          border-color: @border-color-base;
         }
 
-        &:first-child {
-          margin-top: 8px;
-        }
-      }
-
-      .make-order-btns {
-        width: 40px;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-
-        .ant-btn {
-          height: 26%;
-          text-align: center;
-          word-break: break-word;
-          word-wrap: unset;
-          white-space: normal;
-          flex: 1;
-          margin-bottom: 8px;
-
-          &:last-child {
-            margin-bottom: 0px;
-          }
-        }
-        .make-order {
-          height: 72%;
-          flex: 4;
+        .percent-button-active {
+          color: @primary-color;
+          border-color: @primary-color;
         }
       }
     }
 
-    .make-order-algorithm-btns {
-      margin: 8px 0 0 8px;
+    .make-order-position {
+      display: flex;
+      line-height: 1;
+      font-size: 12px;
+      color: @text-color-secondary;
+      font-weight: bold;
+      margin: 8px 0px;
+
+      .position-label {
+        padding-right: 8px;
+        text-align: right;
+      }
+
+      .position-value {
+        font-weight: bold;
+      }
+
+      &:first-child {
+        margin-top: 8px;
+      }
+    }
+
+    .make-order-algorithm__wrap {
+      width: 90%;
+      margin: 40px auto 8px;
+
+      .make-order-algorithm-btns {
+        margin: 8px 0 0 8px;
+      }
+    }
+
+    .make-order-btns {
+      width: 40px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+
+      .ant-btn {
+        height: 26%;
+        text-align: center;
+        word-break: break-word;
+        word-wrap: unset;
+        white-space: normal;
+        flex: 1;
+        margin-bottom: 8px;
+
+        &:last-child {
+          margin-bottom: 0px;
+        }
+      }
+      .make-order {
+        height: 72%;
+        flex: 4;
+      }
     }
   }
 
