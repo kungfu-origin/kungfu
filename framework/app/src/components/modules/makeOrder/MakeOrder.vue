@@ -165,14 +165,9 @@ const makeOrderData = computed(() => {
 });
 
 const availTradingTaskExtensionList = computed(() => {
-  return [
-    ...getExtConfigList(extConfigs.value, 'strategy').filter(
-      (item) => uiExtConfigs.value[item.key]?.position === 'make_order',
-    ),
-    { name: 12456 },
-    { name: 12456 },
-    { name: 12456 },
-  ];
+  return getExtConfigList(extConfigs.value, 'strategy').filter(
+    (item) => uiExtConfigs.value[item.key]?.position === 'make_order',
+  );
 });
 
 const getResolvedOffset = (
