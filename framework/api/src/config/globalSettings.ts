@@ -25,6 +25,10 @@ export interface KfSystemConfig {
   config: KungfuApi.KfConfigItem[];
 }
 
+const __python_version_resolved = __python_version
+  ? [...__python_version.split('.').slice(0, 2), 'x'].join('.')
+  : '3.9.x';
+
 export const getKfGlobalSettings = (): KfSystemConfig[] => [
   {
     key: 'system',
@@ -91,7 +95,7 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
         key: 'python',
         name: t('globalSettingConfig.use_local_python'),
         tip: t('globalSettingConfig.local_python_desc', {
-          py_version: __python_version,
+          py_version: __python_version_resolved,
           whl_dir_path: PY_WHL_DIR,
         }),
         default: false,
