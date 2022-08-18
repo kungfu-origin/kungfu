@@ -11,6 +11,7 @@ import {
   killKungfu,
   killExtra,
   pm2Kill,
+  pm2KillGodDaemon,
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import {
   delayMilliSeconds,
@@ -64,21 +65,25 @@ export function showKungfuInfo(): void {
 function KillAll(): Promise<void> {
   return new Promise((resolve) => {
     pm2Kill()
-      .catch((err) => kfLogger.error(err.message))
+      .catch((err) => kfLogger.error(err))
       .finally(() => {
-        killKfc()
-          .catch((err) => kfLogger.error(err.message))
+        pm2KillGodDaemon()
+          .catch((err) => kfLogger.error(err))
           .finally(() => {
-            killKungfu()
-              .catch((err) => kfLogger.error(err.message))
+            killKfc()
+              .catch((err) => kfLogger.error(err))
               .finally(() => {
-                killExtra()
-                  .catch((err) => kfLogger.error(err.message))
+                killKungfu()
+                  .catch((err) => kfLogger.error(err))
                   .finally(() => {
-                    deleteNNFiles()
-                      .catch((err) => kfLogger.error(err.message))
+                    killExtra()
+                      .catch((err) => kfLogger.error(err))
                       .finally(() => {
-                        resolve();
+                        deleteNNFiles()
+                          .catch((err) => kfLogger.error(err))
+                          .finally(() => {
+                            resolve();
+                          });
                       });
                   });
               });
