@@ -535,6 +535,7 @@ declare namespace KungfuApi {
   }
 
   export interface PositionResolved extends Position {
+    closable_volume: bigint;
     account_id_resolved: string;
     instrument_id_resolved: string;
   }

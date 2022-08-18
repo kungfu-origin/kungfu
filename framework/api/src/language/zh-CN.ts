@@ -249,10 +249,14 @@ export default {
       '买入价格超出警戒线, 当前价格为 {price}, 警戒线为 {warningLine}, 当前乌龙指阈值为 {fatFinger}%',
     fat_finger_sell_modal:
       '卖出价格超出警戒线, 当前价格为 {price}, 警戒线为 {warningLine}, 当前乌龙指阈值为 {fatFinger}%',
+    close_apart_open_modal:
+      '下单量为{volume}, 当前标的可平{direction}仓为 {closable_volume}, 超出数量为 {open_volume}\n点击 “超出部分反向开仓”, 将会 平{direction}{closable_volume}, 开{direction}{open_volume}\n点击“按原方案下单”, 将会继续平{direction}{volume}',
     start_process: '请先启动{process}交易进程',
     place_confirm: '下单确认',
     close_all: '是否全部平仓?',
     Continue: '继续下单',
+    original_plan: '按原方案下单',
+    beyond_to_open: '超出部分反向开仓',
   },
 
   orderConfig: {
@@ -373,6 +377,7 @@ export default {
     yesterday_volume: '昨',
     today_volume: '今',
     sum_volume: '总',
+    closable_volume: '可平',
     avg_open_price: '开仓均价',
     last_price: '最新价',
     unrealized_pnl: '浮动盈亏',

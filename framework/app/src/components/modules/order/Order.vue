@@ -221,8 +221,8 @@ function handleCancelAllOrders(): void {
     `${t('orderConfig.confirm')} ${currentCategoryData.value?.name} ${name} ${t(
       'orderConfig.cancel_all',
     )}`,
-  ).then(() => {
-    if (!currentGlobalKfLocation.value || !window.watcher) {
+  ).then((flag) => {
+    if (!flag || !currentGlobalKfLocation.value || !window.watcher) {
       return;
     }
 

@@ -150,10 +150,11 @@ function handleMakeOrder() {
         return;
       }
 
-      await confirmModal(
+      const flag = await confirmModal(
         t('tradingConfig.place_confirm'),
         dealOrderPlaceVNode({ ...makeOrderInput, ...blockMessage }, 1),
       );
+      if (!flag) return;
 
       makeOrderByBlockMessage(
         window.watcher,
