@@ -3,7 +3,7 @@
 
 [packages]
 poetry = "==1.1.14"
-pip = "==21.3.1"
-setuptools = "==59.8.0"
-virtualenv = "==20.14.1"
+pip = "==22.2.2"
+setuptools = "==65.0.2"
+virtualenv = "==20.16.3"
 wheel = "==0.37.1"
