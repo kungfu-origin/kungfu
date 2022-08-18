@@ -4,6 +4,6 @@
 [packages]
 poetry = "==1.1.14"
 pip = "==22.2.2"
-setuptools = "==65.0.2"
+setuptools = "==63.4.1"
 virtualenv = "==20.16.3"
 wheel = "==0.37.1"
