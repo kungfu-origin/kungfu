@@ -894,7 +894,7 @@ bracex = ">=2.1.1"
 [metadata]
 lock-version = "1.1"
 python-versions = "~3.9"
-content-hash = "3379d85b8611e0ebfbdf8906d3c3bcd6d046b658c7aa58469c5f3d961cffd5ba"
+content-hash = "9257b8b4714ff73972da075fec4290a820924bc42eec5d840b76a047bcf827e8"
 
 [metadata.files]
 altgraph = [

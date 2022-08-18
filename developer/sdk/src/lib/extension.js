@@ -293,7 +293,7 @@ exports.installBatch = async (
   if (hasSourceFor(packageJson, 'python')) {
     const { cmd, args0 } = getKfcCmdArgs();
     spawnExec(cmd, [...args0, 'engage', 'pdm', 'makeup']);
-    spawnExec(cmd, [...args0, 'engage', 'pdm', 'install']);
+    spawnExec(cmd, [...args0, 'engage', 'pdm', 'install', '--no-isolation']);
   }
 };
 
