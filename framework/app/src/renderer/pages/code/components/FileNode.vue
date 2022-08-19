@@ -316,7 +316,9 @@ function handleDelete() {
     const parentId = fileNode.value?.parentId;
     const typeName = type == 'folder' ? t('folder') : t('file');
 
-    confirmModal(t('prompt'), t('editor.delate_confirm')).then(() => {
+    confirmModal(t('prompt'), t('editor.delate_confirm')).then((flag) => {
+      if (!flag) return;
+
       removeFileFolder(fileNode.value?.filePath || '')
         .then(() => {
           store.setCurrentFile(entryFile.value);

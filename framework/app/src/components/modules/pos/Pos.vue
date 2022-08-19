@@ -101,10 +101,10 @@ watch(currentGlobalKfLocation, () => {
 
 function handleClickRow(data: {
   event: MouseEvent;
-  row: KungfuApi.TradingDataItem;
+  row: KungfuApi.PositionResolved;
   column: KfTradingDataTableHeaderConfig;
 }) {
-  const row = data.row as KungfuApi.Position;
+  const row = data.row;
   const { instrument_id, instrument_type, exchange_id } = row;
   const ensuredInstrument: KungfuApi.InstrumentResolved =
     getInstrumentByInstrumentPair(
@@ -123,10 +123,7 @@ function handleClickRow(data: {
       row.yesterday_volume !== BigInt(0)
         ? OffsetEnum.CloseYest
         : OffsetEnum.CloseToday,
-    volume:
-      row.yesterday_volume !== BigInt(0)
-        ? row.yesterday_volume
-        : row.volume - row.yesterday_volume,
+    volume: row.closable_volume,
 
     price: row.last_price || row.avg_open_price || 0,
     accountId: isTdStrategyCategory(currentGlobalKfLocation.value?.category)

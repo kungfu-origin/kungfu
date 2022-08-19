@@ -178,10 +178,11 @@ function handleMakeOrder() {
         return;
       }
 
-      await confirmModal(
+      const flag = await confirmModal(
         t('tradingConfig.place_confirm'),
         dealOrderPlaceVNode(makeOrderInput, 1, true),
       );
+      if (!flag) return;
 
       makeOrderByOrderInput(
         window.watcher,
