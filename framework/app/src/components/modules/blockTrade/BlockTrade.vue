@@ -48,8 +48,8 @@ const configSettings = computed(() => {
   return getConfigSettings(category);
 });
 
-function numberValidator(_rule: RuleObject, value: string) {
-  if (value === '' || !/^\d+$/.test(value)) {
+function numberValidator(_rule: RuleObject, value: string | number) {
+  if (value === '' || !/^\d+$/.test(value + '')) {
     return Promise.reject(t('blockTradeConfig.only_number'));
   } else {
     return Promise.resolve();
@@ -101,11 +101,8 @@ function handleMakeOrder() {
         offset,
         is_swap,
         opponent_seat,
-        opponent_account,
         match_number,
-        linkman,
-        contact_way,
-        underweight_type,
+        is_specific,
       } = formState.value;
 
       const makeOrderInput: KungfuApi.MakeOrderInput = {
@@ -123,13 +120,8 @@ function handleMakeOrder() {
 
       const blockMessage: KungfuApi.BlockMessage = {
         opponent_seat: +opponent_seat || 0,
-        opponent_account: opponent_account || '',
         match_number: match_number || '',
-        value: {
-          linkman: linkman || '',
-          contact_way: contact_way || '',
-          underweight_type: +underweight_type,
-        },
+        is_specific: !!is_specific,
         insert_time: 0n,
       };
 
@@ -173,8 +165,8 @@ function handleMakeOrder() {
 </script>
 <template>
   <div class="kf-make-order-dashboard__warp">
-    <KfDashboard @boardSizeChange="handleBodySizeChange">
-      <template v-slot:title>
+    <KfDashboard @board-size-change="handleBodySizeChange">
+      <template #title>
         <span v-if="currentGlobalKfLocation">
           <a-tag
             v-if="currentCategoryData"
@@ -182,12 +174,12 @@ function handleMakeOrder() {
           >
             {{ currentCategoryData?.name }}
           </a-tag>
-          <span class="name" v-if="currentGlobalKfLocation">
+          <span v-if="currentGlobalKfLocation" class="name">
             {{ getCurrentGlobalKfLocationId(currentGlobalKfLocation) }}
           </span>
         </span>
       </template>
-      <template v-slot:header>
+      <template #header>
         <KfDashboardItem>
           <a-button size="small" @click="handleResetMakeOrderForm">
             {{ $t('blockTradeConfig.reset_order') }}
@@ -199,8 +191,8 @@ function handleMakeOrder() {
           <KfConfigSettingsForm
             ref="formRef"
             v-model:formState="formState"
-            :configSettings="configSettings"
-            changeType="add"
+            :config-settings="configSettings"
+            change-type="add"
             :label-col="6"
             :wrapper-col="14"
             :rules="rules"

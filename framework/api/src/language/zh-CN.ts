@@ -450,11 +450,8 @@ export default {
     limit_price: '价格',
     volume: '下单量',
     opponent_seat: '对方席位',
-    opponent_account: '对方股东',
     match_number: '约定序号',
-    linkman: '联系人',
-    contact_way: '联系方式',
-    underweight_type: '减持类型',
+    is_specific: '减持类型',
 
     unrestricted_shares: '非受限股份',
     restricted_shares: '受限股份',
