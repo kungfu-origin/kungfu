@@ -73,8 +73,7 @@ void RuntimeContext::subscribe_all(const std::string &source, uint8_t market_typ
 }
 
 uint64_t RuntimeContext::insert_block_message(const std::string &source, const std::string &account,
-                                              uint32_t opponent_seat, uint64_t match_number,
-                                              const std::string &opponent_account, const std::string &value) {
+                                              uint32_t opponent_seat, uint64_t match_number, bool is_specific) {
   auto account_location_uid = get_td_location_uid(source, account);
   if (not broker_client_.is_ready(account_location_uid)) {
     SPDLOG_ERROR("account {} not ready", td_locations_.at(account_location_uid)->uname);
@@ -84,8 +83,7 @@ uint64_t RuntimeContext::insert_block_message(const std::string &source, const s
   BlockMessage &msg = writer->open_data<BlockMessage>(app_.now());
   msg.opponent_seat = opponent_seat;
   msg.match_number = match_number;
-  strncpy(msg.opponent_account, opponent_account.c_str(), ACCOUNT_ID_LEN);
-  strncpy(msg.value, value.c_str(), JSON_STR_LEN);
+  msg.is_specific = is_specific;
   msg.block_id = writer->current_frame_uid();
   writer->close_data();
   return msg.block_id;

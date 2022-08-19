@@ -66,6 +66,7 @@ const props = withDefaults(
         trigger: string;
       }
     >;
+    steps: Record<string, number>;
     passPrimaryKeySpecialWordsVerify?: boolean;
   }>(),
   {
@@ -80,6 +81,7 @@ const props = withDefaults(
     labelCol: 6,
     wrapperCol: 14,
     rules: () => ({}),
+    steps: () => ({}),
     passPrimaryKeySpecialWordsVerify: false,
   },
 );
@@ -518,14 +520,14 @@ defineExpose({
       <a-input-number
         v-else-if="item.type === 'float'"
         :precision="4"
-        step="0.0001"
+        :step="steps[item.key] || 0.0001"
         v-model:value="formState[item.key]"
         :disabled="(changeType === 'update' && item.primary) || item.disabled"
       ></a-input-number>
       <a-input-number
         v-else-if="item.type === 'percent'"
         :precision="2"
-        step="0.01"
+        :step="steps[item.key] || 0.01"
         :formatter="formatterPercentNumber"
         :parser="parserPercentString"
         v-model:value="formState[item.key]"

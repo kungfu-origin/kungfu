@@ -194,7 +194,7 @@ app.on('ready', () => {
 //一上来先把所有之前意外没关掉的 pm2/kfc 进程kill掉
 console.time('init clean');
 killExtra()
-  .catch((err) => kfLogger.error(err.message))
+  .catch((err) => kfLogger.error(err))
   .finally(() => {
     console.timeEnd('init clean');
     killExtraFinished = true;
@@ -365,14 +365,8 @@ function setMenu() {
 
 process
   .on('uncaughtException', (err: Error) => {
-    kfLogger.error(
-      '[MASTER] Error caught in uncaughtException event:',
-      err.message,
-    );
+    kfLogger.error('[MASTER] Error caught in uncaughtException event:', err);
   })
   .on('unhandledRejection', (err: Error) => {
-    kfLogger.error(
-      '[MASTER] Error caught in unhandledRejection event:',
-      err.message,
-    );
+    kfLogger.error('[MASTER] Error caught in unhandledRejection event:', err);
   });

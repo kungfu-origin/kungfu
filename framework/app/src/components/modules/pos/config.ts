@@ -4,8 +4,8 @@ import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 const { t } = VueI18n.global;
 
 const buildSorter =
-  (dataIndex: keyof KungfuApi.Position) =>
-  (a: KungfuApi.Position, b: KungfuApi.Position) =>
+  (dataIndex: keyof KungfuApi.PositionResolved) =>
+  (a: KungfuApi.PositionResolved, b: KungfuApi.PositionResolved) =>
     +Number(a[dataIndex]) - +Number(b[dataIndex]);
 
 const buildStrSorter =
@@ -64,6 +64,13 @@ export const getColumns = (
     dataIndex: 'volume',
     flex: 1,
     sorter: buildSorter('yesterday_volume'),
+  },
+  {
+    type: 'number',
+    name: t('posGlobalConfig.closable_volume'),
+    dataIndex: 'closable_volume',
+    flex: 1,
+    sorter: buildSorter('closable_volume'),
   },
   {
     type: 'number',
