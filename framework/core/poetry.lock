@@ -142,7 +142,7 @@ test = ["hypothesis (==3.55.3)", "flake8 (==3.7.8)"]
 
 [[package]]
 name = "conan"
-version = "1.51.2"
+version = "1.51.3"
 description = "Conan C/C++ package manager"
 category = "dev"
 optional = false
@@ -970,7 +970,7 @@ commonmark = [
     {file = "commonmark-0.9.1.tar.gz", hash = "sha256:452f9dc859be7f06631ddcb328b6919c67984aca654e5fefb3914d54691aed60"},
 ]
 conan = [
-    {file = "conan-1.51.2.tar.gz", hash = "sha256:a7ebf0909333af5dc43212b501db0e5a8630d33d7e32fa1e3750aa54b0351a21"},
+    {file = "conan-1.51.3.tar.gz", hash = "sha256:5f7f2a39e4778250b02813606bd9e7a16616e430b4c889da22aaec99e02cc945"},
 ]
 distlib = [
     {file = "distlib-0.3.5-py2.py3-none-any.whl", hash = "sha256:b710088c59f06338ca514800ad795a132da19fda270e3ce4affc74abf955a26c"},
