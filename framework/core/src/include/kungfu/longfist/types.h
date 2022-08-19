@@ -403,9 +403,8 @@ KF_DEFINE_PACK_TYPE(                                         //
     (uint64_t, block_id),      // 大宗交易信息id, 用于TD从OrderInput找到此数据
     (uint32_t, opponent_seat), // 对手方席号
     (uint64_t, match_number),  // 成交约定号
-    (kungfu::array<char, ACCOUNT_ID_LEN>, opponent_account), // 对手方股东账号
-    (kungfu::array<char, JSON_STR_LEN>, value),              // 联系人, 联系方式, 是否受限股份
-    (int64_t, insert_time)                                   // 写入时间
+    (bool, is_specific),       // 是否受限(特定)股份
+    (int64_t, insert_time)     // 写入时间
 );
 
 KF_DEFINE_PACK_TYPE(                                               //

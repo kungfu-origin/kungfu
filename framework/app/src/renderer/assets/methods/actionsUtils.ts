@@ -466,7 +466,7 @@ export const useDealExportHistoryTradingData = (): {
 export const showTradingDataDetail = (
   item: KungfuApi.TradingDataTypes,
   typename: string,
-): Promise<void> => {
+): Promise<boolean> => {
   const dataResolved = dealTradingDataItem(item, window.watcher);
   const vnode = Object.keys(dataResolved || {})
     .filter((key) => {
@@ -1507,42 +1507,64 @@ export const useMakeOrderInfo = (
     return offset === OffsetEnum.Open ? 'amount' : 'position';
   });
 
-  const currentPosition = computed(() => {
-    if (!currentPositionList.value.length || !instrumentResolved.value)
-      return null;
+  const getPositionByInstrumentAndDirection = (
+    positionList: KungfuApi.Position[],
+    instrument: KungfuApi.InstrumentResolved | null,
+    direction: DirectionEnum,
+  ) => {
+    if (!positionList.length || !instrument) return null;
 
-    const { exchangeId, instrumentId, instrumentType } =
-      instrumentResolved.value;
-    const targetPositionList: KungfuApi.Position[] =
-      currentPositionList.value.filter(
-        (position) =>
-          position.exchange_id === exchangeId &&
-          position.instrument_id === instrumentId &&
-          position.instrument_type === instrumentType,
-      );
+    const { exchangeId, instrumentId, instrumentType } = instrument;
+    const targetPositionList: KungfuApi.Position[] = positionList.filter(
+      (position) =>
+        position.exchange_id === exchangeId &&
+        position.instrument_id === instrumentId &&
+        position.instrument_type === instrumentType,
+    );
 
     if (targetPositionList && targetPositionList.length) {
-      const { side, offset } = formState.value;
-
       const targetPositionWithLongDirection = targetPositionList.filter(
-        (item) => item.direction === DirectionEnum.Long,
-      )[0];
-      const targetPositionWithShortDirection = targetPositionList.filter(
-        (item) => item.direction === DirectionEnum.Short,
-      )[0];
+        (item) => item.direction === direction,
+      );
 
-      if (side === SideEnum.Buy) {
-        if (offset === OffsetEnum.Open) {
-          return targetPositionWithLongDirection;
-        } else {
-          return targetPositionWithShortDirection;
-        }
-      } else if (side === SideEnum.Sell) {
-        if (offset === OffsetEnum.Open) {
-          return targetPositionWithShortDirection;
-        } else {
-          return targetPositionWithLongDirection;
-        }
+      if (targetPositionWithLongDirection.length) {
+        return targetPositionWithLongDirection[0];
+      }
+    }
+
+    return null;
+  };
+
+  const currentPositionWithLongDirection = computed(() => {
+    return getPositionByInstrumentAndDirection(
+      currentPositionList.value,
+      instrumentResolved.value,
+      DirectionEnum.Long,
+    );
+  });
+
+  const currentPositionWithShortDirection = computed(() => {
+    return getPositionByInstrumentAndDirection(
+      currentPositionList.value,
+      instrumentResolved.value,
+      DirectionEnum.Short,
+    );
+  });
+
+  const currentPosition = computed(() => {
+    const { offset, side } = formState.value;
+
+    if (side === SideEnum.Buy) {
+      if (offset === OffsetEnum.Open) {
+        return currentPositionWithLongDirection.value;
+      } else {
+        return currentPositionWithShortDirection.value;
+      }
+    } else if (side === SideEnum.Sell) {
+      if (offset === OffsetEnum.Open) {
+        return currentPositionWithShortDirection.value;
+      } else {
+        return currentPositionWithLongDirection.value;
       }
     }
 
@@ -1574,18 +1596,24 @@ export const useMakeOrderInfo = (
     const { offset } = formState.value;
 
     if (currentPosition.value) {
-      const { yesterday_volume, volume } = currentPosition.value;
+      const { yesterday_volume, frozen_yesterday, volume, frozen_total } =
+        currentPosition.value;
+      const today_volume = volume - yesterday_volume;
+      const frozen_today = frozen_total - frozen_yesterday;
+      const closable_yesterday = yesterday_volume - frozen_yesterday;
+      const closable_today = today_volume - frozen_today;
+      const closable_total = volume - frozen_total;
 
       if (shotable(instrumentType)) {
         if (offset === OffsetEnum.CloseYest) {
-          return dealKfNumber(yesterday_volume) + '';
+          return dealKfNumber(closable_yesterday) + '';
         } else if (offset === OffsetEnum.CloseToday) {
-          return dealKfNumber(volume - yesterday_volume) + '';
+          return dealKfNumber(closable_today) + '';
         } else {
-          return dealKfNumber(volume) + '';
+          return dealKfNumber(closable_total) + '';
         }
       } else {
-        return dealKfNumber(yesterday_volume) + '';
+        return dealKfNumber(closable_yesterday) + '';
       }
     }
 
@@ -1727,6 +1755,8 @@ export const useMakeOrderInfo = (
     isAccountOrInstrumentConfirmed,
     instrumentResolved,
     currentPosition,
+    currentPositionWithLongDirection,
+    currentPositionWithShortDirection,
     currentAvailMoney,
     currentAvailPosVolume,
     currentPrice,

@@ -21,7 +21,7 @@ import {
   resolveClientId,
 } from '../utils/busiUtils';
 import { HistoryDateEnum, LedgerCategoryEnum } from '../typings/enums';
-import { ExchangeIds } from '../config/tradingConfig';
+import { ExchangeIds, ShotableInstrumentTypes } from '../config/tradingConfig';
 
 export const kf = kungfu();
 
@@ -558,6 +558,12 @@ export const dealTrade = (
   };
 };
 
+export const getPosClosableVolume = (position: KungfuApi.Position) => {
+  return ShotableInstrumentTypes.includes(position.instrument_type)
+    ? position.volume - position.frozen_total
+    : position.yesterday_volume - position.frozen_yesterday;
+};
+
 export const dealPosition = (
   watcher: KungfuApi.Watcher,
   pos: KungfuApi.Position,
@@ -567,8 +573,10 @@ export const dealPosition = (
     pos.ledger_category === LedgerCategoryEnum.td
       ? `${holderLocation.group}_${holderLocation.name}`
       : '--';
+  const closable_volume = getPosClosableVolume(pos);
   return {
     ...pos,
+    closable_volume,
     uid_key: pos.uid_key,
     account_id_resolved,
     instrument_id_resolved: `${pos.instrument_id} ${
