@@ -151,7 +151,7 @@ void bind_strategy(pybind11::module &m) {
            py::arg("offset") = Offset::Open, py::arg("hedge_flag") = HedgeFlag::Speculation, py::arg("is_swap") = false,
            py::arg("block_id") = 0)
       .def("insert_block_message", &strategy::Context::insert_block_message, py::arg("source"), py::arg("account"),
-           py::arg("opponent_seat"), py::arg("match_number"), py::arg("opponent_account"), py::arg("value") = "")
+           py::arg("opponent_seat"), py::arg("match_number"), py::arg("is_specific") = false)
       .def("cancel_order", &strategy::Context::cancel_order)
       .def("req_history_order", &strategy::Context::req_history_order, py::arg("source"), py::arg("account"),
            py::arg("query_num") = 0)
