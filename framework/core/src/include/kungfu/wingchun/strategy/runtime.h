@@ -59,13 +59,11 @@ public:
    * Insert Block Message
    * @param opponent_seat
    * @param match_number
-   * @param opponent_account
    * @param value
    * @return
    */
   uint64_t insert_block_message(const std::string &source, const std::string &account, uint32_t opponent_seat,
-                                uint64_t match_number, const std::string &opponent_account,
-                                const std::string &value = "") override;
+                                uint64_t match_number, bool is_specific = false) override;
 
   /**
    *
