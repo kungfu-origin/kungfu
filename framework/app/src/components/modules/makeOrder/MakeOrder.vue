@@ -297,7 +297,7 @@ watch(
     const instrumentUKey = hashInstrumentUKey(instrumentId, exchangeId);
     formSteps.limit_price =
       (window.watcher.ledger.Instrument[instrumentUKey] as KungfuApi.Instrument)
-        ?.price_tick ?? 1;
+        ?.price_tick || 1;
 
     makeOrderInstrumentType.value = instrumentResolved.value.instrumentType;
   },
@@ -518,10 +518,13 @@ async function confirmApartCloseToOpen(
 ) {
   const { side, offset, volume } = makeOrderInput;
 
-  let direction: string = '',
-    closable_volume: number = -1;
+  if (
+    shotable(instrumentResolved.value?.instrumentType) &&
+    offset === OffsetEnum.Close
+  ) {
+    let direction: string = '',
+      closable_volume: number | undefined = undefined;
 
-  if (offset === OffsetEnum.Close) {
     if (side === SideEnum.Buy) {
       if (currentPositionWithShortDirection.value) {
         closable_volume = Number(
@@ -539,37 +542,38 @@ async function confirmApartCloseToOpen(
         direction = t('tradingConfig.long');
       }
     }
-  }
 
-  if (direction === '' || closable_volume === -1) return [makeOrderInput];
+    if (direction === '' || closable_volume === undefined)
+      return [makeOrderInput];
 
-  if (volume > closable_volume) {
-    const open_volume = volume - Number(closable_volume);
-    const firstOrderInput: KungfuApi.MakeOrderInput = {
-      ...makeOrderInput,
-      volume: Number(closable_volume),
-    };
-    const secondOrderInput: KungfuApi.MakeOrderInput = {
-      ...makeOrderInput,
-      offset: OffsetEnum.Open,
-      volume: volume - Number(closable_volume),
-    };
-    const flag = await confirmContinueOrderModal(
-      t('tradingConfig.close_apart_open_modal', {
-        direction,
-        volume,
-        closable_volume,
-        open_volume,
-      }),
-      t('tradingConfig.original_plan'),
-      t('tradingConfig.beyond_to_open'),
-    );
+    if (volume > closable_volume) {
+      const open_volume = volume - Number(closable_volume);
+      const firstOrderInput: KungfuApi.MakeOrderInput = {
+        ...makeOrderInput,
+        volume: Number(closable_volume),
+      };
+      const secondOrderInput: KungfuApi.MakeOrderInput = {
+        ...makeOrderInput,
+        offset: OffsetEnum.Open,
+        volume: volume - Number(closable_volume),
+      };
+      const flag = await confirmContinueOrderModal(
+        t('tradingConfig.close_apart_open_modal', {
+          direction,
+          volume,
+          closable_volume,
+          open_volume,
+        }),
+        t('tradingConfig.original_plan'),
+        t('tradingConfig.beyond_to_open'),
+      );
 
-    if (flag !== null) {
-      if (flag) {
-        return [makeOrderInput];
-      } else {
-        return [firstOrderInput, secondOrderInput];
+      if (flag !== null) {
+        if (flag) {
+          return [makeOrderInput];
+        } else {
+          return [firstOrderInput, secondOrderInput];
+        }
       }
     }
   }
