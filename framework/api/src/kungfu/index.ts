@@ -346,9 +346,9 @@ export const kfMakeBlockOrder = async (
       ...blockMessage,
       opponent_seat: +blockMessage.opponent_seat,
       match_number: BigInt(blockMessage.match_number),
-      value: JSON.stringify(blockMessage.value),
       insert_time: watcher.now(),
     };
+    console.log(blockMessage);
     block_id = await watcher.issueBlockMessage(blockMessage, tdLocation);
   }
   if (!block_id) {

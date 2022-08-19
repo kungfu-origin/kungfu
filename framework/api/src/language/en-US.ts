@@ -448,11 +448,8 @@ export default {
     limit_price: 'limit_price',
     volume: 'volume',
     opponent_seat: 'opponent_seat',
-    opponent_account: 'opponent_account',
     match_number: 'match_number',
-    linkman: 'linkman',
-    contact_way: 'contact_way',
-    underweight_type: 'underweight_type',
+    is_specific: 'is_specific',
 
     unrestricted_shares: 'Unrestricted shares',
     restricted_shares: 'Restricted shares',
