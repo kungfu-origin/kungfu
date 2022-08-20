@@ -218,7 +218,7 @@ function toLedgalPriceVolume(num: number | bigint) {
 <style lang="less">
 .kf-order-book__warp {
   height: 100%;
-  width: 100%;
+  width: calc(100% - 8px);
   display: flex;
   flex-direction: column;
   padding: 8px 8px;

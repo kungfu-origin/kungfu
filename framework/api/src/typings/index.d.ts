@@ -16,7 +16,6 @@ declare namespace KungfuApi {
     SideEnum,
     OffsetEnum,
     HedgeFlagEnum,
-    UnderweightEnum,
     LedgerCategoryEnum,
     VolumeConditionEnum,
     TimeConditionEnum,
@@ -465,15 +464,8 @@ declare namespace KungfuApi {
 
   export interface BlockMessage {
     opponent_seat: number; // 对方手席位号
-    opponent_account: string; // 对方手账户
     match_number: bigint; // 成交约定号
-    value:
-      | {
-          linkman: string; // 联系人
-          contact_way: string; // 联系方式
-          underweight_type: UnderweightEnum; // 减持类型
-        }
-      | string;
+    is_specific: boolean; // 是否受限股份
     insert_time: bigint;
   }
 
@@ -535,6 +527,7 @@ declare namespace KungfuApi {
   }
 
   export interface PositionResolved extends Position {
+    closable_volume: bigint;
     account_id_resolved: string;
     instrument_id_resolved: string;
   }

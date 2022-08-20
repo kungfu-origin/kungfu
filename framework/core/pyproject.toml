@@ -10,12 +10,6 @@ packages = [
     { include = "kungfu", from = "src/python" },
 ]
 
-[[tool.poetry.source]]
-name = "aliyun"
-url = "https://mirrors.aliyun.com/pypi/simple"
-default = false
-secondary = true
-
 [tool.poetry.dependencies]
 python = "~3.9"
 

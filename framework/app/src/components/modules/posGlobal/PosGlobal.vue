@@ -31,6 +31,7 @@ import {
   useCurrentGlobalKfLocation,
   useInstruments,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
+import { getPosClosableVolume } from '@kungfu-trader/kungfu-js-api/kungfu';
 
 globalThis.HookKeeper.getHooks().dealTradingData.register(
   {
@@ -152,10 +153,7 @@ function tiggerOrderBookAndMakeOrder(record: KungfuApi.Position) {
       record.yesterday_volume !== BigInt(0)
         ? OffsetEnum.CloseYest
         : OffsetEnum.CloseToday,
-    volume:
-      record.yesterday_volume !== BigInt(0)
-        ? record.yesterday_volume
-        : record.volume - record.yesterday_volume,
+    volume: getPosClosableVolume(record),
 
     price: record.last_price || 0,
   };
@@ -191,7 +189,7 @@ function tiggerOrderBookAndMakeOrder(record: KungfuApi.Position) {
             record,
           }: {
             column: AntTableColumn,
-            record: KungfuApi.Position,
+            record: KungfuApi.PositionResolved,
           }"
         >
           <template v-if="column.dataIndex === 'instrument_id'">

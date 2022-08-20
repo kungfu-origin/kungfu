@@ -3,6 +3,7 @@ import dayjs from 'dayjs';
 import fse, { Stats } from 'fs-extra';
 import log4js from 'log4js';
 import glob from 'glob';
+import os from 'os';
 import {
   buildProcessLogPath,
   EXTENSION_DIRS,
@@ -216,7 +217,7 @@ export const kfLogger = {
   info: (...args: Array<any>) => {
     if (process.env.NODE_ENV === 'development') {
       if (process.env.APP_TYPE !== 'cli') {
-        console.log('<KF_INFO>', args.join(' '));
+        console.log('<KF_INFO>', ...args);
       }
     }
     logger.info('<KF_INFO>', args.join(' '));
@@ -225,7 +226,7 @@ export const kfLogger = {
   warn: (...args: Array<any>) => {
     if (process.env.NODE_ENV === 'development') {
       if (process.env.APP_TYPE !== 'cli') {
-        console.warn('<KF_INFO>', args.join(' '));
+        console.warn('<KF_INFO>', ...args);
       }
     }
     logger.warn('<KF_INFO>', args.join(' '));
@@ -234,7 +235,7 @@ export const kfLogger = {
   error: (...args: Array<any>) => {
     if (process.env.NODE_ENV === 'development') {
       if (process.env.APP_TYPE !== 'cli') {
-        console.error('<KF_INFO>', args.join(' '));
+        console.error('<KF_INFO>', ...args);
       }
     }
     logger.error('<KF_INFO>', args.join(' '));
@@ -1958,3 +1959,20 @@ export function deleteNNFiles(rootPathName = KF_HOME) {
     );
   });
 }
+
+export const dealCmdPath = (pathname: string) => {
+  if (os.platform() === 'win32') {
+    return pathname
+      .replace(/\\/g, '/')
+      .split('/')
+      .map((str) => {
+        if (str.includes(' ')) {
+          return `"${str}"`;
+        }
+
+        return str;
+      })
+      .join('/');
+  }
+  return pathname;
+};

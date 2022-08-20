@@ -9,15 +9,10 @@ import {
   SideEnum,
   InstrumentTypeEnum,
   OffsetEnum,
-  UnderweightEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 
 type OrderInputWithBlockMessage = KungfuApi.MakeOrderInput &
-  KungfuApi.BlockMessage & {
-    linkman: string;
-    contact_way: string;
-    underweight_type: UnderweightEnum;
-  };
+  KungfuApi.BlockMessage;
 
 function dealStockOffset(
   makeOrderInput: OrderInputWithBlockMessage,
@@ -39,8 +34,8 @@ export const dealBlockMessageItem = (
   const orderInputResolved: Record<string, KungfuApi.KfTradeValueCommonData> =
     {};
   for (const key in inputData) {
-    if (key === 'underweight_type') {
-      orderInputResolved[key] = dealUnderweightType(inputData.underweight_type);
+    if (key === 'is_specific') {
+      orderInputResolved[key] = dealUnderweightType(+inputData.is_specific);
     }
   }
   return orderInputResolved;
@@ -50,18 +45,7 @@ export function dealOrderPlaceVNode(
   makeOrderInput: KungfuApi.MakeOrderInput & KungfuApi.BlockMessage,
   orderCount: number,
 ): VNode {
-  const orderInputWithBlockMessage: OrderInputWithBlockMessage = {
-    ...makeOrderInput,
-    ...(makeOrderInput.value as {
-      linkman: string;
-      contact_way: string;
-      underweight_type: UnderweightEnum;
-    }),
-  };
-
-  const orderData: OrderInputWithBlockMessage = dealStockOffset(
-    orderInputWithBlockMessage,
-  );
+  const orderData: OrderInputWithBlockMessage = dealStockOffset(makeOrderInput);
 
   const currentOrderInputTrans = getBlockTradeOrderTrans();
 

@@ -438,7 +438,7 @@ export const switchProcess = (
               },
             );
           })
-          .catch((err: Error) => kfLogger.error(err.message));
+          .catch((err: Error) => kfLogger.error(err));
       } else {
         if (status) {
           messageBoard.log('Stop master first', 2, (err) => {

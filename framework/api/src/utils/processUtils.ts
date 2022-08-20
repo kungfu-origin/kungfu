@@ -156,7 +156,7 @@ export const pm2Connect = (): Promise<void> => {
   return new Promise((resolve, reject) => {
     pm2.connect((err: Error) => {
       if (err) {
-        kfLogger.error(err.message);
+        kfLogger.error(err);
         reject(err);
         return;
       }
@@ -170,7 +170,7 @@ export const pm2List = (): Promise<ProcessDescription[]> => {
   return new Promise((resolve, reject) => {
     pm2.list((err: Error, pList: ProcessDescription[]) => {
       if (err) {
-        kfLogger.error(err.message);
+        kfLogger.error(err);
         reject(err);
         return;
       }
@@ -187,7 +187,7 @@ export const pm2Describe = (
     //此处无需connect, 不然windows会卡死
     pm2.describe(processId, (err: Error, pList: ProcessDescription[]) => {
       if (err) {
-        kfLogger.error(err.message);
+        kfLogger.error(err);
         reject(err);
         return;
       }
@@ -203,7 +203,7 @@ const pm2Start = (options: Pm2StartOptions): Promise<Proc> => {
       .then(() => {
         pm2.start(options, (err: Error, proc: Proc) => {
           if (err) {
-            kfLogger.error(err.message);
+            kfLogger.error(err);
             reject(err);
             return;
           }
@@ -212,7 +212,7 @@ const pm2Start = (options: Pm2StartOptions): Promise<Proc> => {
         });
       })
       .catch((err: Error) => {
-        kfLogger.error(err.message);
+        kfLogger.error(err);
         reject(err);
       });
   });
@@ -224,7 +224,7 @@ const pm2Stop = (processId: string): Promise<void> => {
       .then(() => {
         pm2.stop(processId, (err: Error) => {
           if (err) {
-            kfLogger.error(err.message);
+            kfLogger.error(err);
             reject(err);
             return;
           }
@@ -233,7 +233,7 @@ const pm2Stop = (processId: string): Promise<void> => {
         });
       })
       .catch((err: Error) => {
-        kfLogger.error(err.message);
+        kfLogger.error(err);
         reject(err);
       });
   });
@@ -245,7 +245,7 @@ const pm2Delete = (processId: string): Promise<void> => {
       .then(() => {
         pm2.delete(processId, (err: Error) => {
           if (err) {
-            kfLogger.error(err.message);
+            kfLogger.error(err);
             reject(err);
             return;
           }
@@ -254,7 +254,7 @@ const pm2Delete = (processId: string): Promise<void> => {
         });
       })
       .catch((err: Error) => {
-        kfLogger.error(err.message);
+        kfLogger.error(err);
         reject(err);
       });
   });
@@ -276,7 +276,7 @@ export const pm2Kill = (): Promise<void> => {
       ) => {
         pm2.disconnect();
         if (err) {
-          kfLogger.error(err.message);
+          kfLogger.error(err);
           reject(err);
           return;
         }
@@ -299,7 +299,7 @@ export const pm2KillGodDaemon = (): Promise<void> => {
       pm2.killDaemon((err: Error) => {
         pm2.disconnect();
         if (err) {
-          kfLogger.error(err.message);
+          kfLogger.error(err);
           reject(err);
           return;
         }
@@ -356,7 +356,9 @@ export const startProcess = async (
     },
   };
 
-  return pm2Start(optionsResolved).catch((err) => kfLogger.error(err.message));
+  return pm2Start(optionsResolved).catch((err) => {
+    kfLogger.error(err);
+  });
 };
 
 export const stopProcess = pm2Stop;
@@ -578,7 +580,7 @@ function startGetProcessStatusByName(name: string, callback: Function) {
       .then((pList: ProcessDescription[]) => {
         callback(pList);
       })
-      .catch((err) => kfLogger.error(err.message));
+      .catch((err) => kfLogger.error(err));
   }, 1000);
 
   return timer;
@@ -667,7 +669,7 @@ async function preStartProcess(
 
   if (!force && isProcessAlive) {
     const err = new Error(`kungfu ${processName} is alive`);
-    kfLogger.error(err.message);
+    kfLogger.error(err);
     return Promise.reject(err);
   }
 
@@ -704,7 +706,7 @@ export const startMd = async (
     );
 
   return startProcess(options).catch((err) => {
-    kfLogger.error(err.message);
+    kfLogger.error(err);
   });
 };
 
@@ -738,7 +740,7 @@ export const startTd = async (
     );
 
   return startProcess(options).catch((err) => {
-    kfLogger.error(err.message);
+    kfLogger.error(err);
   });
 };
 
@@ -765,7 +767,7 @@ export const startTask = async (
     },
     force: true,
   }).catch((err) => {
-    kfLogger.error(err.message);
+    kfLogger.error(err);
   });
 };
 
@@ -791,7 +793,7 @@ export const startStrategyByLocalPython = async (
     return Promise.reject(new Error('No local python path!'));
   }
 
-  const fullPythonPathList = pythonPath.split('/');
+  const fullPythonPathList = pythonPath.replace(/\\/g, '/').split('/');
   const pythonFolder = fullPythonPathList
     .slice(0, fullPythonPathList.length - 1)
     .join('/');
@@ -802,11 +804,11 @@ export const startStrategyByLocalPython = async (
   return startProcess({
     name: `strategy_${name}`,
     args,
-    cwd: `'${pythonFolder}'`,
-    script: `'${pythonFile}'`,
+    cwd: `${dealSpaceInPath(pythonFolder)}`,
+    script: `${pythonFile}`,
     force: true,
   }).catch((err) => {
-    kfLogger.error(err.message);
+    kfLogger.error(err);
   });
 };
 
@@ -831,7 +833,7 @@ export const startStrategy = (
       args,
       force: true,
     }).catch((err) => {
-      kfLogger.error(err.message);
+      kfLogger.error(err);
     });
   }
 };
@@ -850,7 +852,7 @@ export const startDzxy = () => {
     },
     kill_timeout: 500,
   }).catch((err) => {
-    kfLogger.error(err.message);
+    kfLogger.error(err);
   });
 };
 
@@ -868,7 +870,7 @@ export const startExtDaemon = (name: string, cwd: string, script: string) => {
     },
     kill_timeout: 500,
   }).catch((err) => {
-    kfLogger.error(err.message);
+    kfLogger.error(err);
   });
 };
 
@@ -881,7 +883,7 @@ export const startBar = (
     name: targetName,
     args: buildArgs(`service bar -s ${source} --time-interval ${timeInterval}`),
   }).catch((err) => {
-    kfLogger.error(err.message);
+    kfLogger.error(err);
   });
 };
 
@@ -894,7 +896,7 @@ export const startCustomProcess = (
     name: targetName,
     args,
   }).catch((err) => {
-    kfLogger.error(err.message);
+    kfLogger.error(err);
   });
 };
 

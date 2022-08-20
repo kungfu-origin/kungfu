@@ -277,19 +277,19 @@ function handleRemoveTdGroup(item: KungfuApi.KfExtraLocation) {
     `${t('tdConfig.delete_amount_group', {
       group: item.name,
     })}, ${t('tdConfig.confirm_delete_group')}`,
-  )
-    .then(() => {
-      return removeTdGroup(item.name);
-    })
-    .then(() => {
-      return setTdGroups();
-    })
-    .then(() => {
-      success();
-    })
-    .catch((err) => {
-      error(err.message || t('operation_failed'));
-    });
+  ).then((flag) => {
+    if (!flag) return;
+    removeTdGroup(item.name)
+      .then(() => {
+        return setTdGroups();
+      })
+      .then(() => {
+        success();
+      })
+      .catch((err) => {
+        error(err.message || t('operation_failed'));
+      });
+  });
 }
 
 function handleRemoveTd(item: KungfuApi.KfConfig) {

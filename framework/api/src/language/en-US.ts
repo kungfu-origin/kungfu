@@ -247,10 +247,14 @@ export default {
       'The buying price exceeded the warning line, the current price is {price}, line for {warningLine}, fat finger is {fatFinger}%',
     fat_finger_sell_modal:
       'The selling price exceeded the warning line, the current price is {price}, line for {warningLine}, fat finger is {fatFinger}%',
+    close_apart_open_modal:
+      'The order input volume is {volume}, the current closable {direction} position is {closable_volume}, the excess is {open_volume}\nclick “Take excess to open”, will close {direction} {closable_volume}, open {direction} {open_volume}\nclick “Orignal plan”, will continue close {direction} {volume}',
     start_process: 'please start {process} first',
     place_confirm: 'Place Order Confirm',
     close_all: 'Close All?',
     Continue: 'Continue',
+    original_plan: 'Orignal plan',
+    beyond_to_open: 'Take excess to open',
   },
 
   orderConfig: {
@@ -375,6 +379,7 @@ export default {
     yesterday_volume: 'yesterday_volume',
     today_volume: 'today_volume',
     sum_volume: 'sum_volume',
+    closable_volume: 'closable_volume',
     avg_open_price: 'avg_open_price',
     last_price: 'last_price',
     unrealized_pnl: 'unrealized_pnl',
@@ -448,11 +453,8 @@ export default {
     limit_price: 'limit_price',
     volume: 'volume',
     opponent_seat: 'opponent_seat',
-    opponent_account: 'opponent_account',
     match_number: 'match_number',
-    linkman: 'linkman',
-    contact_way: 'contact_way',
-    underweight_type: 'underweight_type',
+    is_specific: 'is_specific',
 
     unrestricted_shares: 'Unrestricted shares',
     restricted_shares: 'Restricted shares',
