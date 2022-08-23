@@ -40,7 +40,9 @@
     "@kungfu-trader/kungfu-app": "^2.4.3-alpha.1",
     "@kungfu-trader/kungfu-cli": "^2.4.3-alpha.1",
     "@kungfu-trader/kungfu-core": "^2.4.3-alpha.1",
-    "@kungfu-trader/kungfu-js-api": "^2.4.3-alpha.1",
+    "@kungfu-trader/kungfu-js-api": "^2.4.3-alpha.1"
+  },
+  "devDependencies": {
     "@kungfu-trader/kungfu-toolchain": "^2.4.3-alpha.1"
   }
 }
