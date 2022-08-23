@@ -548,7 +548,6 @@ void Watcher::UpdateBrokerState(uint32_t broker_uid, const BrokerStateUpdate &st
 
 void Watcher::UpdateStrategyState(uint32_t strategy_uid, const StrategyStateUpdate &state) {
   auto app_location = get_location(strategy_uid);
-  location_uid_strategy_states_map_.erase(app_location->uid);
   location_uid_strategy_states_map_.emplace(app_location->uid, state);
 }
 
