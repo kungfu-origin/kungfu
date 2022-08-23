@@ -78,10 +78,10 @@ KF_DEFINE_DATA_TYPE(                                                     //
     StrategyStateUpdate, 20002, PK(update_time), TIMESTAMP(update_time), //
     (StrategyState, state),                                              //
     (int64_t, update_time),                                              //
-    (std::string, info_a),                         //
-    (std::string, info_b),                         //
-    (std::string, info_c),                         //
-    (std::string, value)                           //
+    (std::string, info_a),                                               //
+    (std::string, info_b),                                               //
+    (std::string, info_c),                                               //
+    (std::string, value)                                                 //
 );
 
 KF_DEFINE_PACK_TYPE(                                             //
