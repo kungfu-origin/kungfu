@@ -430,10 +430,10 @@ void Watcher::SyncStrategyStates() {
     auto strategy_state_obj = Napi::Object::New(strategy_states_ref_.Env());
     strategy_state_obj.Set("state", Napi::Number::New(strategy_states_ref_.Env(), int(s.second.state)));
     strategy_state_obj.Set("update_time", Napi::Number::New(strategy_states_ref_.Env(), s.second.update_time));
-    strategy_state_obj.Set("info_a", Napi::String::New(strategy_states_ref_.Env(), s.second.info_a.to_string()));
-    strategy_state_obj.Set("info_b", Napi::String::New(strategy_states_ref_.Env(), s.second.info_b.to_string()));
-    strategy_state_obj.Set("info_c", Napi::String::New(strategy_states_ref_.Env(), s.second.info_c.to_string()));
-    strategy_state_obj.Set("value", Napi::String::New(strategy_states_ref_.Env(), s.second.value.to_string()));
+    strategy_state_obj.Set("info_a", Napi::String::New(strategy_states_ref_.Env(), s.second.info_a));
+    strategy_state_obj.Set("info_b", Napi::String::New(strategy_states_ref_.Env(), s.second.info_b));
+    strategy_state_obj.Set("info_c", Napi::String::New(strategy_states_ref_.Env(), s.second.info_c));
+    strategy_state_obj.Set("value", Napi::String::New(strategy_states_ref_.Env(), s.second.value));
     strategy_states_ref_.Set(format(s.first), strategy_state_obj);
   }
 }
@@ -548,7 +548,6 @@ void Watcher::UpdateBrokerState(uint32_t broker_uid, const BrokerStateUpdate &st
 
 void Watcher::UpdateStrategyState(uint32_t strategy_uid, const StrategyStateUpdate &state) {
   auto app_location = get_location(strategy_uid);
-  location_uid_strategy_states_map_.erase(app_location->uid);
   location_uid_strategy_states_map_.emplace(app_location->uid, state);
 }
 

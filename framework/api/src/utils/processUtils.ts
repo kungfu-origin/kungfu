@@ -813,7 +813,7 @@ export const startStrategyByLocalPython = async (
 };
 
 //启动strategy
-export const startStrategy = (
+export const startStrategy = async (
   strategyId: string,
   strategyPath: string,
 ): Promise<Proc | void> => {
@@ -821,6 +821,13 @@ export const startStrategy = (
   const globalSetting = getKfGlobalSettingsValue();
   const ifLocalPython = globalSetting?.strategy?.python || false;
   const pythonPath = globalSetting?.strategy?.pythonPath || '';
+
+  //因为pm2环境残留，在反复切换本地python跟内置python时，会出现本地python启动失败，所以需要先pm2 kill
+  try {
+    await pm2Delete(strategyId);
+  } catch (err) {
+    console.warn(err);
+  }
 
   if (ifLocalPython && strategyPath.endsWith('.py')) {
     return startStrategyByLocalPython(strategyId, strategyPath, pythonPath);
