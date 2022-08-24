@@ -85,41 +85,46 @@ exports.getComponentsConfig = () => {
 };
 
 exports.getWebpackExternals = () => {
+  // 有些package会作为其他package依赖，需要放在此处处理
   const appPackageJSONPath = require.resolve(
     '@kungfu-trader/kungfu-app/package.json',
   );
   const apiPackageJSONPath = require.resolve(
     '@kungfu-trader/kungfu-js-api/package.json',
   );
-  const corePackageJSONPath = require.resolve(
-    '@kungfu-trader/kungfu-core/package.json',
+  const cliPackageJSONPath = require.resolve(
+    '@kungfu-trader/kungfu-cli/package.json',
   );
   const sdkPackageJSONPath = require.resolve(
     '@kungfu-trader/kungfu-sdk/package.json',
   );
+  const corePackageJSONPath = require.resolve(
+    '@kungfu-trader/kungfu-core/package.json',
+  );
+
   const currentPackageJSONPath = path.join(
     process.cwd().toString(),
     'package.json',
   );
+
   const appPackageJSON = fs.readJSONSync(appPackageJSONPath);
   const apiPackageJSON = fs.readJSONSync(apiPackageJSONPath);
-  const corePackageJSON = fs.readJSONSync(corePackageJSONPath);
+  const cliPackageJSON = fs.readJSONSync(cliPackageJSONPath);
   const sdkPackageJSON = fs.readJSONSync(sdkPackageJSONPath);
+  const corePackageJSON = fs.readJSONSync(corePackageJSONPath);
   const currentPackageJSON = fs.pathExistsSync(currentPackageJSONPath)
     ? fs.readJSONSync(currentPackageJSONPath)
     : {};
   return Object.keys({
     ...(appPackageJSON.dependencies || {}),
     ...(apiPackageJSON.dependencies || {}),
-    ...(corePackageJSON.dependencies || {}),
+    ...(cliPackageJSON.dependencies || {}),
     ...(sdkPackageJSON.dependencies || {}),
+    ...(corePackageJSON.dependencies || {}),
     ...(currentPackageJSON.dependencies || {}),
   }).filter(
-    (item) =>
-      !item.includes('kungfu-js-api') ||
-      !item.includes('kungfu-core') ||
-      !item.includes('kungfu-app') ||
-      !item.includes('kungfu-sdk'),
+    // 以下packages 内js代码我们期望其直接打包进js文件, 不需要通过externals, 但他们的依赖包还是需要通过externals
+    (item) => !item.includes('kungfu-js-api'),
   );
 };
 

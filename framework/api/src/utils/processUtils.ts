@@ -821,10 +821,12 @@ export const startStrategy = async (
   const globalSetting = getKfGlobalSettingsValue();
   const ifLocalPython = globalSetting?.strategy?.python || false;
   const pythonPath = globalSetting?.strategy?.pythonPath || '';
+  const strategyIdResolved = `strategy_${strategyId}`;
 
   //因为pm2环境残留，在反复切换本地python跟内置python时，会出现本地python启动失败，所以需要先pm2 kill
   try {
-    await pm2Delete(strategyId);
+    console.log(`Clear existed strategy ${strategyIdResolved}`);
+    await deleteProcess(strategyIdResolved);
   } catch (err) {
     console.warn(err);
   }
@@ -836,7 +838,7 @@ export const startStrategy = async (
       `run -c strategy -g default -n '${strategyId}' '${strategyPath}'`,
     );
     return startProcess({
-      name: `strategy_${strategyId}`,
+      name: strategyIdResolved,
       args,
       force: true,
     }).catch((err) => {
