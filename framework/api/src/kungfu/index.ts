@@ -344,6 +344,7 @@ export const kfMakeBlockOrder = async (
   if (blockMessage) {
     blockMessage = {
       ...blockMessage,
+      is_specific: !!blockMessage.is_specific,
       opponent_seat: +blockMessage.opponent_seat,
       match_number: BigInt(blockMessage.match_number),
       insert_time: watcher.now(),

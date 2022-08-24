@@ -115,7 +115,11 @@ exports.getWebpackExternals = () => {
     ...(sdkPackageJSON.dependencies || {}),
     ...(currentPackageJSON.dependencies || {}),
   }).filter(
-    (item) => !item.includes('kungfu-js-api') || !item.includes('kungfu-core'),
+    (item) =>
+      !item.includes('kungfu-js-api') ||
+      !item.includes('kungfu-core') ||
+      !item.includes('kungfu-app') ||
+      !item.includes('kungfu-sdk'),
   );
 };
 

@@ -4,6 +4,8 @@ const toolkit = require('@kungfu-trader/kungfu-js-api/toolkit');
 const path = require('path');
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 const os = require('os');
+// const BundleAnalyzerPlugin =
+// require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 const webpack = require('webpack');
 const { merge } = require('webpack-merge');
@@ -83,9 +85,12 @@ const webpackConfig = (argv) => {
     },
     plugins: [
       ...pagesConfig.plugins,
+      // new BundleAnalyzerPlugin({
+      //   analyzerMode: 'static',
+      // }),
       new VueLoaderPlugin(),
       new MonacoWebpackPlugin({
-        languages: ['python', 'yaml', 'json'],
+        languages: ['python', 'yaml'],
       }),
     ],
     target: 'electron-renderer',
