@@ -262,26 +262,26 @@ declare namespace KungfuApi {
   }
 
   export interface ConfigStore {
-    getAllConfig(): Record<string, KfConfigOrigin>;
+    getAllConfig(): Record<string, KfConfigOrigin> | false;
     setConfig(
       category: string,
       group: string,
       name: string,
       mode: string,
       configValue: string,
-    ): void;
+    ): boolean;
     removeConfig(
       category: string,
       group: string,
       name: string,
       mode: string,
-    ): void;
+    ): boolean;
     getConfig(
       category: string,
       group: string,
       name: string,
       mode: string,
-    ): KungfuApi.KfConfig;
+    ): KungfuApi.KfConfig | false;
   }
 
   export interface HistoryStore {
@@ -289,12 +289,12 @@ declare namespace KungfuApi {
   }
 
   export interface CommissionStore {
-    getAllCommission(): Commission[];
+    getAllCommission(): Commission[] | false;
     setAllCommission(commissions: Commission[]): boolean;
   }
 
   export interface RiskSettingStore {
-    getAllRiskSetting(): Record<string, RiskSettingOrigin>;
+    getAllRiskSetting(): Record<string, RiskSettingOrigin> | false;
     setAllRiskSetting(riskSettings: RiskSettingOrigin[]): boolean;
   }
 

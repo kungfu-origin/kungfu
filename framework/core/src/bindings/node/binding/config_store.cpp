@@ -37,31 +37,56 @@ Napi::Value ConfigStore::SetConfig(const Napi::CallbackInfo &info) {
   } else {
     config.value = info[valueIndex].ToString().Utf8Value();
   }
-  profile_.set(config);
-  return {};
+  try {
+    profile_.set(config);
+  } catch (const std::exception &ex) {
+    SPDLOG_ERROR("failed to SetConfig {}", ex.what());
+    yijinjing::util::print_stack_trace();
+    return Napi::Boolean::New(info.Env(), false);
+  }
+  return Napi::Boolean::New(info.Env(), true);
 }
 
 Napi::Value ConfigStore::GetConfig(const Napi::CallbackInfo &info) {
   auto result = Napi::Object::New(info.Env());
-  auto config = profile_.get(getConfigFromJs(info, locator_));
-  set(config, result);
+  try {
+    auto config = profile_.get(getConfigFromJs(info, locator_));
+    set(config, result);
+  } catch (const std::exception &ex) {
+    SPDLOG_ERROR("failed to GetConfig {}", ex.what());
+    yijinjing::util::print_stack_trace();
+    return Napi::Boolean::New(info.Env(), false);
+  }
   return result;
 }
 
 Napi::Value ConfigStore::GetAllConfig(const Napi::CallbackInfo &info) {
   auto table = Napi::Object::New(info.Env());
-  for (const auto &config : profile_.get_all(Config{})) {
-    auto uid = fmt::format("{:016x}", config.uid());
-    auto object = Napi::Object::New(info.Env());
-    set(config, object);
-    table.Set(uid, object);
+  try {
+    for (const auto &config : profile_.get_all(Config{})) {
+      auto uid = fmt::format("{:016x}", config.uid());
+      auto object = Napi::Object::New(info.Env());
+      set(config, object);
+      table.Set(uid, object);
+    }
+  } catch (const std::exception &ex) {
+    SPDLOG_ERROR("failed to GetAllConfig {}", ex.what());
+    yijinjing::util::print_stack_trace();
+    return Napi::Boolean::New(info.Env(), false);
   }
+
   return table;
 }
 
 Napi::Value ConfigStore::RemoveConfig(const Napi::CallbackInfo &info) {
-  profile_.remove(profile_.get(getConfigFromJs(info, locator_)));
-  return {};
+  try {
+    profile_.remove(profile_.get(getConfigFromJs(info, locator_)));
+  } catch (const std::exception &ex) {
+    SPDLOG_ERROR("failed to RemoveConfig {}", ex.what());
+    yijinjing::util::print_stack_trace();
+    return Napi::Boolean::New(info.Env(), false);
+  }
+  return Napi::Boolean::New(info.Env(), true);
 }
 
 void ConfigStore::Init(Napi::Env env, Napi::Object exports) {
