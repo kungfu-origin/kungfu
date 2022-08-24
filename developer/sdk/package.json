@@ -38,10 +38,6 @@
     "@kungfu-trader/kungfu-cli": "^2.4.4-alpha.1",
     "@kungfu-trader/kungfu-core": "^2.4.4-alpha.1",
     "@kungfu-trader/kungfu-js-api": "^2.4.4-alpha.1",
-    "@mapbox/node-pre-gyp": "^1.0.0",
-    "ejs": "^3.1.8"
-  },
-  "devDependencies": {
     "@kungfu-trader/kungfu-toolchain": "^2.4.4-alpha.1"
   }
 }
