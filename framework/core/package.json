@@ -66,7 +66,6 @@
   },
   "dependencies": {
     "@mapbox/node-pre-gyp": "^1.0.0",
-    "fs-extra": "^10.1.0",
     "glob": "^8.0.0",
     "sywac": "^1.3.0"
   },

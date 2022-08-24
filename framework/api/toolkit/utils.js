@@ -124,7 +124,7 @@ exports.getWebpackExternals = () => {
     ...(currentPackageJSON.dependencies || {}),
   }).filter(
     // 以下packages 内js代码我们期望其直接打包进js文件, 不需要通过externals, 但他们的依赖包还是需要通过externals
-    (item) => !item.includes('kungfu-js-api'),
+    (packageName) => packageName !== '@kungfu-trader/kungfu-js-api',
   );
 };
 
