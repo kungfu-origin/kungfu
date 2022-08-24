@@ -239,7 +239,7 @@ bool PassiveClient::is_custom_subscribed_all(uint32_t md_location_uid,
 
     SubscribeInstrumentType custom_type = instrument_type_to_subscribe_instrument_type(kf_instrument_type);
 
-    for (auto it : custom_sub) {
+    for (const auto &it : custom_sub) {
       std::string custom_exchange("0");
       switch (it.market_type) {
       case MarketType::BSE:
@@ -273,9 +273,9 @@ bool PassiveClient::is_custom_subscribed_all(uint32_t md_location_uid,
         custom_exchange = std::string("0");
         break;
       }
-      if ((it.data_type == SubscribeDataType::All or (uint64_t(it.data_type) & uint64_t(secu_dt)) != 0) and
+      if ((it.data_type == SubscribeDataType::All or it.data_type == secu_dt) and
           (custom_exchange.empty() || custom_exchange.compare(exchange) == 0) and
-          ((uint64_t(custom_type) & uint64_t(it.instrument_type)) != 0)) {
+          (it.instrument_type == SubscribeInstrumentType::All or it.instrument_type == custom_type)) {
         return true;
       }
     }
