@@ -10,7 +10,7 @@ import {
   killKfc,
   killKungfu,
   killExtra,
-  pm2Kill,
+  // pm2Kill,
   pm2KillGodDaemon,
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import {
@@ -64,31 +64,31 @@ export function showKungfuInfo(): void {
 
 function KillAll(): Promise<void> {
   return new Promise((resolve) => {
-    pm2Kill()
+    // pm2Kill()
+    //   .catch((err) => kfLogger.error(err))
+    //   .finally(() => {
+    pm2KillGodDaemon()
       .catch((err) => kfLogger.error(err))
       .finally(() => {
-        pm2KillGodDaemon()
+        killKfc()
           .catch((err) => kfLogger.error(err))
           .finally(() => {
-            killKfc()
+            killKungfu()
               .catch((err) => kfLogger.error(err))
               .finally(() => {
-                killKungfu()
+                killExtra()
                   .catch((err) => kfLogger.error(err))
                   .finally(() => {
-                    killExtra()
+                    deleteNNFiles()
                       .catch((err) => kfLogger.error(err))
                       .finally(() => {
-                        deleteNNFiles()
-                          .catch((err) => kfLogger.error(err))
-                          .finally(() => {
-                            resolve();
-                          });
+                        resolve();
                       });
                   });
               });
           });
       });
+    // });
   });
 }
 
