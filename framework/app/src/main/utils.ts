@@ -62,6 +62,7 @@ export function showKungfuInfo(): void {
 }
 
 function KillAll(): Promise<void> {
+  //不需要加killdaemon
   return new Promise((resolve) => {
     pm2Kill()
       .catch((err) => kfLogger.error(err))
