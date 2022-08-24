@@ -307,7 +307,7 @@ void PassiveClient::subscribe(const location_ptr &md_location, const std::string
 
 void PassiveClient::subscribe_all(const location_ptr &md_location, uint8_t market_type, uint64_t instrument_type,
                                   uint64_t data_type) {
-  enrolled_md_locations_.emplace(md_location->uid, true);
+  enrolled_md_locations_.insert_or_assign(md_location->uid, true);
   CustomSubscribe custrom_sub = {};
   custrom_sub.market_type = MarketType(market_type);
   custrom_sub.instrument_type = SubscribeInstrumentType(instrument_type);

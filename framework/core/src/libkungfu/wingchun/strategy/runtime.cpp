@@ -126,6 +126,41 @@ uint64_t RuntimeContext::insert_order(const std::string &instrument_id, const st
   return input.order_id;
 }
 
+bool RuntimeContext::insert_batch_orders(const std::string &source, const std::string &account,
+                                         const std::vector<std::string> &instrument_ids,
+                                         const std::vector<std::string> &exchange_ids, std::vector<double> limit_prices,
+                                         std::vector<int64_t> volumes, std::vector<longfist::enums::PriceType> types,
+                                         std::vector<longfist::enums::Side> sides,
+                                         std::vector<longfist::enums::Offset> offsets,
+                                         std::vector<longfist::enums::HedgeFlag> hedge_flags,
+                                         std::vector<bool> is_swaps) {
+  bool flag = instrument_ids.size() == exchange_ids.size() and //
+              instrument_ids.size() == limit_prices.size() and //
+              instrument_ids.size() == volumes.size() and      //
+              instrument_ids.size() == types.size() and        //
+              instrument_ids.size() == sides.size() and        //
+              instrument_ids.size() == offsets.size() and      //
+              instrument_ids.size() == hedge_flags.size() and  //
+              instrument_ids.size() == is_swaps.size();
+  if (not flag) {
+    SPDLOG_ERROR("Batch size not equals!");
+    return false;
+  }
+
+  auto account_location_uid = get_td_location_uid(source, account);
+  auto writer = app_.get_writer(account_location_uid);
+  writer->mark(time::now_in_nano(), BatchOrderBegin::tag);
+
+  for (int i = 0; i < instrument_ids.size(); ++i) {
+    insert_order(exchange_ids.at(i), exchange_ids.at(i), source, account, limit_prices.at(i), volumes.at(i),
+                 types.at(i), sides.at(i), offsets.at(i), hedge_flags.at(i), is_swaps.at(i));
+  }
+
+  writer->mark(time::now_in_nano(), BatchOrderEnd::tag);
+  writer->close_data();
+  return false;
+}
+
 uint64_t RuntimeContext::cancel_order(uint64_t order_id) {
   uint32_t account_location_uid = (order_id >> 32u) xor (app_.get_home_uid());
   if (not broker_client_.is_ready(account_location_uid)) {

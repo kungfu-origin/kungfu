@@ -63,6 +63,9 @@ class TraderSim(wc.Trader):
         self.logger.info(f"{block_msg}")
         self.map_block_msg[block_msg.block_id] = block_msg
 
+    def insert_batch_orders(self, event):
+        self.logger.info(f"{event.source}")
+
     def insert_order(self, event):
         volume_traded = 0
 
@@ -80,7 +83,7 @@ class TraderSim(wc.Trader):
                 if wc.utils.get_instrument_type(
                     order_input.exchange_id, order_input.instrument_id
                 )
-                == lf.enums.InstrumentType.Stock
+                   == lf.enums.InstrumentType.Stock
                 else 1
             )
             if order_input.volume < min_vol:

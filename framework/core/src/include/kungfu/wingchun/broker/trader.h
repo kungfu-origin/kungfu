@@ -50,6 +50,8 @@ public:
 
   virtual bool insert_order(const event_ptr &event) = 0;
 
+  virtual bool insert_batch_orders(const event_ptr &event) { return true; }
+
   virtual bool cancel_order(const event_ptr &event) = 0;
 
   virtual bool req_position() = 0;
@@ -81,18 +83,24 @@ public:
 
   void enable_positions_sync();
 
+  std::unordered_map<uint64_t, std::vector<longfist::types::OrderInput>> &get_order_inputs() { return order_inputs_; }
+
 protected:
   OrderMap orders_ = {};
   OrderActionMap actions_ = {};
   TradeMap trades_ = {};
+  std::unordered_map<uint64_t, std::vector<longfist::types::OrderInput>> order_inputs_ = {};
 
 private:
   bool sync_asset_ = false;
   bool sync_asset_margin_ = false;
   bool sync_position_ = false;
+  bool batch_status_ = false;
 
   void handle_asset_sync();
   void handle_position_sync();
+  void handle_order_input(const event_ptr &event);
+  void handle_batch_order_tag(const event_ptr &event);
 };
 } // namespace kungfu::wingchun::broker
 
