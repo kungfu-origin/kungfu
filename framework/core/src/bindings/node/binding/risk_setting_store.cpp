@@ -38,14 +38,26 @@ Napi::Value RiskSettingStore::SetRiskSetting(const Napi::CallbackInfo &info) {
   } else {
     risk_setting.value = info[valueIndex].ToString().Utf8Value();
   }
-  profile_.set(risk_setting);
-  return {};
+  try {
+    profile_.set(risk_setting);
+  } catch (const std::exception &ex) {
+    SPDLOG_ERROR("failed to SetRiskSetting {}", ex.what());
+    return Napi::Boolean::New(info.Env(), false);
+  }
+
+  return Napi::Boolean::New(info.Env(), true);
 }
 
 Napi::Value RiskSettingStore::GetRiskSetting(const Napi::CallbackInfo &info) {
   auto result = Napi::Object::New(info.Env());
-  auto risk_setting = profile_.get(getConfigFromJs(info, locator_));
-  set(risk_setting, result);
+  try {
+    auto risk_setting = profile_.get(getConfigFromJs(info, locator_));
+    set(risk_setting, result);
+  } catch (const std::exception &ex) {
+    SPDLOG_ERROR("failed to GetRiskSetting {}", ex.what());
+    return Napi::Boolean::New(info.Env(), false);
+  }
+
   return result;
 }
 
@@ -72,10 +84,17 @@ Napi::Value RiskSettingStore::SetAllRiskSetting(const Napi::CallbackInfo &info) 
           risk_settings.push_back(risk_setting);
         };
       }
-      profile_.remove_all<RiskSetting>();
-      for (auto risk_setting : risk_settings) {
-        profile_.set(risk_setting);
+
+      try {
+        profile_.remove_all<RiskSetting>();
+        for (auto risk_setting : risk_settings) {
+          profile_.set(risk_setting);
+        }
+      } catch (const std::exception &ex) {
+        SPDLOG_ERROR("failed to SetAllRiskSetting {}", ex.what());
+        return Napi::Boolean::New(info.Env(), false);
       }
+
       return Napi::Boolean::New(info.Env(), true);
     }
   } catch (const std::exception &ex) {
@@ -86,18 +105,30 @@ Napi::Value RiskSettingStore::SetAllRiskSetting(const Napi::CallbackInfo &info) 
 
 Napi::Value RiskSettingStore::GetAllRiskSetting(const Napi::CallbackInfo &info) {
   auto table = Napi::Object::New(info.Env());
-  for (const auto &risk_setting : profile_.get_all(RiskSetting{})) {
-    auto uid = fmt::format("{:016x}", risk_setting.uid());
-    auto object = Napi::Object::New(info.Env());
-    set(risk_setting, object);
-    table.Set(uid, object);
+  try {
+    for (const auto &risk_setting : profile_.get_all(RiskSetting{})) {
+      auto uid = fmt::format("{:016x}", risk_setting.uid());
+      auto object = Napi::Object::New(info.Env());
+      set(risk_setting, object);
+      table.Set(uid, object);
+    }
+  } catch (const std::exception &ex) {
+    SPDLOG_ERROR("failed to GetAllRiskSetting {}", ex.what());
+    yijinjing::util::print_stack_trace();
+    return Napi::Boolean::New(info.Env(), false);
   }
+
   return table;
 }
 
 Napi::Value RiskSettingStore::RemoveRiskSetting(const Napi::CallbackInfo &info) {
-  profile_.remove(profile_.get(getConfigFromJs(info, locator_)));
-  return {};
+  try {
+    profile_.remove(profile_.get(getConfigFromJs(info, locator_)));
+  } catch (const std::exception &ex) {
+    SPDLOG_ERROR("failed to RemoveRiskSetting {}", ex.what());
+    return Napi::Boolean::New(info.Env(), false);
+  }
+  return Napi::Boolean::New(info.Env(), true);
 }
 
 void RiskSettingStore::Init(Napi::Env env, Napi::Object exports) {

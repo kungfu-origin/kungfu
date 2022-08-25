@@ -9,7 +9,7 @@ type AllConfig = Record<string, KungfuApi.KfConfigOrigin>;
 export const getKfAllConfig = (): Promise<KungfuApi.KfConfigOrigin[]> => {
   if (fse.pathExistsSync(path.join(BASE_DB_DIR, 'config.db'))) {
     return Promise.resolve(
-      Object.values(configStore.getAllConfig() as AllConfig),
+      Object.values((configStore.getAllConfig() || {}) as AllConfig),
     );
   } else {
     return Promise.resolve([]);
@@ -19,7 +19,7 @@ export const getKfAllConfig = (): Promise<KungfuApi.KfConfigOrigin[]> => {
 export const setKfConfig = (
   kfLocation: KungfuApi.KfLocation,
   configValue: string,
-): Promise<void> => {
+): Promise<boolean> => {
   const configForLog = hidePasswordByLogger(configValue);
   kfLogger.info(
     `Set Kungfu Config ${kfLocation.category} ${kfLocation.group} ${kfLocation.name} ${configForLog}`,
@@ -37,7 +37,7 @@ export const setKfConfig = (
 
 export const removeKfConfig = (
   kfLocation: KungfuApi.KfLocation,
-): Promise<void> => {
+): Promise<boolean> => {
   kfLogger.info(
     `Remove Kungfu Config ${kfLocation.category} ${kfLocation.group} ${kfLocation.name}`,
   );

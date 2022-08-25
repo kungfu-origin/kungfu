@@ -33,7 +33,7 @@ public:
     PYBIND11_OVERLOAD_PURE(bool, MarketData, subscribe, instruments);
   }
 
-  bool subscribe_all() override { PYBIND11_OVERLOAD_PURE(bool, MarketData, subscribe_all); }
+  bool subscribe_all() override { PYBIND11_OVERLOAD(bool, MarketData, subscribe_all); }
 
   bool unsubscribe(const std::vector<InstrumentKey> &instruments) override {
     PYBIND11_OVERLOAD_PURE(bool, MarketData, unsubscribe, instruments);
