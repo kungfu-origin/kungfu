@@ -1,7 +1,7 @@
 {
   "name": "@kungfu-trader/examples-strategy-python",
   "author": "kungfu-trader",
-  "version": "2.4.4-alpha.1",
+  "version": "2.4.4",
   "description": "KungFu Strategy 101 - Python Demo",
   "license": "Apache-2.0",
   "private": true,
@@ -15,6 +15,6 @@
     "format": "node ../../framework/core/.gyp/run-format-python.js src"
   },
   "devDependencies": {
-    "@kungfu-trader/kungfu-sdk": "^2.4.4-alpha.1"
+    "@kungfu-trader/kungfu-sdk": "^2.4.4"
   }
 }
