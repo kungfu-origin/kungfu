@@ -40,7 +40,7 @@ public:
 
   virtual bool subscribe(const std::vector<longfist::types::InstrumentKey> &instrument_keys) = 0;
 
-  virtual bool subscribe_all() = 0;
+  virtual bool subscribe_all() { return false; };
 
   virtual bool subscribe_custom(const longfist::types::CustomSubscribe &custom_sub) { return subscribe_all(); };
 

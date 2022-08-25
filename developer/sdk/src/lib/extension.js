@@ -105,7 +105,7 @@ function generateCMakeFiles(projectName, kungfuBuild) {
       sources: cppSources,
       extraSource: extraSources[kungfuBuild.cpp.target],
       makeTarget: targetMakers[kungfuBuild.cpp.target],
-      targetLinks: cppLinks.join(' '),
+      targetLinks: (cppLinks || ['']).join(' '),
     },
     (err, str) => {
       logError(err) ||

@@ -17,53 +17,80 @@ CommissionStore::CommissionStore(const Napi::CallbackInfo &info)
     : ObjectWrap(info), locator_(ExtractRuntimeLocatorByInfo0(info)), profile_(locator_) {}
 
 Napi::Value CommissionStore::SetCommission(const Napi::CallbackInfo &info) {
-  profile_.set(ExtractCommission(info));
-  return {};
+  try {
+    profile_.set(ExtractCommission(info));
+  } catch (const std::exception &ex) {
+    SPDLOG_ERROR("failed to SetCommission {}", ex.what());
+    yijinjing::util::print_stack_trace();
+    return Napi::Boolean::New(info.Env(), false);
+  }
+  return Napi::Boolean::New(info.Env(), true);
 }
 
 Napi::Value CommissionStore::GetCommission(const Napi::CallbackInfo &info) {
   auto result = Napi::Object::New(info.Env());
-  auto commission = profile_.get(ExtractCommission(info));
-  set(commission, result);
+  try {
+    auto commission = profile_.get(ExtractCommission(info));
+    set(commission, result);
+  } catch (const std::exception &ex) {
+    SPDLOG_ERROR("failed to GetCommission {}", ex.what());
+    yijinjing::util::print_stack_trace();
+    return Napi::Boolean::New(info.Env(), false);
+  }
+
   return result;
 }
 
 Napi::Value CommissionStore::SetAllCommission(const Napi::CallbackInfo &info) {
-  try {
-    if (info[0].IsArray()) {
-      auto args = info[0].As<Napi::Array>();
-      std::vector<Commission> commissions;
-      for (int i = 0; i < args.Length(); i++) {
-        Commission commission = {};
-        get(args.Get(i).ToObject(), commission);
-        commissions.push_back(commission);
-      }
+  if (info[0].IsArray()) {
+    auto args = info[0].As<Napi::Array>();
+    std::vector<Commission> commissions;
+    for (int i = 0; i < args.Length(); i++) {
+      Commission commission = {};
+      get(args.Get(i).ToObject(), commission);
+      commissions.push_back(commission);
+    }
+    try {
       profile_.remove_all<Commission>();
       for (auto commission : commissions) {
         profile_.set(commission);
       }
-      return Napi::Boolean::New(info.Env(), true);
+    } catch (const std::exception &ex) {
+      SPDLOG_ERROR("failed to SetAllCommission {}", ex.what());
+      yijinjing::util::print_stack_trace();
+      return Napi::Boolean::New(info.Env(), false);
     }
-  } catch (const std::exception &ex) {
-    SPDLOG_ERROR("failed to set commissions {}", ex.what());
+    return Napi::Boolean::New(info.Env(), true);
   }
   return Napi::Boolean::New(info.Env(), false);
 }
 
 Napi::Value CommissionStore::GetAllCommission(const Napi::CallbackInfo &info) {
-  auto commissions = profile_.get_all(Commission{});
-  auto result = Napi::Array::New(info.Env(), commissions.size());
-  for (int i = 0; i < commissions.size(); i++) {
-    auto target = Napi::Object::New(info.Env());
-    set(commissions[i], target);
-    result.Set(i, target);
+  try {
+    auto commissions = profile_.get_all(Commission{});
+    auto result = Napi::Array::New(info.Env(), commissions.size());
+    for (int i = 0; i < commissions.size(); i++) {
+      auto target = Napi::Object::New(info.Env());
+      set(commissions[i], target);
+      result.Set(i, target);
+    }
+    return result;
+  } catch (const std::exception &ex) {
+    SPDLOG_ERROR("failed to GetAllCommission {}", ex.what());
+    yijinjing::util::print_stack_trace();
+    return Napi::Boolean::New(info.Env(), false);
   }
-  return result;
 }
 
 Napi::Value CommissionStore::RemoveCommission(const Napi::CallbackInfo &info) {
-  profile_.remove(profile_.get(ExtractCommission(info)));
-  return {};
+  try {
+    profile_.remove(profile_.get(ExtractCommission(info)));
+  } catch (const std::exception &ex) {
+    SPDLOG_ERROR("failed to GetAllCommission {}", ex.what());
+    yijinjing::util::print_stack_trace();
+    return Napi::Boolean::New(info.Env(), false);
+  }
+  return Napi::Boolean::New(info.Env(), true);
 }
 
 void CommissionStore::Init(Napi::Env env, Napi::Object exports) {
