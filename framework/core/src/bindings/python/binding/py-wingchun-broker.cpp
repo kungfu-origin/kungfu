@@ -107,7 +107,7 @@ void bind_broker(pybind11::module &m) {
       .def_property_readonly("runtime_folder", &Trader::get_runtime_folder)
       .def_property_readonly("config", &Trader::get_config)
       .def_property_readonly("home", &Trader::get_home)
-      .def_readwrite("order_inputs", &Trader::order_inputs_)
+      .def_property("order_inputs", &Trader::set_order_inputs, &Trader::get_order_inputs)
       .def("on_start", &Trader::on_start)
       .def("now", &Trader::now)
       .def("get_writer", &Trader::get_writer)

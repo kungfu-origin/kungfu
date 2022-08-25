@@ -121,6 +121,8 @@ enum class SubscribeInstrumentType : uint64_t {
   Fund = 0x0000000000020,       ///< 订阅基金证券品种类别
   Index = 0x000000000040,       ///< 订阅指数证券品种类别
   HKT = 0x000000000080,         ///< 订阅港股通证券品种类别
+
+  /// SubscribeInstrumentType(All | Stock), 虽然没有定义值为3的枚举值, 这个操作不会报错, 会得到一个值为3的枚举值
 };
 
 // for trading, different type has different minimum volume, price, accounting rules for making order

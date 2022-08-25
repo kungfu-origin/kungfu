@@ -83,6 +83,10 @@ public:
 
   void enable_positions_sync();
 
+  void set_order_inputs(std::unordered_map<uint64_t, std::vector<longfist::types::OrderInput>> &order_inputs) {
+    order_inputs_ = order_inputs;
+  }
+
   std::unordered_map<uint64_t, std::vector<longfist::types::OrderInput>> &get_order_inputs() { return order_inputs_; }
 
 protected:
