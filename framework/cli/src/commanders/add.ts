@@ -39,7 +39,9 @@ export const selectMdTdStrategy = async () => {
   return getKfCategoryFromString(answers.type);
 };
 
-export const addMdTdStrategy = async (type: KfCategoryTypes): Promise<void> => {
+export const addMdTdStrategy = async (
+  type: KfCategoryTypes,
+): Promise<boolean> => {
   const extConfigs = await getKfExtensionConfig();
 
   if (type === 'md') {
@@ -154,6 +156,8 @@ export const addMdTdStrategy = async (type: KfCategoryTypes): Promise<void> => {
       }),
     );
   }
+
+  return Promise.resolve(false);
 };
 
 export const selectKfExtPrompt = async (

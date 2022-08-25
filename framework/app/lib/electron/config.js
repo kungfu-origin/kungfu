@@ -72,6 +72,7 @@ module.exports = {
     'dist/app/**/*',
     'dist/cli/**/*',
     'dist/kfs/**/*',
+    '!dist/kfs/native_modules/dist/**/*', //由于sdk依赖了app的electronBuilder方法, 所以会把electron打包进去, 需要过滤掉
     '!**/@kungfu-trader/kfx-*/**/*',
     '!**/@kungfu-trader/kungfu-sdk/**/*',
     '**/@kungfu-trader/kungfu-sdk/templates/**/*',

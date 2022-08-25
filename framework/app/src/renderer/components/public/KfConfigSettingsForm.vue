@@ -66,7 +66,7 @@ const props = withDefaults(
         trigger: string;
       }
     >;
-    steps: Record<string, number>;
+    steps?: Record<string, number>;
     passPrimaryKeySpecialWordsVerify?: boolean;
   }>(),
   {

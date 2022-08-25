@@ -5,7 +5,7 @@ export const getKfCommission = (): Promise<KungfuApi.Commission[]> => {
   kfLogger.info('Get kungfu Commission');
   return new Promise((resolve, reject) => {
     try {
-      const commissionData = commissionStore.getAllCommission();
+      const commissionData = commissionStore.getAllCommission() || [];
       resolve(
         commissionData.sort((a, b) =>
           a.exchange_id.localeCompare(b.exchange_id),

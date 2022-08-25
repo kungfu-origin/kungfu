@@ -5,18 +5,22 @@ import {
 } from '@kungfu-trader/kungfu-js-api/kungfu/strategy';
 import { BrowserWindow } from '@electron/remote';
 import { messagePrompt } from '../assets/methods/uiUtils';
-const { success } = messagePrompt();
+const { success, error } = messagePrompt();
 
 export function bindIPCListener(store) {
   ipcRenderer.removeAllListeners('ipc-emit-strategyById');
   ipcRenderer.on('ipc-emit-strategyById', (event, { childWinId, params }) => {
     const childWin = BrowserWindow.fromId(childWinId);
     const { strategyId } = params;
-    return getStrategyById(strategyId).then((strategies) => {
-      if (childWin) {
-        childWin.webContents.send('ipc-res-strategyById', strategies);
-      }
-    });
+    return getStrategyById(strategyId)
+      .then((strategies) => {
+        if (childWin) {
+          childWin.webContents.send('ipc-res-strategyById', strategies);
+        }
+      })
+      .catch((err) => {
+        error(err.message);
+      });
   });
 
   ipcRenderer.removeAllListeners('ipc-emit-updateStrategyPath');
