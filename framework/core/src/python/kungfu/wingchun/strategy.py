@@ -184,7 +184,7 @@ class Strategy(wc.Strategy):
         self.ctx.insert_block_message = wc_context.insert_block_message
         self.ctx.insert_order = wc_context.insert_order
         self.ctx.insert_batch_orders = wc_context.insert_batch_orders
-        self.ctx.cancel_orders = wc_context.cancel_orders
+        self.ctx.cancel_order = wc_context.cancel_order
         self.ctx.req_history_order = wc_context.req_history_order
         self.ctx.req_history_trade = wc_context.req_history_trade
         self.ctx.update_strategy_state = wc_context.update_strategy_state

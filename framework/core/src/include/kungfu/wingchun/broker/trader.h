@@ -46,7 +46,7 @@ public:
 
   [[nodiscard]] virtual longfist::enums::AccountType get_account_type() const = 0;
 
-  virtual bool insert_block_message(const event_ptr &event) { return true; }
+  virtual bool insert_block_message(const event_ptr &event);
 
   virtual bool insert_order(const event_ptr &event) = 0;
 
@@ -83,9 +83,7 @@ public:
 
   void enable_positions_sync();
 
-  void set_order_inputs(std::unordered_map<uint64_t, std::vector<longfist::types::OrderInput>> &order_inputs) {
-    order_inputs_ = order_inputs;
-  }
+  void clear_order_inputs() { order_inputs_.clear(); }
 
   std::unordered_map<uint64_t, std::vector<longfist::types::OrderInput>> &get_order_inputs() { return order_inputs_; }
 
@@ -94,6 +92,7 @@ protected:
   OrderActionMap actions_ = {};
   TradeMap trades_ = {};
   std::unordered_map<uint64_t, std::vector<longfist::types::OrderInput>> order_inputs_ = {};
+  std::unordered_map<uint64_t, kungfu::longfist::types::BlockMessage> block_messages_ = {};
 
 private:
   bool sync_asset_ = false;
