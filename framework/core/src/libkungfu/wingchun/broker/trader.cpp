@@ -122,7 +122,8 @@ void Trader::handle_position_sync() {
 }
 
 void Trader::handle_order_input(const event_ptr &event) {
-  if (batch_status_) {
+  /// try_emplace default insert false to map, means not batch mode
+  if (batch_status_.try_emplace(event->source()).first->second) {
     const OrderInput &input = event->data<OrderInput>();
     order_inputs_.try_emplace(event->source()).first->second.push_back(input);
   } else {
@@ -132,9 +133,9 @@ void Trader::handle_order_input(const event_ptr &event) {
 
 void Trader::handle_batch_order_tag(const event_ptr &event) {
   if (event->msg_type() == BatchOrderBegin::tag) {
-    batch_status_ = true;
+    batch_status_.insert_or_assign(event->source(), true);
   } else if (event->msg_type() == BatchOrderEnd::tag) {
-    batch_status_ = false;
+    batch_status_.insert_or_assign(event->source(), false);
     insert_batch_orders(event);
   }
 }

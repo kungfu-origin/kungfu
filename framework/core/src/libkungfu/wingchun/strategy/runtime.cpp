@@ -152,7 +152,7 @@ bool RuntimeContext::insert_batch_orders(const std::string &source, const std::s
   writer->mark(time::now_in_nano(), BatchOrderBegin::tag);
 
   for (int i = 0; i < instrument_ids.size(); ++i) {
-    insert_order(exchange_ids.at(i), exchange_ids.at(i), source, account, limit_prices.at(i), volumes.at(i),
+    insert_order(instrument_ids.at(i), exchange_ids.at(i), source, account, limit_prices.at(i), volumes.at(i),
                  types.at(i), sides.at(i), offsets.at(i), hedge_flags.at(i), is_swaps.at(i));
   }
 

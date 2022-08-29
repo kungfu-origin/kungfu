@@ -69,7 +69,7 @@ class TraderSim(wc.Trader):
         for item in self.order_inputs[event.source]:
             self.insert_order_(event, item)
 
-        self.clear_order_inputs()
+        self.clear_order_inputs(event.source)
         self.logger.info(f"{self.order_inputs}")
 
     def insert_order(self, event):

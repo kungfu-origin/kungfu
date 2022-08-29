@@ -83,7 +83,7 @@ public:
 
   void enable_positions_sync();
 
-  void clear_order_inputs() { order_inputs_.clear(); }
+  void clear_order_inputs(const uint64_t location_uid) { order_inputs_.erase(location_uid); }
 
   std::unordered_map<uint64_t, std::vector<longfist::types::OrderInput>> &get_order_inputs() { return order_inputs_; }
 
@@ -91,14 +91,16 @@ protected:
   OrderMap orders_ = {};
   OrderActionMap actions_ = {};
   TradeMap trades_ = {};
+  std::unordered_map<uint64_t, kungfu::longfist::types::BlockMessage> block_messages_ = {}; // <block_id, batch_flag>
+  /// <strategy_uid, OrderInput>, a batch OrderInputs for a strategy
   std::unordered_map<uint64_t, std::vector<longfist::types::OrderInput>> order_inputs_ = {};
-  std::unordered_map<uint64_t, kungfu::longfist::types::BlockMessage> block_messages_ = {};
+  /// <strategy_uid, batch_flag>, true mean batch mode for this strategy
+  std::unordered_map<uint64_t, bool> batch_status_{};
 
 private:
   bool sync_asset_ = false;
   bool sync_asset_margin_ = false;
   bool sync_position_ = false;
-  bool batch_status_ = false;
 
   void handle_asset_sync();
   void handle_position_sync();
