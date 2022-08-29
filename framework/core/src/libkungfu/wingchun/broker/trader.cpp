@@ -22,7 +22,7 @@ void TraderVendor::on_start() {
   BrokerVendor::on_start();
 
   events_ | is(BlockMessage::tag) | $$(service_->insert_block_message(event));
-  events_ | is(OrderInput::tag) | $$(service_->insert_order(event));
+  events_ | is(OrderInput::tag) | $$(service_->handle_order_input(event));
   events_ | is(OrderAction::tag) | $$(service_->cancel_order(event));
   events_ | is(AssetRequest::tag) | $$(service_->req_account());
   events_ | is(Deregister::tag) | $$(service_->on_strategy_exit(event));
@@ -32,6 +32,7 @@ void TraderVendor::on_start() {
   events_ | is(AssetSync::tag) | $$(service_->handle_asset_sync());
   events_ | is(PositionSync::tag) | $$(service_->handle_position_sync());
   events_ | is(ResetBookRequest::tag) | $$(get_writer(location::PUBLIC)->mark(now(), ResetBookRequest::tag));
+  events_ | $$(service_->handle_batch_order_tag(event));
 
   clean_orders();
 
@@ -118,6 +119,29 @@ void Trader::handle_position_sync() {
   if (state_ == BrokerState::Ready) {
     req_position();
   }
+}
+
+void Trader::handle_order_input(const event_ptr &event) {
+  if (batch_status_) {
+    const OrderInput &input = event->data<OrderInput>();
+    order_inputs_.try_emplace(event->source()).first->second.push_back(input);
+  } else {
+    insert_order(event);
+  }
+}
+
+void Trader::handle_batch_order_tag(const event_ptr &event) {
+  if (event->msg_type() == BatchOrderBegin::tag) {
+    batch_status_ = true;
+  } else if (event->msg_type() == BatchOrderEnd::tag) {
+    batch_status_ = false;
+    insert_batch_orders(event);
+  }
+}
+
+bool Trader::insert_block_message(const event_ptr &event) {
+  const BlockMessage &msg = event->data<BlockMessage>();
+  return block_messages_.try_emplace(msg.block_id, msg).second;
 }
 
 } // namespace kungfu::wingchun::broker

@@ -58,6 +58,10 @@ public:
     PYBIND11_OVERLOAD_PURE(bool, Trader, insert_order, event);
   }
 
+  bool insert_batch_orders(const kungfu::event_ptr &event) override {
+    PYBIND11_OVERLOAD(bool, Trader, insert_batch_orders, event);
+  }
+
   bool cancel_order(const kungfu::event_ptr &event) override {
     PYBIND11_OVERLOAD_PURE(bool, Trader, cancel_order, event);
   }
@@ -103,12 +107,15 @@ void bind_broker(pybind11::module &m) {
       .def_property_readonly("runtime_folder", &Trader::get_runtime_folder)
       .def_property_readonly("config", &Trader::get_config)
       .def_property_readonly("home", &Trader::get_home)
+      .def_property_readonly("order_inputs", &Trader::get_order_inputs)
+      .def("clear_order_inputs", &Trader::clear_order_inputs)
       .def("on_start", &Trader::on_start)
       .def("now", &Trader::now)
       .def("get_writer", &Trader::get_writer)
       .def("get_asset_writer", &Trader::get_asset_writer)
       .def("get_position_writer", &Trader::get_position_writer)
       .def("enable_asset_sync", &Trader::enable_asset_sync)
+      .def("enable_asset_margin_sync", &Trader::enable_asset_margin_sync)
       .def("enable_positions_sync", &Trader::enable_positions_sync)
       .def("get_account_type", &Trader::get_account_type)
       .def("add_timer", &Trader::add_timer)
@@ -116,6 +123,7 @@ void bind_broker(pybind11::module &m) {
       .def("update_broker_state", &Trader::update_broker_state)
       .def("insert_block_message", &Trader::insert_block_message)
       .def("insert_order", &Trader::insert_order)
+      .def("insert_batch_orders", &Trader::insert_batch_orders)
       .def("cancel_order", &Trader::cancel_order)
       .def("req_history_order", &Trader::req_history_order)
       .def("req_history_trade", &Trader::req_history_trade);

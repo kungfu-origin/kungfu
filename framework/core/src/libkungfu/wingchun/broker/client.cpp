@@ -239,7 +239,7 @@ bool PassiveClient::is_custom_subscribed_all(uint32_t md_location_uid,
 
     SubscribeInstrumentType custom_type = instrument_type_to_subscribe_instrument_type(kf_instrument_type);
 
-    for (auto it : custom_sub) {
+    for (const auto &it : custom_sub) {
       std::string custom_exchange("0");
       switch (it.market_type) {
       case MarketType::BSE:
@@ -277,6 +277,7 @@ bool PassiveClient::is_custom_subscribed_all(uint32_t md_location_uid,
           (custom_exchange.empty() || custom_exchange.compare(exchange) == 0) and
           (it.instrument_type == SubscribeInstrumentType::All or
            (uint64_t(custom_type) & uint64_t(it.instrument_type)) != 0)) {
+        /// using & operator because it.instrument_type maybe InstrumentType::Stock | InstrumentType::Future
         return true;
       }
     }
