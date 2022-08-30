@@ -36,8 +36,10 @@ int64_t ContinuousResumePolicy::get_resume_time(const apprentice &app, const Reg
 }
 
 int64_t IntradayResumePolicy::get_resume_time(const apprentice &app, const Register &broker) const {
-  return std::max(app.now(), time::calendar_day_start(app.now()));
+  return std::max(app.get_last_active_time(), time::calendar_day_start(app.now()));
 }
+
+int64_t FromNowResumePolicy::get_resume_time(const apprentice &app, const Register &broker) const { return app.now(); }
 
 Client::Client(apprentice &app) : app_(app) {}
 
