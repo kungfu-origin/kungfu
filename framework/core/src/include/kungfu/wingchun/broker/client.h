@@ -234,7 +234,7 @@ static constexpr auto is_md_datatype_v =
     std::is_same_v<DataType, longfist::types::Quote> or std::is_same_v<DataType, longfist::types::Entrust> or
     std::is_same_v<DataType, longfist::types::Transaction>;
 
-template <typename DataType, std::enable_if_t<longfist::is_md_datatype_v<DataType>>...>
+template <typename DataType, std::enable_if_t<is_md_datatype_v<DataType>>...>
 static constexpr auto is_own(const Client &broker_client) {
   return rx::filter([&](const event_ptr &event) {
     if (event->msg_type() == DataType::tag) {
