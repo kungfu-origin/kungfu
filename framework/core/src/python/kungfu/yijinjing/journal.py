@@ -95,9 +95,9 @@ def find_sessions(ctx):
             session.group,
             session.name,
             session.begin_time,
-            abs(session.end_time),
-            session.end_time <= 0,
-            abs(session.end_time) - session.begin_time,
+            session.end_time,
+            session.end_time == 0,
+            abs(session.update_time) - session.begin_time,
         ]
     return sessions_df
 
