@@ -50,6 +50,14 @@ struct IntradayResumePolicy : public ResumePolicy {
 };
 
 /**
+ * Always resume from the now, is intended to be used by category like strategy.
+ */
+struct FromNowResumePolicy : public ResumePolicy {
+  [[nodiscard]] int64_t get_resume_time(const yijinjing::practice::apprentice &app,
+                                        const longfist::types::Register &broker) const override;
+};
+
+/**
  * Manage connections to brokers.
  */
 class Client {
@@ -223,7 +231,7 @@ protected:
   [[nodiscard]] bool should_connect_strategy(const yijinjing::data::location_ptr &md_location) const override;
 
 private:
-  IntradayResumePolicy resume_policy_ = {};
+  FromNowResumePolicy resume_policy_ = {};
   CustomSubscribeMap custom_subs_ = {};
   EnrollmentMap enrolled_md_locations_ = {};
   EnrollmentMap enrolled_td_locations_ = {};
