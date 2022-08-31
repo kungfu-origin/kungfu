@@ -337,13 +337,19 @@ export const useDealExportHistoryTradingData = (): {
 
       const targetFolder = filePaths[0];
 
-      const ordersFilename = path.join(targetFolder, `orders-${dateResolved}`);
-      const tradesFilename = path.join(targetFolder, `trades-${dateResolved}`);
+      const ordersFilename = path.join(
+        targetFolder,
+        `orders-${dateResolved}.csv`,
+      );
+      const tradesFilename = path.join(
+        targetFolder,
+        `trades-${dateResolved}.csv`,
+      );
       const orderStatFilename = path.join(
         targetFolder,
-        `orderStats-${dateResolved}`,
+        `orderStats-${dateResolved}.csv`,
       );
-      const posFilename = path.join(targetFolder, `pos-${dateResolved}`);
+      const posFilename = path.join(targetFolder, `pos-${dateResolved}.csv`);
 
       return Promise.all([
         writeCSV(ordersFilename, orders, dealTradingDataItemResolved()),
