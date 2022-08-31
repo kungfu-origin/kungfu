@@ -1603,11 +1603,10 @@ export const useMakeOrderInfo = (
     const { offset } = formState.value;
 
     if (currentPosition.value) {
-      const { yesterday_volume, frozen_yesterday, volume, frozen_total } =
-        currentPosition.value;
+      const { yesterday_volume, volume, frozen_total } = currentPosition.value;
       const today_volume = volume - yesterday_volume;
-      const frozen_today = frozen_total - frozen_yesterday;
-      const closable_yesterday = yesterday_volume - frozen_yesterday;
+      const frozen_today = frozen_total - frozen_total;
+      const closable_yesterday = yesterday_volume - frozen_total;
       const closable_today = today_volume - frozen_today;
       const closable_total = volume - frozen_total;
 

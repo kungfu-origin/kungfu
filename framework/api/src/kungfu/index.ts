@@ -563,7 +563,7 @@ export const dealTrade = (
 export const getPosClosableVolume = (position: KungfuApi.Position) => {
   return isShotable(position.instrument_type) || isT0(position.instrument_type)
     ? position.volume - position.frozen_total
-    : position.yesterday_volume - position.frozen_yesterday;
+    : position.yesterday_volume - position.frozen_total;
 };
 
 export const dealPosition = (
