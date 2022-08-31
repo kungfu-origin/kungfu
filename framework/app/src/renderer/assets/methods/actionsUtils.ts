@@ -43,6 +43,8 @@ import {
   dealKfPrice,
   transformSearchInstrumentResultToInstrument,
   booleanProcessEnv,
+  isShotable,
+  isT0,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { writeCSV } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import {
@@ -73,7 +75,6 @@ import { Row } from '@fast-csv/format';
 import {
   AbleSubscribeInstrumentTypesBySourceType,
   OrderInputKeySetting,
-  ShotableInstrumentTypes,
 } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import {
   buildInstrumentSelectOptionLabel,
@@ -325,7 +326,8 @@ export const useDealExportHistoryTradingData = (): {
       const orders = tradingData.Order.sort('update_time');
       const trades = tradingData.Trade.sort('trade_time');
       const orderStat = tradingData.OrderStat.sort('insert_time');
-      const positions = tradingData.Trade.list();
+      const positions = tradingData.Position.sort('update_time');
+      const assets = tradingData.Asset.sort('update_time');
 
       const { filePaths } = await dialog.showOpenDialog({
         properties: ['openDirectory'],
@@ -350,6 +352,10 @@ export const useDealExportHistoryTradingData = (): {
         `orderStats-${dateResolved}.csv`,
       );
       const posFilename = path.join(targetFolder, `pos-${dateResolved}.csv`);
+      const assetFilename = path.join(
+        targetFolder,
+        `assets-${dateResolved}.csv`,
+      );
 
       return Promise.all([
         writeCSV(ordersFilename, orders, dealTradingDataItemResolved()),
@@ -360,6 +366,7 @@ export const useDealExportHistoryTradingData = (): {
           dealTradingDataItemResolved(true),
         ),
         writeCSV(posFilename, positions, dealTradingDataItemResolved()),
+        writeCSV(assetFilename, assets, dealTradingDataItemResolved()),
       ])
         .then(() => {
           shell.showItemInFolder(ordersFilename);
@@ -1486,12 +1493,6 @@ export const useMakeOrderInfo = (
       : null;
   });
 
-  const shotable = (instrumentType: InstrumentTypeEnum): boolean => {
-    return instrumentType
-      ? ShotableInstrumentTypes.includes(instrumentType)
-      : false;
-  };
-
   const isCurrentCategoryIsTd = computed(
     () => currentGlobalKfLocation.value?.category === 'td',
   );
@@ -1610,7 +1611,7 @@ export const useMakeOrderInfo = (
       const closable_today = today_volume - frozen_today;
       const closable_total = volume - frozen_total;
 
-      if (shotable(instrumentType)) {
+      if (isShotable(instrumentType) || isT0(instrumentType)) {
         if (offset === OffsetEnum.CloseYest) {
           return dealKfNumber(closable_yesterday) + '';
         } else if (offset === OffsetEnum.CloseToday) {

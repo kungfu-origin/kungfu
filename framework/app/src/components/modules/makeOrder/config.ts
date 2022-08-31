@@ -1,4 +1,3 @@
-import { ShotableInstrumentTypes } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import {
   HedgeFlagEnum,
   InstrumentTypeEnum,
@@ -8,6 +7,7 @@ import {
   SideEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
+import { isShotable } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 const { t } = VueI18n.global;
 
 export const LABEL_COL = 6;
@@ -18,12 +18,6 @@ export const getConfigSettings = (
   instrumentTypeEnum?: InstrumentTypeEnum,
   priceType?: PriceTypeEnum,
 ): KungfuApi.KfConfigItem[] => {
-  const shotable = instrumentTypeEnum
-    ? ShotableInstrumentTypes.includes(
-        instrumentTypeEnum || InstrumentTypeEnum.unknown,
-      )
-    : false;
-
   const defaultSettings: KungfuApi.KfConfigItem[] = [
     category === 'td'
       ? null
@@ -46,7 +40,7 @@ export const getConfigSettings = (
       default: SideEnum.Buy,
       required: true,
     },
-    ...(shotable
+    ...(isShotable(instrumentTypeEnum || InstrumentTypeEnum.unknown)
       ? [
           {
             key: 'offset',

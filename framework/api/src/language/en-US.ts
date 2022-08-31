@@ -379,6 +379,7 @@ export default {
     yesterday_volume: 'yesterday_volume',
     today_volume: 'today_volume',
     sum_volume: 'sum_volume',
+    frozen_total: 'frozen_total',
     closable_volume: 'closable_volume',
     avg_open_price: 'avg_open_price',
     last_price: 'last_price',
