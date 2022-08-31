@@ -50,14 +50,6 @@ struct IntradayResumePolicy : public ResumePolicy {
 };
 
 /**
- * Always resume from the now, is intended to be used by category like strategy.
- */
-struct FromNowResumePolicy : public ResumePolicy {
-  [[nodiscard]] int64_t get_resume_time(const yijinjing::practice::apprentice &app,
-                                        const longfist::types::Register &broker) const override;
-};
-
-/**
  * Manage connections to brokers.
  */
 class Client {
@@ -231,7 +223,7 @@ protected:
   [[nodiscard]] bool should_connect_strategy(const yijinjing::data::location_ptr &md_location) const override;
 
 private:
-  FromNowResumePolicy resume_policy_ = {};
+  IntradayResumePolicy resume_policy_ = {};
   CustomSubscribeMap custom_subs_ = {};
   EnrollmentMap enrolled_md_locations_ = {};
   EnrollmentMap enrolled_td_locations_ = {};
@@ -240,7 +232,7 @@ private:
 template <typename DataType>
 static constexpr auto is_md_datatype_v =
     std::is_same_v<DataType, longfist::types::Quote> or std::is_same_v<DataType, longfist::types::Entrust> or
-    std::is_same_v<DataType, longfist::types::Transaction> or std::is_same_v<DataType, longfist::types::Bar>;
+    std::is_same_v<DataType, longfist::types::Transaction>;
 
 template <typename DataType, std::enable_if_t<is_md_datatype_v<DataType>>...>
 static constexpr auto is_own(const Client &broker_client) {
@@ -248,12 +240,11 @@ static constexpr auto is_own(const Client &broker_client) {
     if (event->msg_type() == DataType::tag) {
       const DataType &data = event->data<DataType>();
       if (broker_client.is_custom_subscribed(event->source())) {
-        if (((std::is_same_v<DataType, longfist::types::Quote> ||
-              std::is_same_v<DataType, longfist::types::Bar>)&&broker_client
-                 .is_custom_subscribed_all(
-                     event->source(), kungfu::longfist::enums::SubscribeDataType::Snapshot,
-                     std::string(data.exchange_id.value),
-                     kungfu::wingchun::get_instrument_type(data.exchange_id, data.instrument_id))) ||
+        if ((std::is_same_v<DataType, longfist::types::Quote> &&
+             broker_client.is_custom_subscribed_all(
+                 event->source(), kungfu::longfist::enums::SubscribeDataType::Snapshot,
+                 std::string(data.exchange_id.value),
+                 kungfu::wingchun::get_instrument_type(data.exchange_id, data.instrument_id))) ||
             (std::is_same_v<DataType, longfist::types::Transaction> &&
              broker_client.is_custom_subscribed_all(
                  event->source(), kungfu::longfist::enums::SubscribeDataType::Transaction,
