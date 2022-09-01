@@ -666,28 +666,26 @@ export const confirmModal = (
 const markdown = md();
 
 export const openReadmeModal = (title: string, readmePath: string) => {
-  return fse
-    .ensureFile(readmePath)
-    .then(() =>
-      fse.readFile(readmePath).then((buffer) => {
-        const str = buffer.toString();
-        const mdHtml = markdown.render(str);
-        const content = h('div', {
-          class: 'kf-modal-markdown__wrap',
-          innerHTML: mdHtml,
-        });
-        return Modal.confirm({
-          title: title,
-          content: content,
-          width: 600,
-          okText: t('confirm'),
-          cancelText: t('cancel'),
-        });
-      }),
-    )
-    .catch(() => {
-      message.error(t('文件路径不存在'));
+  if (fse.existsSync(readmePath)) {
+    return fse.readFile(readmePath).then((buffer) => {
+      const str = buffer.toString();
+      const mdHtml = markdown.render(str);
+      const content = h('div', {
+        class: 'kf-modal-markdown__wrap',
+        innerHTML: mdHtml,
+      });
+      return Modal.confirm({
+        title: title,
+        content: content,
+        width: 600,
+        okText: t('confirm'),
+        cancelText: t('cancel'),
+      });
     });
+  } else {
+    message.error(t('文件路径不存在'));
+    return Promise.reject();
+  }
 };
 
 export const useBoardFilter = () => {
