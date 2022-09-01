@@ -69,8 +69,12 @@ void Runner::post_start() {
   if (not started_) {
     return; // safe guard for live mode, in that case we will run truly when prepare process is done.
   }
-
-  auto market_data_events = events_ | skip_until(events_ | from_nano_time(now()));
+  // strategy load all frame from resume time, we need filter market frames after strategy start
+  // but the filter process is dynamic, so we need to wait for the filting frame process until the lastest
+  // if without the " - 100 milliseconds", the filter process will be forever
+  auto market_data_events = events_ | skip_until(events_ | rx::filter([&](const event_ptr &event) {
+                                                   return event->gen_time() >= now() - 100 * NANO_MILLISECOND;
+                                                 }));
   market_data_events | is_own<Quote>(context_->get_broker_client()) |
       $$(invoke(&Strategy::on_quote, event->data<Quote>(), get_location(event->source())));
   market_data_events | is_own<Entrust>(context_->get_broker_client()) |

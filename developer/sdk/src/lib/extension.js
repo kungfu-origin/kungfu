@@ -352,7 +352,11 @@ exports.compile = () => {
 
   const cwd = process.cwd().toString(); // 这一步避免在打包中process.cwd()被替换
   const packageJsonPath = path.join(cwd, 'package.json');
+  const readmePath = path.join(cwd, 'README.md');
   fse.copyFile(packageJsonPath, path.join(outputDir, 'package.json'));
+  if (fse.existsSync(readmePath)) {
+    fse.copyFile(readmePath, path.join(outputDir, 'README.md'));
+  }
 
   const copyOutput = (pattern) => {
     glob.sync(pattern).forEach((p) => {

@@ -95,9 +95,7 @@ private:
   DECLARE_PTR(BookListener);
 };
 
-static constexpr auto from_nano_time = [](int64_t nano) {
-  return rx::filter([&](const event_ptr &event) { return event->gen_time() >= nano; });
-};
+static const int64_t NANO_MILLISECOND = int64_t(1000000);
 
 } // namespace kungfu::wingchun::strategy
 

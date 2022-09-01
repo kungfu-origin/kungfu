@@ -13,6 +13,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
   useCurrentGlobalKfLocation,
+  useMakeOrderSubscribe,
   useProcessStatusDetailData,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import {
@@ -38,6 +39,7 @@ const {
   currentCategoryData,
   getCurrentGlobalKfLocationId,
 } = useCurrentGlobalKfLocation(window.watcher);
+useMakeOrderSubscribe(formState);
 
 const configSettings = computed(() => {
   if (!currentGlobalKfLocation.value) {

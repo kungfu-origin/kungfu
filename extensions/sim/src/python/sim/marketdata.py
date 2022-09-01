@@ -30,7 +30,7 @@ class MarketDataSim(wc.MarketData):
         quote = lf.types.Quote()
         instrument_id, exchange_id = ob.security.split(".")
 
-        quote.data_time = self.now()
+        quote.data_time = yjj.now_in_nano()
         quote.instrument_id = instrument_id
         quote.exchange_id = exchange_id
         quote.instrument_type = wc.utils.get_instrument_type(exchange_id, instrument_id)

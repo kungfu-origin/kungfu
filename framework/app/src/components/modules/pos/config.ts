@@ -67,7 +67,7 @@ export const getColumns = (
   },
   {
     type: 'number',
-    name: t('posGlobalConfig.frozen_total'),
+    name: t('posGlobalConfig.frozen_volume'),
     dataIndex: 'frozen_total',
     flex: 1,
     sorter: buildSorter('frozen_total'),
