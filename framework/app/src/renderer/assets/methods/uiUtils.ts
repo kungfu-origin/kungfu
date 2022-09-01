@@ -7,6 +7,7 @@ import {
   toRaw,
   Component,
   App,
+  h,
 } from 'vue';
 import {
   ARCHIVE_DIR,
@@ -41,6 +42,7 @@ import { VueNode } from 'ant-design-vue/lib/_util/type';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 const { t } = VueI18n.global;
 import fse from 'fs-extra';
+import md from 'markdown-it';
 import { Router } from 'vue-router';
 
 // this utils file is only for ui components
@@ -659,6 +661,31 @@ export const confirmModal = (
       },
     });
   });
+};
+
+const markdown = md();
+
+export const openReadmeModal = (title: string, readmePath: string) => {
+  if (fse.existsSync(readmePath)) {
+    return fse.readFile(readmePath).then((buffer) => {
+      const str = buffer.toString();
+      const mdHtml = markdown.render(str);
+      const content = h('div', {
+        class: 'kf-modal-markdown__wrap',
+        innerHTML: mdHtml,
+      });
+      return Modal.confirm({
+        title: title,
+        content: content,
+        width: 600,
+        okText: t('confirm'),
+        cancelText: t('cancel'),
+      });
+    });
+  } else {
+    message.error(t('文件路径不存在'));
+    return Promise.reject();
+  }
 };
 
 export const useBoardFilter = () => {

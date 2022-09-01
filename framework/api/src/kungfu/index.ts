@@ -16,12 +16,14 @@ import {
   dealVolumeCondition,
   getIdByKfLocation,
   getMdTdKfLocationByProcessId,
+  isShotable,
+  isT0,
   kfLogger,
   resolveAccountId,
   resolveClientId,
 } from '../utils/busiUtils';
 import { HistoryDateEnum, LedgerCategoryEnum } from '../typings/enums';
-import { ExchangeIds, ShotableInstrumentTypes } from '../config/tradingConfig';
+import { ExchangeIds } from '../config/tradingConfig';
 
 export const kf = kungfu();
 
@@ -558,10 +560,12 @@ export const dealTrade = (
   };
 };
 
-export const getPosClosableVolume = (position: KungfuApi.Position) => {
-  return ShotableInstrumentTypes.includes(position.instrument_type)
-    ? position.volume - position.frozen_total
-    : position.yesterday_volume - position.frozen_yesterday;
+export const getPosClosableVolume = (position: KungfuApi.Position): bigint => {
+  return isShotable(position.instrument_type) || isT0(position.instrument_type)
+    ? BigInt(Math.max(+Number(position.volume - position.frozen_total), 0))
+    : BigInt(
+        Math.max(+Number(position.yesterday_volume - position.frozen_total), 0),
+      );
 };
 
 export const dealPosition = (

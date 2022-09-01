@@ -377,6 +377,8 @@ export default {
     yesterday_volume: '昨',
     today_volume: '今',
     sum_volume: '总',
+    frozen_total: '冻结数量',
+    frozen_volume: '冻结',
     closable_volume: '可平',
     avg_open_price: '开仓均价',
     last_price: '最新价',

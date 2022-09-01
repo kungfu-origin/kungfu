@@ -141,7 +141,7 @@ void Client::connect(const event_ptr &event, const Register &register_data) {
     app_.request_write_to(app_.now(), app_uid);
     app_.request_read_from(app_.now(), app_uid, resume_time_point);
     app_.request_read_from_public(app_.now(), app_uid, resume_time_point);
-    app_.request_read_from_sync(app_.now(), app_uid, resume_time_point); // 类似于request_read_from_public
+    app_.request_read_from_sync(app_.now(), app_uid, resume_time_point);
     SPDLOG_INFO("resume {} connection from {}", app_.get_location_uname(app_uid), time::strftime(resume_time_point));
   }
   if (app_location->category == category::STRATEGY and should_connect_strategy(app_location)) {
@@ -239,7 +239,7 @@ bool PassiveClient::is_custom_subscribed_all(uint32_t md_location_uid,
 
     SubscribeInstrumentType custom_type = instrument_type_to_subscribe_instrument_type(kf_instrument_type);
 
-    for (auto it : custom_sub) {
+    for (const auto &it : custom_sub) {
       std::string custom_exchange("0");
       switch (it.market_type) {
       case MarketType::BSE:
@@ -277,6 +277,7 @@ bool PassiveClient::is_custom_subscribed_all(uint32_t md_location_uid,
           (custom_exchange.empty() || custom_exchange.compare(exchange) == 0) and
           (it.instrument_type == SubscribeInstrumentType::All or
            (uint64_t(custom_type) & uint64_t(it.instrument_type)) != 0)) {
+        /// using & operator because it.instrument_type maybe InstrumentType::Stock | InstrumentType::Future
         return true;
       }
     }

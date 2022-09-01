@@ -232,7 +232,7 @@ private:
 template <typename DataType>
 static constexpr auto is_md_datatype_v =
     std::is_same_v<DataType, longfist::types::Quote> or std::is_same_v<DataType, longfist::types::Entrust> or
-    std::is_same_v<DataType, longfist::types::Transaction> or std::is_same_v<DataType, longfist::types::Bar>;
+    std::is_same_v<DataType, longfist::types::Transaction>;
 
 template <typename DataType, std::enable_if_t<is_md_datatype_v<DataType>>...>
 static constexpr auto is_own(const Client &broker_client) {
@@ -240,12 +240,11 @@ static constexpr auto is_own(const Client &broker_client) {
     if (event->msg_type() == DataType::tag) {
       const DataType &data = event->data<DataType>();
       if (broker_client.is_custom_subscribed(event->source())) {
-        if (((std::is_same_v<DataType, longfist::types::Quote> ||
-              std::is_same_v<DataType, longfist::types::Bar>)&&broker_client
-                 .is_custom_subscribed_all(
-                     event->source(), kungfu::longfist::enums::SubscribeDataType::Snapshot,
-                     std::string(data.exchange_id.value),
-                     kungfu::wingchun::get_instrument_type(data.exchange_id, data.instrument_id))) ||
+        if ((std::is_same_v<DataType, longfist::types::Quote> &&
+             broker_client.is_custom_subscribed_all(
+                 event->source(), kungfu::longfist::enums::SubscribeDataType::Snapshot,
+                 std::string(data.exchange_id.value),
+                 kungfu::wingchun::get_instrument_type(data.exchange_id, data.instrument_id))) ||
             (std::is_same_v<DataType, longfist::types::Transaction> &&
              broker_client.is_custom_subscribed_all(
                  event->source(), kungfu::longfist::enums::SubscribeDataType::Transaction,

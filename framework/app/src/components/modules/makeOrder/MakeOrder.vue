@@ -3,8 +3,6 @@ import {
   computed,
   getCurrentInstance,
   nextTick,
-  onBeforeUnmount,
-  onMounted,
   reactive,
   ref,
   watch,
@@ -13,7 +11,6 @@ import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/publi
 import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboardItem.vue';
 import KfConfigSettingsForm from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfConfigSettingsForm.vue';
 import {
-  buildInstrumentSelectOptionValue,
   useTriggerMakeOrder,
   useDashboardBodySize,
   confirmModal,
@@ -48,14 +45,17 @@ import {
   getIdByKfLocation,
   getProcessIdByKfLocation,
   initFormStateByConfig,
+  isShotable,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import OrderConfirmModal from './OrderConfirmModal.vue';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import { useTradingTask } from '../tradingTask/utils';
 import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
 import { storeToRefs } from 'pinia';
-import { ShotableInstrumentTypes } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
-import { useMakeOrderInfo } from '../../../renderer/assets/methods/actionsUtils';
+import {
+  useMakeOrderInfo,
+  useMakeOrderSubscribe,
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 
 const { t } = VueI18n.global;
 const { error } = messagePrompt();
@@ -91,6 +91,7 @@ const {
   currentAvailPosVolume,
   isAccountOrInstrumentConfirmed,
 } = useMakeOrderInfo(app, formState);
+useMakeOrderSubscribe(formState);
 
 const {
   currentGlobalKfLocation,
@@ -182,81 +183,13 @@ const getResolvedOffset = (
   side: SideEnum,
   instrumentType: InstrumentTypeEnum,
 ) => {
-  if (shotable(instrumentType)) {
+  if (isShotable(instrumentType)) {
     if (offset !== undefined) {
       return offset;
     }
   }
   return side === 0 ? 0 : 1;
 };
-
-const shotable = (instrumentType: InstrumentTypeEnum): boolean => {
-  return instrumentType
-    ? ShotableInstrumentTypes.includes(instrumentType)
-    : false;
-};
-
-onMounted(() => {
-  if (app?.proxy) {
-    const subscription = app.proxy.$globalBus.subscribe(
-      (data: KfEvent.KfBusEvent) => {
-        if (data.tag === 'makeOrder') {
-          const { offset, side, volume, price, instrumentType, accountId } = (
-            data as KfEvent.TriggerMakeOrder
-          ).orderInput;
-
-          const instrumentValue = buildInstrumentSelectOptionValue(
-            (data as KfEvent.TriggerMakeOrder).orderInput,
-          );
-
-          formState.value.instrument = instrumentValue;
-          formState.value.offset = +offset;
-          formState.value.side = +side;
-          formState.value.volume = +Number(volume).toFixed(0);
-          formState.value.limit_price = +Number(price).toFixed(4);
-          formState.value.instrument_type = +instrumentType;
-
-          if (accountId) {
-            formState.value.account_id = accountId;
-          }
-        }
-
-        if (data.tag === 'orderBookUpdate') {
-          const { side, price, volume, instrumentType } = (
-            data as KfEvent.TriggerOrderBookUpdate
-          ).orderInput;
-
-          const instrumentValue = buildInstrumentSelectOptionValue(
-            (data as KfEvent.TriggerOrderBookUpdate).orderInput,
-          );
-
-          if (!formState.value.instrument) {
-            formState.value.instrument = instrumentValue;
-            formState.value.instrument_type = +instrumentType;
-          }
-
-          if (!!price && !Number.isNaN(price) && +price !== 0) {
-            formState.value.limit_price = +Number(price).toFixed(4);
-          }
-
-          if (
-            !!volume &&
-            !Number.isNaN(Number(volume)) &&
-            BigInt(volume) !== BigInt(0)
-          ) {
-            formState.value.volume = +Number(volume).toFixed(0);
-          }
-
-          formState.value.side = +side;
-        }
-      },
-    );
-
-    onBeforeUnmount(() => {
-      subscription.unsubscribe();
-    });
-  }
-});
 
 watch(
   () => currentGlobalKfLocation.value,
@@ -309,7 +242,7 @@ watch(
     if (instrumentResolved.value) {
       const { instrumentType } = instrumentResolved.value;
 
-      if (shotable(instrumentType)) {
+      if (isShotable(instrumentType)) {
         if (newSide === SideEnum.Sell) {
           if (currentPositionWithLongDirection.value) {
             formState.value.offset = !!currentPositionWithLongDirection.value
@@ -519,7 +452,7 @@ async function confirmApartCloseToOpen(
   const { side, offset, volume } = makeOrderInput;
 
   if (
-    shotable(instrumentResolved.value?.instrumentType) &&
+    isShotable(instrumentResolved.value?.instrumentType) &&
     offset === OffsetEnum.Close
   ) {
     let direction: string = '',
@@ -788,7 +721,7 @@ watch(
               <div class="make-order-position">
                 <a-col :span="LABEL_COL" class="position-label">
                   {{
-                    shotable(instrumentResolved?.instrumentType)
+                    isShotable(instrumentResolved?.instrumentType)
                       ? formState.offset === OffsetEnum.Open
                         ? t('保证金占用')
                         : t('保证金返还')

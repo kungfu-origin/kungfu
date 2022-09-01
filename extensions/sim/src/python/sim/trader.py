@@ -63,14 +63,26 @@ class TraderSim(wc.Trader):
         self.logger.info(f"{block_msg}")
         self.map_block_msg[block_msg.block_id] = block_msg
 
+    def insert_batch_orders(self, event):
+        self.logger.info(f"insert_batch_orders")
+        self.logger.info(f"{self.order_inputs}")
+        for item in self.order_inputs[event.source]:
+            self.insert_order_(event, item)
+
+        self.clear_order_inputs(event.source)
+        self.logger.info(f"{self.order_inputs}")
+
     def insert_order(self, event):
+        self.insert_order_(event, event.OrderInput())
+
+    def insert_order_(self, event, order_input):
         volume_traded = 0
 
         if self.match_mode == MatchMode.Custom:
             return self.ctx.insert_order(self.ctx, event)
         else:
             writer = self.get_writer(event.source)
-            order_input = event.OrderInput()
+            # order_input = event.OrderInput()
             order = wc.utils.order_from_input(order_input)
             order.insert_time = event.gen_time
             order.update_time = event.gen_time

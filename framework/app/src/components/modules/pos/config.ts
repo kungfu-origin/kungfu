@@ -67,11 +67,19 @@ export const getColumns = (
   },
   {
     type: 'number',
+    name: t('posGlobalConfig.frozen_volume'),
+    dataIndex: 'frozen_total',
+    flex: 1,
+    sorter: buildSorter('frozen_total'),
+  },
+  {
+    type: 'number',
     name: t('posGlobalConfig.closable_volume'),
     dataIndex: 'closable_volume',
     flex: 1,
     sorter: buildSorter('closable_volume'),
   },
+
   {
     type: 'number',
     name: t('posGlobalConfig.avg_open_price'),

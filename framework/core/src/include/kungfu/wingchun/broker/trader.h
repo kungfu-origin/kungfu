@@ -46,9 +46,11 @@ public:
 
   [[nodiscard]] virtual longfist::enums::AccountType get_account_type() const = 0;
 
-  virtual bool insert_block_message(const event_ptr &event) { return true; }
+  virtual bool insert_block_message(const event_ptr &event);
 
   virtual bool insert_order(const event_ptr &event) = 0;
+
+  virtual bool insert_batch_orders(const event_ptr &event) { return true; }
 
   virtual bool cancel_order(const event_ptr &event) = 0;
 
@@ -81,10 +83,19 @@ public:
 
   void enable_positions_sync();
 
+  void clear_order_inputs(const uint64_t location_uid) { order_inputs_.erase(location_uid); }
+
+  std::unordered_map<uint64_t, std::vector<longfist::types::OrderInput>> &get_order_inputs() { return order_inputs_; }
+
 protected:
   OrderMap orders_ = {};
   OrderActionMap actions_ = {};
   TradeMap trades_ = {};
+  std::unordered_map<uint64_t, kungfu::longfist::types::BlockMessage> block_messages_ = {}; // <block_id, batch_flag>
+  /// <strategy_uid, OrderInput>, a batch OrderInputs for a strategy
+  std::unordered_map<uint64_t, std::vector<longfist::types::OrderInput>> order_inputs_ = {};
+  /// <strategy_uid, batch_flag>, true mean batch mode for this strategy
+  std::unordered_map<uint64_t, bool> batch_status_{};
 
 private:
   bool sync_asset_ = false;
@@ -93,6 +104,8 @@ private:
 
   void handle_asset_sync();
   void handle_position_sync();
+  void handle_order_input(const event_ptr &event);
+  void handle_batch_order_tag(const event_ptr &event);
 };
 } // namespace kungfu::wingchun::broker
 

@@ -5,8 +5,8 @@ import {
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { InstrumentTypeEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { ref, toRefs, computed, getCurrentInstance } from 'vue';
-import { ShotableInstrumentTypes } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
+import { isShotable } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 const { t } = VueI18n.global;
 
 const { error } = messagePrompt();
@@ -37,11 +37,8 @@ const { modalVisible, closeModal } = useModalVisible(props.visible);
 const { curOrderType } = props;
 const { curOrderVolume } = toRefs(props);
 
-const shotable = curOrderType
-  ? ShotableInstrumentTypes.includes(curOrderType)
-  : false;
 const defaultVolume = computed(() => {
-  if (shotable) {
+  if (isShotable(curOrderType)) {
     return 1;
   }
   return 100;

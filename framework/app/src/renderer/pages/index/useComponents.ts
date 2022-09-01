@@ -33,22 +33,20 @@ export const useComponenets = (
     'MakeOrder',
     'FutureArbitrage',
     'BlockTrade',
-  ];
+  ].filter((componentName) => getBoard(componentName, true, false));
 
   components.forEach((componentName) => {
-    if (getBoard(componentName, true, false)) {
-      app.component(
-        t(componentName),
-        defineAsyncComponent(
-          () =>
-            import(
-              `@kungfu-trader/kungfu-app/src/components/modules/${
-                componentName[0].toLowerCase() + componentName.slice(1)
-              }/${componentName}.vue`
-            ),
-        ),
-      );
-    }
+    app.component(
+      t(componentName),
+      defineAsyncComponent(
+        () =>
+          import(
+            `@kungfu-trader/kungfu-app/src/components/modules/${
+              componentName[0].toLowerCase() + componentName.slice(1)
+            }/${componentName}.vue`
+          ),
+      ),
+    );
   });
 
   app.config.globalProperties.$availKfBoards = components.map((componentName) =>

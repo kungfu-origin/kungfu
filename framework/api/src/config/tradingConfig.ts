@@ -491,6 +491,11 @@ export const ShotableInstrumentTypes = [
   InstrumentTypeEnum.multi,
 ];
 
+export const T0InstrumentTypes = [
+  InstrumentTypeEnum.future,
+  InstrumentTypeEnum.bond,
+];
+
 export const AbleSubscribeInstrumentTypesBySourceType: Record<
   InstrumentTypes,
   InstrumentTypeEnum[]
