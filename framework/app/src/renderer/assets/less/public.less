@@ -281,3 +281,34 @@
     }
   }
 }
+
+.kf-modal-markdown__wrap {
+  max-height: 600px;
+  overflow-y: overlay;
+  padding-right: 8px;
+
+  .list {
+    display: block;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    padding-inline-start: 20px;
+  }
+
+  ul {
+    .list();
+    list-style-type: disc;
+  }
+
+  ol {
+    .list();
+    list-style-type: decimal;
+  }
+
+  blockquote {
+    padding: 10px 20px;
+    margin: 0 0 20px;
+    border-left: 5px solid rgba(238, 238, 238, 0.3);
+  }
+}
