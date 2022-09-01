@@ -158,7 +158,7 @@ public:
       frozen_cash = input.volume * input.frozen_price + frozen_fee;
       book->asset.frozen_cash += frozen_cash;
       book->asset.avail -= frozen_cash;
-    } else if (input.side == Side::RepayStock) { // Offset: Close 
+    } else if (input.side == Side::RepayStock) { // Offset: Close
       // TODO: book->asset.frozen_fee += frozen_cash * fee_ratio;
       frozen_cash = input.volume * input.frozen_price + frozen_fee;
       book->asset.frozen_cash += frozen_cash;
