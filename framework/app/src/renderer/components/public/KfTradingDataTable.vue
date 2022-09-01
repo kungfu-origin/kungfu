@@ -197,13 +197,13 @@ function handleSort(
         @click.stop="handleSort(column.dataIndex, column.sorter)"
       >
         <span class="name">{{ column.name }}</span>
-        <span class="sort-btn" v-if="column.sorter">
+        <span v-if="column.sorter" class="sort-btn">
           <CaretUpOutlined
             style="color: #bfbfbf; font-size: 11px"
             :class="{
               active:
                 column.dataIndex === currentSorterIndex &&
-                currentSorterOrder === 'descend',
+                currentSorterOrder === 'ascend',
             }"
           ></CaretUpOutlined>
           <CaretDownOutlined
@@ -211,7 +211,7 @@ function handleSort(
             :class="{
               active:
                 column.dataIndex === currentSorterIndex &&
-                currentSorterOrder === 'ascend',
+                currentSorterOrder === 'descend',
             }"
           ></CaretDownOutlined>
         </span>

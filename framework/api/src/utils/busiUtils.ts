@@ -28,6 +28,8 @@ import {
   CommissionMode,
   StrategyExtType,
   UnderweightType,
+  ShotableInstrumentTypes,
+  T0InstrumentTypes,
 } from '../config/tradingConfig';
 import {
   KfCategoryEnum,
@@ -1131,6 +1133,16 @@ export const switchKfLocation = (
   }
 
   return startProcessByKfLocation(kfLocation, force);
+};
+
+export const isShotable = (instrumentType: InstrumentTypeEnum): boolean => {
+  return instrumentType
+    ? ShotableInstrumentTypes.includes(instrumentType)
+    : false;
+};
+
+export const isT0 = (instrumentType: InstrumentTypeEnum): boolean => {
+  return instrumentType ? T0InstrumentTypes.includes(instrumentType) : false;
 };
 
 export const dealKfNumber = (
