@@ -145,25 +145,31 @@ public:
     auto &asset = book->asset;
     auto &asset_margin = book->asset_margin;
     // Offset: Close
-    if ((input.side == Side::Sell || input.side == Side::RepayMargin) and
-        position.yesterday_volume - position.frozen_yesterday >= input.volume) {
+    if (input.side == Side::Sell || input.side == Side::RepayMargin) {
       position.frozen_total += input.volume;
-      position.frozen_yesterday += input.volume;
+      if (position.yesterday_volume - position.frozen_yesterday >= input.volume) {
+        position.frozen_yesterday += input.volume;
+      } else {
+        position.frozen_yesterday = position.yesterday_volume;
+      }
     } else if (input.side == Side::Buy) { // Offset: Open
       // TODO: book->asset.frozen_fee += frozen_cash * fee_ratio;
 
       frozen_cash = input.volume * input.frozen_price + frozen_fee;
       book->asset.frozen_cash += frozen_cash;
       book->asset.avail -= frozen_cash;
-    } else if (input.side == Side::RepayStock and // Offset: Close
-               position.yesterday_volume - position.frozen_yesterday >= input.volume) {
+    } else if (input.side == Side::RepayStock) { // Offset: Close 
       // TODO: book->asset.frozen_fee += frozen_cash * fee_ratio;
       frozen_cash = input.volume * input.frozen_price + frozen_fee;
       book->asset.frozen_cash += frozen_cash;
       book->asset.avail -= frozen_cash;
       // Short position need frozen
       position.frozen_total += input.volume;
-      position.frozen_yesterday += input.volume;
+      if (position.yesterday_volume - position.frozen_yesterday >= input.volume) {
+        position.frozen_yesterday += input.volume;
+      } else {
+        position.frozen_yesterday = position.yesterday_volume;
+      }
     } else if (input.side == Side::MarginTrade || input.side == Side::ShortSell) {
       auto cd_mr = get_instr_conversion_margin_rate(book, position);
       // TODO: book->asset.frozen_fee += frozen_cash * fee_ratio;
@@ -180,17 +186,6 @@ public:
       }
       book->asset_margin.margin += frozen_margin;
     }
-    // SPDLOG_TRACE("instrument_id {} input.side {} yesterday_volume {} frozen_total_vol {} position.unrealized_pnl {} "
-    //              "last_price{} position.margin {} "
-    //              "frozen_cash {} frozen_margin {} frozen_price {} "
-    //              "asset.frozen_cash {} asset.avail {} market_value {} unrealized_pnl {} "
-    //              "short_margin {} cash_margin {} avail_margin {} margin {} total_asset {} ",
-    //              position.instrument_id, (int)input.side, (int)position.yesterday_volume, (int)position.frozen_total,
-    //              (double)position.unrealized_pnl, (double)position.last_price, (double)position.margin,
-    //              (double)frozen_cash, (double)frozen_margin, (double)input.frozen_price, (double)asset.frozen_cash,
-    //              (double)asset.avail, (double)asset.market_value, (double)asset.unrealized_pnl,
-    //              (double)asset_margin.short_margin, (double)asset_margin.cash_margin,
-    //              (double)asset_margin.avail_margin, (double)asset_margin.margin, (double)asset_margin.total_asset);
   }
 
   virtual void apply_order(Book_ptr &book, const Order &order) override {
