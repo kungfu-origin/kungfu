@@ -354,7 +354,9 @@ exports.compile = () => {
   const packageJsonPath = path.join(cwd, 'package.json');
   const readmePath = path.join(cwd, 'README.md');
   fse.copyFile(packageJsonPath, path.join(outputDir, 'package.json'));
-  fse.copyFile(readmePath, path.join(outputDir, 'README.md'));
+  if (fse.existsSync(readmePath)) {
+    fse.copyFile(readmePath, path.join(outputDir, 'README.md'));
+  }
 
   const copyOutput = (pattern) => {
     glob.sync(pattern).forEach((p) => {
