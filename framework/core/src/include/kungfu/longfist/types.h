@@ -679,26 +679,26 @@ KF_DEFINE_PACK_TYPE(                                  //
 );
 
 KF_DEFINE_PACK_TYPE(                                                       //
-    RequestHistoryOrder, 10029, PK(trigger_time), TIMESTAMP(trigger_time), //
+    RequestHistoryOrder, 10129, PK(trigger_time), TIMESTAMP(trigger_time), //
     (uint64_t, trigger_time),                                              // 触发时间
     (uint32_t, query_num)                                                  // 请求查询的数量
 );
 
 KF_DEFINE_PACK_TYPE(                                                       //
-    RequestHistoryTrade, 10030, PK(trigger_time), TIMESTAMP(trigger_time), //
+    RequestHistoryTrade, 10130, PK(trigger_time), TIMESTAMP(trigger_time), //
     (uint64_t, trigger_time),                                              // 触发时间
     (uint32_t, query_num)                                                  // 请求查询的数量
 );
 
 KF_DEFINE_PACK_TYPE(                                                           //
-    RequestHistoryOrderError, 10031, PK(trigger_time), TIMESTAMP(insert_time), //
+    RequestHistoryOrderError, 10131, PK(trigger_time), TIMESTAMP(insert_time), //
     (int32_t, error_id),                                                       // 错误ID
     (kungfu::array<char, ERROR_MSG_LEN>, error_msg),                           // 错误信息
     (int64_t, trigger_time)                                                    // 写入时间
 );
 
 KF_DEFINE_PACK_TYPE(                                                           //
-    RequestHistoryTradeError, 10032, PK(trigger_time), TIMESTAMP(insert_time), //
+    RequestHistoryTradeError, 10132, PK(trigger_time), TIMESTAMP(insert_time), //
     (int32_t, error_id),                                                       // 错误ID
     (kungfu::array<char, ERROR_MSG_LEN>, error_msg),                           // 错误信息
     (int64_t, trigger_time)                                                    // 写入时间

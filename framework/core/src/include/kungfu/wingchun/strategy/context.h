@@ -108,13 +108,13 @@ public:
    * @param is_swaps
    * @return
    */
-  virtual bool insert_batch_orders(const std::string &source, const std::string &account,
-                                   const std::vector<std::string> &instrument_ids,
-                                   const std::vector<std::string> &exchange_ids, std::vector<double> limit_prices,
-                                   std::vector<int64_t> volumes, std::vector<longfist::enums::PriceType> types,
-                                   std::vector<longfist::enums::Side> sides,
-                                   std::vector<longfist::enums::Offset> offsets,
-                                   std::vector<longfist::enums::HedgeFlag> hedge_flags, std::vector<bool> is_swaps) = 0;
+  virtual std::vector<uint64_t>
+  insert_batch_orders(const std::string &source, const std::string &account,
+                      const std::vector<std::string> &instrument_ids, const std::vector<std::string> &exchange_ids,
+                      std::vector<double> limit_prices, std::vector<int64_t> volumes,
+                      std::vector<longfist::enums::PriceType> types, std::vector<longfist::enums::Side> sides,
+                      std::vector<longfist::enums::Offset> offsets, std::vector<longfist::enums::HedgeFlag> hedge_flags,
+                      std::vector<bool> is_swaps) = 0;
 
   /**
    * query history order
