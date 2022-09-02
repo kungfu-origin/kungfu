@@ -71,10 +71,9 @@ void Runner::post_start() {
   }
   // strategy load all frame from resume time, we need filter market frames after strategy start
   // but the filter process is dynamic, so we need to wait for the filting frame process until the lastest
-  // if without the " - 100 milliseconds", the filter process will be forever
-  auto market_data_events = events_ | skip_until(events_ | rx::filter([&](const event_ptr &event) {
-                                                   return event->gen_time() >= now() - 100 * NANO_MILLISECOND;
-                                                 }));
+  // there will always be a event gen_time === now()
+  auto market_data_events =
+      events_ | skip_until(events_ | rx::filter([&](const event_ptr &event) { return event->gen_time() >= now(); }));
   market_data_events | is_own<Quote>(context_->get_broker_client()) |
       $$(invoke(&Strategy::on_quote, event->data<Quote>(), get_location(event->source())));
   market_data_events | is_own<Entrust>(context_->get_broker_client()) |
