@@ -126,14 +126,13 @@ uint64_t RuntimeContext::insert_order(const std::string &instrument_id, const st
   return input.order_id;
 }
 
-bool RuntimeContext::insert_batch_orders(const std::string &source, const std::string &account,
-                                         const std::vector<std::string> &instrument_ids,
-                                         const std::vector<std::string> &exchange_ids, std::vector<double> limit_prices,
-                                         std::vector<int64_t> volumes, std::vector<longfist::enums::PriceType> types,
-                                         std::vector<longfist::enums::Side> sides,
-                                         std::vector<longfist::enums::Offset> offsets,
-                                         std::vector<longfist::enums::HedgeFlag> hedge_flags,
-                                         std::vector<bool> is_swaps) {
+std::vector<uint64_t> RuntimeContext::insert_batch_orders(
+    const std::string &source, const std::string &account, const std::vector<std::string> &instrument_ids,
+    const std::vector<std::string> &exchange_ids, std::vector<double> limit_prices, std::vector<int64_t> volumes,
+    std::vector<longfist::enums::PriceType> types, std::vector<longfist::enums::Side> sides,
+    std::vector<longfist::enums::Offset> offsets, std::vector<longfist::enums::HedgeFlag> hedge_flags,
+    std::vector<bool> is_swaps) {
+  std::vector<uint64_t> order_ids{};
   bool flag = instrument_ids.size() == exchange_ids.size() and //
               instrument_ids.size() == limit_prices.size() and //
               instrument_ids.size() == volumes.size() and      //
@@ -144,7 +143,7 @@ bool RuntimeContext::insert_batch_orders(const std::string &source, const std::s
               instrument_ids.size() == is_swaps.size();
   if (not flag) {
     SPDLOG_ERROR("Batch size not equals!");
-    return false;
+    return order_ids;
   }
 
   auto account_location_uid = get_td_location_uid(source, account);
@@ -152,13 +151,15 @@ bool RuntimeContext::insert_batch_orders(const std::string &source, const std::s
   writer->mark(time::now_in_nano(), BatchOrderBegin::tag);
 
   for (int i = 0; i < instrument_ids.size(); ++i) {
-    insert_order(instrument_ids.at(i), exchange_ids.at(i), source, account, limit_prices.at(i), volumes.at(i),
-                 types.at(i), sides.at(i), offsets.at(i), hedge_flags.at(i), is_swaps.at(i));
+    uint64_t order_id =
+        insert_order(instrument_ids.at(i), exchange_ids.at(i), source, account, limit_prices.at(i), volumes.at(i),
+                     types.at(i), sides.at(i), offsets.at(i), hedge_flags.at(i), is_swaps.at(i));
+    order_ids.push_back(order_id);
   }
 
   writer->mark(time::now_in_nano(), BatchOrderEnd::tag);
   writer->close_data();
-  return false;
+  return order_ids;
 }
 
 uint64_t RuntimeContext::cancel_order(uint64_t order_id) {
