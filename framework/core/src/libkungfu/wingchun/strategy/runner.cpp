@@ -69,16 +69,20 @@ void Runner::post_start() {
   if (not started_) {
     return; // safe guard for live mode, in that case we will run truly when prepare process is done.
   }
+
   // strategy load all frame from resume time, we need filter market frames after strategy start
   // but the filter process is dynamic, so we need to wait for the filting frame process until the lastest
-  // there will always be a event gen_time === now()
-  auto market_data_events =
-      events_ | skip_until(events_ | rx::filter([&](const event_ptr &event) { return event->gen_time() >= now(); }));
-  market_data_events | is_own<Quote>(context_->get_broker_client()) |
+  // there will always be a event gen_time === now() in low_latency mode, but be not always in low_latency = false mode.
+  // the "- 200 milliseconds" usage is on reason of hero drain using DEFAULT_RECV_TIMEOUT(100ms) as socket waiting
+  // timeout time.
+  auto from_now_events = events_ | skip_until(events_ | rx::filter([&](const event_ptr &event) {
+                                                return event->gen_time() >= now() - 200 * NANO_MILLISECOND;
+                                              }));
+  from_now_events | is_own<Quote>(context_->get_broker_client()) |
       $$(invoke(&Strategy::on_quote, event->data<Quote>(), get_location(event->source())));
-  market_data_events | is_own<Entrust>(context_->get_broker_client()) |
+  from_now_events | is_own<Entrust>(context_->get_broker_client()) |
       $$(invoke(&Strategy::on_entrust, event->data<Entrust>(), get_location(event->source())));
-  market_data_events | is_own<Transaction>(context_->get_broker_client()) |
+  from_now_events | is_own<Transaction>(context_->get_broker_client()) |
       $$(invoke(&Strategy::on_transaction, event->data<Transaction>(), get_location(event->source())));
 
   events_ | is(Order::tag) | $$(invoke(&Strategy::on_order, event->data<Order>(), get_location(event->source())));

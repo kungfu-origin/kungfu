@@ -278,7 +278,7 @@ private:
     auto &order_queue = trading_bank_[type];
     int i = 0;
     kungfu::state<DataType> *pstate = nullptr;
-    while (i < 1024 && order_queue.pop(pstate) && pstate != nullptr) {
+    while (i < longfist::TRADING_MAP_RING_SIZE && order_queue.pop(pstate) && pstate != nullptr) {
       update_ledger(pstate->update_time, pstate->source, pstate->dest, pstate->data);
       i++;
     }
