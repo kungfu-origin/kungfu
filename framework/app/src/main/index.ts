@@ -14,7 +14,7 @@ import {
   showQuitMessageBox,
   showCrashMessageBox,
   showKungfuInfo,
-  // openUrl,
+  openUrl,
 } from '@kungfu-trader/kungfu-app/src/main/utils';
 import { kfLogger } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { killExtra } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
@@ -36,6 +36,7 @@ import {
   initKfDefaultInstruments,
 } from '@kungfu-trader/kungfu-js-api/config';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
+import { readRootPackageJsonSync } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 const { t } = VueI18n.global;
 
 let MainWindow: BrowserWindow | null = null;
@@ -261,6 +262,9 @@ function setMenu() {
     });
   }
 
+  const rootPackageJson = readRootPackageJsonSync();
+  const isShowHelp = !(rootPackageJson?.appConfig?.showHelp === false); // 如果没有显示设置为 false，则显示
+
   const template: MenuItemConstructorOptions[] = [
     {
       label: t('KungFu'),
@@ -337,27 +341,32 @@ function setMenu() {
         },
       ],
     },
-    // {
-    //   label: t('help'),
-    //   submenu: [
-    //     {
-    //       label: t('website'),
-    //       click: () => openUrl('https://www.kungfu-trader.com/'),
-    //     },
-    //     {
-    //       label: t('user_manual'),
-    //       click: () => openUrl('https://www.kungfu-trader.com/manual/'),
-    //     },
-    //     {
-    //       label: t('API_documentation'),
-    //       click: () => openUrl('https://www.kungfu-trader.com/api-doc/'),
-    //     },
-    //     {
-    //       label: t('Kungfu_forum'),
-    //       click: () => openUrl('https://www.kungfu-trader.com/community/'),
-    //     },
-    //   ],
-    // },
+    ...(isShowHelp
+      ? [
+          {
+            label: t('help'),
+            submenu: [
+              {
+                label: t('website'),
+                click: () => openUrl('https://www.kungfu-trader.com/'),
+              },
+              {
+                label: t('user_manual'),
+                click: () => openUrl('https://www.kungfu-trader.com/manual/'),
+              },
+              {
+                label: t('API_documentation'),
+                click: () => openUrl('https://www.kungfu-trader.com/api-doc/'),
+              },
+              {
+                label: t('Kungfu_forum'),
+                click: () =>
+                  openUrl('https://www.kungfu-trader.com/community/'),
+              },
+            ],
+          },
+        ]
+      : []),
   ];
 
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
