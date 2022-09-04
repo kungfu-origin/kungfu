@@ -122,7 +122,7 @@ onMounted(() => {
         if (unfinishedOrder.value) {
           orders.value = toRaw(
             ordersResolved
-              .slice(0, 1000)
+              .slice(0, 2000)
               .filter((item) => !isFinishedOrderStatus(item.status))
               .map((item) =>
                 toRaw(dealOrder(watcher, item, watcher.ledger.OrderStat)),
