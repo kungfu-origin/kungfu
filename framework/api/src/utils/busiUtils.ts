@@ -1931,8 +1931,14 @@ export const getTaskListFromProcessStatusData = (
         }) !== -1
       );
     })
-    .map((processId) => psDetail[processId])
-    .sort((a, b) => +(b.created_at || 0) - +(a.created_at || 0));
+    .map((processId) => {
+      return psDetail[processId];
+    })
+    .sort((a, b) => {
+      const aCreateTime = +(a.name?.toKfName() || 0);
+      const bCreateTime = +(b.name?.toKfName() || 0);
+      return aCreateTime - bCreateTime;
+    });
 };
 
 export function dealTradingTaskName(

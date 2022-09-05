@@ -1424,9 +1424,9 @@ export const useAssetMargins = () => {
   };
 };
 
-export const playSound = (): void => {
+export const playSound = (type: 'ding' | 'warn' = 'ding'): void => {
   const soundPath = path.join(
-    `${path.join(KUNGFU_RESOURCES_DIR, 'music/ding.mp3')}`,
+    `${path.join(KUNGFU_RESOURCES_DIR, `music/${type}.mp3`)}`,
   );
   const { globalSetting } = storeToRefs(useGlobalStore());
   if (globalSetting.value?.trade?.sound) {

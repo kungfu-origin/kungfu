@@ -104,6 +104,9 @@ const busSubscription = globalBus.subscribe((data: KfEvent.KfBusEvent) => {
       store.setRiskSettingList();
     });
   }
+  if (data.tag === 'play:tradingError') {
+    playSound();
+  }
 });
 
 const {
@@ -200,6 +203,7 @@ onBeforeUnmount(() => {
       v-if="setTradingTaskModalVisible"
       v-model:visible="setTradingTaskModalVisible"
       :payload="setTradingTaskConfigPayload"
+      :isPrimaryDisabled="true"
       :passPrimaryKeySpecialWordsVerify="true"
       @confirm="
         handleConfirmAddUpdateTask($event, currentSelectedTradingTaskExtKey)
