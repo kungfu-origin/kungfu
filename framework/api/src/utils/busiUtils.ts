@@ -1931,9 +1931,7 @@ export const getTaskListFromProcessStatusData = (
         }) !== -1
       );
     })
-    .map((processId) => {
-      return psDetail[processId];
-    })
+    .map((processId) => psDetail[processId])
     .sort((a, b) => {
       const aCreateTime = +(a.name?.toKfName() || 0);
       const bCreateTime = +(b.name?.toKfName() || 0);
