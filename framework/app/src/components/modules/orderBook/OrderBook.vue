@@ -13,7 +13,10 @@ import {
   ref,
 } from 'vue';
 import KfBlinkNum from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfBlinkNum.vue';
-import { SideEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
+import {
+  InstrumentTypeEnum,
+  SideEnum,
+} from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { useQuote } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 
 const currentInstrument = ref<KungfuApi.InstrumentResolved | undefined>();
@@ -49,7 +52,7 @@ const askPrices = computed(() => {
     return [];
   }
 
-  return quoteData.value.ask_price;
+  return dealQuoteAskPidPrices(quoteData.value, 'ask');
 });
 
 const bidPrices = computed(() => {
@@ -57,7 +60,7 @@ const bidPrices = computed(() => {
     return [];
   }
 
-  return quoteData.value.bid_price;
+  return dealQuoteAskPidPrices(quoteData.value, 'bid');
 });
 
 const askVolume = computed(() => {
@@ -104,6 +107,36 @@ function handleTriggerSellOrderBookPriceVolume(
     price,
     volume: BigInt(volume),
   });
+}
+
+function dealQuoteAskPidPrices(
+  quoteData: KungfuApi.Quote,
+  type: 'ask' | 'bid',
+) {
+  if (quoteData.instrument_type === InstrumentTypeEnum.future) {
+    if (currentInstrument.value) {
+      const price_tick =
+        (
+          (window.watcher?.ledger?.Instrument[currentInstrument.value.ukey] ||
+            {}) as KungfuApi.Instrument
+        ).price_tick ?? 0;
+
+      if (price_tick !== 0) {
+        return quoteData[`${type}_price`].reduce((pre, cur, index) => {
+          if (index === 0 || cur) {
+            pre.push(cur);
+          } else {
+            const prePrice = pre[index - 1];
+            pre.push(prePrice + (type === 'ask' ? +price_tick : -price_tick));
+          }
+
+          return pre;
+        }, [] as number[]);
+      }
+    }
+  }
+
+  return quoteData[`${type}_price`];
 }
 
 function toLedgalPriceVolume(num: number | bigint) {
