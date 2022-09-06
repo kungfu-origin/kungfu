@@ -121,13 +121,15 @@ function dealQuoteAskPidPrices(
             {}) as KungfuApi.Instrument
         ).price_tick ?? 0;
 
+      const target_price_tick = type === 'ask' ? +price_tick : -price_tick;
+
       if (price_tick !== 0) {
         return quoteData[`${type}_price`].reduce((pre, cur, index) => {
-          if (index === 0 || cur) {
-            pre.push(cur);
+          if (index === 0 || toLedgalPriceVolume(cur)) {
+            pre.push(toLedgalPriceVolume(cur));
           } else {
             const prePrice = pre[index - 1];
-            pre.push(prePrice + (type === 'ask' ? +price_tick : -price_tick));
+            pre.push(toLedgalPriceVolume(prePrice + target_price_tick));
           }
 
           return pre;
