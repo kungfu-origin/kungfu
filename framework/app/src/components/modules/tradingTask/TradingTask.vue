@@ -264,10 +264,11 @@ function getProcessStatusName(
   const newState = getStrategyStatusName(taskLocation);
   const oldState = strategyStateMap[record?.name || ''];
 
-  if (
-    (oldState !== 'Warn' || oldState !== 'Warn') &&
-    (newState === 'Warn' || newState === 'Error')
-  ) {
+  const isOldWarn = oldState === 'Warn' || oldState === 'Error';
+  const isNewWarn = newState === 'Warn' || newState === 'Error';
+  const oldNotEqualNew = isOldWarn && isNewWarn && oldState !== newState;
+
+  if ((!isOldWarn && isNewWarn) || oldNotEqualNew) {
     playSound('warn');
   }
 
