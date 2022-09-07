@@ -925,5 +925,10 @@ export default defineComponent({
   .ant-form-item-extra {
     white-space: pre-line;
   }
+
+  .ant-form-item-label {
+    overflow: inherit;
+    white-space: normal;
+  }
 }
 </style>
