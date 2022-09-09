@@ -36,7 +36,7 @@ import {
   dealCategory,
   dealAssetsByHolderUID,
   getAvailDaemonList,
-  removeNoDefaultStrategyFolders,
+  // removeNoDefaultStrategyFolders,
   getStrategyStateStatusName,
   isBrokerStateReady,
   dealKfNumber,
@@ -739,7 +739,10 @@ export const usePreStartAndQuitApp = (): {
             switch (data.name) {
               case 'record-before-quit':
                 preQuitSystemLoadingData.record = 'loading';
-                preQuitTasks([removeNoDefaultStrategyFolders()]).finally(() => {
+                preQuitTasks([
+                  // removeNoDefaultStrategyFolders(),
+                  Promise.resolve(),
+                ]).finally(() => {
                   ipcRenderer.send('record-before-quit-done');
                   preQuitSystemLoadingData.record = 'done';
                 });

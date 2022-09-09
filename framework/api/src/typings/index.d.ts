@@ -73,6 +73,7 @@ declare namespace KungfuApi {
     | 'int'
     | 'float'
     | 'percent'
+    | 'error'
     | 'side' // select - number
     | 'offset' // select - number
     | 'direction' // select - number
