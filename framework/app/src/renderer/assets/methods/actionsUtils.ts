@@ -36,7 +36,7 @@ import {
   dealCategory,
   dealAssetsByHolderUID,
   getAvailDaemonList,
-  removeNoDefaultStrategyFolders,
+  // removeNoDefaultStrategyFolders,
   getStrategyStateStatusName,
   isBrokerStateReady,
   dealKfNumber,
@@ -739,7 +739,10 @@ export const usePreStartAndQuitApp = (): {
             switch (data.name) {
               case 'record-before-quit':
                 preQuitSystemLoadingData.record = 'loading';
-                preQuitTasks([removeNoDefaultStrategyFolders()]).finally(() => {
+                preQuitTasks([
+                  // removeNoDefaultStrategyFolders(),
+                  Promise.resolve(),
+                ]).finally(() => {
                   ipcRenderer.send('record-before-quit-done');
                   preQuitSystemLoadingData.record = 'done';
                 });
@@ -1424,9 +1427,9 @@ export const useAssetMargins = () => {
   };
 };
 
-export const playSound = (): void => {
+export const playSound = (type: 'ding' | 'warn' = 'ding'): void => {
   const soundPath = path.join(
-    `${path.join(KUNGFU_RESOURCES_DIR, 'music/ding.mp3')}`,
+    `${path.join(KUNGFU_RESOURCES_DIR, `music/${type}.mp3`)}`,
   );
   const { globalSetting } = storeToRefs(useGlobalStore());
   if (globalSetting.value?.trade?.sound) {

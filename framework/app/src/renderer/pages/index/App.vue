@@ -10,6 +10,7 @@ import {
   useIpcListener,
   handleOpenLogviewByFile,
   markClearDB,
+  setHtmlTitle,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import {
   playSound,
@@ -32,9 +33,14 @@ import {
 import { bindIPCListener } from '@kungfu-trader/kungfu-app/src/renderer/ipcMsg/ipcListener';
 import { useTradingTask } from '@kungfu-trader/kungfu-app/src/components/modules/tradingTask/utils';
 import { setAllRiskSettingList } from '@kungfu-trader/kungfu-js-api/actions';
+import { readRootPackageJsonSync } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 
 const app = getCurrentInstance();
 const store = useGlobalStore();
+
+const rootPackageJson = readRootPackageJsonSync();
+const newTitle = rootPackageJson?.appConfig?.appTitle;
+newTitle && setHtmlTitle(`${newTitle}`);
 
 const {
   preStartSystemLoadingData,
@@ -103,6 +109,9 @@ const busSubscription = globalBus.subscribe((data: KfEvent.KfBusEvent) => {
     setAllRiskSettingList(data.riskSettings).finally(() => {
       store.setRiskSettingList();
     });
+  }
+  if (data.tag === 'play:tradingError') {
+    playSound();
   }
 });
 
@@ -200,6 +209,7 @@ onBeforeUnmount(() => {
       v-if="setTradingTaskModalVisible"
       v-model:visible="setTradingTaskModalVisible"
       :payload="setTradingTaskConfigPayload"
+      :isPrimaryDisabled="true"
       :passPrimaryKeySpecialWordsVerify="true"
       @confirm="
         handleConfirmAddUpdateTask($event, currentSelectedTradingTaskExtKey)

@@ -37,4 +37,6 @@ if (process.env.NODE_ENV === 'development') {
 
 export const KF_HOME_BASE_DIR_RESOLVE: string = getHomePath();
 
-console.log('process.env.NODE_ENV', process.env.NODE_ENV);
+if (process.env.APP_TYPE === 'renderer') {
+  console.log('process.env.NODE_ENV', process.env.NODE_ENV);
+}

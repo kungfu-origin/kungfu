@@ -33,6 +33,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import KfProcessStatus from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfProcessStatus.vue';
 import {
+  playSound,
   useAddUpdateRemoveKfConfig,
   useCurrentGlobalKfLocation,
   useExtConfigsRelated,
@@ -250,6 +251,8 @@ function parseTaskSettingsFromEnv(configSettingsEnv = '[]') {
   return configSettings;
 }
 
+const strategyStateMap: Record<string, string> = {};
+
 function getProcessStatusName(
   record: Pm2ProcessStatusDetail,
 ): ProcessStatusTypes | undefined {
@@ -257,7 +260,21 @@ function getProcessStatusName(
   if (!taskLocation) {
     return;
   }
-  return getStrategyStatusName(taskLocation);
+
+  const newState = getStrategyStatusName(taskLocation);
+  const oldState = strategyStateMap[record?.name || ''];
+
+  const isOldWarn = oldState === 'Warn' || oldState === 'Error';
+  const isNewWarn = newState === 'Warn' || newState === 'Error';
+  const oldNotEqualNew = isOldWarn && isNewWarn && oldState !== newState;
+
+  if ((!isOldWarn && isNewWarn) || oldNotEqualNew) {
+    playSound('warn');
+  }
+
+  strategyStateMap[record?.name || ''] = newState || '';
+
+  return newState;
 }
 </script>
 

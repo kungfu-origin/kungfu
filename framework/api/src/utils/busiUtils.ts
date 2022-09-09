@@ -1807,6 +1807,7 @@ export const dealOrderInputItem = (
 ): Record<string, KungfuApi.KfTradeValueCommonData> => {
   const orderInputResolved: Record<string, KungfuApi.KfTradeValueCommonData> =
     {};
+  const isInstrumnetShotable = isShotable(inputData.instrument_type);
   for (let key in inputData) {
     if (key === 'instrument_type') {
       orderInputResolved[key] = dealInstrumentType(inputData.instrument_type);
@@ -1817,9 +1818,11 @@ export const dealOrderInputItem = (
     } else if (key === 'offset') {
       orderInputResolved[key] = dealOffset(inputData.offset);
     } else if (key === 'hedge_flag') {
-      orderInputResolved[key] = dealHedgeFlag(inputData.hedge_flag);
+      isInstrumnetShotable &&
+        (orderInputResolved[key] = dealHedgeFlag(inputData.hedge_flag));
     } else if (key === 'is_swap') {
-      orderInputResolved[key] = dealIsSwap(inputData.is_swap);
+      isInstrumnetShotable &&
+        (orderInputResolved[key] = dealIsSwap(inputData.is_swap));
     } else {
       orderInputResolved[key] = {
         name: inputData[key],
@@ -1932,7 +1935,11 @@ export const getTaskListFromProcessStatusData = (
       );
     })
     .map((processId) => psDetail[processId])
-    .sort((a, b) => +(b.created_at || 0) - +(a.created_at || 0));
+    .sort((a, b) => {
+      const aCreateTime = +(a.name?.toKfName() || 0);
+      const bCreateTime = +(b.name?.toKfName() || 0);
+      return aCreateTime - bCreateTime;
+    });
 };
 
 export function dealTradingTaskName(

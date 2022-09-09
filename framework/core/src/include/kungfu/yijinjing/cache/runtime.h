@@ -74,7 +74,9 @@ private:
 
 class trading_bank {
 public:
-  trading_bank() : trading_data_map_(longfist::build_ring_state_map(longfist::TradingDataTypes)) {}
+  trading_bank()
+      : trading_data_map_(longfist::build_ring_state_map(longfist::TradingDataTypes, longfist::TRADING_MAP_RING_SIZE)) {
+  }
   template <typename DataType> void operator<<(const state<DataType> &state) {
     auto &target_queue = trading_data_map_[boost::hana::type_c<DataType>];
     target_queue->push(state);

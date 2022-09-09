@@ -29,4 +29,4 @@ export class KfHookKeeper {
   }
 }
 
-globalThis.HookKeeper = new KfHookKeeper();
+globalThis.HookKeeper = globalThis.HookKeeper || new KfHookKeeper();

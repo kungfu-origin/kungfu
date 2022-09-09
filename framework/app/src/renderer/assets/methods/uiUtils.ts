@@ -387,7 +387,7 @@ export const useIpcListener = (): void => {
 };
 
 export const markClearJournal = (): void => {
-  localStorage.setItem('needClearJournal', '');
+  localStorage.setItem('needClearJournal', '1');
   messagePrompt().success(t('clear', { content: 'journal' }));
 };
 
