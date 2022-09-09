@@ -343,6 +343,36 @@ export const getCategoryName = (category: KfCategoryTypes) => {
   }
 };
 
+export const dealKfConfigValue = async (
+  kfConfig: KungfuApi.KfConfig,
+  extConfigs: KungfuApi.KfExtConfigs,
+) => {
+  const extConfig =
+    await globalThis.HookKeeper.getHooks().resolveExtConfig.trigger(
+      kfConfig,
+      extConfigs[kfConfig.category][kfConfig.group],
+    );
+
+  try {
+    const settingsMap = extConfig?.settings.reduce((pre, item) => {
+      pre[item.key] = item.type;
+      return pre;
+    }, {});
+
+    const kfConfigValue = JSON.parse(kfConfig.value);
+    return JSON.stringify(
+      Object.keys(kfConfigValue).reduce((pre, key) => {
+        if (settingsMap[key] === 'password') {
+          pre[key] = '*********';
+        }
+        return pre;
+      }, kfConfigValue),
+    );
+  } catch (error) {
+    return kfConfig.value;
+  }
+};
+
 export const colorNum = (num: number | string): string => {
   if (+num > 0) {
     return colors.red(num.toString());
