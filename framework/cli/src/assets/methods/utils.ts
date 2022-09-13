@@ -171,6 +171,8 @@ export const buildQuestionByKfConfigItem = (
 
       return true;
     },
+
+    ...(targetType === 'path' ? { cwd: process.cwd().toString() } : {}),
   };
 
   if (value !== undefined && value !== '' && value !== 0) {
