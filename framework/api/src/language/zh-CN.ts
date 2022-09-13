@@ -152,7 +152,7 @@ export default {
     Limit: '[Limit] 限价',
     Market: '[Any] 市价',
     FakBest5: '[FakBest5] 上海深圳最优五档即时成交剩余撤销, 不需要报价',
-    Forward_best: '[ForwardBest] 深圳本方方最优价格申报',
+    Forward_best: '[ForwardBest] 深圳本方最优价格申报',
     Reverse_best:
       '[ReverseBest] 上海最优五档即时成交剩余转限价, 深圳对手方最优价格申报, 不需要报价',
     Fak: '[Fak] 深圳即时成交剩余撤销',
