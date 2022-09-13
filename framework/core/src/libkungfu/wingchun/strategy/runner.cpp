@@ -75,9 +75,12 @@ void Runner::post_start() {
   // there will always be a event gen_time === now() in low_latency mode, but be not always in low_latency = false mode.
   // the "- 200 milliseconds" usage is on reason of hero drain using DEFAULT_RECV_TIMEOUT(100ms) as socket waiting
   // timeout time.
-  auto from_now_events = events_ | skip_until(events_ | rx::filter([&](const event_ptr &event) {
-                                                return event->gen_time() >= now() - 200 * NANO_MILLISECOND;
-                                              }));
+  auto from_now_events =
+      events_ | skip_until(events_ | rx::filter([&](const event_ptr &event) {
+                             return event->gen_time() >=
+                                    (get_io_device()->is_low_latency() ? now() : (now() - 200 * NANO_MILLISECOND));
+                           }));
+  from_now_events | first() | $([](const event_ptr &event) { SPDLOG_INFO("skip until now"); });
   from_now_events | is_own<Quote>(context_->get_broker_client()) |
       $$(invoke(&Strategy::on_quote, event->data<Quote>(), get_location(event->source())));
   from_now_events | is_own<Entrust>(context_->get_broker_client()) |

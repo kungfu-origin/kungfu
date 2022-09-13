@@ -1816,7 +1816,8 @@ export const dealOrderInputItem = (
     } else if (key === 'side') {
       orderInputResolved[key] = dealSide(inputData.side);
     } else if (key === 'offset') {
-      orderInputResolved[key] = dealOffset(inputData.offset);
+      isInstrumnetShotable &&
+        (orderInputResolved[key] = dealOffset(inputData.offset));
     } else if (key === 'hedge_flag') {
       isInstrumnetShotable &&
         (orderInputResolved[key] = dealHedgeFlag(inputData.hedge_flag));
