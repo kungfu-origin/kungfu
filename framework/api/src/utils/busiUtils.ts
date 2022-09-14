@@ -1816,7 +1816,8 @@ export const dealOrderInputItem = (
     } else if (key === 'side') {
       orderInputResolved[key] = dealSide(inputData.side);
     } else if (key === 'offset') {
-      orderInputResolved[key] = dealOffset(inputData.offset);
+      isInstrumnetShotable &&
+        (orderInputResolved[key] = dealOffset(inputData.offset));
     } else if (key === 'hedge_flag') {
       isInstrumnetShotable &&
         (orderInputResolved[key] = dealHedgeFlag(inputData.hedge_flag));
@@ -1852,6 +1853,7 @@ export const kfConfigItemsToProcessArgs = (
 export const dealByConfigItemType = (
   type: string,
   value: KungfuApi.KfConfigValue,
+  options?: KungfuApi.KfSelectOption[],
 ): string => {
   switch (type) {
     case 'side':
@@ -1891,6 +1893,11 @@ export const dealByConfigItemType = (
             }`,
         )
         .join(' ');
+    case 'select':
+    case 'radio':
+      if (!options?.length) return value;
+      return options.filter((option) => option.value === value)[0]
+        .label as string;
     default:
       return value;
   }
@@ -1904,7 +1911,7 @@ export const kfConfigItemsToArgsByPrimaryForShow = (
     .filter((item) => item.primary)
     .map((item) => ({
       label: item.name,
-      value: dealByConfigItemType(item.type, formState[item.key]),
+      value: dealByConfigItemType(item.type, formState[item.key], item.options),
     }))
     .map((item) => `${item.label} ${item.value}`)
     .join('; ');

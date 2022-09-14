@@ -68,7 +68,7 @@ export const showGlobalSetting = () => {
     json: getKfGlobalSettingsValue(),
     tipsMap: getConfigTipsMap(kfGlobalSettings),
     aliasKeyMap: { close: 'CloseThreshold' },
-    keyWidth: 15,
+    keyWidth: 18,
   });
 
   console.log(jsonTree.build());
