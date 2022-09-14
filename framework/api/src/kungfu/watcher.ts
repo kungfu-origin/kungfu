@@ -72,14 +72,14 @@ export const startWatcher = () => {
 
 export const startWatcherSyncTask = (
   interval = 1000,
-  callback: (watcher: KungfuApi.Watcher) => void,
+  callback?: (watcher: KungfuApi.Watcher) => void,
 ) => {
   if (watcher === null) return;
   return setTimerPromiseTask(() => {
     return new Promise((resolve) => {
       if (watcher.isLive() && watcher.isStarted()) {
         watcher.sync();
-        callback(watcher);
+        callback && callback(watcher);
       }
       resolve(true);
     });
