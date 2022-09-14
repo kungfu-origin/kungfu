@@ -362,7 +362,10 @@ function handleRemoveFile(key: string, filename: string): void {
 }
 
 function handleTimePickerChange(date: Dayjs, key: string) {
-  formState[key] = dayjs(date).format('YYYY-MM-DD HH:mm:ss');
+  formState[key] =
+    dayjs(date).toString() === 'Invalid Date'
+      ? null
+      : dayjs(date).format('YYYY-MM-DD HH:mm:ss');
 }
 
 function handleInstrumentSelected(val: string, key: string) {
