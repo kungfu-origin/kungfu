@@ -105,7 +105,9 @@ export function removeKfLocation(
 
   return pathExists(targetDir).then((isExisted: boolean): Promise<void> => {
     if (isExisted) {
-      return remove(targetDir);
+      return remove(targetDir).catch((err) => {
+        console.warn(err);
+      });
     }
 
     console.warn(`Location Dir ${targetDir} is not existed`);
@@ -118,7 +120,9 @@ export function removeLog(kfLocation: KungfuApi.KfLocation): Promise<void> {
   const logPath = buildProcessLogPath(processId);
   return pathExists(logPath).then((isExisted: boolean): Promise<void> => {
     if (isExisted) {
-      return remove(logPath);
+      return remove(logPath).catch((err) => {
+        console.warn(err);
+      });
     }
 
     console.warn(`Log Path ${logPath} is not existed`);
