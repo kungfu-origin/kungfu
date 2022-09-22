@@ -1691,15 +1691,15 @@ export const initFormStateByConfig = (
       defaultValue = item?.default;
     }
 
-    if (defaultValue === undefined) {
-      defaultValue = getDefaultValueByType();
-    }
-
     if (
       (initValue || {})[item.key] !== undefined &&
-      (initValue || {})[item.key] !== getDefaultValueByType()
+      (initValue || {})[item.key] !== item?.default
     ) {
       defaultValue = (initValue || {})[item.key];
+    }
+
+    if (defaultValue === undefined) {
+      defaultValue = getDefaultValueByType();
     }
 
     if (KfConfigValueBooleanType.includes(type)) {

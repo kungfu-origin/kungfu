@@ -1,5 +1,6 @@
 import './preInit';
 import './injectGlobal';
+import './setCliEnv';
 import CFonts from 'cfonts';
 import colors from 'colors';
 import { version } from '../package.json';
