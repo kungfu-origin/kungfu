@@ -5,14 +5,8 @@ import { triggerStartStep } from '@kungfu-trader/kungfu-js-api/kungfu/tradingDat
 import {
   getOrderTradeFilterKey,
   getProcessIdByKfLocation,
-  setTimerPromiseTask,
-  switchKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import { SwitchKfLocationPacketData } from './typings';
-import {
-  dealAppStates,
-  dealAssetsByHolderUID,
-} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import { dealAssetsByHolderUID } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { Pm2PacketMain } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import {
   dealOrder,
@@ -31,41 +25,13 @@ import { useAllExtComponentByPosition } from './assets/methods/utils';
 triggerStartStep();
 useAllExtComponentByPosition('dzxy');
 
-setTimerPromiseTask((): Promise<void> => {
-  return new Promise((resolve) => {
-    process.send &&
-      process.send({
-        type: 'process:msg',
-        data: {
-          type: 'APP_STATES',
-          body: dealAppStates(watcher, watcher?.appStates || {}),
-        },
-      });
-
-    console.log('Heartbeat watcher living', watcher?.isLive());
-    process.send &&
-      process.send({
-        type: 'process:msg',
-        data: {
-          type: 'WATCHER_IS_LIVE',
-          body: watcher ? watcher.isLive() && watcher.isStarted() : false,
-        },
-      });
-
-    resolve();
-  });
-}, 3000);
-
 process.on('message', (packet: Pm2PacketMain) => {
-  const { type, topic, data } = packet;
+  const { type, topic } = packet;
   if (type !== 'process:msg') {
     return;
   }
 
   switch (topic) {
-    case 'SWITCH_KF_LOCATION':
-      swithKfLocationResolved(data as SwitchKfLocationPacketData);
-      break;
     case 'GET_ORDERS':
       resOrders(packet);
       break;
@@ -208,31 +174,6 @@ function resAsset(packet: Pm2PacketMain) {
         },
       },
     });
-}
-
-function swithKfLocationResolved(data: SwitchKfLocationPacketData) {
-  const { category, group, name, value, status, cwd, script } = data;
-  const kfConfig: KungfuApi.KfConfig | KungfuApi.KfDaemonLocation = {
-    category,
-    group,
-    name,
-    value: value,
-    location_uid: 0,
-    mode: 'live',
-    cwd,
-    script,
-  };
-
-  // task dealing logic
-  if (category === 'strategy' && group !== 'default') {
-    if (!value) {
-      return Promise.reject(new Error('Task cannot start in CLI'));
-    }
-  }
-
-  return switchKfLocation(watcher, kfConfig, !status).catch((err) => {
-    console.error(err.message);
-  });
 }
 
 function cancellAllOrders(packet: Pm2PacketMain) {
