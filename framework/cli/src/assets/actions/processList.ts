@@ -4,7 +4,6 @@ import {
   KfCategoryTypes,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
-  dealAppStates,
   delayMilliSeconds,
   deleteNNFiles,
   getAvailCliDaemonList,
@@ -14,7 +13,6 @@ import {
   kfLogger,
   removeArchiveBeforeToday,
   removeJournal,
-  setTimerPromiseTask,
   switchKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
@@ -38,7 +36,6 @@ import { combineLatest, Observable } from 'rxjs';
 import { ProcessListItem, SwitchKfLocationPacketData } from '../../typings';
 import colors from 'colors';
 import { Widgets } from 'blessed';
-import { Subject } from 'rxjs';
 import {
   dealStatus,
   getCategoryName,
@@ -49,23 +46,9 @@ import {
   ARCHIVE_DIR,
   KF_HOME,
 } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
-import { watcher } from '@kungfu-trader/kungfu-js-api/kungfu/watcher';
+import { globalState } from './globalState';
 
-const appStatesSubject = new Subject<Record<string, BrokerStateStatusTypes>>();
-
-const timer = setTimeout(() => {
-  appStatesSubject.next({});
-  clearTimeout(timer);
-}, 1000);
-
-setTimerPromiseTask((): Promise<void> => {
-  return new Promise((resolve) => {
-    appStatesSubject.next(dealAppStates(watcher, watcher?.appStates || {}));
-    resolve();
-  });
-}, 3000);
-
-const isMasterAlive = async () => {
+const isMasterAlive = async (watcher: KungfuApi.Watcher) => {
   const masterDes = await pm2Describe('master');
   return masterDes.length && watcher?.isLive();
 };
@@ -95,7 +78,7 @@ export const mdTdStrategyDaemonObservable = () => {
 };
 
 export const appStatesObservable = () => {
-  return appStatesSubject.asObservable();
+  return globalState.APP_STATES_SUBJECT.asObservable();
 };
 
 const getProcessStatus = (
@@ -425,6 +408,9 @@ export const switchProcess = async (
   messageBoard: Widgets.MessageElement,
   loading: Widgets.LoadingElement,
 ): Promise<void> => {
+  const { watcher } = await import(
+    '@kungfu-trader/kungfu-js-api/kungfu/watcher'
+  );
   const status = proc.status !== '--';
   const startOrStop = status ? 'Stop' : 'Start';
   const { category, group, name, value, cwd, script } = proc;
@@ -475,7 +461,16 @@ export const switchProcess = async (
     case 'md':
     case 'td':
     case 'strategy':
-      if (!(await isMasterAlive())) {
+      if (!watcher) {
+        messageBoard.log('Watcher is NULL', 2, (err) => {
+          if (err) {
+            console.error(err);
+          }
+        });
+        return;
+      }
+
+      if (!(await isMasterAlive(watcher))) {
         messageBoard.log(
           'Start master first, If did, Please wait...',
           2,
@@ -489,6 +484,7 @@ export const switchProcess = async (
       }
 
       swithKfLocationResolved(
+        watcher,
         {
           category,
           group,
@@ -518,6 +514,7 @@ export const switchProcess = async (
 };
 
 function swithKfLocationResolved(
+  watcher: KungfuApi.Watcher,
   data: SwitchKfLocationPacketData,
   messageBoard: Widgets.MessageElement,
 ) {

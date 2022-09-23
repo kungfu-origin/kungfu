@@ -8,7 +8,7 @@ import {
   // statTimeEnd,
 } from '../utils/busiUtils';
 
-const isCliDev =
+const IS_CLI_DEV =
   process.env.APP_TYPE !== 'cli' || process.env.NODE_ENV === 'development';
 
 export const getWatcherId = () => {
@@ -21,7 +21,7 @@ export const getWatcherId = () => {
   ]
     .filter((str) => !!str)
     .join('-');
-  isCliDev && console.log(`WatcherId ${watcherId}`);
+  IS_CLI_DEV && console.log(`WatcherId ${watcherId}`);
   return watcherId;
 };
 
@@ -41,7 +41,7 @@ export const watcher = ((): KungfuApi.Watcher | null => {
   }
 
   //for cli show
-  isCliDev &&
+  IS_CLI_DEV &&
     console.log(
       'Init Watcher',
       'APP_TYPE',
@@ -63,7 +63,7 @@ export const watcher = ((): KungfuApi.Watcher | null => {
     process.env.BY_PASS_TRADINGDATA ??
     globalSetting?.performance?.bypassTradingData;
 
-  if (isCliDev) {
+  if (IS_CLI_DEV) {
     console.log('bypassRestore', bypassRestore);
     console.log('bypassAccounting', bypassAccounting);
     console.log('bypassTradingData', bypassTradingData);
