@@ -9,7 +9,7 @@ import {
 } from '../utils/busiUtils';
 
 const isCliDev =
-  process.env.APP_TYPE !== 'cli' || process.env.NODE_ENV !== 'development';
+  process.env.APP_TYPE !== 'cli' || process.env.NODE_ENV === 'development';
 
 export const getWatcherId = () => {
   const watcherId = [
