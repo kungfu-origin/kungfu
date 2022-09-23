@@ -8,6 +8,9 @@ import {
   // statTimeEnd,
 } from '../utils/busiUtils';
 
+const IS_CLI_DEV =
+  process.env.APP_TYPE !== 'cli' || process.env.NODE_ENV === 'development';
+
 export const getWatcherId = () => {
   const watcherId = [
     process.env.APP_TYPE,
@@ -18,14 +21,16 @@ export const getWatcherId = () => {
   ]
     .filter((str) => !!str)
     .join('-');
-  console.log(`WatcherId ${watcherId}`);
+  IS_CLI_DEV && console.log(`WatcherId ${watcherId}`);
   return watcherId;
 };
 
 export const watcher = ((): KungfuApi.Watcher | null => {
   if (process.env.APP_TYPE !== 'renderer') {
     if (process.env.APP_TYPE !== 'daemon') {
-      return null;
+      if (process.env.APP_TYPE !== 'cli') {
+        return null;
+      }
     }
   }
 
@@ -36,15 +41,16 @@ export const watcher = ((): KungfuApi.Watcher | null => {
   }
 
   //for cli show
-  console.log(
-    'Init Watcher',
-    'APP_TYPE',
-    process.env.APP_TYPE || 'undefined',
-    'UI_EXT_TYPE',
-    process.env.UI_EXT_TYPE || 'undefined',
-    'APP_ID',
-    process.env.APP_ID || 'undefined',
-  );
+  IS_CLI_DEV &&
+    console.log(
+      'Init Watcher',
+      'APP_TYPE',
+      process.env.APP_TYPE || 'undefined',
+      'UI_EXT_TYPE',
+      process.env.UI_EXT_TYPE || 'undefined',
+      'APP_ID',
+      process.env.APP_ID || 'undefined',
+    );
 
   const bypassRestore =
     booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED) ||
@@ -57,9 +63,11 @@ export const watcher = ((): KungfuApi.Watcher | null => {
     process.env.BY_PASS_TRADINGDATA ??
     globalSetting?.performance?.bypassTradingData;
 
-  console.log('bypassRestore', bypassRestore);
-  console.log('bypassAccounting', bypassAccounting);
-  console.log('bypassTradingData', bypassTradingData);
+  if (IS_CLI_DEV) {
+    console.log('bypassRestore', bypassRestore);
+    console.log('bypassAccounting', bypassAccounting);
+    console.log('bypassTradingData', bypassTradingData);
+  }
 
   return kf.watcher(
     KF_RUNTIME_DIR,
