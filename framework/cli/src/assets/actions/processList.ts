@@ -50,6 +50,7 @@ import {
   KF_HOME,
 } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 import { watcher } from '@kungfu-trader/kungfu-js-api/kungfu/watcher';
+watcher;
 
 const appStatesSubject = new Subject<Record<string, BrokerStateStatusTypes>>();
 

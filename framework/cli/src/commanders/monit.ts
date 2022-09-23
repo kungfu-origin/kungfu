@@ -6,6 +6,10 @@ import { triggerStartStep } from '@kungfu-trader/kungfu-js-api/kungfu/tradingDat
 // it is so important, because inquirer event will conflict with blessed
 process.stdin.removeAllListeners('data');
 
+process.on('SIGINT', function () {
+  process.exit();
+});
+
 export const monitPrompt = async (list: boolean) => {
   triggerStartStep();
 
