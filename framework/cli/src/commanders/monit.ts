@@ -6,17 +6,19 @@ import {
   dealAppStates,
   setTimerPromiseTask,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import {
-  getWatcher,
-  triggerStartStep,
-} from '../assets/actions/cliMonitWatcher';
 
 // it is so important, because inquirer event will conflict with blessed
 process.stdin.removeAllListeners('data');
 
 export const monitPrompt = async (list: boolean) => {
-  const watcher = getWatcher();
-  triggerStartStep(watcher);
+  const { watcher } = await import(
+    '@kungfu-trader/kungfu-js-api/kungfu/watcher'
+  );
+  const { triggerStartStep } = await import(
+    '@kungfu-trader/kungfu-js-api/kungfu/tradingData'
+  );
+
+  triggerStartStep();
 
   setTimerPromiseTask((): Promise<void> => {
     return new Promise((resolve) => {

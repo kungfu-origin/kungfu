@@ -1,4 +1,3 @@
-import { getWatcher } from './cliMonitWatcher';
 import { getAllKfConfigOriginData } from '@kungfu-trader/kungfu-js-api/actions';
 import {
   BrokerStateStatusTypes,
@@ -409,7 +408,9 @@ export const switchProcess = async (
   messageBoard: Widgets.MessageElement,
   loading: Widgets.LoadingElement,
 ): Promise<void> => {
-  const watcher = getWatcher();
+  const { watcher } = await import(
+    '@kungfu-trader/kungfu-js-api/kungfu/watcher'
+  );
   const status = proc.status !== '--';
   const startOrStop = status ? 'Stop' : 'Start';
   const { category, group, name, value, cwd, script } = proc;
