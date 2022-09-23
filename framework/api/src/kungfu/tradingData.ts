@@ -4,7 +4,8 @@ export const tradingDataSubject = new Subject<KungfuApi.Watcher>();
 
 export const triggerStartStep = (stepInterval = 2000) => {
   startWatcher();
-  startWatcherSyncTask(stepInterval, (watcher) => {
+  return startWatcherSyncTask(stepInterval, (watcher) => {
+    console.log('triggerStartStep');
     tradingDataSubject.next(watcher);
   });
 };
