@@ -16,7 +16,6 @@ import {
   switchKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
-  pm2KillGodDaemon,
   killExtra,
   killKfc,
   pm2Kill,
@@ -30,7 +29,6 @@ import {
   startCacheD,
   processStatusDataObservable,
   Pm2ProcessStatusDetail,
-  pm2Describe,
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import { combineLatest, Observable } from 'rxjs';
 import { ProcessListItem, SwitchKfLocationPacketData } from '../../typings';
@@ -47,11 +45,6 @@ import {
   KF_HOME,
 } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 import { globalState } from './globalState';
-
-const isMasterAlive = async (watcher: KungfuApi.Watcher) => {
-  const masterDes = await pm2Describe('master');
-  return masterDes.length && watcher?.isLive();
-};
 
 export const mdTdStrategyDaemonObservable = () => {
   return new Observable<
@@ -470,7 +463,7 @@ export const switchProcess = async (
         return;
       }
 
-      if (!(await isMasterAlive(watcher))) {
+      if (!watcher.isLive()) {
         messageBoard.log(
           'Start master first, If did, Please wait...',
           2,
@@ -569,7 +562,6 @@ function preSwitchMain(
 const switchMaster = async (status: boolean): Promise<void> => {
   if (!status) {
     await pm2Kill();
-    await pm2KillGodDaemon();
     await killKfc();
     await killExtra();
     if (process.env.NODE_ENV === 'production') {

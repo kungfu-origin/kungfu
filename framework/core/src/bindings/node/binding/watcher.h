@@ -23,7 +23,7 @@ constexpr uint32_t PAGE_ID_MASK = 0x80000000;
 
 class WatcherAutoClient : public wingchun::broker::SilentAutoClient {
 public:
-  explicit WatcherAutoClient(yijinjing::practice::apprentice &app, bool bypass_trading_Data);
+  explicit WatcherAutoClient(yijinjing::practice::apprentice &app, bool bypass_trading_data);
 
   ~WatcherAutoClient() = default;
 
@@ -106,6 +106,7 @@ protected:
 private:
   static Napi::FunctionReference constructor;
   uv_work_t uv_work_ = {};
+  bool uv_work_live_ = false;
   WatcherAutoClient broker_client_;
   wingchun::book::Bookkeeper bookkeeper_;
   Napi::ObjectReference state_ref_;
@@ -195,6 +196,10 @@ private:
   void UpdateEventCache(const event_ptr &event);
 
   void SyncEventCache();
+
+  void StartWorker();
+
+  void CancelWorker();
 
   template <typename DataType>
   void feed_state_data_bank(const state<DataType> &state, yijinjing::cache::bank &receiver) {

@@ -35,6 +35,8 @@ apprentice::apprentice(location_ptr home, bool low_latency)
 
 bool apprentice::is_started() const { return started_; }
 
+void apprentice::pause() { started_ = false; }
+
 uint32_t apprentice::get_master_commands_uid() const { return master_cmd_location_->uid; }
 
 int64_t apprentice::get_checkin_time() const { return checkin_time_; }
@@ -240,7 +242,9 @@ void apprentice::on_write_to(const event_ptr &event) {
   }
 }
 
-void apprentice::on_cached_ready_to_read() { request_cached(cached_home_location_->uid); }
+void apprentice::on_cached_ready_to_read() {
+  request_cached(cached_home_location_->uid);
+}
 
 void apprentice::checkin() {
   auto now = time::now_in_nano();

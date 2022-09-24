@@ -32,6 +32,8 @@ public:
 
   bool is_started() const;
 
+  void pause();
+
   uint32_t get_master_commands_uid() const;
 
   int64_t get_last_active_time() const;
