@@ -242,9 +242,7 @@ void apprentice::on_write_to(const event_ptr &event) {
   }
 }
 
-void apprentice::on_cached_ready_to_read() {
-  request_cached(cached_home_location_->uid);
-}
+void apprentice::on_cached_ready_to_read() { request_cached(cached_home_location_->uid); }
 
 void apprentice::checkin() {
   auto now = time::now_in_nano();
