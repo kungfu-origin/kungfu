@@ -553,8 +553,8 @@ void Watcher::StartWorker() {
     SPDLOG_INFO("Watcher uv loop completed");
     auto watcher = (Watcher *)(req->data);
     SPDLOG_INFO("Restart watcher uv loop");
-    // master will be quit in watcher running time,
-    // so, once master deregistered, the uv logic in watcher need to be restarted.
+    // master may quit within watcher running time,
+    // so, once master deregistered, the uv logic in watcher need to be restarte.
     watcher->StartWorker();
   };
   uv_queue_work(uv_default_loop(), &uv_work_, worker, after);
