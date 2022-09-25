@@ -192,15 +192,6 @@ void apprentice::react() {
                                    return false;
                                  }) |
                                  first();
-
-    cached_register_event | $([&](const event_ptr &event) {
-      uint32_t location_uid = data::location::make_shared(event->data<Register>(), get_locator())->uid;
-      auto source = event->source();
-      auto dest = event->dest();
-      SPDLOG_INFO("cached_register_event 333333333333 {} -> {}, location {}, gen_time {}, now {}",
-                  get_location_uname(source), get_location_uname(dest), get_location_uname(location_uid),
-                  time::strftime(event->gen_time()), time::strftime(time::now_in_nano()));
-    });
     cached_register_event | $$(request_cached_reader_writer());
 
     checkin();
@@ -214,7 +205,7 @@ void apprentice::react() {
     // dest_id 0 should be configurable TODO
     auto home = get_io_device()->get_home();
     auto bt_location = location::make_shared(mode::BACKTEST, category::MD, home->group, home->name, get_locator());
-    reader_->join(bt_location, 0, begin_time_);
+    reader_->join(bt_location, location::PUBLIC, begin_time_);
     started_ = true;
     on_start();
   }
@@ -227,27 +218,12 @@ void apprentice::on_react() {}
 void apprentice::on_start() {}
 
 void apprentice::on_register(int64_t trigger_time, const Register &register_data) {
-  uint32_t location_uid = data::location::make_shared(event->data<Register>(), get_locator())->uid;
-  auto source = event->source();
-  auto dest = event->dest();
-  SPDLOG_INFO("on_register 111111111111 {} -> {}, location {}, gen_time {}, now {}", get_location_uname(source),
-              get_location_uname(dest), get_location_uname(location_uid), time::strftime(event->gen_time()),
-              time::strftime(time::now_in_nano()));
-
   register_location(trigger_time, register_data);
 }
 
 void apprentice::on_deregister(const event_ptr &event) {
   uint32_t location_uid = data::location::make_shared(event->data<Deregister>(), get_locator())->uid;
-  auto source = event->source();
-  auto dest = event->dest();
-  SPDLOG_INFO("on_deregister 2222222222 {} -> {}, location {}, gen_time {}, now {}", get_location_uname(source),
-              get_location_uname(dest), get_location_uname(location_uid), time::strftime(event->gen_time()),
-              time::strftime(time::now_in_nano()));
-
   if (location_uid == get_live_home_uid()) {
-
-    SPDLOG_INFO("is self {}", get_location_uname(location_uid));
     return;
   }
 
@@ -296,7 +272,7 @@ void apprentice::checkin() {
 }
 
 void apprentice::expect_start() {
-  reader_->join(master_home_location_, 0, begin_time_);
+  reader_->join(master_home_location_, location::PUBLIC, begin_time_);
   events_ | is(RequestStart::tag) | first() |
       $([&](const event_ptr &event) {
         started_ = true;

@@ -336,7 +336,6 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
 }
 
 void Watcher::on_react() {
-  SPDLOG_INFO("Watcher on_react");
   events_ | is(Quote::tag) | is_subscribed(subscribed_instruments_) | $$(feed_state_data(event, data_bank_));
   events_ | is(Instrument::tag) | $$(Feed(event, event->data<Instrument>()));
   events_ | skip_while(while_is(Quote::tag)) | is_trading_data() | $$(feed_trading_data(event, trading_bank_));
@@ -345,7 +344,6 @@ void Watcher::on_react() {
 }
 
 void Watcher::on_start() {
-  SPDLOG_INFO("Watcher on_start");
   broker_client_.on_start(events_);
 
   if (not bypass_accounting_ and not bypass_trading_data_) {
@@ -364,13 +362,6 @@ void Watcher::on_start() {
   events_ | is(Channel::tag) | $$(InspectChannel(event->gen_time(), event->data<Channel>()));
   events_ | is(Register::tag) | $$(OnRegister(event->gen_time(), event->data<Register>()));
   events_ | is(Deregister::tag) | $$(OnDeregister(event->gen_time(), event->data<Deregister>()));
-  events_ | is(BrokerStateUpdate::tag) | $([&](const event_ptr &event) {
-    auto source = event->source();
-    auto dest = event->dest();
-    auto &state = event->data<BrokerStateUpdate>();
-    SPDLOG_INFO("On BrokerStateUpdate from {} -> {}, state {}", get_location_uname(source), get_location_uname(dest),
-                int(state.state));
-  });
   events_ | is(BrokerStateUpdate::tag) | $$(UpdateBrokerState(event->source(), event->data<BrokerStateUpdate>()));
   events_ | is(StrategyStateUpdate::tag) | $$(UpdateStrategyState(event->source(), event->data<StrategyStateUpdate>()));
   events_ | is(CacheReset::tag) | $$(UpdateEventCache(event));
@@ -519,7 +510,6 @@ void Watcher::OnRegister(int64_t trigger_time, const Register &register_data) {
   }
 
   auto app_location = get_location(register_data.location_uid);
-  SPDLOG_INFO("OnRegister app_location {}", get_location_uname(app_location->uid));
   if (app_location->category == category::MD or app_location->category == category::TD) {
     location_uid_states_map_.insert_or_assign(app_location->uid, int(BrokerState::Pending));
   }
@@ -531,8 +521,6 @@ void Watcher::OnRegister(int64_t trigger_time, const Register &register_data) {
 
 void Watcher::OnDeregister(int64_t trigger_time, const Deregister &deregister_data) {
   auto app_location = location::make_shared(deregister_data, get_locator());
-  SPDLOG_INFO("OnDeregister app_location {}", get_location_uname(app_location->uid));
-
   if (app_location->category == category::MD or app_location->category == category::TD) {
     location_uid_states_map_.insert_or_assign(app_location->uid, int(BrokerState::Pending));
   }
@@ -540,6 +528,7 @@ void Watcher::OnDeregister(int64_t trigger_time, const Deregister &deregister_da
   if (app_location->category == category::SYSTEM and app_location->group == "master" and
       app_location->name == "master") {
     CancelWorker();
+    set_begin_time(time::now_in_nano());
   }
 }
 
@@ -549,10 +538,7 @@ void Watcher::StartWorker() {
   auto worker = [](uv_work_t *req) {
     auto watcher = (Watcher *)(req->data);
     while (req->data && watcher->uv_work_live_) {
-      // SPDLOG_INFO("watcher->is_live() {}, watcher->is_started() {}, watcher->is_usable() {}", watcher->is_live(),
-      // watcher->is_started(), watcher->is_usable());
       if (not watcher->is_live() and not watcher->is_started() and watcher->is_usable()) {
-        SPDLOG_INFO("SETUP !!!!!!!!!!!!!!!!!!!");
         watcher->setup();
       }
       if (watcher->is_live()) {
@@ -565,9 +551,6 @@ void Watcher::StartWorker() {
   };
   auto after = [](uv_work_t *req, int status) {
     SPDLOG_INFO("Watcher uv loop completed");
-    SPDLOG_INFO("Restart watcher uv loop waiting --- now {}", time::strftime(time::now_in_nano()));
-    std::this_thread::sleep_for(std::chrono::milliseconds(3000));
-    SPDLOG_INFO("Restart watcher uv loop done --- now {}", time::strftime(time::now_in_nano()));
     auto watcher = (Watcher *)(req->data);
     // master may quit within watcher running time,
     // so, once master deregistered, the uv logic in watcher need to restart.

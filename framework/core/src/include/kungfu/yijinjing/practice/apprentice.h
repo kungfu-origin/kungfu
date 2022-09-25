@@ -193,8 +193,6 @@ private:
 
   template <typename DataType> void do_read_from(const event_ptr &event, uint32_t dest_id) {
     const DataType &request = event->data<DataType>();
-    SPDLOG_INFO("DO_READ_FROM from {} to {} ------==== ", get_location_uname(request.source_id),
-                get_location_uname(dest_id));
     reader_->join(get_location(request.source_id), dest_id, request.from_time);
   }
 
