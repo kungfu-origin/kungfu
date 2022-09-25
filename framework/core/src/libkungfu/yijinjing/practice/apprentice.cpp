@@ -193,6 +193,14 @@ void apprentice::react() {
                                  }) |
                                  first();
 
+    cached_register_event | $([&](const event_ptr &event) {
+      uint32_t location_uid = data::location::make_shared(event->data<Register>(), get_locator())->uid;
+      auto source = event->source();
+      auto dest = event->dest();
+      SPDLOG_INFO("cached_register_event 333333333333 {} -> {}, location {}, gen_time {}, now {}",
+                  get_location_uname(source), get_location_uname(dest), get_location_uname(location_uid),
+                  time::strftime(event->gen_time()), time::strftime(time::now_in_nano()));
+    });
     cached_register_event | $$(request_cached_reader_writer());
 
     checkin();
@@ -219,6 +227,13 @@ void apprentice::on_react() {}
 void apprentice::on_start() {}
 
 void apprentice::on_register(int64_t trigger_time, const Register &register_data) {
+  uint32_t location_uid = data::location::make_shared(event->data<Register>(), get_locator())->uid;
+  auto source = event->source();
+  auto dest = event->dest();
+  SPDLOG_INFO("on_register 111111111111 {} -> {}, location {}, gen_time {}, now {}", get_location_uname(source),
+              get_location_uname(dest), get_location_uname(location_uid), time::strftime(event->gen_time()),
+              time::strftime(time::now_in_nano()));
+
   register_location(trigger_time, register_data);
 }
 
@@ -226,8 +241,9 @@ void apprentice::on_deregister(const event_ptr &event) {
   uint32_t location_uid = data::location::make_shared(event->data<Deregister>(), get_locator())->uid;
   auto source = event->source();
   auto dest = event->dest();
-  SPDLOG_INFO("{} -> {}, location {}, gen_time {}, now {}", get_location_uname(source), get_location_uname(dest),
-              get_location_uname(location_uid), time::strftime(event->gen_time()), time::strftime(time::now_in_nano()));
+  SPDLOG_INFO("on_deregister 2222222222 {} -> {}, location {}, gen_time {}, now {}", get_location_uname(source),
+              get_location_uname(dest), get_location_uname(location_uid), time::strftime(event->gen_time()),
+              time::strftime(time::now_in_nano()));
 
   if (location_uid == get_live_home_uid()) {
 
