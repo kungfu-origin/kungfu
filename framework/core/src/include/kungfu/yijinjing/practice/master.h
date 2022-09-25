@@ -25,6 +25,12 @@ public:
 
   void on_exit() override;
 
+  void notify_deregister_on_exit();
+
+  void notify_master_deregister_on_exit();
+
+  void mark_session_end_on_exit();
+
   void on_notify() override;
 
   virtual void on_register(const event_ptr &event, const longfist::types::Register &register_data) = 0;

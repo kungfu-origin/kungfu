@@ -56,8 +56,7 @@ void cached::on_start() {
   events_ | is(CacheReset::tag) | $$(on_cache_reset(event));
   events_ | instanceof <journal::frame>() | filter([&](const event_ptr &event) {
                          auto source_id = event->source();
-                         return source_id != master_home_location_->location_uid and
-                                source_id != master_cmd_location_->location_uid;
+                         return source_id != master_home_location_->uid and source_id != master_cmd_location_->uid;
                        }) | $$(feed(event));
 }
 
