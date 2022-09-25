@@ -336,6 +336,7 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
 }
 
 void Watcher::on_react() {
+  SPDLOG_INFO("watcher on react");
   events_ | is(Quote::tag) | is_subscribed(subscribed_instruments_) | $$(feed_state_data(event, data_bank_));
   events_ | is(Instrument::tag) | $$(Feed(event, event->data<Instrument>()));
   events_ | skip_while(while_is(Quote::tag)) | is_trading_data() | $$(feed_trading_data(event, trading_bank_));
@@ -528,7 +529,6 @@ void Watcher::OnDeregister(int64_t trigger_time, const Deregister &deregister_da
   if (app_location->category == category::SYSTEM and app_location->group == "master" and
       app_location->name == "master") {
     CancelWorker();
-    set_begin_time(time::now_in_nano());
   }
 }
 
@@ -551,7 +551,10 @@ void Watcher::StartWorker() {
   };
   auto after = [](uv_work_t *req, int status) {
     SPDLOG_INFO("Watcher uv loop completed");
+    // have to wait for master down totally
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     auto watcher = (Watcher *)(req->data);
+    watcher->set_begin_time(time::now_in_nano());
     SPDLOG_INFO("Restart watcher uv loop");
     // master may quit within watcher running time,
     // so, once master deregistered, the uv logic in watcher need to be restarte.
