@@ -555,8 +555,9 @@ void Watcher::StartWorker() {
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     auto watcher = (Watcher *)(req->data);
     watcher->set_begin_time(time::now_in_nano());
+    SPDLOG_INFO("Restart watcher uv loop");
     // master may quit within watcher running time,
-    // so, once master deregistered, the uv logic in watcher need to restart.
+    // so, once master deregistered, the uv logic in watcher need to be restarte.
     watcher->StartWorker();
   };
   uv_queue_work(uv_default_loop(), &uv_work_, worker, after);
