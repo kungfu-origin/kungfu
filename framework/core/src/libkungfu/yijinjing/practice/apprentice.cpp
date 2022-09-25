@@ -272,7 +272,8 @@ void apprentice::checkin() {
 }
 
 void apprentice::expect_start() {
-  SPDLOG_TRACE("expecting start begin_time_ {} now {}", time::strftime(begin_time_), time::strftime(time::now_in_nano()));
+  SPDLOG_TRACE("expecting start begin_time_ {} now {}", time::strftime(begin_time_),
+               time::strftime(time::now_in_nano()));
   reader_->join(master_home_location_, location::PUBLIC, begin_time_);
   events_ | is(RequestStart::tag) | first() |
       $([&](const event_ptr &event) {
