@@ -224,6 +224,17 @@ void apprentice::on_register(int64_t trigger_time, const Register &register_data
 
 void apprentice::on_deregister(const event_ptr &event) {
   uint32_t location_uid = data::location::make_shared(event->data<Deregister>(), get_locator())->uid;
+  auto source = event->source();
+  auto dest = event->dest();
+  SPDLOG_INFO("{} -> {}, location {}, gen_time {}, now {}", get_location_uname(source), get_location_uname(dest),
+              get_location_uname(location_uid), time::strftime(event->gen_time()), time::strftime(time::now_in_nano()));
+
+  if (location_uid == get_live_home_uid()) {
+
+    SPDLOG_INFO("is self {}", get_location_uname(location_uid));
+    return;
+  }
+
   reader_->disjoin(location_uid);
   deregister_channel(location_uid);
   deregister_location(event->trigger_time(), location_uid);
