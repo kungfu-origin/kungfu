@@ -35,8 +35,8 @@ master::master(location_ptr home, bool low_latency)
 
 void master::on_exit() {
   notify_deregister_on_exit();
-  notify_master_deregister_on_exit();
   mark_session_end_on_exit();
+  notify_master_deregister_on_exit();
 }
 
 void master::notify_deregister_on_exit() {
@@ -45,7 +45,7 @@ void master::notify_deregister_on_exit() {
   for (auto &iter : live_sessions) {
     auto &session = iter.second;
     auto location_from_session = location::make_shared(session, get_locator());
-    if (session.location_uid != master_home_location_->location_uid) {
+    if (session.location_uid != master_home_location_->uid) {
       get_writer(location::PUBLIC)->write(now, location_from_session->to<Deregister>());
     }
   }

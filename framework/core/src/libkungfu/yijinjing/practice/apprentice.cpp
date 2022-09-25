@@ -192,7 +192,6 @@ void apprentice::react() {
                                    return false;
                                  }) |
                                  first();
-
     cached_register_event | $$(request_cached_reader_writer());
 
     checkin();
@@ -206,7 +205,7 @@ void apprentice::react() {
     // dest_id 0 should be configurable TODO
     auto home = get_io_device()->get_home();
     auto bt_location = location::make_shared(mode::BACKTEST, category::MD, home->group, home->name, get_locator());
-    reader_->join(bt_location, 0, begin_time_);
+    reader_->join(bt_location, location::PUBLIC, begin_time_);
     started_ = true;
     on_start();
   }
@@ -224,6 +223,10 @@ void apprentice::on_register(int64_t trigger_time, const Register &register_data
 
 void apprentice::on_deregister(const event_ptr &event) {
   uint32_t location_uid = data::location::make_shared(event->data<Deregister>(), get_locator())->uid;
+  if (location_uid == get_live_home_uid()) {
+    return;
+  }
+
   reader_->disjoin(location_uid);
   deregister_channel(location_uid);
   deregister_location(event->trigger_time(), location_uid);
@@ -269,7 +272,7 @@ void apprentice::checkin() {
 }
 
 void apprentice::expect_start() {
-  reader_->join(master_home_location_, 0, begin_time_);
+  reader_->join(master_home_location_, location::PUBLIC, begin_time_);
   events_ | is(RequestStart::tag) | first() |
       $([&](const event_ptr &event) {
         started_ = true;

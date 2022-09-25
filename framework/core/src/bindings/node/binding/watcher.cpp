@@ -510,7 +510,6 @@ void Watcher::OnRegister(int64_t trigger_time, const Register &register_data) {
   }
 
   auto app_location = get_location(register_data.location_uid);
-
   if (app_location->category == category::MD or app_location->category == category::TD) {
     location_uid_states_map_.insert_or_assign(app_location->uid, int(BrokerState::Pending));
   }
@@ -522,13 +521,14 @@ void Watcher::OnRegister(int64_t trigger_time, const Register &register_data) {
 
 void Watcher::OnDeregister(int64_t trigger_time, const Deregister &deregister_data) {
   auto app_location = location::make_shared(deregister_data, get_locator());
-  if ((app_location->category == category::TD) or (app_location->category == category::MD)) {
+  if (app_location->category == category::MD or app_location->category == category::TD) {
     location_uid_states_map_.insert_or_assign(app_location->uid, int(BrokerState::Pending));
   }
 
-  if ((app_location->category == category::SYSTEM) and (app_location->group == "master") and
-      (app_location->name == "master")) {
+  if (app_location->category == category::SYSTEM and app_location->group == "master" and
+      app_location->name == "master") {
     CancelWorker();
+    set_begin_time(time::now_in_nano());
   }
 }
 
