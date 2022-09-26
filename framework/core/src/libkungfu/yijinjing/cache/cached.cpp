@@ -26,6 +26,9 @@ void cached::on_react() {
   events_ | is(Register::tag) | $$(register_triggger_clear_cache_shift(event->data<Register>()));
   events_ | is(RequestCached::tag) | $([&](const event_ptr &event) {
     auto source_id = event->source();
+
+    SPDLOG_INFO("get RequestCached from {}", get_location_uname(source_id));
+
     if (locations_.find(source_id) == locations_.end()) {
       SPDLOG_ERROR("no location {} in locations_", get_location_uname(source_id));
       return;

@@ -222,12 +222,13 @@ void apprentice::on_register(int64_t trigger_time, const Register &register_data
 }
 
 void apprentice::on_deregister(const event_ptr &event) {
-  uint32_t location_uid = data::location::make_shared(event->data<Deregister>(), get_locator())->uid;
+  uint32_t location_uid = event->data<Deregister>().location_uid;
   if (location_uid == get_live_home_uid()) {
     return;
   }
 
   reader_->disjoin(location_uid);
+  writers_.erase(location_uid);
   deregister_channel(location_uid);
   deregister_location(event->trigger_time(), location_uid);
 }
@@ -272,8 +273,6 @@ void apprentice::checkin() {
 }
 
 void apprentice::expect_start() {
-  SPDLOG_TRACE("expecting start begin_time_ {} now {}", time::strftime(begin_time_),
-               time::strftime(time::now_in_nano()));
   reader_->join(master_home_location_, location::PUBLIC, begin_time_);
   events_ | is(RequestStart::tag) | first() |
       $([&](const event_ptr &event) {
