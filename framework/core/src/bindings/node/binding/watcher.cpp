@@ -554,6 +554,7 @@ void Watcher::StartWorker() {
     // have to wait for master down totally
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     auto watcher = (Watcher *)(req->data);
+    // have to be at this position, for deleting old journal securitily
     watcher->AfterMasterDown();
     watcher->set_begin_time(time::now_in_nano());
     SPDLOG_INFO("Restart watcher uv loop");
