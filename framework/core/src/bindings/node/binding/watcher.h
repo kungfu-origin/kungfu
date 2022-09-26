@@ -201,6 +201,8 @@ private:
 
   void CancelWorker();
 
+  void AfterMasterDown();
+
   template <typename DataType>
   void feed_state_data_bank(const state<DataType> &state, yijinjing::cache::bank &receiver) {
     boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {

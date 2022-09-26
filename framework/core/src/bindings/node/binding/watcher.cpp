@@ -554,6 +554,7 @@ void Watcher::StartWorker() {
     // have to wait for master down totally
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     auto watcher = (Watcher *)(req->data);
+    watcher->AfterMasterDown();
     watcher->set_begin_time(time::now_in_nano());
     SPDLOG_INFO("Restart watcher uv loop");
     // master may quit within watcher running time,
@@ -564,6 +565,11 @@ void Watcher::StartWorker() {
 }
 
 void Watcher::CancelWorker() { uv_work_live_ = false; }
+
+void Watcher::AfterMasterDown() {
+  reader_->disjoin(master_cmd_location_->uid);
+  writers_.erase(master_cmd_location_->uid);
+}
 
 void Watcher::UpdateBrokerState(uint32_t broker_uid, const BrokerStateUpdate &state) {
   auto app_location = get_location(broker_uid);
