@@ -4,6 +4,9 @@ export type PreStartProcessMethod = (
   kfLocation: KungfuApi.DerivedKfLocation,
 ) => Promise<Proc | void>;
 
+const IS_CLI_DEV =
+  process.env.APP_TYPE !== 'cli' || process.env.NODE_ENV === 'development';
+
 export class PreStartProcessHooks {
   hooks: Record<string, PreStartProcessMethod[]>;
   constructor() {
@@ -13,7 +16,7 @@ export class PreStartProcessHooks {
         get(target: Record<string, PreStartProcessMethod[]>, prop: string) {
           const locationPairs = prop.split('_');
           if (locationPairs.length != 3) {
-            console.warn(`Invalid hook key: ${prop}`);
+            IS_CLI_DEV && console.warn(`Invalid hook key: ${prop}`);
             return [];
           }
 
@@ -55,7 +58,8 @@ export class PreStartProcessHooks {
           const methods = Reflect.get(target, prop);
           methods.push(value);
           Reflect.set(target, prop, methods);
-          console.log(`PreStartProcess hook ${prop} register success`);
+          IS_CLI_DEV &&
+            console.log(`PreStartProcess hook ${prop} register success`);
           return true;
         },
       },

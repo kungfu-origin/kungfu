@@ -4,25 +4,13 @@ import {
   Pm2Bus,
   pm2LaunchBus,
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
+import { BrokerStateStatusTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
 
 export const globalState = {
   DZXY_PM_ID: 0,
-  DZXY_WATCHER_IS_LIVE: false,
   DZXY_SUBJECT: new Subject<Pm2Packet>(),
+  APP_STATES_SUBJECT: new Subject<Record<string, BrokerStateStatusTypes>>(),
 };
-
-const timer = setTimeout(() => {
-  globalState.DZXY_SUBJECT.next({
-    process: {
-      pm_id: -1,
-    },
-    data: {
-      type: 'APP_STATES',
-      body: {},
-    },
-  });
-  clearTimeout(timer);
-}, 1000);
 
 if (process.env.APP_TYPE === 'cli') {
   pm2LaunchBus((err: Error, pm2_bus: Pm2Bus) => {
@@ -35,10 +23,6 @@ if (process.env.APP_TYPE === 'cli') {
       pm2_bus.on('process:msg', (packet: Pm2Packet) => {
         const processData = packet.process;
         globalState.DZXY_PM_ID = processData.pm_id;
-
-        if (packet.data.type === 'WATCHER_IS_LIVE') {
-          globalState.DZXY_WATCHER_IS_LIVE = !!packet.data.body;
-        }
 
         globalState.DZXY_SUBJECT.next(packet);
       });

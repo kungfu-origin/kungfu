@@ -77,7 +77,11 @@ export const dealTradingDataItem = (
     itemResolved.side = dealSide(item.side).name;
   }
   if ('offset' in item) {
-    itemResolved.offset = dealOffset(item.offset).name;
+    if (isInstrumnetShotable) {
+      itemResolved.offset = dealOffset(item.offset).name;
+    } else {
+      delete itemResolved.offset;
+    }
   }
   if ('status' in item) {
     itemResolved.status = dealOrderStatus(

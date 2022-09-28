@@ -87,7 +87,11 @@ export const getPromptQuestionsBySettings = (
 ): Promise<KungfuApi.KfConfigValue> => {
   const formState = initFormStateByConfig(settings, initValue || {});
   const questions = settings.map((item) =>
-    buildQuestionByKfConfigItem(item, formState[item.key], !!initValue),
+    buildQuestionByKfConfigItem(
+      item,
+      item.type === 'password' ? '' : formState[item.key],
+      !!initValue,
+    ),
   );
 
   return inquirer
@@ -167,6 +171,8 @@ export const buildQuestionByKfConfigItem = (
 
       return true;
     },
+
+    ...(targetType === 'path' ? { cwd: process.cwd().toString() } : {}),
   };
 
   if (value !== undefined && value !== '' && value !== 0) {
@@ -363,7 +369,7 @@ export const dealKfConfigValue = async (
     return JSON.stringify(
       Object.keys(kfConfigValue).reduce((pre, key) => {
         if (settingsMap[key] === 'password') {
-          pre[key] = '*********';
+          pre[key] = '******';
         }
         return pre;
       }, kfConfigValue),

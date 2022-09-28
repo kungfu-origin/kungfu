@@ -120,7 +120,6 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
     config_store->profile_.setup();
   }
 
-  uv_work_.data = (void *)this;
   SPDLOG_INFO("Watcher created for {}", get_home_uname());
 
   // byPassRestore will be true after ui browserWindow reopen by crashed
@@ -337,6 +336,7 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
 }
 
 void Watcher::on_react() {
+  SPDLOG_INFO("watcher on react");
   events_ | is(Quote::tag) | is_subscribed(subscribed_instruments_) | $$(feed_state_data(event, data_bank_));
   events_ | is(Instrument::tag) | $$(Feed(event, event->data<Instrument>()));
   events_ | skip_while(while_is(Quote::tag)) | is_trading_data() | $$(feed_trading_data(event, trading_bank_));
@@ -382,22 +382,7 @@ void Watcher::RestoreState(const location_ptr &state_location, int64_t from, int
 }
 
 Napi::Value Watcher::Start(const Napi::CallbackInfo &info) {
-  auto worker = [](uv_work_t *req) {
-    SPDLOG_INFO("Watcher uv loop started");
-    auto watcher = (Watcher *)(req->data);
-    while (req->data) {
-      if (not watcher->is_live() and not watcher->is_started() and watcher->is_usable()) {
-        watcher->setup();
-      }
-      if (watcher->is_live()) {
-        watcher->step();
-      }
-    }
-    watcher->signal_stop();
-    SPDLOG_INFO("Watcher uv loop stopped");
-  };
-  auto after = [](uv_work_t *req, int status) { SPDLOG_INFO("Watcher uv loop completed"); };
-  uv_queue_work(uv_default_loop(), &uv_work_, worker, after);
+  StartWorker();
   return {};
 }
 
@@ -526,7 +511,6 @@ void Watcher::OnRegister(int64_t trigger_time, const Register &register_data) {
   }
 
   auto app_location = get_location(register_data.location_uid);
-
   if (app_location->category == category::MD or app_location->category == category::TD) {
     location_uid_states_map_.insert_or_assign(app_location->uid, int(BrokerState::Pending));
   }
@@ -538,7 +522,54 @@ void Watcher::OnRegister(int64_t trigger_time, const Register &register_data) {
 
 void Watcher::OnDeregister(int64_t trigger_time, const Deregister &deregister_data) {
   auto app_location = location::make_shared(deregister_data, get_locator());
-  location_uid_states_map_.insert_or_assign(app_location->uid, int(BrokerState::Pending));
+  if (app_location->category == category::MD or app_location->category == category::TD) {
+    location_uid_states_map_.insert_or_assign(app_location->uid, int(BrokerState::Pending));
+  }
+
+  if (app_location->category == category::SYSTEM and app_location->group == "master" and
+      app_location->name == "master") {
+    CancelWorker();
+  }
+}
+
+void Watcher::StartWorker() {
+  uv_work_.data = (void *)this;
+  uv_work_live_ = true;
+  auto worker = [](uv_work_t *req) {
+    auto watcher = (Watcher *)(req->data);
+    while (req->data && watcher->uv_work_live_) {
+      if (not watcher->is_live() and not watcher->is_started() and watcher->is_usable()) {
+        watcher->setup();
+      }
+      if (watcher->is_live()) {
+        watcher->step();
+      }
+    }
+    watcher->signal_stop();
+    watcher->pause();
+    SPDLOG_INFO("Watcher uv loop stopped");
+  };
+  auto after = [](uv_work_t *req, int status) {
+    SPDLOG_INFO("Watcher uv loop completed");
+    // have to wait for master down totally
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    auto watcher = (Watcher *)(req->data);
+    // have to be at this position, for deleting old journal securitily
+    watcher->AfterMasterDown();
+    watcher->set_begin_time(time::now_in_nano());
+    SPDLOG_INFO("Restart watcher uv loop");
+    // master may quit within watcher running time,
+    // so, once master deregistered, the uv logic in watcher need to be restarte.
+    watcher->StartWorker();
+  };
+  uv_queue_work(uv_default_loop(), &uv_work_, worker, after);
+}
+
+void Watcher::CancelWorker() { uv_work_live_ = false; }
+
+void Watcher::AfterMasterDown() {
+  reader_->disjoin(master_cmd_location_->uid);
+  writers_.erase(master_cmd_location_->uid);
 }
 
 void Watcher::UpdateBrokerState(uint32_t broker_uid, const BrokerStateUpdate &state) {

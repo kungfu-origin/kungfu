@@ -70,6 +70,8 @@ void bind_book(pybind11::module &m) {
       .def_readonly("order_inputs", &Book::order_inputs, py::return_value_policy::reference)
       .def_readonly("orders", &Book::orders, py::return_value_policy::reference)
       .def_readonly("trades", &Book::trades, py::return_value_policy::reference)
+      .def_property_readonly("instruments", &Book::get_instruments)
+      .def_property_readonly("commissions", &Book::get_commissions)
       .def("update", &Book::update)
       .def("has_long_position", &Book::has_long_position)
       .def("has_short_position", &Book::has_short_position)

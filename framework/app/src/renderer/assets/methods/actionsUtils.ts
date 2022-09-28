@@ -1878,6 +1878,7 @@ export const useMakeOrderSubscribe = (
   formState: Ref<Record<string, KungfuApi.KfConfigValue>>,
 ) => {
   const app = getCurrentInstance();
+  let lastTriggerTag: 'makeOrder' | 'orderBookUpdate' | '' = '';
   onMounted(() => {
     if (app?.proxy) {
       const subscription = app.proxy.$globalBus.subscribe(
@@ -1901,6 +1902,7 @@ export const useMakeOrderSubscribe = (
             if (accountId) {
               formState.value.account_id = accountId;
             }
+            lastTriggerTag = 'makeOrder';
           }
 
           if (data.tag === 'orderBookUpdate') {
@@ -1921,15 +1923,19 @@ export const useMakeOrderSubscribe = (
               formState.value.limit_price = +Number(price).toFixed(4);
             }
 
-            if (
+            const shouldUpdateVolume =
+              lastTriggerTag === 'orderBookUpdate' || !formState.value.volume;
+            const isNewVolumeValuable =
               !!volume &&
               !Number.isNaN(Number(volume)) &&
-              BigInt(volume) !== BigInt(0)
-            ) {
+              BigInt(volume) !== BigInt(0);
+
+            if (shouldUpdateVolume && isNewVolumeValuable) {
               formState.value.volume = +Number(volume).toFixed(0);
             }
 
             formState.value.side = +side;
+            shouldUpdateVolume && (lastTriggerTag = 'orderBookUpdate');
           }
         },
       );

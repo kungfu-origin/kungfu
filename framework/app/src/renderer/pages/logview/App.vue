@@ -260,6 +260,7 @@ function resetLog() {
     user-select: text;
     padding-bottom: 4px;
     line-height: 1.5;
+    word-break: break-all;
 
     .error {
       color: lighten(@red2-base, 10%);
