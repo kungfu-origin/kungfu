@@ -4,7 +4,7 @@
     "name": "Kungfu Trader",
     "email": "info@kungfu.link"
   },
-  "version": "2.4.7-alpha.11",
+  "version": "2.4.8-alpha.0",
   "description": "Kungfu Core Library",
   "license": "Apache-2.0",
   "main": "lib/index.js",
@@ -70,7 +70,7 @@
     "sywac": "^1.3.0"
   },
   "devDependencies": {
-    "@kungfu-trader/kungfu-toolchain": "^2.4.7-alpha.11",
+    "@kungfu-trader/kungfu-toolchain": "^2.4.8-alpha.0",
     "@kungfu-trader/libnode": "16.15.0",
     "cmake-js": "^6.3.0",
     "electron": "19.0.8",
