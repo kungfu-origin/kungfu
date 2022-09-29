@@ -95,22 +95,28 @@ const priceVolumeStats = computed(() => {
     min: string;
     max: string;
     volume: string;
-  }> = Object.keys(priceVolumeData).map((id) => {
-    const [instrumentId, exchangeId, side, offset] = id.split('_');
-    const priceStats = new Stats().push(...priceVolumeData[id].price);
-    const priceSum = priceVolumeData[id].priceByVolume.reduce((a, b) => a + b);
-    const volumeSum = priceVolumeData[id].volume.reduce((a, b) => a + b);
-    const range = priceStats.range();
-    return {
-      instrumentId_exchangeId: `${instrumentId}_${exchangeId}`,
-      side: dealSide(+side),
-      offset: dealOffset(+offset),
-      mean: Number(priceSum / volumeSum).toFixed(2),
-      min: range[0].toFixed(2),
-      max: range[1].toFixed(2),
-      volume: volumeSum.toString(),
-    };
-  });
+  }> = Object.keys(priceVolumeData)
+    .map((id) => {
+      const [instrumentId, exchangeId, side, offset] = id.split('_');
+      const priceStats = new Stats().push(...priceVolumeData[id].price);
+      const priceSum = priceVolumeData[id].priceByVolume.reduce(
+        (a, b) => a + b,
+      );
+      const volumeSum = priceVolumeData[id].volume.reduce((a, b) => a + b);
+      const range = priceStats.range();
+      return {
+        instrumentId_exchangeId: `${instrumentId}_${exchangeId}`,
+        side: dealSide(+side),
+        offset: dealOffset(+offset),
+        mean: Number(priceSum / volumeSum).toFixed(2),
+        min: range[0].toFixed(2),
+        max: range[1].toFixed(2),
+        volume: volumeSum.toString(),
+      };
+    })
+    .sort((a, b) =>
+      a.instrumentId_exchangeId.localeCompare(b.instrumentId_exchangeId),
+    );
 
   return priceVolumeDataResolved;
 });
