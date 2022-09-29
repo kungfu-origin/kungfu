@@ -217,28 +217,31 @@ export const logger = log4js.getLogger('app');
 
 export const kfLogger = {
   info: (...args: Array<any>) => {
-    if (process.env.NODE_ENV === 'development') {
-      if (process.env.APP_TYPE !== 'cli') {
-        console.log('<KF_INFO>', ...args);
-      }
+    if (
+      process.env.NODE_ENV === 'development' ||
+      process.env.APP_TYPE !== 'cli'
+    ) {
+      console.log('<KF_INFO>', ...args);
     }
     logger.info('<KF_INFO>', args.join(' '));
   },
 
   warn: (...args: Array<any>) => {
-    if (process.env.NODE_ENV === 'development') {
-      if (process.env.APP_TYPE !== 'cli') {
-        console.warn('<KF_INFO>', ...args);
-      }
+    if (
+      process.env.NODE_ENV === 'development' ||
+      process.env.APP_TYPE !== 'cli'
+    ) {
+      console.warn('<KF_INFO>', ...args);
     }
     logger.warn('<KF_INFO>', args.join(' '));
   },
 
   error: (...args: Array<any>) => {
-    if (process.env.NODE_ENV === 'development') {
-      if (process.env.APP_TYPE !== 'cli') {
-        console.error('<KF_INFO>', ...args);
-      }
+    if (
+      process.env.NODE_ENV === 'development' ||
+      process.env.APP_TYPE !== 'cli'
+    ) {
+      console.error('<KF_INFO>', ...args);
     }
     logger.error('<KF_INFO>', args.join(' '));
   },

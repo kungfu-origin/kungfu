@@ -3,13 +3,11 @@ import { KF_RUNTIME_DIR } from '../config/pathConfig';
 import { getKfGlobalSettingsValue } from '@kungfu-trader/kungfu-js-api/config/globalSettings';
 import {
   booleanProcessEnv,
+  kfLogger,
   setTimerPromiseTask,
   // statTime,
   // statTimeEnd,
 } from '../utils/busiUtils';
-
-const IS_CLI_DEV =
-  process.env.APP_TYPE !== 'cli' || process.env.NODE_ENV === 'development';
 
 export const getWatcherId = () => {
   const watcherId = [
@@ -21,7 +19,7 @@ export const getWatcherId = () => {
   ]
     .filter((str) => !!str)
     .join('-');
-  IS_CLI_DEV && console.log(`WatcherId ${watcherId}`);
+  kfLogger.info(`WatcherId ${watcherId}`);
   return watcherId;
 };
 
@@ -40,17 +38,15 @@ export const watcher = ((): KungfuApi.Watcher | null => {
     }
   }
 
-  //for cli show
-  IS_CLI_DEV &&
-    console.log(
-      'Init Watcher',
-      'APP_TYPE',
-      process.env.APP_TYPE || 'undefined',
-      'UI_EXT_TYPE',
-      process.env.UI_EXT_TYPE || 'undefined',
-      'APP_ID',
-      process.env.APP_ID || 'undefined',
-    );
+  kfLogger.info(
+    'Init Watcher',
+    'APP_TYPE',
+    process.env.APP_TYPE || 'undefined',
+    'UI_EXT_TYPE',
+    process.env.UI_EXT_TYPE || 'undefined',
+    'APP_ID',
+    process.env.APP_ID || 'undefined',
+  );
 
   const bypassRestore =
     booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED) ||
@@ -63,11 +59,9 @@ export const watcher = ((): KungfuApi.Watcher | null => {
     process.env.BY_PASS_TRADINGDATA ??
     globalSetting?.performance?.bypassTradingData;
 
-  if (IS_CLI_DEV) {
-    console.log('bypassRestore', bypassRestore);
-    console.log('bypassAccounting', bypassAccounting);
-    console.log('bypassTradingData', bypassTradingData);
-  }
+  kfLogger.info('bypassRestore', bypassRestore);
+  kfLogger.info('bypassAccounting', bypassAccounting);
+  kfLogger.info('bypassTradingData', bypassTradingData);
 
   return kf.watcher(
     KF_RUNTIME_DIR,
