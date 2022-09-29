@@ -167,4 +167,4 @@ if (!booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED)) {
   );
 }
 
-triggerStartStep();
+triggerStartStep(500);

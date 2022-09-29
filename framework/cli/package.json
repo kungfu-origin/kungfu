@@ -23,7 +23,7 @@
   "types": "src/typings/index.d.ts",
   "main": "lib/index.js",
   "scripts": {
-    "cli": "node dist/cli/index.js",
+    "cli": "node lib/dev/cli.dev.js",
     "dev": "node lib/dev/run.js",
     "build": "node lib/webpack/build.js",
     "clean": "rimraf build dist",
