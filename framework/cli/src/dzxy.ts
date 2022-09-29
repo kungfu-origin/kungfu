@@ -5,6 +5,7 @@ import { triggerStartStep } from '@kungfu-trader/kungfu-js-api/kungfu/tradingDat
 import {
   getOrderTradeFilterKey,
   getProcessIdByKfLocation,
+  setTimerPromiseTask,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { dealAssetsByHolderUID } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { Pm2PacketMain } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
@@ -25,11 +26,29 @@ import { useAllExtComponentByPosition } from './assets/methods/utils';
 triggerStartStep();
 useAllExtComponentByPosition('dzxy');
 
+setTimerPromiseTask((): Promise<void> => {
+  return new Promise((resolve) => {
+    console.log('Heartbeat watcher living', watcher?.isLive());
+    process.send &&
+      process.send({
+        type: 'process:msg',
+        data: {
+          type: 'WATCHER_IS_LIVE',
+          body: watcher ? watcher.isLive() && watcher.isStarted() : false,
+        },
+      });
+
+    resolve();
+  });
+}, 2000);
+
 process.on('message', (packet: Pm2PacketMain) => {
   const { type, topic } = packet;
   if (type !== 'process:msg') {
     return;
   }
+
+  console.log('dzxy get msg topic', topic);
 
   switch (topic) {
     case 'GET_ORDERS':
