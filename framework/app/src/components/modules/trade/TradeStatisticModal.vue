@@ -18,7 +18,7 @@ const props = withDefaults(
   {
     visible: false,
     trades: () => [],
-    historyDate: null,
+    historyDate: undefined,
   },
 );
 
@@ -52,48 +52,40 @@ const tradeLatencyStats = computed(() => {
   };
 });
 
+interface PriceVolumeStatItem {
+  price: number[];
+  volume: number[];
+  priceByVolume: number[];
+}
+
 const priceVolumeStats = computed(() => {
   const tradesForStatistic = props.trades
     .slice(0)
     .filter((item) => item.price >= 0);
-  const priceVolumeData: Record<
-    string,
-    {
-      price: number[];
-      volume: number[];
-    }
-  > = tradesForStatistic.reduce(
-    (
-      priceVolumeData: Record<
-        string,
-        {
-          price: number[];
-          volume: number[];
+  const priceVolumeData: Record<string, PriceVolumeStatItem> =
+    tradesForStatistic.reduce(
+      (
+        priceVolumeData: Record<string, PriceVolumeStatItem>,
+        trade: KungfuApi.TradeResolved,
+      ) => {
+        const id = `${trade.instrument_id}_${trade.exchange_id}_${trade.side}_${trade.offset}`;
+        if (!priceVolumeData[id]) {
+          priceVolumeData[id] = {
+            price: [],
+            volume: [],
+            priceByVolume: [],
+          };
         }
-      >,
-      trade: KungfuApi.TradeResolved,
-    ) => {
-      const id = `${trade.instrument_id}_${trade.exchange_id}_${trade.side}_${trade.offset}`;
-      if (!priceVolumeData[id]) {
-        priceVolumeData[id] = {
-          price: [],
-          volume: [],
-        };
-      }
 
-      priceVolumeData[id].price.push(trade.price);
-      priceVolumeData[id].volume.push(+Number(trade.volume));
-      return priceVolumeData;
-    },
-    {} as Record<
-      string,
-      {
-        price: number[];
-        volume: number[];
-        volumeTraded: number[];
-      }
-    >,
-  );
+        priceVolumeData[id].price.push(trade.price);
+        priceVolumeData[id].volume.push(+Number(trade.volume));
+        priceVolumeData[id].priceByVolume.push(
+          +Number(trade.volume) * trade.price,
+        );
+        return priceVolumeData;
+      },
+      {} as Record<string, PriceVolumeStatItem>,
+    );
 
   const priceVolumeDataResolved: Array<{
     instrumentId_exchangeId: string;
@@ -106,13 +98,14 @@ const priceVolumeStats = computed(() => {
   }> = Object.keys(priceVolumeData).map((id) => {
     const [instrumentId, exchangeId, side, offset] = id.split('_');
     const priceStats = new Stats().push(...priceVolumeData[id].price);
+    const priceSum = priceVolumeData[id].priceByVolume.reduce((a, b) => a + b);
     const volumeSum = priceVolumeData[id].volume.reduce((a, b) => a + b);
     const range = priceStats.range();
     return {
       instrumentId_exchangeId: `${instrumentId}_${exchangeId}`,
       side: dealSide(+side),
       offset: dealOffset(+offset),
-      mean: priceStats.amean().toFixed(2),
+      mean: Number(priceSum / volumeSum).toFixed(2),
       min: range[0].toFixed(2),
       max: range[1].toFixed(2),
       volume: volumeSum.toString(),
