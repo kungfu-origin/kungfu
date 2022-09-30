@@ -17,8 +17,8 @@ namespace kungfu::wingchun::broker {
  * Policy interface to decide the time point to resume when connecting to a broker.
  */
 struct ResumePolicy {
-  [[nodiscard]] int64_t get_connect_time(const yijinjing::practice::apprentice &app,
-                                         const longfist::types::Register &broker) const;
+  [[nodiscard]] virtual int64_t get_connect_time(const yijinjing::practice::apprentice &app,
+                                                 const longfist::types::Register &broker) const;
 
   [[nodiscard]] virtual int64_t get_resume_time(const yijinjing::practice::apprentice &app,
                                                 const longfist::types::Register &broker) const = 0;
@@ -49,6 +49,14 @@ struct IntradayResumePolicy : public ResumePolicy {
                                         const longfist::types::Register &broker) const override;
 };
 
+struct FromNowResumePolicy : public ResumePolicy {
+  [[nodiscard]] int64_t get_connect_time(const yijinjing::practice::apprentice &app,
+                                         const longfist::types::Register &broker) const override;
+
+  [[nodiscard]] int64_t get_resume_time(const yijinjing::practice::apprentice &app,
+                                        const longfist::types::Register &broker) const override;
+};
+
 /**
  * Manage connections to brokers.
  */
@@ -68,6 +76,8 @@ public:
   [[nodiscard]] const InstrumentKeyMap &get_instrument_keys() const;
 
   [[nodiscard]] virtual bool is_ready(uint32_t broker_location_uid) const;
+
+  [[nodiscard]] virtual bool is_connected(uint32_t broker_location_uid) const;
 
   [[nodiscard]] virtual bool is_custom_subscribed(uint32_t md_location_uid) const = 0;
 
@@ -223,7 +233,7 @@ protected:
   [[nodiscard]] bool should_connect_strategy(const yijinjing::data::location_ptr &md_location) const override;
 
 private:
-  IntradayResumePolicy resume_policy_ = {};
+  FromNowResumePolicy resume_policy_ = {};
   CustomSubscribeMap custom_subs_ = {};
   EnrollmentMap enrolled_md_locations_ = {};
   EnrollmentMap enrolled_td_locations_ = {};
