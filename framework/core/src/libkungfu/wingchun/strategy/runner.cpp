@@ -145,7 +145,6 @@ void Runner::prepare(const event_ptr &event) {
     return;
   }
 
-
   if (not positions_requested_) {
     if (not context_->is_book_held()) {
       // Start - Let ledger prepare book for strategy
