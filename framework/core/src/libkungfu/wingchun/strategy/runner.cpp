@@ -70,22 +70,11 @@ void Runner::post_start() {
     return; // safe guard for live mode, in that case we will run truly when prepare process is done.
   }
 
-  // strategy load all frame from resume time, we need filter market frames after strategy start
-  // but the filter process is dynamic, so we need to wait for the filting frame process until the lastest
-  // there will always be a event gen_time === now() in low_latency mode, but be not always in low_latency = false mode.
-  // the "- 200 milliseconds" usage is on reason of hero drain using DEFAULT_RECV_TIMEOUT(100ms) as socket waiting
-  // timeout time.
-  auto from_now_events =
-      events_ | skip_until(events_ | rx::filter([&](const event_ptr &event) {
-                             return event->gen_time() >=
-                                    (get_io_device()->is_low_latency() ? now() : (now() - 200 * NANO_MILLISECOND));
-                           }));
-  from_now_events | first() | $([](const event_ptr &event) { SPDLOG_INFO("skip until now"); });
-  from_now_events | is_own<Quote>(context_->get_broker_client()) |
+  events_ | is_own<Quote>(context_->get_broker_client()) |
       $$(invoke(&Strategy::on_quote, event->data<Quote>(), get_location(event->source())));
-  from_now_events | is_own<Entrust>(context_->get_broker_client()) |
+  events_ | is_own<Entrust>(context_->get_broker_client()) |
       $$(invoke(&Strategy::on_entrust, event->data<Entrust>(), get_location(event->source())));
-  from_now_events | is_own<Transaction>(context_->get_broker_client()) |
+  events_ | is_own<Transaction>(context_->get_broker_client()) |
       $$(invoke(&Strategy::on_transaction, event->data<Transaction>(), get_location(event->source())));
 
   events_ | is(Order::tag) | $$(invoke(&Strategy::on_order, event->data<Order>(), get_location(event->source())));
@@ -122,6 +111,28 @@ void Runner::prepare(const event_ptr &event) {
       context_->get_broker_client().subscribe(position.exchange_id, position.instrument_id);
     }
   }
+
+  auto ledger_uid = ledger_home_location_->uid;
+  if (not has_writer(ledger_uid)) {
+    SPDLOG_ERROR("ledger writer not found");
+    return;
+  }
+  auto writer = get_writer(ledger_uid);
+
+  auto connected_test = [&](auto &locations) {
+    for (const auto &pair : locations) {
+      if (not context_->get_broker_client().is_connected(pair.second->uid)) {
+        return false;
+      }
+    }
+    return true;
+  };
+  if (not broker_states_requested_ and connected_test(context_->list_accounts()) and
+      connected_test(context_->list_md())) {
+    writer->mark(now(), BrokerStateRequest::tag);
+    broker_states_requested_ = true;
+  }
+
   auto ready_test = [&](auto &locations) {
     for (const auto &pair : locations) {
       if (not context_->get_broker_client().is_ready(pair.second->uid)) {
@@ -133,10 +144,9 @@ void Runner::prepare(const event_ptr &event) {
   if (not ready_test(context_->list_accounts()) or not ready_test(context_->list_md())) {
     return;
   }
-  auto ledger_uid = ledger_home_location_->uid;
-  if (not positions_requested_ and has_writer(ledger_uid)) {
-    auto writer = get_writer(ledger_uid);
 
+
+  if (not positions_requested_) {
     if (not context_->is_book_held()) {
       // Start - Let ledger prepare book for strategy
       writer->mark(now(), KeepPositionsRequest::tag);

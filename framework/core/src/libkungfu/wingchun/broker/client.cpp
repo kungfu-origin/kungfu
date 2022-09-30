@@ -39,6 +39,15 @@ int64_t IntradayResumePolicy::get_resume_time(const apprentice &app, const Regis
   return std::max(app.get_last_active_time(), time::calendar_day_start(app.now()));
 }
 
+int64_t FromNowResumePolicy::get_connect_time(const apprentice &app, const Register &broker) const {
+  if (broker.checkin_time >= app.get_checkin_time()) {
+    return broker.checkin_time;
+  }
+  return get_resume_time(app, broker);
+}
+
+int64_t FromNowResumePolicy::get_resume_time(const apprentice &app, const Register &broker) const { return app.now(); }
+
 Client::Client(apprentice &app) : app_(app) {}
 
 const Client::InstrumentKeyMap &Client::get_instrument_keys() const { return instrument_keys_; }
@@ -51,6 +60,13 @@ bool Client::is_ready(uint32_t broker_location_uid) const {
     bool td_test = broker_location->category == category::TD and
                    ready_td_locations_.find(broker_location->uid) != ready_td_locations_.end();
     return md_test or td_test;
+  }
+  return false;
+}
+
+bool Client::is_connected(uint32_t broker_location_uid) const {
+  if (app_.has_location(broker_location_uid) and app_.has_writer(broker_location_uid)) {
+    return true;
   }
   return false;
 }
@@ -154,8 +170,7 @@ void Client::connect(const event_ptr &event, const Register &register_data) {
 
 void Client::update_broker_state(const event_ptr &event, const BrokerStateUpdate &state) {
   auto state_value = state.state;
-  auto broker_location = app_.get_location(event->source());
-
+  auto broker_location = app_.get_location(state.location_uid);
   bool state_ready = state_value == BrokerState::Ready;
   bool state_reset = state_value == BrokerState::Connected or state_value == BrokerState::DisConnected;
 

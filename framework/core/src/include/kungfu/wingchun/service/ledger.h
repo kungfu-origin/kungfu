@@ -14,9 +14,11 @@
 namespace kungfu::wingchun::service {
 
 // key = hash_instrument(exchange_id, instrument_id)
-typedef std::unordered_map<uint32_t, longfist::types::Position> PositionMap;
 
 class Ledger : public yijinjing::practice::apprentice {
+  typedef std::unordered_map<uint32_t, longfist::types::BrokerStateUpdate> BrokerStateMap;
+  typedef std::unordered_map<uint32_t, longfist::types::Position> PositionMap;
+
 public:
   explicit Ledger(yijinjing::data::locator_ptr locator, longfist::enums::mode m, bool low_latency = false);
 
@@ -36,7 +38,12 @@ private:
   book::Bookkeeper bookkeeper_;
   book::BookMap tmp_books_;
   std::unordered_map<uint64_t, state<longfist::types::OrderStat>> order_stats_ = {};
+  BrokerStateMap broker_states_ = {};
   bool is_sync_;
+
+  void update_broker_state_map(uint32_t location_uid, const longfist::types::BrokerStateUpdate &brokerStateUpdate);
+
+  void update_broker_state_map(uint32_t location_uid, const longfist::types::Deregister &deregister);
 
   void refresh_books();
 
@@ -57,6 +64,8 @@ private:
   void keep_positions(int64_t trigger_time, uint32_t strategy_uid);
 
   void rebuild_positions(int64_t trigger_time, uint32_t strategy_uid);
+
+  void write_broker_state(int64_t trigger_time, uint32_t source_id);
 
   void write_book_reset(int64_t trigger_time, uint32_t book_uid);
 

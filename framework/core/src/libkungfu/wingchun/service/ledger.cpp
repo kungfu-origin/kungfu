@@ -32,6 +32,8 @@ void Ledger::on_start() {
   bookkeeper_.on_start(events_);
   bookkeeper_.guard_positions();
 
+  events_ | is(BrokerStateUpdate::tag) | $$(update_broker_state_map(event->source(), event->data<BrokerStateUpdate>()));
+  events_ | is(Deregister::tag) | $$(update_broker_state_map(event->source(), event->data<Deregister>()));
   events_ | is(OrderInput::tag) | $$(update_order_stat(event, event->data<OrderInput>()));
   events_ | is(Order::tag) | $$(update_order_stat(event, event->data<Order>()));
   events_ | is(Trade::tag) | $$(update_order_stat(event, event->data<Trade>()));
@@ -39,6 +41,7 @@ void Ledger::on_start() {
   events_ | is(KeepPositionsRequest::tag) | $$(keep_positions(event->gen_time(), event->source()));
   events_ | is(RebuildPositionsRequest::tag) | $$(rebuild_positions(event->gen_time(), event->source()));
   events_ | is(MirrorPositionsRequest::tag) | $$(bookkeeper_.mirror_positions(event->gen_time(), event->source()));
+  events_ | is(BrokerStateRequest::tag) | $$(write_broker_state(event->gen_time(), event->source()));
   events_ | is(AssetRequest::tag) | $$(write_book_reset(event->gen_time(), event->source()));
   events_ | is(PositionRequest::tag) | $$(write_strategy_data(event->gen_time(), event->source()));
   events_ | is(PositionEnd::tag) | skip_while(while_to(location::SYNC)) |
@@ -47,6 +50,16 @@ void Ledger::on_start() {
   add_time_interval(time_unit::NANOSECONDS_PER_MINUTE, [&](auto e) { request_asset_sync(e->gen_time()); });
   add_time_interval(time_unit::NANOSECONDS_PER_MINUTE, [&](auto e) { request_position_sync(e->gen_time()); });
   refresh_books();
+}
+
+void Ledger::update_broker_state_map(uint32_t location_uid, const BrokerStateUpdate &state) {
+  broker_states_.insert_or_assign(location_uid, state);
+}
+
+void Ledger::update_broker_state_map(uint32_t location_uid, const Deregister &deregister) {
+  if (broker_states_.find(location_uid) != broker_states_.end()) {
+    broker_states_.erase(location_uid);
+  }
 }
 
 void Ledger::refresh_books() {
@@ -168,6 +181,14 @@ void Ledger::rebuild_positions(int64_t trigger_time, uint32_t strategy_uid) {
     rebuild_book(tmp_book->short_positions);
   }
   strategy_book->update(trigger_time);
+}
+
+void Ledger::write_broker_state(int64_t trigger_time, uint32_t source_id) {
+  auto writer = get_writer(source_id);
+  for (const auto &pair : broker_states_) {
+    auto &broker_state = pair.second;
+    writer->write(trigger_time, broker_state);
+  }
 }
 
 void Ledger::write_book_reset(int64_t trigger_time, uint32_t book_uid) {

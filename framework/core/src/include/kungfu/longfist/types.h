@@ -34,6 +34,7 @@ KF_DEFINE_MARK_TYPE(RequestCached, 10061);
 KF_DEFINE_MARK_TYPE(NewOrderSingle, 353);
 KF_DEFINE_MARK_TYPE(CancelOrder, 354);
 KF_DEFINE_MARK_TYPE(CancelAllOrder, 355);
+KF_DEFINE_MARK_TYPE(BrokerStateRequest, 399);
 KF_DEFINE_MARK_TYPE(ResetBookRequest, 400);
 KF_DEFINE_MARK_TYPE(MirrorPositionsRequest, 401);
 KF_DEFINE_MARK_TYPE(AssetRequest, 402);
@@ -84,22 +85,6 @@ KF_DEFINE_DATA_TYPE(                                                     //
     (std::string, info_b),                                               //
     (std::string, info_c),                                               //
     (std::string, value)                                                 //
-);
-
-KF_DEFINE_PACK_TYPE(                                             //
-    Commission, 10006, PK(product_id, exchange_id), PERPETUAL(), //
-    (kungfu::array<char, PRODUCT_ID_LEN>, product_id),           // 品种
-    (kungfu::array<char, EXCHANGE_ID_LEN>, exchange_id),         // 交易所
-
-    (InstrumentType, instrument_type), // 合约类型
-
-    (CommissionRateMode, mode), // 手续费模式(按照交易额或者交易量)
-
-    (double, open_ratio),        // 开仓费率
-    (double, close_ratio),       // 平仓费率
-    (double, close_today_ratio), // 平今费率
-
-    (double, min_commission) // 最小手续费
 );
 
 KF_DEFINE_DATA_TYPE(                                   //
@@ -156,14 +141,15 @@ KF_DEFINE_DATA_TYPE(                                  //
     (std::string, name)                               //
 );
 
+KF_DEFINE_PACK_TYPE(                                  //
+    BrokerStateUpdate, 10014, PK(state), PERPETUAL(), //
+    (uint32_t, location_uid),                         //
+    (BrokerState, state)                              //
+);
+
 KF_DEFINE_PACK_TYPE(                              //
     CacheReset, 10013, PK(msg_type), PERPETUAL(), //
     (int32_t, msg_type)                           //
-);
-
-KF_DEFINE_PACK_TYPE(                                  //
-    BrokerStateUpdate, 10014, PK(state), PERPETUAL(), //
-    (BrokerState, state)                              //
 );
 
 KF_DEFINE_PACK_TYPE(                                    //
@@ -222,6 +208,22 @@ KF_DEFINE_PACK_TYPE(                                                           /
     TimeReset, 10100, PK(system_clock_count, steady_clock_count), PERPETUAL(), //
     (int64_t, system_clock_count),                                             //
     (int64_t, steady_clock_count)                                              //
+);
+
+KF_DEFINE_PACK_TYPE(                                             //
+    Commission, 10006, PK(product_id, exchange_id), PERPETUAL(), //
+    (kungfu::array<char, PRODUCT_ID_LEN>, product_id),           // 品种
+    (kungfu::array<char, EXCHANGE_ID_LEN>, exchange_id),         // 交易所
+
+    (InstrumentType, instrument_type), // 合约类型
+
+    (CommissionRateMode, mode), // 手续费模式(按照交易额或者交易量)
+
+    (double, open_ratio),        // 开仓费率
+    (double, close_ratio),       // 平仓费率
+    (double, close_today_ratio), // 平今费率
+
+    (double, min_commission) // 最小手续费
 );
 
 KF_DEFINE_PACK_TYPE(                                              //
