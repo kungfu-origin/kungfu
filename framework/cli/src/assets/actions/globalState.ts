@@ -23,7 +23,6 @@ if (process.env.APP_TYPE === 'cli') {
       pm2_bus.on('process:msg', (packet: Pm2Packet) => {
         const processData = packet.process;
         globalState.DZXY_PM_ID = processData.pm_id;
-
         globalState.DZXY_SUBJECT.next(packet);
       });
   });

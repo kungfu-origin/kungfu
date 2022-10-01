@@ -27,6 +27,7 @@ constexpr auto AllTypes = boost::hana::make_map( //
     TYPE_PAIR(NewOrderSingle),                   //
     TYPE_PAIR(CancelOrder),                      //
     TYPE_PAIR(CancelAllOrder),                   //
+    TYPE_PAIR(BrokerStateRequest),               //
     TYPE_PAIR(ResetBookRequest),                 //
     TYPE_PAIR(MirrorPositionsRequest),           //
     TYPE_PAIR(AssetRequest),                     //

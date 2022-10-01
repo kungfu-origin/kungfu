@@ -1,11 +1,9 @@
 import { Proc } from 'pm2';
+import { kfLogger } from '../utils/busiUtils';
 
 export type PreStartProcessMethod = (
   kfLocation: KungfuApi.DerivedKfLocation,
 ) => Promise<Proc | void>;
-
-const IS_CLI_DEV =
-  process.env.APP_TYPE !== 'cli' || process.env.NODE_ENV === 'development';
 
 export class PreStartProcessHooks {
   hooks: Record<string, PreStartProcessMethod[]>;
@@ -16,7 +14,7 @@ export class PreStartProcessHooks {
         get(target: Record<string, PreStartProcessMethod[]>, prop: string) {
           const locationPairs = prop.split('_');
           if (locationPairs.length != 3) {
-            IS_CLI_DEV && console.warn(`Invalid hook key: ${prop}`);
+            kfLogger.warn(`Invalid hook key: ${prop}`);
             return [];
           }
 
@@ -58,8 +56,7 @@ export class PreStartProcessHooks {
           const methods = Reflect.get(target, prop);
           methods.push(value);
           Reflect.set(target, prop, methods);
-          IS_CLI_DEV &&
-            console.log(`PreStartProcess hook ${prop} register success`);
+          kfLogger.info(`PreStartProcess hook ${prop} register success`);
           return true;
         },
       },
