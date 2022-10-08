@@ -179,8 +179,8 @@ function handleAddCommission() {
                 </a-button>
               </div>
               <div
-                v-for="item in tableData"
-                :key="item"
+                v-for="(item, index) in tableData"
+                :key="index"
                 class="commission-setting-row"
               >
                 <div class="commission-setting-item">
