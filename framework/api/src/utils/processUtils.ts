@@ -412,18 +412,23 @@ export const graceStopProcess = (
 
 export const deleteProcess = pm2Delete;
 
-export const graceDeleteProcess = (
+export const graceDeleteProcess = async (
   watcher: KungfuApi.Watcher | null,
   kfLocation: KungfuApi.KfConfig | KungfuApi.KfLocation,
   processStatusData?: Pm2ProcessStatusData,
 ): Promise<void> => {
+  if (!processStatusData) {
+    const { processStatus } = await listProcessStatus();
+    processStatusData = processStatus;
+  }
+
   const processId = getProcessIdByKfLocation(kfLocation);
 
   if (!watcher) {
     return Promise.reject(new Error('Watcher is NULL'));
   }
 
-  if (!processStatusData || getIfProcessRunning(processStatusData, processId)) {
+  if (getIfProcessRunning(processStatusData, processId)) {
     if (
       watcher &&
       !watcher.isReadyToInteract(kfLocation) &&
