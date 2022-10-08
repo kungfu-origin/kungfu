@@ -424,8 +424,6 @@ export const graceDeleteProcess = async (
 
   const processId = getProcessIdByKfLocation(kfLocation);
 
-  processStatusData = processStatusData || (await getProcessStatusData());
-
   if (!watcher) {
     return Promise.reject(new Error('Watcher is NULL'));
   }
