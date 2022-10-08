@@ -226,6 +226,13 @@ Napi::Value Watcher::IsStarted(const Napi::CallbackInfo &info) { return Napi::Bo
 
 Napi::Value Watcher::RequestStop(const Napi::CallbackInfo &info) {
   auto app_location = ExtractLocation(info, 0, get_locator());
+
+  // stop master
+  if (app_location->category == category::SYSTEM && app_location->group == "master") {
+    get_writer(master_cmd_location_->uid)->mark(now(), RequestStop::tag);
+    return Napi::Boolean::New(info.Env(), true);
+  }
+
   if (not has_writer(app_location->uid)) {
     return Napi::Boolean::New(info.Env(), false);
   }

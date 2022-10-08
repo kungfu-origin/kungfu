@@ -157,6 +157,17 @@ void master::react() {
   events_ | is(RequestReadFrom::tag) | $$(check_cached_ready_to_read(event));
   events_ | is(RequestReadFromPublic::tag) | $$(on_request_read_from_public(event));
   events_ | is(RequestReadFromSync::tag) | $$(on_request_read_from_sync(event));
+  // for watcher request stop master in widnows
+  events_ | is(RequestStop::tag) | filter([&](const event_ptr &event) {
+    auto dest = event->dest();
+    if (has_location(dest)) {
+      auto dest_location = get_location(dest);
+      if (dest_location->category == category::SYSTEM and dest_location->group == "master") {
+        return true;
+      }
+    }
+    return false;
+  }) | $$(signal_stop());
   events_ | is(ChannelRequest::tag) | $$(on_channel_request(event));
   events_ | is(TimeRequest::tag) | $$(on_time_request(event));
   events_ | is(Location::tag) | $$(on_new_location(event));
