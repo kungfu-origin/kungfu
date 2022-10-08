@@ -3,6 +3,7 @@ import {
   Ref,
   ref,
   computed,
+  watch,
   getCurrentInstance,
   toRaw,
   Component,
@@ -199,10 +200,50 @@ export const useTableSearchKeyword = <T>(
               ).toString() || '',
           )
           .join('_');
-        return combinedValue.includes(searchKeyword.value);
+        return new RegExp(searchKeyword.value, 'ig').test(combinedValue);
       })
       .map((item) => toRaw(item));
   });
+
+  return {
+    searchKeyword,
+    tableData,
+  };
+};
+
+export const useWritableTableSearchKeyword = <T>(
+  targetList: Ref<T[]> | ComputedRef<T[]>,
+  keys: string[],
+): {
+  searchKeyword: Ref<string>;
+  tableData: Ref<T[]>;
+} => {
+  const searchKeyword = ref<string>('');
+  const tableData = ref<T[]>([]) as Ref<T[]>;
+
+  watch(
+    () => ({ keyword: searchKeyword.value, list: targetList.value }),
+    (newValue) => {
+      const { keyword, list } = newValue;
+      tableData.value = list
+        .filter((item: T) => {
+          const combinedValue = keys
+            .map(
+              (key: string) =>
+                (
+                  ((item as Record<string, unknown>)[key] as string | number) ||
+                  ''
+                ).toString() || '',
+            )
+            .join('_');
+          return new RegExp(keyword, 'ig').test(combinedValue);
+        })
+        .map((item) => toRaw(item));
+    },
+    {
+      deep: true,
+    },
+  );
 
   return {
     searchKeyword,
