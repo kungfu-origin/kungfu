@@ -91,7 +91,7 @@ const getCmakeCmdArgs = () => {
     [ModeMap.IN_CORE]: { cmd: 'yarn', args: ['cmake-js', 'build'] },
     [ModeMap.IN_PROD_APP]: {
       cmd: 'cmake',
-      args: ['-S', './', '-B', './build'],
+      args: ['-S', './', '-B', './build', '-DCMAKE_BUILD_TYPE=Release'],
     },
     [ModeMap.IN_SDK_SRC]: { cmd: 'yarn', args: ['cmake-js', 'build'] },
   };
@@ -104,7 +104,7 @@ const getCmakeNextCmdArgs = () => {
     [ModeMap.IN_CORE]: null,
     [ModeMap.IN_PROD_APP]: {
       cmd: 'cmake',
-      args: ['--build', './build', '--config', 'Release'],
+      args: ['--build', './build'],
     },
     [ModeMap.IN_SDK_SRC]: null,
   };

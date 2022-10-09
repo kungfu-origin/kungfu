@@ -340,10 +340,15 @@ exports.compile = () => {
   }
 
   if (hasSourceFor(packageJson, 'cpp')) {
-    const { cmd, args } = getCmakeCmdArgs();
-    spawnExec(cmd, [...args]);
+    const cmakeCmdArgs = getCmakeCmdArgs();
+    console.log('cmake fist step: ', JSON.stringify(cmakeCmdArgs));
+    if (cmakeCmdArgs) {
+      const { cmd, args } = cmakeCmdArgs;
+      spawnExec(cmd, [...args]);
+    }
 
     const nextCmdArgs = getCmakeNextCmdArgs();
+    console.log('cmake second step: ', JSON.stringify(nextCmdArgs));
     if (nextCmdArgs) {
       const { cmd, args } = nextCmdArgs;
       spawnExec(cmd, [...args]);
