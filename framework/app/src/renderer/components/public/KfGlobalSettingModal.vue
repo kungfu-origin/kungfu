@@ -6,7 +6,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/config/globalSettings';
 import {
   useModalVisible,
-  useTableSearchKeyword,
+  useWritableTableSearchKeyword,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
 import KfConfigSettingsForm from './KfConfigSettingsForm.vue';
@@ -66,7 +66,9 @@ const globalSettingsFromStates = reactive(
 const { modalVisible, closeModal } = useModalVisible(props.visible);
 const commissions = ref<KungfuApi.Commission[]>([]);
 const { searchKeyword, tableData } =
-  useTableSearchKeyword<KungfuApi.Commission>(commissions, ['product_id']);
+  useWritableTableSearchKeyword<KungfuApi.Commission>(commissions, [
+    'product_id',
+  ]);
 
 onMounted(() => {
   globalBus.next({
@@ -176,7 +178,11 @@ function handleAddCommission() {
                   {{ $t('globalSettingConfig.add_comission') }}
                 </a-button>
               </div>
-              <div class="commission-setting-row" v-for="item in tableData">
+              <div
+                v-for="(item, index) in tableData"
+                :key="index"
+                class="commission-setting-row"
+              >
                 <div class="commission-setting-item">
                   <a-input
                     class="value product-id"
