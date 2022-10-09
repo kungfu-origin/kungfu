@@ -5,7 +5,7 @@ macro(kungfu_setup MODULE_NAME)
   add_compile_definitions(FMT_HEADER_ONLY)
   
   if (${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
-    set(CMAKE_CXX_FLAGS_RELEASE "-O")
+    set(CMAKE_CXX_FLAGS "-O")
   endif ()
 
   include_directories("<%- kfcDir -%>/include")
