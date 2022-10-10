@@ -1879,6 +1879,7 @@ export const useMakeOrderSubscribe = (
 ) => {
   const app = getCurrentInstance();
   let lastTriggerTag: 'makeOrder' | 'orderBookUpdate' | '' = '';
+  let lastVolume = 0;
   onMounted(() => {
     if (app?.proxy) {
       const subscription = app.proxy.$globalBus.subscribe(
@@ -1903,6 +1904,7 @@ export const useMakeOrderSubscribe = (
               formState.value.account_id = accountId;
             }
             lastTriggerTag = 'makeOrder';
+            lastVolume = formState.value.volume;
           }
 
           if (data.tag === 'orderBookUpdate') {
@@ -1924,7 +1926,9 @@ export const useMakeOrderSubscribe = (
             }
 
             const shouldUpdateVolume =
-              lastTriggerTag === 'orderBookUpdate' || !formState.value.volume;
+              (lastTriggerTag === 'orderBookUpdate' &&
+                lastVolume === formState.value.volume) ||
+              !formState.value.volume;
             const isNewVolumeValuable =
               !!volume &&
               !Number.isNaN(Number(volume)) &&
@@ -1932,10 +1936,15 @@ export const useMakeOrderSubscribe = (
 
             if (shouldUpdateVolume && isNewVolumeValuable) {
               formState.value.volume = +Number(volume).toFixed(0);
+              lastVolume = formState.value.volume;
             }
 
             formState.value.side = +side;
-            shouldUpdateVolume && (lastTriggerTag = 'orderBookUpdate');
+            if (shouldUpdateVolume) {
+              lastTriggerTag = 'orderBookUpdate';
+            } else {
+              lastVolume = 0;
+            }
           }
         },
       );
