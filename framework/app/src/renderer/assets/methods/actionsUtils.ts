@@ -721,6 +721,7 @@ export const usePreStartAndQuitApp = (): {
             if (data.name && data.name === 'archive') {
               preStartSystemLoadingData.archive =
                 data.status === 'online' ? 'loading' : 'done';
+              startGetWatcherStatus();
             }
 
             if (data.name && data.name === 'extraResourcesLoading') {
@@ -730,8 +731,8 @@ export const usePreStartAndQuitApp = (): {
 
             if (data.name === 'system' && data.status === 'waiting restart') {
               preStartSystemLoadingData.archive = 'loading';
+              preStartSystemLoadingData.watcher = 'loading';
               preStartSystemLoadingData.extraResourcesLoading = 'loading';
-              startGetWatcherStatus();
             }
           }
 
