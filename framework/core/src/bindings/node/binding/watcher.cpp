@@ -370,7 +370,8 @@ void Watcher::on_start() {
   events_ | is(Channel::tag) | $$(InspectChannel(event->gen_time(), event->data<Channel>()));
   events_ | is(Register::tag) | $$(OnRegister(event->gen_time(), event->data<Register>()));
   events_ | is(Deregister::tag) | $$(OnDeregister(event->gen_time(), event->data<Deregister>()));
-  events_ | is(BrokerStateUpdate::tag) | $$(UpdateBrokerState(event->source(), event->data<BrokerStateUpdate>()));
+  events_ | is(BrokerStateUpdate::tag) |
+      $$(UpdateBrokerState(event->source(), event->dest(), event->data<BrokerStateUpdate>()));
   events_ | is(StrategyStateUpdate::tag) | $$(UpdateStrategyState(event->source(), event->data<StrategyStateUpdate>()));
   events_ | is(CacheReset::tag) | $$(UpdateEventCache(event));
 }
@@ -579,9 +580,20 @@ void Watcher::AfterMasterDown() {
   writers_.erase(master_cmd_location_->uid);
 }
 
-void Watcher::UpdateBrokerState(uint32_t broker_uid, const BrokerStateUpdate &state) {
-  auto app_location = get_location(broker_uid);
-  location_uid_states_map_.insert_or_assign(app_location->uid, int(state.state));
+void Watcher::UpdateBrokerState(uint32_t source_id, uint32_t dest_id, const BrokerStateUpdate &state) {
+  auto source_location = get_location(source_id);
+  if (source_location->category == category::TD or source_location->category == category::MD) {
+    location_uid_states_map_.insert_or_assign(source_location->uid, int(state.state));
+  }
+
+  if (dest_id == location::PUBLIC) {
+    return;
+  }
+
+  auto dest_location = get_location(dest_id);
+  if (dest_location->category == category::TD or dest_location->category == category::MD) {
+    location_uid_states_map_.insert_or_assign(dest_location->uid, int(state.state));
+  }
 }
 
 void Watcher::UpdateStrategyState(uint32_t strategy_uid, const StrategyStateUpdate &state) {
