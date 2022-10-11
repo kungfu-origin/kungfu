@@ -175,7 +175,7 @@ private:
 
   void OnDeregister(int64_t trigger_time, const longfist::types::Deregister &deregister_data);
 
-  void UpdateBrokerState(uint32_t broker_uid, const longfist::types::BrokerStateUpdate &state);
+  void UpdateBrokerState(uint32_t source_id, uint32_t dest_id, const longfist::types::BrokerStateUpdate &state);
 
   void UpdateStrategyState(uint32_t strategy_uid, const longfist::types::StrategyStateUpdate &state);
 
