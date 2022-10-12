@@ -61,6 +61,8 @@ void master::notify_master_deregister_on_exit() {
     if (has_writer(session.location_uid)) {
       auto writer = get_writer(session.location_uid);
       writer->write(now, master_home_location_->to<Deregister>());
+    } else {
+      SPDLOG_WARN("no writer {} {}", session.location_uid, get_location_uname(session.location_uid));
     }
   }
 }
@@ -74,6 +76,8 @@ void master::mark_session_end_on_exit() {
     if (has_writer(session.location_uid)) {
       auto writer = get_writer(session.location_uid);
       writer->mark(now, SessionEnd::tag);
+    } else {
+      SPDLOG_WARN("no writer {} {}", session.location_uid, get_location_uname(session.location_uid));
     }
   }
 }
@@ -219,8 +223,12 @@ void master::check_cached_ready_to_read(const event_ptr &event) {
   auto read_from_source_id = request.source_id;
 
   if (read_from_source_id == cached_home_location_->uid) {
-    auto app_cmd_writer = get_writer(app_uid);
-    app_cmd_writer->mark(now(), CachedReadyToRead::tag);
+    if (has_writer(app_uid)) {
+      auto app_cmd_writer = get_writer(app_uid);
+      app_cmd_writer->mark(now(), CachedReadyToRead::tag);
+    } else {
+      SPDLOG_WARN("no writer {} {}", app_uid, get_location_uname(app_uid));
+    }
   }
 }
 
@@ -287,10 +295,15 @@ void master::on_request_read_from_sync(const event_ptr &event) {
 void master::on_request_cached_done(const event_ptr &event) {
   auto request_cached_done_data = event->data<RequestCachedDone>();
   auto app_uid = request_cached_done_data.dest_id;
-  auto app_cmd_writer = get_writer(app_uid);
-  app_cmd_writer->mark(now(), RequestStart::tag);
-  write_registries(event->gen_time(), app_cmd_writer);
-  write_channels(event->gen_time(), app_cmd_writer);
+
+  if (has_writer(app_uid)) {
+    auto app_cmd_writer = get_writer(app_uid);
+    app_cmd_writer->mark(now(), RequestStart::tag);
+    write_registries(event->gen_time(), app_cmd_writer);
+    write_channels(event->gen_time(), app_cmd_writer);
+  } else {
+    SPDLOG_WARN("no writer {} {}", app_uid, get_location_uname(app_uid));
+  }
 }
 
 void master::on_channel_request(const event_ptr &event) {

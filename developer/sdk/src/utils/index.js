@@ -104,7 +104,7 @@ const getCmakeNextCmdArgs = () => {
     [ModeMap.IN_CORE]: null,
     [ModeMap.IN_PROD_APP]: {
       cmd: 'cmake',
-      args: ['--build', './build'],
+      args: ['--build', './build', '--config', 'Release'],
     },
     [ModeMap.IN_SDK_SRC]: null,
   };
