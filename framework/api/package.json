@@ -4,7 +4,7 @@
     "name": "Kungfu Trader",
     "email": "info@kungfu.link"
   },
-  "version": "2.4.12-alpha.1",
+  "version": "2.4.12-alpha.2",
   "description": "Kungfu Javascript/Typescript API",
   "license": "Apache-2.0",
   "repository": {
@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@fast-csv/format": "^4.3.5",
-    "@kungfu-trader/kungfu-core": "^2.4.12-alpha.1",
+    "@kungfu-trader/kungfu-core": "^2.4.12-alpha.2",
     "cfonts": "^2.10.0",
     "chalk": "^4.1.0",
     "find-root": "^1.1.0",
