@@ -15,12 +15,13 @@ jobs:
       use-poetry: true
       build-timeout-minutes: 150
       max-build-attempts: 3
+      check-format: false
     secrets:
       AWS_CI_ACCESS_KEY_ID: ${{ secrets.AWS_CI_ACCESS_KEY_ID }}
       AWS_CI_SECRET_ACCESS_KEY: ${{ secrets.AWS_CI_SECRET_ACCESS_KEY }}
       AWS_USER_ACCESS_KEY_ID: ${{ secrets.AWS_USER_ACCESS_KEY_ID }}
       AWS_USER_SECRET_ACCESS_KEY: ${{ secrets.AWS_USER_SECRET_ACCESS_KEY }}
-  
+
   verify:
     needs: try
     runs-on: ubuntu-20.04
