@@ -777,6 +777,7 @@ export const usePreStartAndQuitApp = (): {
 export const useSubscibeInstrumentAtEntry = (): void => {
   const app = getCurrentInstance();
   const subscribedInstrumentsForPos: Record<string, boolean> = {};
+  const SUBSCRIBE_INSTRUMENTS_LIMIT = 50;
 
   onMounted(() => {
     if (app?.proxy) {
@@ -797,7 +798,7 @@ export const useSubscibeInstrumentAtEntry = (): void => {
               }),
             );
 
-          positions.slice(0, 50).forEach((item) => {
+          positions.slice(0, SUBSCRIBE_INSTRUMENTS_LIMIT).forEach((item) => {
             if (subscribedInstrumentsForPos[item.uidKey]) {
               return;
             }
@@ -858,7 +859,10 @@ export const useSubscibeInstrumentAtEntry = (): void => {
           processStatusData.value,
           appStates.value,
           mdExtTypeMap.value,
-          [...subscribedInstruments.value, ...positions.slice(0, 50)],
+          [
+            ...subscribedInstruments.value,
+            ...positions.slice(0, SUBSCRIBE_INSTRUMENTS_LIMIT),
+          ],
         );
       }
     });
