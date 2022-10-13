@@ -29,8 +29,10 @@ export default defineComponent({
   name: 'Index',
 
   setup() {
+    const dealDefaultBoardsHook =
+      globalThis.HookKeeper.getHooks().dealBoardsMap;
     const boardsMap: KfLayout.BoardsMap =
-      getIndexBoardsMap() || defaultBoardsMap;
+      getIndexBoardsMap() || dealDefaultBoardsHook.trigger(defaultBoardsMap);
 
     const { initBoardsMap } = useGlobalStore();
     initBoardsMap(boardsMap);
@@ -47,7 +49,7 @@ export default defineComponent({
 
       if (data.tag === 'main') {
         if (data.name === 'reset-main-dashboard') {
-          initBoardsMap(defaultBoardsMap);
+          initBoardsMap(dealDefaultBoardsHook.trigger(defaultBoardsMap));
           success();
         }
 
