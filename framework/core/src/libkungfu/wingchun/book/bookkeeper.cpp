@@ -88,6 +88,9 @@ void Bookkeeper::restore(const cache::bank &state_bank) {
   for (auto &pair : state_bank[boost::hana::type_c<Position>]) {
     auto &state = pair.second;
     auto &position = state.data;
+    if (not app_.has_location(position.holder_uid)) {
+      continue;
+    }
     auto book = get_book(position.holder_uid);
     auto is_long = position.direction == longfist::enums::Direction::Long;
     auto &positions = is_long ? book->long_positions : book->short_positions;
@@ -96,6 +99,9 @@ void Bookkeeper::restore(const cache::bank &state_bank) {
   for (auto &pair : state_bank[boost::hana::type_c<Asset>]) {
     auto &state = pair.second;
     auto &asset = state.data;
+    if (not app_.has_location(asset.holder_uid)) {
+      continue;
+    }
     auto book = get_book(asset.holder_uid);
     book->asset = asset;
     book->update(app_.now());
@@ -103,6 +109,9 @@ void Bookkeeper::restore(const cache::bank &state_bank) {
   for (auto &pair : state_bank[boost::hana::type_c<AssetMargin>]) {
     auto &state = pair.second;
     auto &asset_margin = state.data;
+    if (not app_.has_location(asset_margin.holder_uid)) {
+      continue;
+    }
     auto book = get_book(asset_margin.holder_uid);
     book->asset_margin = asset_margin;
     book->update(app_.now());
