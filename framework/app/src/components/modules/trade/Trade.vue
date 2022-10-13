@@ -98,7 +98,7 @@ onMounted(() => {
 
         trades.value = toRaw(
           tradesResolved
-            .slice(0, 100)
+            .slice(0, 500)
             .map((item) =>
               toRaw(dealTrade(watcher, item, watcher.ledger.OrderStat)),
             ),

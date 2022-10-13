@@ -36,7 +36,6 @@ import {
   dealCategory,
   dealAssetsByHolderUID,
   getAvailDaemonList,
-  // removeNoDefaultStrategyFolders,
   getStrategyStateStatusName,
   isBrokerStateReady,
   dealKfNumber,
@@ -774,7 +773,10 @@ export const usePreStartAndQuitApp = (): {
   };
 };
 
-export const useSubscibeInstrumentAtEntry = (): void => {
+export const useSubscibeInstrumentAtEntry = (
+  watcher: KungfuApi.Watcher | null,
+): void => {
+  const { currentGlobalKfLocation } = useCurrentGlobalKfLocation(watcher);
   const app = getCurrentInstance();
   const subscribedInstrumentsForPos: Record<string, boolean> = {};
   const SUBSCRIBE_INSTRUMENTS_LIMIT = 50;
@@ -784,10 +786,24 @@ export const useSubscibeInstrumentAtEntry = (): void => {
       const subscription = app.proxy.$tradingDataSubject
         .pipe(throttleTime(3000))
         .subscribe((watcher: KungfuApi.Watcher) => {
-          const bigint0 = BigInt(0);
-          const positions = watcher.ledger.Position.filter('ledger_category', 0)
-            .nofilter('volume', bigint0)
-            .list()
+          if (currentGlobalKfLocation.value == null) {
+            return;
+          }
+
+          const positions =
+            globalThis.HookKeeper.getHooks().dealTradingData.trigger(
+              watcher,
+              currentGlobalKfLocation.value,
+              watcher.ledger.Position,
+              'position',
+            ) as KungfuApi.Position[];
+
+          if (!positions.length) {
+            return;
+          }
+          const positionsForSub = positions
+            .reverse()
+            .slice(0, SUBSCRIBE_INSTRUMENTS_LIMIT)
             .map(
               (item: KungfuApi.Position): KungfuApi.InstrumentForSub => ({
                 uidKey: item.uid_key,
@@ -798,7 +814,7 @@ export const useSubscibeInstrumentAtEntry = (): void => {
               }),
             );
 
-          positions.slice(0, SUBSCRIBE_INSTRUMENTS_LIMIT).forEach((item) => {
+          positionsForSub.forEach((item) => {
             if (subscribedInstrumentsForPos[item.uidKey]) {
               return;
             }
