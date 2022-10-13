@@ -797,7 +797,7 @@ export const useSubscibeInstrumentAtEntry = (): void => {
               }),
             );
 
-          positions.forEach((item) => {
+          positions.slice(0, 50).forEach((item) => {
             if (subscribedInstrumentsForPos[item.uidKey]) {
               return;
             }
@@ -858,7 +858,7 @@ export const useSubscibeInstrumentAtEntry = (): void => {
           processStatusData.value,
           appStates.value,
           mdExtTypeMap.value,
-          [...subscribedInstruments.value, ...positions],
+          [...subscribedInstruments.value, ...positions.slice(0, 50)],
         );
       }
     });
