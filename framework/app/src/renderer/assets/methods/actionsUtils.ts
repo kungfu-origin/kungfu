@@ -786,6 +786,10 @@ export const useSubscibeInstrumentAtEntry = (
   const subscribedInstrumentsForPos: Record<string, boolean> = {};
   const SUBSCRIBE_INSTRUMENTS_LIMIT = 50;
 
+  const mdProcessIds = computed(() => {
+    return mdList.value.map((md) => getProcessIdByKfLocation(md));
+  });
+
   const getCurrentPositions = (watcher: KungfuApi.Watcher) => {
     const positions = globalThis.HookKeeper.getHooks().dealTradingData.trigger(
       watcher,
@@ -816,10 +820,6 @@ export const useSubscibeInstrumentAtEntry = (
     positionsForSub: KungfuApi.InstrumentForSub[],
     processIds: string[],
   ) => {
-    if (currentGlobalKfLocation.value == null) {
-      return;
-    }
-
     positionsForSub.forEach((item) => {
       processIds.forEach((processId) => {
         if (subscribedInstrumentsForPos[item.uidKey]) {
@@ -844,13 +844,10 @@ export const useSubscibeInstrumentAtEntry = (
       const subscription = app.proxy.$tradingDataSubject
         .pipe(throttleTime(3000))
         .subscribe((watcher: KungfuApi.Watcher) => {
-          const mdProcessIds = mdList.value.map((md) =>
-            getProcessIdByKfLocation(md),
-          );
           const positionsForSub = getCurrentPositions(watcher);
           subscribeInstrumentsByCurPosAndProcessIds(
             positionsForSub,
-            mdProcessIds,
+            mdProcessIds.value,
           );
         });
 
