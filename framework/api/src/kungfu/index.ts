@@ -236,7 +236,7 @@ export const kfRequestMarketData = (
   exchangeId: string,
   instrumentId: string,
   mdLocation: KungfuApi.KfLocation,
-): Promise<void> => {
+): Promise<boolean> => {
   if (!watcher) {
     return Promise.reject(new Error('Watcher is NULL'));
   }

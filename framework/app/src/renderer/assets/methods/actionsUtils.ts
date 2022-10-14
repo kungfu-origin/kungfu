@@ -516,7 +516,7 @@ export const useInstruments = (): {
     appStates: Record<string, BrokerStateStatusTypes>,
     mdExtTypeMap: Record<string, InstrumentTypes>,
     instrumentsForSubscribe: KungfuApi.InstrumentResolved[],
-  ): void;
+  ): Promise<void[]>;
   subscribeAllInstrumentByAppStates(
     processStatus: Pm2ProcessStatusData,
     appStates: Record<string, BrokerStateStatusTypes>,
@@ -546,7 +546,7 @@ export const useInstruments = (): {
     appStates: Record<string, BrokerStateStatusTypes>,
     mdExtTypeMap: Record<string, InstrumentTypes>,
     instrumentsForSubscribe: KungfuApi.InstrumentResolved[],
-  ): void => {
+  ): Promise<void[]> => {
     if (isBrokerStateReady(appStates[processId])) {
       if (processStatus[processId] === 'online') {
         if (processId.indexOf('md_') === 0) {
@@ -557,22 +557,40 @@ export const useInstruments = (): {
             const ableSubscribedInstrumentTypes =
               AbleSubscribeInstrumentTypesBySourceType[sourceType] || [];
 
-            instrumentsForSubscribe.forEach((item) => {
-              if (
-                ableSubscribedInstrumentTypes.includes(+item.instrumentType)
-              ) {
-                kfRequestMarketData(
-                  window.watcher,
-                  item.exchangeId,
-                  item.instrumentId,
-                  mdLocation,
-                ).catch((err) => console.warn(err.message));
-              }
-            });
+            return Promise.all(
+              instrumentsForSubscribe.map((item) => {
+                if (
+                  ableSubscribedInstrumentTypes.includes(+item.instrumentType)
+                ) {
+                  return new Promise<void>((resolve, reject) => {
+                    kfRequestMarketData(
+                      window.watcher,
+                      item.exchangeId,
+                      item.instrumentId,
+                      mdLocation,
+                    )
+                      .then((flag) => {
+                        if (flag) {
+                          resolve();
+                        } else {
+                          reject();
+                        }
+                      })
+                      .catch((err) => {
+                        console.warn(err.message);
+                      });
+                  });
+                }
+
+                return Promise.reject();
+              }),
+            );
           }
         }
       }
     }
+
+    return Promise.reject();
   };
 
   const subscribeAllInstrumentByAppStates = (
@@ -833,9 +851,9 @@ export const useSubscibeInstrumentAtEntry = (
           appStates.value,
           mdExtTypeMap.value,
           [item],
-        );
-
-        filterByCached && (subscribedInstrumentsForPos[item.uidKey] = true);
+        ).then(() => {
+          filterByCached && (subscribedInstrumentsForPos[item.uidKey] = true);
+        });
       });
     });
   };

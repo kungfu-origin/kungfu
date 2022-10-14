@@ -716,7 +716,7 @@ declare namespace KungfuApi {
       kfLocation: KfLocation,
       exchangeId: string,
       instrumentId: string,
-    ): void;
+    ): boolean;
     cancelOrder(
       orderAction: OrderAction,
       tdLocation: KfLocation,
