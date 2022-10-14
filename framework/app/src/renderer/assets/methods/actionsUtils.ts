@@ -835,7 +835,7 @@ export const useSubscibeInstrumentAtEntry = (
           [item],
         );
 
-        subscribedInstrumentsForPos[item.uidKey] = true;
+        filterByCached && (subscribedInstrumentsForPos[item.uidKey] = true);
       });
     });
   };
