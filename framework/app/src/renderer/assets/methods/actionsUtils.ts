@@ -778,6 +778,7 @@ export const useSubscibeInstrumentAtEntry = (
 ): void => {
   const { currentGlobalKfLocation } = useCurrentGlobalKfLocation(watcher);
   const { appStates, processStatusData } = useProcessStatusDetailData();
+  const { mdList } = storeToRefs(useGlobalStore());
   const { mdExtTypeMap } = useExtConfigsRelated();
   const { subscribedInstruments, subscribeAllInstrumentByMdProcessId } =
     useInstruments();
@@ -812,37 +813,30 @@ export const useSubscibeInstrumentAtEntry = (
       );
   };
 
-  const subscribeInstrumentsByCurrentPositions = (
+  const subscribeInstrumentsByCurPosAndProcessIds = (
     positionsForSub: KungfuApi.InstrumentForSub[],
+    processIds: string[],
   ) => {
     if (currentGlobalKfLocation.value == null) {
       return;
     }
 
-    const { group } = currentGlobalKfLocation.value;
-    const mdLocationResolved: KungfuApi.KfLocation = {
-      category: 'md',
-      group,
-      name: group,
-      mode: 'live',
-    };
-
     positionsForSub.forEach((item) => {
-      if (subscribedInstrumentsForPos[item.uidKey]) {
-        return;
-      }
+      processIds.forEach((processId) => {
+        if (subscribedInstrumentsForPos[item.uidKey]) {
+          return;
+        }
 
-      const processId = getProcessIdByKfLocation(mdLocationResolved);
+        subscribeAllInstrumentByMdProcessId(
+          processId,
+          processStatusData.value,
+          appStates.value,
+          mdExtTypeMap.value,
+          [item],
+        );
 
-      subscribeAllInstrumentByMdProcessId(
-        processId,
-        processStatusData.value,
-        appStates.value,
-        mdExtTypeMap.value,
-        [item],
-      );
-
-      subscribedInstrumentsForPos[item.uidKey] = true;
+        subscribedInstrumentsForPos[item.uidKey] = true;
+      });
     });
   };
 
@@ -851,8 +845,14 @@ export const useSubscibeInstrumentAtEntry = (
       const subscription = app.proxy.$tradingDataSubject
         .pipe(throttleTime(3000))
         .subscribe((watcher: KungfuApi.Watcher) => {
+          const mdProcessIds = mdList.value.map((md) =>
+            getProcessIdByKfLocation(md),
+          );
           const positionsForSub = getCurrentPositions(watcher);
-          subscribeInstrumentsByCurrentPositions(positionsForSub);
+          subscribeInstrumentsByCurPosAndProcessIds(
+            positionsForSub,
+            mdProcessIds,
+          );
         });
 
       onBeforeUnmount(() => {
@@ -880,7 +880,7 @@ export const useSubscibeInstrumentAtEntry = (
           ...getCurrentPositions(window.watcher),
         ];
 
-        subscribeInstrumentsByCurrentPositions(positionsForSub);
+        subscribeInstrumentsByCurPosAndProcessIds(positionsForSub, [processId]);
       }
     });
   });
