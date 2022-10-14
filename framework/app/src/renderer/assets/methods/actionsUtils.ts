@@ -16,7 +16,6 @@ import {
   InstrumentTypeEnum,
   InstrumentTypes,
   KfCategoryTypes,
-  LedgerCategoryEnum,
   OffsetEnum,
   PriceTypeEnum,
   ProcessStatusTypes,
