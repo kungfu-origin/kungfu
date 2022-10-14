@@ -819,10 +819,11 @@ export const useSubscibeInstrumentAtEntry = (
   const subscribeInstrumentsByCurPosAndProcessIds = (
     positionsForSub: KungfuApi.InstrumentForSub[],
     processIds: string[],
+    filterByCached = true,
   ) => {
     positionsForSub.forEach((item) => {
       processIds.forEach((processId) => {
-        if (subscribedInstrumentsForPos[item.uidKey]) {
+        if (filterByCached && subscribedInstrumentsForPos[item.uidKey]) {
           return;
         }
 
@@ -876,7 +877,11 @@ export const useSubscibeInstrumentAtEntry = (
           ...getCurrentPositions(window.watcher),
         ];
 
-        subscribeInstrumentsByCurPosAndProcessIds(positionsForSub, [processId]);
+        subscribeInstrumentsByCurPosAndProcessIds(
+          positionsForSub,
+          [processId],
+          false,
+        );
       }
     });
   });
