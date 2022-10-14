@@ -16,7 +16,6 @@ import {
   InstrumentTypeEnum,
   InstrumentTypes,
   KfCategoryTypes,
-  LedgerCategoryEnum,
   OffsetEnum,
   PriceTypeEnum,
   ProcessStatusTypes,
@@ -36,7 +35,6 @@ import {
   dealCategory,
   dealAssetsByHolderUID,
   getAvailDaemonList,
-  // removeNoDefaultStrategyFolders,
   getStrategyStateStatusName,
   isBrokerStateReady,
   dealKfNumber,
@@ -774,51 +772,84 @@ export const usePreStartAndQuitApp = (): {
   };
 };
 
-export const useSubscibeInstrumentAtEntry = (): void => {
+export const useSubscibeInstrumentAtEntry = (
+  watcher: KungfuApi.Watcher | null,
+): void => {
+  const { currentGlobalKfLocation } = useCurrentGlobalKfLocation(watcher);
+  const { appStates, processStatusData } = useProcessStatusDetailData();
+  const { mdList } = storeToRefs(useGlobalStore());
+  const { mdExtTypeMap } = useExtConfigsRelated();
+  const { subscribedInstruments, subscribeAllInstrumentByMdProcessId } =
+    useInstruments();
+
   const app = getCurrentInstance();
   const subscribedInstrumentsForPos: Record<string, boolean> = {};
   const SUBSCRIBE_INSTRUMENTS_LIMIT = 50;
+
+  const mdProcessIds = computed(() => {
+    return mdList.value.map((md) => getProcessIdByKfLocation(md));
+  });
+
+  const getCurrentPositions = (watcher: KungfuApi.Watcher) => {
+    const positions = globalThis.HookKeeper.getHooks().dealTradingData.trigger(
+      watcher,
+      currentGlobalKfLocation.value,
+      watcher.ledger.Position,
+      'position',
+    ) as KungfuApi.Position[];
+
+    if (!positions.length) return [];
+
+    return positions
+      .reverse()
+      .slice(0, SUBSCRIBE_INSTRUMENTS_LIMIT)
+      .map(
+        (item: KungfuApi.Position): KungfuApi.InstrumentForSub => ({
+          uidKey: item.uid_key,
+          exchangeId: item.exchange_id,
+          instrumentId: item.instrument_id,
+          instrumentType: item.instrument_type,
+          instrumentName: '',
+          ukey: item.uid_key,
+          id: item.uid_key,
+        }),
+      );
+  };
+
+  const subscribeInstrumentsByCurPosAndProcessIds = (
+    positionsForSub: KungfuApi.InstrumentForSub[],
+    processIds: string[],
+    filterByCached = true,
+  ) => {
+    positionsForSub.forEach((item) => {
+      processIds.forEach((processId) => {
+        if (filterByCached && subscribedInstrumentsForPos[item.uidKey]) {
+          return;
+        }
+
+        subscribeAllInstrumentByMdProcessId(
+          processId,
+          processStatusData.value,
+          appStates.value,
+          mdExtTypeMap.value,
+          [item],
+        );
+
+        filterByCached && (subscribedInstrumentsForPos[item.uidKey] = true);
+      });
+    });
+  };
 
   onMounted(() => {
     if (app?.proxy) {
       const subscription = app.proxy.$tradingDataSubject
         .pipe(throttleTime(3000))
         .subscribe((watcher: KungfuApi.Watcher) => {
-          const bigint0 = BigInt(0);
-          const positions = watcher.ledger.Position.filter('ledger_category', 0)
-            .nofilter('volume', bigint0)
-            .list()
-            .map(
-              (item: KungfuApi.Position): KungfuApi.InstrumentForSub => ({
-                uidKey: item.uid_key,
-                exchangeId: item.exchange_id,
-                instrumentId: item.instrument_id,
-                instrumentType: item.instrument_type,
-                mdLocation: watcher.getLocation(item.holder_uid),
-              }),
-            );
-
-          positions.slice(0, SUBSCRIBE_INSTRUMENTS_LIMIT).forEach((item) => {
-            if (subscribedInstrumentsForPos[item.uidKey]) {
-              return;
-            }
-
-            const { group } = item.mdLocation;
-            const mdLocationResolved: KungfuApi.KfLocation = {
-              category: 'md',
-              group,
-              name: group,
-              mode: 'live',
-            };
-
-            kfRequestMarketData(
-              watcher,
-              item.exchangeId,
-              item.instrumentId,
-              mdLocationResolved,
-            ).catch((err) => console.warn(err.message));
-            subscribedInstrumentsForPos[item.uidKey] = true;
-          });
+          const positionsForSub = getCurrentPositions(watcher);
+          subscribeInstrumentsByCurPosAndProcessIds(
+            positionsForSub,
+            mdProcessIds.value,
+          );
         });
 
       onBeforeUnmount(() => {
@@ -827,10 +858,6 @@ export const useSubscibeInstrumentAtEntry = (): void => {
     }
   });
 
-  const { appStates, processStatusData } = useProcessStatusDetailData();
-  const { mdExtTypeMap } = useExtConfigsRelated();
-  const { subscribedInstruments, subscribeAllInstrumentByMdProcessId } =
-    useInstruments();
   watch(appStates, (newAppStates, oldAppStates) => {
     Object.keys(newAppStates || {}).forEach((processId: string) => {
       const newState = newAppStates[processId];
@@ -842,27 +869,18 @@ export const useSubscibeInstrumentAtEntry = (): void => {
         processStatusData.value[processId] === 'online' &&
         processId.includes('md_')
       ) {
-        const positions: KungfuApi.InstrumentResolved[] =
-          window.watcher.ledger.Position.nofilter('volume', BigInt(0))
-            .filter('ledger_category', LedgerCategoryEnum.td)
-            .list()
-            .map((item: KungfuApi.Position) => ({
-              instrumentId: item.instrument_id,
-              instrumentName: '',
-              exchangeId: item.exchange_id,
-              instrumentType: item.instrument_type,
-              ukey: item.uid_key,
-              id: item.uid_key,
-            }));
-        subscribeAllInstrumentByMdProcessId(
-          processId,
-          processStatusData.value,
-          appStates.value,
-          mdExtTypeMap.value,
-          [
-            ...subscribedInstruments.value,
-            ...positions.slice(0, SUBSCRIBE_INSTRUMENTS_LIMIT),
-          ],
+        const positionsForSub = [
+          ...subscribedInstruments.value.map((instrument) => ({
+            ...instrument,
+            uidKey: instrument.ukey,
+          })),
+          ...getCurrentPositions(window.watcher),
+        ];
+
+        subscribeInstrumentsByCurPosAndProcessIds(
+          positionsForSub,
+          [processId],
+          false,
         );
       }
     });

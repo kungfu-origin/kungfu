@@ -203,6 +203,10 @@ private:
 
   void AfterMasterDown();
 
+  void refresh_books();
+
+  void refresh_account_book(int64_t trigger_time, uint32_t account_uid);
+
   template <typename DataType>
   void feed_state_data_bank(const state<DataType> &state, yijinjing::cache::bank &receiver) {
     boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
@@ -258,19 +262,7 @@ private:
     return instruction.*id_ptr;
   }
 
-  template <typename DataType>
-  std::enable_if_t<not (std::is_same_v<DataType, longfist::types::Instrument> or std::is_same_v<DataType, longfist::types::Position>)>
-  UpdateLedger(const boost::hana::basic_type<DataType> &type) {
-    for (auto &pair : data_bank_[type]) {
-      auto &state = pair.second;
-      update_ledger(state.update_time, state.source, state.dest, state.data);
-    }
-  }
-
-  template <typename DataType>
-  std::enable_if_t<std::is_same_v<DataType, longfist::types::Instrument> or
-                   std::is_same_v<DataType, longfist::types::Position>>
-  UpdateLedger(const boost::hana::basic_type<DataType> &type) {
+  template <typename DataType> void UpdateLedger(const boost::hana::basic_type<DataType> &type) {
     using DataTypeMap = std::unordered_map<uint64_t, state<DataType>>;
     auto &target_map = const_cast<DataTypeMap &>(data_bank_[type]);
     auto iter = target_map.begin();
