@@ -181,7 +181,7 @@ class SilentAutoClient : public AutoClient {
 public:
   explicit SilentAutoClient(yijinjing::practice::apprentice &app);
 
-  [[nodiscard]] bool is_subscribed(const std::string &exchange_id, const std::string &instrument_id) const override;
+  // [[nodiscard]] bool is_subscribed(const std::string &exchange_id, const std::string &instrument_id) const override;
 
   void renew(int64_t trigger_time, const yijinjing::data::location_ptr &md_location) override;
 

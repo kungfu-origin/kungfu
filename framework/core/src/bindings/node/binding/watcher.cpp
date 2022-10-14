@@ -365,6 +365,7 @@ void Watcher::on_start() {
     events_ | is(Trade::tag) | $$(UpdateBook(event, event->data<Trade>()));
     events_ | is(Position::tag) | $$(UpdateBook(event, event->data<Position>()));
     events_ | is(PositionEnd::tag) | $$(UpdateAsset(event, event->data<PositionEnd>().holder_uid));
+    refresh_books();
   }
 
   events_ | is(Channel::tag) | $$(InspectChannel(event->gen_time(), event->data<Channel>()));
@@ -374,6 +375,30 @@ void Watcher::on_start() {
       $$(UpdateBrokerState(event->source(), event->dest(), event->data<BrokerStateUpdate>()));
   events_ | is(StrategyStateUpdate::tag) | $$(UpdateStrategyState(event->source(), event->data<StrategyStateUpdate>()));
   events_ | is(CacheReset::tag) | $$(UpdateEventCache(event));
+}
+
+void Watcher::refresh_books() {
+  for (const auto &pair : bookkeeper_.get_books()) {
+    if (pair.second->asset.ledger_category == LedgerCategory::Account) {
+      refresh_account_book(now(), pair.first);
+    }
+  }
+}
+
+void Watcher::refresh_account_book(int64_t trigger_time, uint32_t account_uid) {
+  auto account_location = get_location(account_uid);
+  auto group = account_location->group;
+  auto md_location = location::make_shared(account_location->mode, category::MD, group, group, get_locator());
+  auto book = bookkeeper_.get_book(account_uid);
+  auto subscribe_positions = [&](auto positions) {
+    for (const auto &pair : positions) {
+      auto &position = pair.second;
+      broker_client_.subscribe(md_location, position.exchange_id, position.instrument_id);
+    }
+  };
+
+  subscribe_positions(book->long_positions);
+  subscribe_positions(book->short_positions);
 }
 
 void Watcher::Feed(const event_ptr &event, const Instrument &instrument) {

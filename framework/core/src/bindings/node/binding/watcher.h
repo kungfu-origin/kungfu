@@ -203,6 +203,10 @@ private:
 
   void AfterMasterDown();
 
+  void refresh_books();
+
+  void refresh_account_book(int64_t trigger_time, uint32_t account_uid);
+
   template <typename DataType>
   void feed_state_data_bank(const state<DataType> &state, yijinjing::cache::bank &receiver) {
     boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
