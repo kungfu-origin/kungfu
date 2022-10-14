@@ -768,14 +768,6 @@ declare namespace KungfuApi {
     hash(str: string): string;
   }
 
-  export interface InstrumentForSub {
-    uidKey: string;
-    exchangeId: string;
-    instrumentId: string;
-    instrumentType: InstrumentTypeEnum;
-    mdLocation: KfLocation;
-  }
-
   export interface InstrumentResolved {
     instrumentId: string;
     instrumentType: InstrumentTypeEnum;
@@ -783,6 +775,10 @@ declare namespace KungfuApi {
     exchangeId: string;
     id: string;
     ukey: string;
+  }
+
+  export interface InstrumentForSub extends InstrumentResolved {
+    uidKey: string;
   }
 
   export interface KfLocationBase {
