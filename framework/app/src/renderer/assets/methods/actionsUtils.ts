@@ -316,11 +316,17 @@ export const useDealExportHistoryTradingData = (): {
     const dateResolved = dayjs(date).format('YYYYMMDD');
 
     if (tradingDataType === 'all') {
-      const { tradingData } = await getKungfuHistoryData(
+      const historyData = await getKungfuHistoryData(
         date,
         dateType,
         tradingDataType,
-      );
+      ).catch(() => {
+        error(t('database_locked'));
+      });
+
+      if (!historyData) return;
+
+      const { tradingData } = historyData;
       const orders = tradingData.Order.sort('update_time');
       const trades = tradingData.Trade.sort('trade_time');
       const orderStat = tradingData.OrderStat.sort('insert_time');
@@ -380,13 +386,19 @@ export const useDealExportHistoryTradingData = (): {
     }
 
     exportDataLoading.value = true;
-    const { tradingData } = await getKungfuHistoryData(
+    const historyData = await getKungfuHistoryData(
       date,
       dateType,
       tradingDataType,
       currentKfLocation,
-    );
+    ).catch(() => {
+      error(t('database_locked'));
+    });
     exportDataLoading.value = false;
+
+    if (!historyData) return Promise.resolve();
+
+    const { tradingData } = historyData;
 
     const processId = getProcessIdByKfLocation(currentKfLocation);
     const filename: string = await dialog

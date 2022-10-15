@@ -286,7 +286,7 @@ declare namespace KungfuApi {
   }
 
   export interface HistoryStore {
-    selectPeriod(from: string, to: string): TradingData;
+    selectPeriod(from: string, to: string): TradingData | false;
   }
 
   export interface CommissionStore {

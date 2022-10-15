@@ -6,6 +6,7 @@ import {
   delayMilliSeconds,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
+  messagePrompt,
   useDashboardBodySize,
   useDownloadHistoryTradingData,
   useTableSearchKeyword,
@@ -41,7 +42,9 @@ import {
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import TradeStatisticModal from './TradeStatisticModal.vue';
 import { HistoryDateEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
+import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 
+const { t } = VueI18n.global;
 const app = getCurrentInstance();
 const { handleBodySizeChange } = useDashboardBodySize();
 
@@ -128,28 +131,37 @@ watch(historyDate, async (newDate) => {
 
   trades.value = [];
   historyDataLoading.value = true;
-  await delayMilliSeconds(500);
-  const { tradingData } = await getKungfuHistoryData(
-    newDate.format(),
-    HistoryDateEnum.naturalDate,
-    'Trade',
-    currentGlobalKfLocation.value,
-  );
+  delayMilliSeconds(500)
+    .then(() =>
+      getKungfuHistoryData(
+        newDate.format(),
+        HistoryDateEnum.naturalDate,
+        'Trade',
+        currentGlobalKfLocation.value as KungfuApi.KfLocation,
+      ).catch(() => {
+        messagePrompt().error(t('database_locked'));
+      }),
+    )
+    .then((historyData) => {
+      if (!historyData) return;
 
-  const tradesResolved =
-    globalThis.HookKeeper.getHooks().dealTradingData.trigger(
-      window.watcher,
-      currentGlobalKfLocation.value,
-      tradingData.Trade,
-      'trade',
-    ) as KungfuApi.Trade[];
+      const { tradingData } = historyData;
 
-  trades.value = toRaw(
-    tradesResolved.map((item) =>
-      toRaw(dealTrade(window.watcher, item, tradingData.OrderStat, true)),
-    ),
-  );
-  historyDataLoading.value = false;
+      const tradesResolved =
+        globalThis.HookKeeper.getHooks().dealTradingData.trigger(
+          window.watcher,
+          currentGlobalKfLocation.value,
+          tradingData.Trade,
+          'trade',
+        ) as KungfuApi.Trade[];
+
+      trades.value = toRaw(
+        tradesResolved.map((item) =>
+          toRaw(dealTrade(window.watcher, item, tradingData.OrderStat, true)),
+        ),
+      );
+      historyDataLoading.value = false;
+    });
 });
 
 function handleShowTradingDataDetail({
