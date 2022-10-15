@@ -316,11 +316,17 @@ export const useDealExportHistoryTradingData = (): {
     const dateResolved = dayjs(date).format('YYYYMMDD');
 
     if (tradingDataType === 'all') {
-      const { tradingData } = await getKungfuHistoryData(
+      const historyData = await getKungfuHistoryData(
         date,
         dateType,
         tradingDataType,
-      );
+      ).catch(() => {
+        error(t('database_locked'));
+      });
+
+      if (!historyData) return;
+
+      const { tradingData } = historyData;
       const orders = tradingData.Order.sort('update_time');
       const trades = tradingData.Trade.sort('trade_time');
       const orderStat = tradingData.OrderStat.sort('insert_time');
@@ -380,13 +386,19 @@ export const useDealExportHistoryTradingData = (): {
     }
 
     exportDataLoading.value = true;
-    const { tradingData } = await getKungfuHistoryData(
+    const historyData = await getKungfuHistoryData(
       date,
       dateType,
       tradingDataType,
       currentKfLocation,
-    );
+    ).catch(() => {
+      error(t('database_locked'));
+    });
     exportDataLoading.value = false;
+
+    if (!historyData) return Promise.resolve();
+
+    const { tradingData } = historyData;
 
     const processId = getProcessIdByKfLocation(currentKfLocation);
     const filename: string = await dialog
@@ -516,7 +528,7 @@ export const useInstruments = (): {
     appStates: Record<string, BrokerStateStatusTypes>,
     mdExtTypeMap: Record<string, InstrumentTypes>,
     instrumentsForSubscribe: KungfuApi.InstrumentResolved[],
-  ): void;
+  ): Promise<boolean>;
   subscribeAllInstrumentByAppStates(
     processStatus: Pm2ProcessStatusData,
     appStates: Record<string, BrokerStateStatusTypes>,
@@ -546,7 +558,7 @@ export const useInstruments = (): {
     appStates: Record<string, BrokerStateStatusTypes>,
     mdExtTypeMap: Record<string, InstrumentTypes>,
     instrumentsForSubscribe: KungfuApi.InstrumentResolved[],
-  ): void => {
+  ): Promise<boolean> => {
     if (isBrokerStateReady(appStates[processId])) {
       if (processStatus[processId] === 'online') {
         if (processId.indexOf('md_') === 0) {
@@ -556,23 +568,40 @@ export const useInstruments = (): {
             const sourceType = mdExtTypeMap[sourceId];
             const ableSubscribedInstrumentTypes =
               AbleSubscribeInstrumentTypesBySourceType[sourceType] || [];
+            return Promise.all(
+              instrumentsForSubscribe.map((item) => {
+                if (
+                  ableSubscribedInstrumentTypes.includes(+item.instrumentType)
+                ) {
+                  return new Promise<void>((resolve, reject) => {
+                    kfRequestMarketData(
+                      window.watcher,
+                      item.exchangeId,
+                      item.instrumentId,
+                      mdLocation,
+                    )
+                      .then((flag) => {
+                        if (flag) {
+                          resolve();
+                        } else {
+                          reject();
+                        }
+                      })
+                      .catch((err) => {
+                        console.warn(err.message);
+                      });
+                  });
+                }
 
-            instrumentsForSubscribe.forEach((item) => {
-              if (
-                ableSubscribedInstrumentTypes.includes(+item.instrumentType)
-              ) {
-                kfRequestMarketData(
-                  window.watcher,
-                  item.exchangeId,
-                  item.instrumentId,
-                  mdLocation,
-                ).catch((err) => console.warn(err.message));
-              }
-            });
+                return Promise.reject();
+              }),
+            ).then(() => true);
           }
         }
       }
     }
+
+    return Promise.resolve(false);
   };
 
   const subscribeAllInstrumentByAppStates = (
@@ -826,16 +855,16 @@ export const useSubscibeInstrumentAtEntry = (
         if (filterByCached && subscribedInstrumentsForPos[item.uidKey]) {
           return;
         }
-
         subscribeAllInstrumentByMdProcessId(
           processId,
           processStatusData.value,
           appStates.value,
           mdExtTypeMap.value,
           [item],
-        );
-
-        filterByCached && (subscribedInstrumentsForPos[item.uidKey] = true);
+        ).then((flag) => {
+          console.log(flag);
+          filterByCached && (subscribedInstrumentsForPos[item.uidKey] = flag);
+        });
       });
     });
   };
