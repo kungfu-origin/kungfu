@@ -516,7 +516,7 @@ export const useInstruments = (): {
     appStates: Record<string, BrokerStateStatusTypes>,
     mdExtTypeMap: Record<string, InstrumentTypes>,
     instrumentsForSubscribe: KungfuApi.InstrumentResolved[],
-  ): Promise<void[]>;
+  ): Promise<boolean>;
   subscribeAllInstrumentByAppStates(
     processStatus: Pm2ProcessStatusData,
     appStates: Record<string, BrokerStateStatusTypes>,
@@ -546,7 +546,7 @@ export const useInstruments = (): {
     appStates: Record<string, BrokerStateStatusTypes>,
     mdExtTypeMap: Record<string, InstrumentTypes>,
     instrumentsForSubscribe: KungfuApi.InstrumentResolved[],
-  ): Promise<void[]> => {
+  ): Promise<boolean> => {
     if (isBrokerStateReady(appStates[processId])) {
       if (processStatus[processId] === 'online') {
         if (processId.indexOf('md_') === 0) {
@@ -556,7 +556,6 @@ export const useInstruments = (): {
             const sourceType = mdExtTypeMap[sourceId];
             const ableSubscribedInstrumentTypes =
               AbleSubscribeInstrumentTypesBySourceType[sourceType] || [];
-
             return Promise.all(
               instrumentsForSubscribe.map((item) => {
                 if (
@@ -584,13 +583,13 @@ export const useInstruments = (): {
 
                 return Promise.reject();
               }),
-            );
+            ).then(() => true);
           }
         }
       }
     }
 
-    return Promise.reject();
+    return Promise.resolve(false);
   };
 
   const subscribeAllInstrumentByAppStates = (
@@ -844,15 +843,15 @@ export const useSubscibeInstrumentAtEntry = (
         if (filterByCached && subscribedInstrumentsForPos[item.uidKey]) {
           return;
         }
-
         subscribeAllInstrumentByMdProcessId(
           processId,
           processStatusData.value,
           appStates.value,
           mdExtTypeMap.value,
           [item],
-        ).then(() => {
-          filterByCached && (subscribedInstrumentsForPos[item.uidKey] = true);
+        ).then((flag) => {
+          console.log(flag);
+          filterByCached && (subscribedInstrumentsForPos[item.uidKey] = flag);
         });
       });
     });
