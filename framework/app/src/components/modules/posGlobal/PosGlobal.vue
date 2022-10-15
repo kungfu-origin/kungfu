@@ -94,6 +94,7 @@ function buildGlobalPositions(
         prePosStat;
       posStat[id] = {
         ...prePosStat,
+        uid_key: pos.uid_key,
         yesterday_volume: yesterday_volume + pos.yesterday_volume,
         volume: volume + pos.volume,
 
