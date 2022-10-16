@@ -600,7 +600,7 @@ export const useInstruments = (): {
     mdExtTypeMap: Record<string, InstrumentTypes>,
     instrumentsForSubscribe: KungfuApi.InstrumentResolved[],
   ): Promise<Array<KungfuApi.InstrumentResolved>> => {
-    const subscribedInstruments = await Promise.all(
+    const subscribedSuccessInstruments = await Promise.all(
       Object.keys(appStates || {}).map((processId) =>
         subscribeAllInstrumentByMdProcessId(
           processId,
@@ -612,7 +612,7 @@ export const useInstruments = (): {
       ),
     );
 
-    return subscribedInstruments.reduce((pre, instruments) => {
+    return subscribedSuccessInstruments.reduce((pre, instruments) => {
       return pre.concat(instruments);
     }, []);
   };
