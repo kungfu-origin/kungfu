@@ -528,7 +528,7 @@ export const useInstruments = (): {
     appStates: Record<string, BrokerStateStatusTypes>,
     mdExtTypeMap: Record<string, InstrumentTypes>,
     instrumentsForSubscribe: KungfuApi.InstrumentResolved[],
-  ): Promise<boolean>;
+  ): Promise<Array<KungfuApi.InstrumentResolved>>;
   subscribeAllInstrumentByAppStates(
     processStatus: Pm2ProcessStatusData,
     appStates: Record<string, BrokerStateStatusTypes>,
@@ -552,13 +552,13 @@ export const useInstruments = (): {
 } => {
   const { instruments, subscribedInstruments } = storeToRefs(useGlobalStore());
 
-  const subscribeAllInstrumentByMdProcessId = (
+  const subscribeAllInstrumentByMdProcessId = async (
     processId: string,
     processStatus: Pm2ProcessStatusData,
     appStates: Record<string, BrokerStateStatusTypes>,
     mdExtTypeMap: Record<string, InstrumentTypes>,
     instrumentsForSubscribe: KungfuApi.InstrumentResolved[],
-  ): Promise<boolean> => {
+  ): Promise<Array<KungfuApi.InstrumentResolved>> => {
     if (isBrokerStateReady(appStates[processId])) {
       if (processStatus[processId] === 'online') {
         if (processId.indexOf('md_') === 0) {
@@ -568,40 +568,30 @@ export const useInstruments = (): {
             const sourceType = mdExtTypeMap[sourceId];
             const ableSubscribedInstrumentTypes =
               AbleSubscribeInstrumentTypesBySourceType[sourceType] || [];
-            return Promise.all(
-              instrumentsForSubscribe.map((item) => {
-                if (
-                  ableSubscribedInstrumentTypes.includes(+item.instrumentType)
-                ) {
-                  return new Promise<void>((resolve, reject) => {
-                    kfRequestMarketData(
-                      window.watcher,
-                      item.exchangeId,
-                      item.instrumentId,
-                      mdLocation,
-                    )
-                      .then((flag) => {
-                        if (flag) {
-                          resolve();
-                        } else {
-                          reject();
-                        }
-                      })
-                      .catch((err) => {
-                        console.warn(err.message);
-                      });
-                  });
-                }
 
-                return Promise.reject();
-              }),
-            ).then(() => true);
+            const instrumentsForSubscribeResolved =
+              instrumentsForSubscribe.filter((item) =>
+                ableSubscribedInstrumentTypes.includes(+item.instrumentType),
+              );
+            const subscribeResults = await Promise.all(
+              instrumentsForSubscribeResolved.map((item) =>
+                kfRequestMarketData(
+                  window.watcher,
+                  item.exchangeId,
+                  item.instrumentId,
+                  mdLocation,
+                ),
+              ),
+            );
+            return instrumentsForSubscribeResolved.filter(
+              (_, index) => !!subscribeResults[index],
+            );
           }
         }
       }
     }
 
-    return Promise.resolve(false);
+    return [];
   };
 
   const subscribeAllInstrumentByAppStates = (
@@ -851,19 +841,20 @@ export const useSubscibeInstrumentAtEntry = (
     filterByCached = true,
   ) => {
     positionsForSub.forEach((item) => {
-      processIds.forEach((processId) => {
+      processIds.forEach(async (processId) => {
         if (filterByCached && subscribedInstrumentsForPos[item.uidKey]) {
           return;
         }
-        subscribeAllInstrumentByMdProcessId(
-          processId,
-          processStatusData.value,
-          appStates.value,
-          mdExtTypeMap.value,
-          [item],
-        ).then((flag) => {
-          console.log(flag);
-          filterByCached && (subscribedInstrumentsForPos[item.uidKey] = flag);
+        const subscribedInsturments =
+          (await subscribeAllInstrumentByMdProcessId(
+            processId,
+            processStatusData.value,
+            appStates.value,
+            mdExtTypeMap.value,
+            [item],
+          )) as KungfuApi.InstrumentForSub[];
+        subscribedInsturments.forEach((item) => {
+          filterByCached && (subscribedInstrumentsForPos[item.uidKey] = true);
         });
       });
     });

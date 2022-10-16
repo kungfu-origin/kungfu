@@ -220,14 +220,12 @@ export const getKungfuHistoryData = (
       if (tradingDataTypeName === 'all') {
         return {
           tradingData: tradingData as KungfuApi.TradingData,
-          historyDatas: [],
         };
       }
 
       if (!kfLocation) {
         return {
           tradingData: tradingData as KungfuApi.TradingData,
-          historyDatas: [],
         };
       }
 
