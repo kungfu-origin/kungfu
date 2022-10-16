@@ -316,13 +316,27 @@ export const useDealExportHistoryTradingData = (): {
     const dateResolved = dayjs(date).format('YYYYMMDD');
 
     if (tradingDataType === 'all') {
-      const historyData = await getKungfuHistoryData(
-        date,
-        dateType,
-        tradingDataType,
-      ).catch(() => {
-        error(t('database_locked'));
-      });
+      let historyData: {
+        tradingData: KungfuApi.TradingData;
+      } | null = null;
+
+      try {
+        historyData = await getKungfuHistoryData(
+          date,
+          dateType,
+          tradingDataType,
+        );
+      } catch (err) {
+        if (err instanceof Error) {
+          if (err.message === 'database_locked') {
+            error(t('database_locked'));
+          } else {
+            console.error(err);
+          }
+        } else {
+          console.error(err);
+        }
+      }
 
       if (!historyData) return;
 
@@ -386,14 +400,29 @@ export const useDealExportHistoryTradingData = (): {
     }
 
     exportDataLoading.value = true;
-    const historyData = await getKungfuHistoryData(
-      date,
-      dateType,
-      tradingDataType,
-      currentKfLocation,
-    ).catch(() => {
-      error(t('database_locked'));
-    });
+    let historyData: {
+      tradingData: KungfuApi.TradingData;
+    } | null = null;
+
+    try {
+      historyData = await getKungfuHistoryData(
+        date,
+        dateType,
+        tradingDataType,
+        currentKfLocation,
+      );
+    } catch (err) {
+      if (err instanceof Error) {
+        if (err.message === 'database_locked') {
+          error(t('database_locked'));
+        } else {
+          console.error(err);
+        }
+      } else {
+        console.error(err);
+      }
+    }
+
     exportDataLoading.value = false;
 
     if (!historyData) return Promise.resolve();

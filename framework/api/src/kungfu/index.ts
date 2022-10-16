@@ -176,7 +176,7 @@ export const getKungfuDataByDateRange = (
         const historyData: KungfuApi.TradingData | Record<string, unknown> = {};
 
         if (!kungfuDataToday || !kungfuDataYesterday || !kungfuDataFriday)
-          return reject();
+          return reject(new Error('database_locked'));
 
         dataTypeForHistory.forEach((key) => {
           if (key === 'Order' || key === 'Trade' || key === 'OrderInput') {
@@ -198,7 +198,7 @@ export const getKungfuDataByDateRange = (
       } else {
         const kungfuDataToday = history.selectPeriod(from, to);
 
-        if (!kungfuDataToday) return reject();
+        if (!kungfuDataToday) return reject(new Error('database_locked'));
 
         resolve(kungfuDataToday);
       }
