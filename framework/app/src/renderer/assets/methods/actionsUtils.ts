@@ -853,8 +853,8 @@ export const useSubscibeInstrumentAtEntry = (
       appStates.value,
       mdExtTypeMap.value,
       positionsForSubResolved,
-    ).then((subscribedInstruments) => {
-      (subscribedInstruments as KungfuApi.InstrumentForSub[]).forEach(
+    ).then((subscribedSuccessInstruments) => {
+      (subscribedSuccessInstruments as KungfuApi.InstrumentForSub[]).forEach(
         (item) => {
           filterByCached && (subscribedInstrumentsForPos[item.uidKey] = true);
         },
