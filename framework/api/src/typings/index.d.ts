@@ -286,7 +286,7 @@ declare namespace KungfuApi {
   }
 
   export interface HistoryStore {
-    selectPeriod(from: string, to: string): TradingData;
+    selectPeriod(from: string, to: string): TradingData | false;
   }
 
   export interface CommissionStore {
@@ -716,7 +716,7 @@ declare namespace KungfuApi {
       kfLocation: KfLocation,
       exchangeId: string,
       instrumentId: string,
-    ): void;
+    ): boolean;
     cancelOrder(
       orderAction: OrderAction,
       tdLocation: KfLocation,
