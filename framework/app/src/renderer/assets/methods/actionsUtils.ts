@@ -840,6 +840,8 @@ export const useSubscibeInstrumentAtEntry = (
   const SUBSCRIBE_INSTRUMENTS_LIMIT = 50;
 
   const getCurrentPositions = (watcher: KungfuApi.Watcher) => {
+    if (!currentGlobalKfLocation.value) return [];
+
     const positions = globalThis.HookKeeper.getHooks().dealTradingData.trigger(
       watcher,
       currentGlobalKfLocation.value,
