@@ -258,6 +258,10 @@ class RegistryJSONEncoder(json.JSONEncoder):
 
 
 def load_strategy(ctx, path, key):
+    ctx.logger.debug(f"loading strategy from {path}")
+    ctx.logger.debug(f"strategy key: {key}")
+    ctx.logger.debug(f"strategy dirname: {os.path.dirname(path)}")
+
     if path.endswith(".py"):
         return Strategy(ctx)  # keep strategy alive for pybind11
     elif key is not None and (path.endswith(".so") or path.endswith(".pyd")):
