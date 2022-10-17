@@ -163,27 +163,42 @@ watch(historyDate, async (newDate) => {
 
   orders.value = [];
   historyDataLoading.value = true;
-  await delayMilliSeconds(500);
-  const { tradingData } = await getKungfuHistoryData(
-    newDate.format(),
-    HistoryDateEnum.naturalDate,
-    'Order',
-    currentGlobalKfLocation.value,
-  );
-  const orderResolved =
-    globalThis.HookKeeper.getHooks().dealTradingData.trigger(
-      window.watcher,
-      currentGlobalKfLocation.value,
-      tradingData.Order,
-      'order',
-    ) as KungfuApi.Order[];
+  delayMilliSeconds(500)
+    .then(() =>
+      getKungfuHistoryData(
+        newDate.format(),
+        HistoryDateEnum.naturalDate,
+        'Order',
+        currentGlobalKfLocation.value as KungfuApi.KfLocation,
+      ),
+    )
+    .then((historyData) => {
+      if (!historyData) return;
 
-  orders.value = toRaw(
-    orderResolved.map((item) =>
-      toRaw(dealOrder(window.watcher, item, tradingData.OrderStat, true)),
-    ),
-  );
-  historyDataLoading.value = false;
+      const { tradingData } = historyData;
+
+      const orderResolved =
+        globalThis.HookKeeper.getHooks().dealTradingData.trigger(
+          window.watcher,
+          currentGlobalKfLocation.value,
+          tradingData.Order,
+          'order',
+        ) as KungfuApi.Order[];
+
+      orders.value = toRaw(
+        orderResolved.map((item) =>
+          toRaw(dealOrder(window.watcher, item, tradingData.OrderStat, true)),
+        ),
+      );
+      historyDataLoading.value = false;
+    })
+    .catch((err) => {
+      if (err.message === 'database_locked') {
+        messagePrompt().error(t('database_locked'));
+      } else {
+        console.error(err.message);
+      }
+    });
 });
 
 function isFinishedOrderStatus(orderStatus: OrderStatusEnum): boolean {

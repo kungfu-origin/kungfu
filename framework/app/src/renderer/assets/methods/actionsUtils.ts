@@ -316,11 +316,31 @@ export const useDealExportHistoryTradingData = (): {
     const dateResolved = dayjs(date).format('YYYYMMDD');
 
     if (tradingDataType === 'all') {
-      const { tradingData } = await getKungfuHistoryData(
-        date,
-        dateType,
-        tradingDataType,
-      );
+      let historyData: {
+        tradingData: KungfuApi.TradingData;
+      } | null = null;
+
+      try {
+        historyData = await getKungfuHistoryData(
+          date,
+          dateType,
+          tradingDataType,
+        );
+      } catch (err) {
+        if (err instanceof Error) {
+          if (err.message === 'database_locked') {
+            error(t('database_locked'));
+          } else {
+            console.error(err);
+          }
+        } else {
+          console.error(err);
+        }
+      }
+
+      if (!historyData) return;
+
+      const { tradingData } = historyData;
       const orders = tradingData.Order.sort('update_time');
       const trades = tradingData.Trade.sort('trade_time');
       const orderStat = tradingData.OrderStat.sort('insert_time');
@@ -380,13 +400,34 @@ export const useDealExportHistoryTradingData = (): {
     }
 
     exportDataLoading.value = true;
-    const { tradingData } = await getKungfuHistoryData(
-      date,
-      dateType,
-      tradingDataType,
-      currentKfLocation,
-    );
+    let historyData: {
+      tradingData: KungfuApi.TradingData;
+    } | null = null;
+
+    try {
+      historyData = await getKungfuHistoryData(
+        date,
+        dateType,
+        tradingDataType,
+        currentKfLocation,
+      );
+    } catch (err) {
+      if (err instanceof Error) {
+        if (err.message === 'database_locked') {
+          error(t('database_locked'));
+        } else {
+          console.error(err);
+        }
+      } else {
+        console.error(err);
+      }
+    }
+
     exportDataLoading.value = false;
+
+    if (!historyData) return Promise.resolve();
+
+    const { tradingData } = historyData;
 
     const processId = getProcessIdByKfLocation(currentKfLocation);
     const filename: string = await dialog
@@ -516,13 +557,13 @@ export const useInstruments = (): {
     appStates: Record<string, BrokerStateStatusTypes>,
     mdExtTypeMap: Record<string, InstrumentTypes>,
     instrumentsForSubscribe: KungfuApi.InstrumentResolved[],
-  ): void;
+  ): Promise<Array<KungfuApi.InstrumentResolved>>;
   subscribeAllInstrumentByAppStates(
     processStatus: Pm2ProcessStatusData,
     appStates: Record<string, BrokerStateStatusTypes>,
     mdExtTypeMap: Record<string, InstrumentTypes>,
     instrumentsForSubscribe: KungfuApi.InstrumentResolved[],
-  ): void;
+  ): Promise<Array<KungfuApi.InstrumentResolved>>;
 
   searchInstrumentResult: Ref<string | undefined>;
   searchInstrumnetOptions: Ref<{ value: string; label: string }[]>;
@@ -540,13 +581,13 @@ export const useInstruments = (): {
 } => {
   const { instruments, subscribedInstruments } = storeToRefs(useGlobalStore());
 
-  const subscribeAllInstrumentByMdProcessId = (
+  const subscribeAllInstrumentByMdProcessId = async (
     processId: string,
     processStatus: Pm2ProcessStatusData,
     appStates: Record<string, BrokerStateStatusTypes>,
     mdExtTypeMap: Record<string, InstrumentTypes>,
     instrumentsForSubscribe: KungfuApi.InstrumentResolved[],
-  ): void => {
+  ): Promise<Array<KungfuApi.InstrumentResolved>> => {
     if (isBrokerStateReady(appStates[processId])) {
       if (processStatus[processId] === 'online') {
         if (processId.indexOf('md_') === 0) {
@@ -557,39 +598,52 @@ export const useInstruments = (): {
             const ableSubscribedInstrumentTypes =
               AbleSubscribeInstrumentTypesBySourceType[sourceType] || [];
 
-            instrumentsForSubscribe.forEach((item) => {
-              if (
-                ableSubscribedInstrumentTypes.includes(+item.instrumentType)
-              ) {
+            const instrumentsForSubscribeResolved =
+              instrumentsForSubscribe.filter((item) =>
+                ableSubscribedInstrumentTypes.includes(+item.instrumentType),
+              );
+            const subscribeResults = await Promise.all(
+              instrumentsForSubscribeResolved.map((item) =>
                 kfRequestMarketData(
                   window.watcher,
                   item.exchangeId,
                   item.instrumentId,
                   mdLocation,
-                ).catch((err) => console.warn(err.message));
-              }
-            });
+                ),
+              ),
+            );
+            return instrumentsForSubscribeResolved.filter(
+              (_, index) => !!subscribeResults[index],
+            );
           }
         }
       }
     }
+
+    return [];
   };
 
-  const subscribeAllInstrumentByAppStates = (
+  const subscribeAllInstrumentByAppStates = async (
     processStatus: Pm2ProcessStatusData,
     appStates: Record<string, BrokerStateStatusTypes>,
     mdExtTypeMap: Record<string, InstrumentTypes>,
     instrumentsForSubscribe: KungfuApi.InstrumentResolved[],
-  ) => {
-    Object.keys(appStates || {}).forEach((processId) => {
-      subscribeAllInstrumentByMdProcessId(
-        processId,
-        processStatus,
-        appStates,
-        mdExtTypeMap,
-        instrumentsForSubscribe,
-      );
-    });
+  ): Promise<Array<KungfuApi.InstrumentResolved>> => {
+    const subscribedSuccessInstruments = await Promise.all(
+      Object.keys(appStates || {}).map((processId) =>
+        subscribeAllInstrumentByMdProcessId(
+          processId,
+          processStatus,
+          appStates,
+          mdExtTypeMap,
+          instrumentsForSubscribe,
+        ),
+      ),
+    );
+
+    return subscribedSuccessInstruments.reduce((pre, instruments) => {
+      return pre.concat(instruments);
+    }, []);
   };
 
   const searchInstrumentResult = ref<string | undefined>(undefined);
@@ -777,28 +831,23 @@ export const useSubscibeInstrumentAtEntry = (
 ): void => {
   const { currentGlobalKfLocation } = useCurrentGlobalKfLocation(watcher);
   const { appStates, processStatusData } = useProcessStatusDetailData();
-  const { mdList } = storeToRefs(useGlobalStore());
   const { mdExtTypeMap } = useExtConfigsRelated();
-  const { subscribedInstruments, subscribeAllInstrumentByMdProcessId } =
-    useInstruments();
+  const { subscribedInstruments } = useInstruments();
+  const { subscribeAllInstrumentByAppStates } = useInstruments();
 
   const app = getCurrentInstance();
   const subscribedInstrumentsForPos: Record<string, boolean> = {};
   const SUBSCRIBE_INSTRUMENTS_LIMIT = 50;
 
-  const mdProcessIds = computed(() => {
-    return mdList.value.map((md) => getProcessIdByKfLocation(md));
-  });
-
   const getCurrentPositions = (watcher: KungfuApi.Watcher) => {
+    if (!currentGlobalKfLocation.value) return [];
+
     const positions = globalThis.HookKeeper.getHooks().dealTradingData.trigger(
       watcher,
       currentGlobalKfLocation.value,
       watcher.ledger.Position,
       'position',
     ) as KungfuApi.Position[];
-
-    if (!positions.length) return [];
 
     return positions
       .reverse()
@@ -818,25 +867,29 @@ export const useSubscibeInstrumentAtEntry = (
 
   const subscribeInstrumentsByCurPosAndProcessIds = (
     positionsForSub: KungfuApi.InstrumentForSub[],
-    processIds: string[],
     filterByCached = true,
   ) => {
-    positionsForSub.forEach((item) => {
-      processIds.forEach((processId) => {
-        if (filterByCached && subscribedInstrumentsForPos[item.uidKey]) {
-          return;
-        }
+    const positionsForSubResolved = positionsForSub.filter((item) => {
+      if (!filterByCached) return true;
+      if (filterByCached && !subscribedInstrumentsForPos[item.uidKey]) {
+        return true;
+      }
+      return false;
+    });
 
-        subscribeAllInstrumentByMdProcessId(
-          processId,
-          processStatusData.value,
-          appStates.value,
-          mdExtTypeMap.value,
-          [item],
-        );
+    if (!positionsForSubResolved.length) return;
 
-        filterByCached && (subscribedInstrumentsForPos[item.uidKey] = true);
-      });
+    subscribeAllInstrumentByAppStates(
+      processStatusData.value,
+      appStates.value,
+      mdExtTypeMap.value,
+      positionsForSubResolved,
+    ).then((subscribedSuccessInstruments) => {
+      (subscribedSuccessInstruments as KungfuApi.InstrumentForSub[]).forEach(
+        (item) => {
+          filterByCached && (subscribedInstrumentsForPos[item.uidKey] = true);
+        },
+      );
     });
   };
 
@@ -846,10 +899,7 @@ export const useSubscibeInstrumentAtEntry = (
         .pipe(throttleTime(3000))
         .subscribe((watcher: KungfuApi.Watcher) => {
           const positionsForSub = getCurrentPositions(watcher);
-          subscribeInstrumentsByCurPosAndProcessIds(
-            positionsForSub,
-            mdProcessIds.value,
-          );
+          subscribeInstrumentsByCurPosAndProcessIds(positionsForSub);
         });
 
       onBeforeUnmount(() => {
@@ -877,11 +927,7 @@ export const useSubscibeInstrumentAtEntry = (
           ...getCurrentPositions(window.watcher),
         ];
 
-        subscribeInstrumentsByCurPosAndProcessIds(
-          positionsForSub,
-          [processId],
-          false,
-        );
+        subscribeInstrumentsByCurPosAndProcessIds(positionsForSub, false);
       }
     });
   });

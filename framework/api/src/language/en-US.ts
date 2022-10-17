@@ -68,6 +68,7 @@ export default {
   add_config_modal:
     '{category} ID unique in the system. {changeTypeName} cannot be modified after it succeeds.',
   update_config_modal: 'Confirm {key} configurations',
+  database_locked: 'The database is occupied now, please wait and retry.',
 
   MakeOrder: 'Order Dashboard',
   FutureArbitrage: 'Future Arbitrage',

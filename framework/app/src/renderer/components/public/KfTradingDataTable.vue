@@ -16,11 +16,15 @@ const props = withDefaults(
     dataSource: KungfuApi.TradingDataItem[];
     columns: KfTradingDataTableHeaderConfig[];
     keyField?: string;
+    itemSize?: number;
+    customRowClass?: (row: KungfuApi.TradingDataItem) => string;
   }>(),
   {
     columns: () => [],
     dataSource: () => [],
     keyField: 'id',
+    itemSize: 26,
+    customRowClass: () => '',
   },
 );
 
@@ -82,6 +86,8 @@ const headerWidth = computed(() => {
     return collection;
   }, {} as Record<string, string>);
 });
+
+const tableCellHeight = computed(() => `${props.itemSize}px`);
 
 onMounted(() => {
   if (kfScrollerTableBodyRef.value) {
@@ -222,13 +228,13 @@ function handleSort(
         v-if="dataSourceResolved && dataSourceResolved.length"
         class="kf-table-scroller"
         :items="dataSourceResolved"
-        :item-size="26"
+        :item-size="Number(itemSize)"
         :key-field="keyField"
         :buffer="100"
       >
         <template v-slot="{ item }: { item: any }">
           <ul
-            class="kf-table-row"
+            :class="['kf-table-row', customRowClass?.(item) || '']"
             @dblclick="handleDbClickRow($event, item)"
             @mousedown="handleMousedown($event, item)"
           >
@@ -238,6 +244,8 @@ function handleSort(
               :key="`${column.dataIndex}_${item[keyField as keyof KungfuApi.TradingDataItem]}`"
               :style="{
                 'max-width': getHeaderWidth(column),
+                height: tableCellHeight,
+                lineHeight: tableCellHeight,
               }"
               @click.stop="handleClickCell($event, item, column)"
               :title="item[column.dataIndex]"
@@ -361,8 +369,6 @@ function handleSort(
   }
 
   .kf-table-cell {
-    height: 26px;
-    line-height: 26px;
     padding: 0 6px;
     box-sizing: border-box;
     word-wrap: break-word;
