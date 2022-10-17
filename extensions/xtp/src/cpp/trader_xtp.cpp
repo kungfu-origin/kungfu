@@ -196,6 +196,7 @@ void TraderXTP::OnQueryPosition(XTPQueryStkPositionRsp *position, XTPRI *error_i
                  request_id, is_last);
     return;
   }
+  SPDLOG_TRACE("OnQueryPosition: {}", to_string(*position));
   auto writer = get_position_writer();
   Position &stock_pos = writer->open_data<Position>(0);
   if (error_info == nullptr || error_info->error_id == 0) {
@@ -222,6 +223,7 @@ void TraderXTP::OnQueryAsset(XTPQueryAssetRsp *asset, XTPRI *error_info, int req
                  request_id, is_last);
   }
   if (error_info == nullptr || error_info->error_id == 0 || error_info->error_id == 11000350) {
+    SPDLOG_TRACE("OnQueryAsset: {}", to_string(*asset));
     auto writer = get_asset_writer();
     Asset &account = writer->open_data<Asset>(0);
     if (error_info == nullptr || error_info->error_id == 0) {
