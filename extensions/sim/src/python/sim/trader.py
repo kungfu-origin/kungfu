@@ -149,6 +149,7 @@ class TraderSim(wc.Trader):
                 trade.instrument_type = order.instrument_type
                 trade.exchange_id = order.exchange_id
                 trade.trade_time = yjj.now_in_nano()
+                trade.trading_day = kft.strfnow("%Y%m%d")
                 writer.write(event.gen_time, trade)
 
             return True

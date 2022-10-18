@@ -114,7 +114,6 @@ void Runner::prepare(const event_ptr &event) {
 
   auto ledger_uid = ledger_home_location_->uid;
   if (not has_writer(ledger_uid)) {
-    SPDLOG_ERROR("ledger writer not found");
     return;
   }
   auto writer = get_writer(ledger_uid);

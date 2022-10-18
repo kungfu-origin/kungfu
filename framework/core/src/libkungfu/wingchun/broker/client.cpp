@@ -230,9 +230,9 @@ bool AutoClient::should_connect_strategy(const location_ptr &td_location) const 
 
 SilentAutoClient::SilentAutoClient(practice::apprentice &app) : AutoClient(app) {}
 
-bool SilentAutoClient::is_subscribed(const std::string &exchange_id, const std::string &instrument_id) const {
-  return false;
-}
+// bool SilentAutoClient::is_subscribed(const std::string &exchange_id, const std::string &instrument_id) const {
+//   return false;
+// }
 
 void SilentAutoClient::renew(int64_t trigger_time, const location_ptr &md_location) {}
 
