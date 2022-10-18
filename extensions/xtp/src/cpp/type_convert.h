@@ -287,6 +287,8 @@ inline void from_xtp(const XTP_PRICE_TYPE &xtp_price_type, const XTP_MARKET_TYPE
       price_type = PriceType::ForwardBest;
     else if (xtp_price_type == XTP_PRICE_REVERSE_BEST_LIMIT)
       price_type = PriceType::ReverseBest;
+    else if (xtp_price_type == XTP_PRICE_ALL_OR_CANCEL)
+      price_type = PriceType::Fok;
   } else
     price_type = PriceType::UnKnown;
 }
@@ -306,6 +308,8 @@ inline void to_xtp(XTP_PRICE_TYPE &xtp_price_type, const PriceType &price_type, 
       xtp_price_type = XTP_PRICE_FORWARD_BEST;
     else if (price_type == PriceType::ReverseBest)
       xtp_price_type = XTP_PRICE_REVERSE_BEST_LIMIT;
+    else if (price_type == PriceType::Fok)
+      xtp_price_type = XTP_PRICE_ALL_OR_CANCEL;
   } else
     xtp_price_type = XTP_PRICE_TYPE_UNKNOWN;
 }

@@ -159,13 +159,14 @@ watch(historyDate, async (newDate) => {
         ),
       );
       historyDataLoading.value = false;
-    }).catch((err) => {
+    })
+    .catch((err) => {
       if (err.message === 'database_locked') {
         messagePrompt().error(t('database_locked'));
       } else {
         console.error(err.message);
       }
-    });;
+    });
 });
 
 function handleShowTradingDataDetail({
