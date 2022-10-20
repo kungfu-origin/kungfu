@@ -125,6 +125,11 @@ void Ledger::update_order_stat(const event_ptr &event, const Trade &data) {
   auto &stat = get_order_stat(data.order_id, event);
   if (stat.trade_time == 0) {
     stat.trade_time = event->gen_time();
+    stat.total_price += data.price * data.volume;
+    stat.total_volume += data.volume;
+    if (stat.total_volume > 0) {
+      stat.avg_price = stat.total_price / stat.total_volume;
+    }
     write_to(event->gen_time(), stat, event->source());
   }
 }

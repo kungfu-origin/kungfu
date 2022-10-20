@@ -543,6 +543,7 @@ export const dealOrder = (
   const latencyData = dealOrderStat(orderStats, order.uid_key) || {
     latencySystem: '--',
     latencyNetwork: '--',
+    avg_price: 0,
   };
   const statusData = dealOrderStatus(order.status, order.error_msg);
   return {
@@ -559,6 +560,7 @@ export const dealOrder = (
     update_time_resolved: dealKfTime(order.update_time, isHistory),
     latency_system: latencyData.latencySystem,
     latency_network: latencyData.latencyNetwork,
+    avg_price: latencyData.avg_price,
   };
 };
 

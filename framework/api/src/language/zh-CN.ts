@@ -267,6 +267,7 @@ export default {
     order_status: '订单状态',
     latency_system: '系统延迟μs',
     latency_network: '网络延迟μs',
+    avg_price: '成交均价',
     dest_uname: '下单源',
     source_uname: '目标账户',
     completed: '已完成',
