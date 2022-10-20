@@ -13,6 +13,7 @@ using namespace kungfu::yijinjing::data;
 using namespace kungfu::yijinjing::cache;
 
 #define STORE_LIMIT 100
+#define STORE_INTERVAL_LIMIT 500
 
 namespace kungfu::yijinjing::cache {
 
@@ -67,7 +68,7 @@ void cached::on_start() {
 
 void cached::on_active() {
   // limit cache overhead
-  if (store_interval_ < STORE_LIMIT) {
+  if (store_interval_ < STORE_INTERVAL_LIMIT) {
     store_interval_++;
     return;
   } else {
