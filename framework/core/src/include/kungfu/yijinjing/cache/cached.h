@@ -48,6 +48,7 @@ private:
   yijinjing::cache::bank feed_bank_;
   yijinjing::practice::profile profile_;
   ProfileStateBank profile_bank_ = ProfileStateBank(longfist::ProfileDataTypes);
+  int store_interval_ = 0;
 
   void on_location(const event_ptr &event);
 

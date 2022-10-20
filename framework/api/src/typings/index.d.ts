@@ -433,6 +433,7 @@ declare namespace KungfuApi {
     update_time_resolved: string;
     latency_system: string;
     latency_network: string;
+    avg_price: number;
   }
 
   export interface OrderInput {
@@ -477,6 +478,9 @@ declare namespace KungfuApi {
     insert_time: bigint;
     ack_time: bigint;
     trade_time: bigint;
+    total_price: number;
+    total_volume: number;
+    avg_price: number;
 
     source: number;
     dest: number;

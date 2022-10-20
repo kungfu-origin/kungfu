@@ -60,6 +60,13 @@ export const getColumns = (
     },
   },
   {
+    type: 'number',
+    name: t('orderConfig.avg_price'),
+    dataIndex: 'avg_price',
+    width: 120,
+    sorter: buildSorter('avg_price'),
+  },
+  {
     type: 'string',
     name: t('orderConfig.order_status'),
     dataIndex: 'status_uname',
