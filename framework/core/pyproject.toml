@@ -40,7 +40,7 @@ railroad-diagrams = "^2.0.0"
 virtualenv = "20.14.1"
 
 [tool.poetry.dev-dependencies]
-conan = "^1.50.0"
+conan = "^1.53.0"
 pyinstaller = "^5.2"
 
 [build-system]
