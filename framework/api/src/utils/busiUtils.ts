@@ -1290,6 +1290,7 @@ export const dealOrderStat = (
   latencyNetwork: string;
   latencyTrade: string;
   trade_time: bigint;
+  avg_price: number;
 } | null => {
   const orderStat = orderStats[orderUKey];
   if (!orderStat) {
@@ -1315,6 +1316,7 @@ export const dealOrderStat = (
     latencyNetwork,
     latencyTrade,
     trade_time: orderStat.trade_time,
+    avg_price: orderStat.avg_price,
   };
 };
 

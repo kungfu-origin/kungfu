@@ -265,6 +265,7 @@ export default {
     order_status: 'order_status',
     latency_system: 'latency_system(μs)',
     latency_network: 'latency_network(μs)',
+    avg_price: 'avg_price',
     dest_uname: 'dest_uname',
     source_uname: 'source_uname',
     completed: 'completed',

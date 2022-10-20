@@ -665,7 +665,8 @@ export const useInstruments = (): {
   ): Promise<{ value: string; label: string }[]> => {
     searchInstrumnetOptions.value = instruments.value
       .filter((item) => {
-        return !!val && item.id.includes(val);
+        const regx = new RegExp(`${val}`, 'ig');
+        return !!val && regx.test(item.id);
       })
       .slice(0, 20)
       .map((item) => ({
