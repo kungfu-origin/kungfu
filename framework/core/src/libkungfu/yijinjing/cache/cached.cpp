@@ -71,7 +71,7 @@ void cached::on_active() {
   if (store_interval_ < STORE_INTERVAL_LIMIT) {
     store_interval_++;
     return;
-  } 
+  }
   store_interval_ = 0;
   handle_cached_feeds();
   handle_profile_feeds();
