@@ -1467,8 +1467,12 @@ export const dealAssetsByHolderUID = <
   return Object.values(assets).reduce((assetsResolved, asset) => {
     const { holder_uid } = asset;
     const kfLocation = watcher.getLocation(holder_uid);
-    const processId = getProcessIdByKfLocation(kfLocation);
-    assetsResolved[processId] = asset;
+
+    if (kfLocation) {
+      const processId = getProcessIdByKfLocation(kfLocation);
+      assetsResolved[processId] = asset;
+    }
+
     return assetsResolved;
   }, {} as Record<string, T>);
 };
