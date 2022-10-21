@@ -13,7 +13,7 @@ using namespace kungfu::yijinjing::data;
 using namespace kungfu::yijinjing::cache;
 
 #define STORE_LIMIT 100
-#define STORE_INTERVAL_LIMIT 500
+#define STORE_INTERVAL_LIMIT 200
 
 namespace kungfu::yijinjing::cache {
 
@@ -101,6 +101,8 @@ void cached::handle_cached_feeds() {
         if (app_cache_shift_.find(source_id) != app_cache_shift_.end()) {
           try {
             app_cache_shift_.at(source_id) << s;
+            SPDLOG_TRACE("cache [feed] source {} datatype {} data {}", get_location_uname(source_id),
+                         DataType::type_name.c_str(), s.data.to_string());
           } catch (const std::exception &e) {
             SPDLOG_ERROR("Unexpected exception by handle_cached_feeds {}", e.what());
             continue;
@@ -132,6 +134,7 @@ void cached::handle_profile_feeds() {
 
         try {
           profile_ << s;
+          SPDLOG_TRACE("cache [profile] datatype {} data {}", DataType::type_name.c_str(), s.data.to_string());
         } catch (const std::exception &e) {
           SPDLOG_ERROR("Unexpected exception by handle_profile_feeds {}", e.what());
           continue;
