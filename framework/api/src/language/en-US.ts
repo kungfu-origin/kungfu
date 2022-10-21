@@ -475,7 +475,10 @@ export default {
     for_all_log: 'For all Log',
 
     language: 'Language',
-    select_language: 'Select Language',
+    select_language_desc: 'Select Language',
+    bypass_archive: 'ByPass Archive',
+    bypass_archive_desc:
+      'Archive only delete journal and logs, zip nomore files',
 
     porformance: 'Performance',
     rocket_model: 'Open Rocket Model',
