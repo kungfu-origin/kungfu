@@ -198,11 +198,19 @@ def archive(ctx, format, mode):
 
     if mode == "delete":
         today_start = yjj.strptime(today_date, "%Y-%m-%d")
-        today_start_timestamp = today_start / 10 ** 9
-        ctx.logger.info(f"pruning runtime logs before {yjj.strftime(today_start, '%Y-%m-%d %H:%M:%S')}")
-        prue_layout_dirs_before_timestamp(ctx.runtime_dir, "log", "live", today_start_timestamp)
-        ctx.logger.info(f"pruning runtime journals before {yjj.strftime(today_start, '%Y-%m-%d %H:%M:%S')}")
-        prue_layout_dirs_before_timestamp(ctx.runtime_dir, "journal", "live", today_start_timestamp)
+        today_start_timestamp = today_start / 10**9
+        ctx.logger.info(
+            f"pruning runtime logs before {yjj.strftime(today_start, '%Y-%m-%d %H:%M:%S')}"
+        )
+        prue_layout_dirs_before_timestamp(
+            ctx.runtime_dir, "log", "live", today_start_timestamp
+        )
+        ctx.logger.info(
+            f"pruning runtime journals before {yjj.strftime(today_start, '%Y-%m-%d %H:%M:%S')}"
+        )
+        prue_layout_dirs_before_timestamp(
+            ctx.runtime_dir, "journal", "live", today_start_timestamp
+        )
         ctx.logger.info("archive done (delete mode)")
         return
 

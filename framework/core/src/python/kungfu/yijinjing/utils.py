@@ -11,6 +11,7 @@ def prune_layout_files(base_dir, layout, mode):
         except:
             continue
 
+
 def prue_layout_dirs_before_timestamp(base_dir, layout, mode, timestamp):
     search_path = os.path.join(base_dir, "*", "*", "*", layout, mode, "*")
     for file in filter(os.path.isfile, glob.glob(search_path)):
