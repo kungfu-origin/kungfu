@@ -9,7 +9,7 @@ export default {
   rename: 'rename',
   set: 'Set',
   clean: 'clean',
-  Help: 'Help',
+  help: 'Help',
   run: 'Run',
   quit: 'Quit',
   operation_success: 'operation success',
@@ -17,6 +17,7 @@ export default {
   location_error: 'current location error',
   watcher_error: 'Watcher is NULL',
   instrument_error: 'instrument error',
+  component_error: 'component error',
   prompt: 'prompt',
   warning: 'warning',
   confirm: 'confirm',
@@ -51,8 +52,8 @@ export default {
   KungFu: 'Kungfu',
   about_kungfu: 'About Kungfu',
 
-  file: 'file',
-  folder: 'folder',
+  file: 'File',
+  folder: 'Folder',
 
   no_focus: 'The current page is not in focus',
   clear: 'Clearing {content} completed, please restart the application',
@@ -72,6 +73,7 @@ export default {
 
   MakeOrder: 'Order Dashboard',
   FutureArbitrage: 'Future Arbitrage',
+  BlockTrade: 'Block Trade',
   OrderBook: 'Order Book',
   MarketData: 'Market Data',
   TradingTask: 'Trading Task',
@@ -474,7 +476,7 @@ export default {
     for_all_log: 'For all Log',
 
     language: 'Language',
-    select_language: 'Select Language',
+    select_language: 'Select Language, the modified restart takes effect',
 
     porformance: 'Performance',
     rocket_model: 'Open Rocket Model',

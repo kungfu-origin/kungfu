@@ -17,6 +17,7 @@ export default {
   location_error: '当前 Location 错误',
   watcher_error: 'Watcher is NULL',
   instrument_error: '标的错误',
+  component_error: '组件错误',
   prompt: '提示',
   warning: '警告',
   confirm: '确 认',
@@ -471,7 +472,7 @@ export default {
     for_all_log: '对系统内所有日志级别的设置',
 
     language: '语言',
-    select_language: '选择语言',
+    select_language: '选择语言，修改后重启功夫生效',
 
     porformance: '性能',
     rocket_model: '开启极速模式',

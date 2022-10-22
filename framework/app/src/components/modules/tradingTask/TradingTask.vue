@@ -15,7 +15,7 @@ import {
   SettingOutlined,
   DeleteOutlined,
 } from '@ant-design/icons-vue';
-import { columns } from './config';
+import { getColumns } from './config';
 import path from 'path';
 import {
   getIfProcessRunning,
@@ -46,6 +46,7 @@ import { useTradingTask } from './utils';
 import { ProcessStatusTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
 
 const { t } = VueI18n.global;
+const columns = getColumns();
 const { success, error } = messagePrompt();
 const { extConfigs } = useExtConfigsRelated();
 const { dashboardBodyHeight, handleBodySizeChange } = useDashboardBodySize();

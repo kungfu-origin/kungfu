@@ -15,7 +15,7 @@ import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/publi
 import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboardItem.vue';
 import KfBlinkNum from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfBlinkNum.vue';
 import KfTradingDataTable from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfTradingDataTable.vue';
-import { categoryRegisterConfig, columns } from './config';
+import { categoryRegisterConfig, getColumns } from './config';
 import {
   dealAssetPrice,
   dealDirection,
@@ -44,6 +44,7 @@ globalThis.HookKeeper.getHooks().dealTradingData.register(
 );
 
 const app = getCurrentInstance();
+const columns = getColumns();
 const pos = ref<KungfuApi.Position[]>([]);
 const { handleBodySizeChange } = useDashboardBodySize();
 const { searchKeyword, tableData } = useTableSearchKeyword<KungfuApi.Position>(
