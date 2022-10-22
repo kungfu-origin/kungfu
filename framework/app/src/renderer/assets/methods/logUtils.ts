@@ -44,8 +44,8 @@ export function dealLogMessage(line: string): string {
       /(?<=\[)\s*(error|KF_ERROR)\s*(?=\])/g,
       '<span class="error"> $1 </span>',
     )
-    .replace(/\s*debug\s*/g, '<span class="debug"> debug </span>')
-    .replace(/\s*trace\s*/g, '<span class="trace"> trace </span>');
+    .replace(/(?<=\[)\s*debug\s*(?=\])/g, '<span class="debug"> debug </span>')
+    .replace(/(?<=\[)\s*trace\s*(?=\])/g, '<span class="trace"> trace </span>');
 
   return line;
 }
