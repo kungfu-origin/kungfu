@@ -677,7 +677,10 @@ KF_DEFINE_PACK_TYPE(                                  //
     (int64_t, input_time),                            //
     (int64_t, insert_time),                           //
     (int64_t, ack_time),                              //
-    (int64_t, trade_time)                             //
+    (int64_t, trade_time),                            //
+    (double, total_price),                            //
+    (double, total_volume),                           //
+    (double, avg_price)                               //
 );
 
 KF_DEFINE_PACK_TYPE(                                                       //

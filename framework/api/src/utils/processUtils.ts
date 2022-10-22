@@ -605,10 +605,12 @@ function startGetProcessStatusByName(name: string, callback: Function) {
 //================ business related start ===============
 
 export function startArchiveMakeTask(cb?: Function) {
+  const globalSetting = getKfGlobalSettingsValue();
+  const bypassArchive = globalSetting?.system?.bypassArchive || false;
   return startProcessGetStatusUntilStop(
     {
       name: 'archive',
-      args: buildArgs('journal archive'),
+      args: buildArgs(`journal archive ${bypassArchive ? '-m delete' : ''}`),
     },
     cb,
   );

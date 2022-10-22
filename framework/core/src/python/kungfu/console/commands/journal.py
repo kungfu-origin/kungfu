@@ -18,7 +18,7 @@ from kungfu.yijinjing import time as kft
 from kungfu.yijinjing.log import create_logger
 from kungfu.yijinjing.locator import Locator
 from kungfu.yijinjing.sinks.archive import ArchiveSink
-from kungfu.yijinjing.utils import prune_layout_files
+from kungfu.yijinjing.utils import prune_layout_files, prue_layout_dirs_before_timestamp
 
 
 SESSION_DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
@@ -184,11 +184,36 @@ def clean(ctx, archive, dry):
     default="zip",
     help="archive format",
 )
+@click.option(
+    "-m",
+    "--mode",
+    type=click.Choice(["normal", "delete"]),
+    default="normal",
+    help="archive mode",
+)
 @journal_command_context
-def archive(ctx, format):
+def archive(ctx, format, mode):
     os.chdir(ctx.archive_dir)
-
     today_date = yjj.strftime(yjj.now_in_nano(), "%Y-%m-%d")
+
+    if mode == "delete":
+        today_start = yjj.strptime(today_date, "%Y-%m-%d")
+        today_start_timestamp = today_start / 10**9
+        ctx.logger.info(
+            f"pruning runtime logs before {yjj.strftime(today_start, '%Y-%m-%d %H:%M:%S')}"
+        )
+        prue_layout_dirs_before_timestamp(
+            ctx.runtime_dir, "log", "live", today_start_timestamp
+        )
+        ctx.logger.info(
+            f"pruning runtime journals before {yjj.strftime(today_start, '%Y-%m-%d %H:%M:%S')}"
+        )
+        prue_layout_dirs_before_timestamp(
+            ctx.runtime_dir, "journal", "live", today_start_timestamp
+        )
+        ctx.logger.info("archive done (delete mode)")
+        return
+
     today_archive_name = f"{ARCHIVE_PREFIX}-{today_date}.{format}"
     today_archive_path = os.path.join(ctx.archive_dir, today_archive_name)
     today_temp_path = os.path.join(ctx.archive_dir, ".today")
@@ -255,7 +280,7 @@ def export_logs(ctx, src_dir, dst_dir):
             else:
                 shutil.copy2(log_file, archive_path)
         else:
-            ctx.logger.warn("unable to match log file %s", log_file)
+            ctx.logger.warn(f"unable to match log file {log_file}")
 
 
 def make_archive(ctx, archive_format, archive_date):

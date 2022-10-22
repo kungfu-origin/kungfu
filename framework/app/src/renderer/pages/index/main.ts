@@ -147,7 +147,7 @@ if (!booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED)) {
 
       delayMilliSeconds(1000)
         .then(() => startCacheD(false))
-        .then(() => delayMilliSeconds(1000))
+        .then(() => delayMilliSeconds(2000))
         .then(() => startLedger(false))
         .then(() => postStartAll())
         .then(() => delayMilliSeconds(1000))
@@ -173,4 +173,4 @@ if (!booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED)) {
   );
 }
 
-triggerStartStep(500);
+triggerStartStep(1000);

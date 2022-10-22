@@ -12,6 +12,9 @@ using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
 using namespace kungfu::yijinjing::cache;
 
+#define STORE_LIMIT 100
+#define STORE_INTERVAL_LIMIT 200
+
 namespace kungfu::yijinjing::cache {
 
 cached::cached(locator_ptr locator, mode m, bool low_latency)
@@ -64,6 +67,12 @@ void cached::on_start() {
 }
 
 void cached::on_active() {
+  // limit cache overhead
+  if (store_interval_ < STORE_INTERVAL_LIMIT) {
+    store_interval_++;
+    return;
+  }
+  store_interval_ = 0;
   handle_cached_feeds();
   handle_profile_feeds();
 }
@@ -76,7 +85,7 @@ void cached::mark_request_cached_done(uint32_t dest_id) {
 }
 
 void cached::handle_cached_feeds() {
-  bool stored_controller = false;
+  int stored_controller = 0;
   boost::hana::for_each(StateDataTypes, [&](auto it) {
     using DataType = typename decltype(+boost::hana::second(it))::type;
     auto hana_type = boost::hana::type_c<DataType>;
@@ -86,19 +95,21 @@ void cached::handle_cached_feeds() {
 
     if (feed_map.size() != 0) {
       auto iter = feed_map.begin();
-      while (iter != feed_map.end() and !stored_controller) {
+      while (iter != feed_map.end() and stored_controller <= STORE_LIMIT) {
         auto &s = iter->second;
         auto source_id = s.source;
         if (app_cache_shift_.find(source_id) != app_cache_shift_.end()) {
           try {
             app_cache_shift_.at(source_id) << s;
+            SPDLOG_TRACE("cache [feed] source {} datatype {} data {}", get_location_uname(source_id),
+                         DataType::type_name.c_str(), s.data.to_string());
           } catch (const std::exception &e) {
             SPDLOG_ERROR("Unexpected exception by handle_cached_feeds {}", e.what());
             continue;
           }
 
           iter = feed_map.erase(iter);
-          stored_controller = true;
+          stored_controller++;
         } else {
           iter++;
         }
@@ -108,7 +119,7 @@ void cached::handle_cached_feeds() {
 }
 
 void cached::handle_profile_feeds() {
-  bool stored_controller = false;
+  int stored_controller = 0;
   boost::hana::for_each(ProfileDataTypes, [&](auto it) {
     using DataType = typename decltype(+boost::hana::second(it))::type;
     auto hana_type = boost::hana::type_c<DataType>;
@@ -118,18 +129,19 @@ void cached::handle_profile_feeds() {
 
     if (feed_map.size() != 0) {
       auto iter = feed_map.begin();
-      while (iter != feed_map.end() and !stored_controller) {
+      while (iter != feed_map.end() and stored_controller <= STORE_LIMIT) {
         auto &s = iter->second;
 
         try {
           profile_ << s;
+          SPDLOG_TRACE("cache [profile] datatype {} data {}", DataType::type_name.c_str(), s.data.to_string());
         } catch (const std::exception &e) {
           SPDLOG_ERROR("Unexpected exception by handle_profile_feeds {}", e.what());
           continue;
         }
 
         iter = feed_map.erase(iter);
-        stored_controller = true;
+        stored_controller++;
       }
     }
   });

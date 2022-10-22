@@ -52,10 +52,17 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
       {
         key: 'language',
         name: t('globalSettingConfig.language'),
-        tip: t('globalSettingConfig.select_language'),
+        tip: t('globalSettingConfig.select_language_desc'),
         type: 'select',
         options: languageList,
         default: langDefault,
+      },
+      {
+        key: 'bypassArchive',
+        name: t('globalSettingConfig.bypass_archive'),
+        tip: t('globalSettingConfig.bypass_archive_desc'),
+        type: 'bool',
+        default: false,
       },
     ],
   },

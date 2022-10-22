@@ -267,6 +267,7 @@ export default {
     order_status: 'order_status',
     latency_system: 'latency_system(μs)',
     latency_network: 'latency_network(μs)',
+    avg_price: 'avg_price',
     dest_uname: 'dest_uname',
     source_uname: 'source_uname',
     completed: 'completed',
@@ -476,7 +477,10 @@ export default {
     for_all_log: 'For all Log',
 
     language: 'Language',
-    select_language: 'Select Language, the modified restart takes effect',
+    select_language_desc: 'Select Language, the modified restart takes effect',
+    bypass_archive: 'ByPass Archive',
+    bypass_archive_desc:
+      'Archive only delete journal and logs, zip nomore files',
 
     porformance: 'Performance',
     rocket_model: 'Open Rocket Model',
