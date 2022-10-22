@@ -8,9 +8,6 @@ import { App, defineAsyncComponent } from 'vue';
 import { Router } from 'vue-router';
 import { useGlobalStore } from './store/global';
 
-import VueI18n from '@kungfu-trader/kungfu-js-api/language';
-const { t } = VueI18n.global;
-
 import { useBoardFilter } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 
 const { getBoard } = useBoardFilter();
@@ -37,7 +34,7 @@ export const useComponenets = (
 
   components.forEach((componentName) => {
     app.component(
-      t(componentName),
+      componentName,
       defineAsyncComponent(
         () =>
           import(
@@ -49,8 +46,8 @@ export const useComponenets = (
     );
   });
 
-  app.config.globalProperties.$availKfBoards = components.map((componentName) =>
-    t(componentName),
+  app.config.globalProperties.$availKfBoards = components.map(
+    (componentName) => componentName,
   );
 
   return useGlobalStore()

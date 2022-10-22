@@ -17,6 +17,7 @@ export default {
   location_error: '当前 Location 错误',
   watcher_error: 'Watcher is NULL',
   instrument_error: '标的错误',
+  component_error: '组件错误',
   prompt: '提示',
   warning: '警告',
   confirm: '确 认',
@@ -472,7 +473,7 @@ export default {
     for_all_log: '对系统内所有日志级别的设置',
 
     language: '语言',
-    select_language_desc: '选择语言',
+    select_language_desc: '选择语言，修改后重启功夫生效',
     bypass_archive: '跳过归档',
     bypass_archive_desc:
       '仅删除上个交易日留下的journal与log文件, 不再压缩打包, 归档后无法恢复之前的内存数据, 会加快启动速度',

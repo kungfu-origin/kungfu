@@ -3,7 +3,9 @@ import { getCurrentInstance, onBeforeUnmount, onMounted, ref } from 'vue';
 import KfSystemPrepareModal from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfSystemPrepareModal.vue';
 import KfLayoutVue from '@kungfu-trader/kungfu-app/src/renderer/components/layout/KfLayout.vue';
 import KfSetByConfigModal from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfSetByConfigModal.vue';
+import { Locale } from 'ant-design-vue/es/locale-provider';
 import zhCN from 'ant-design-vue/es/locale/zh_CN';
+import { langDefault } from '@kungfu-trader/kungfu-js-api/language';
 import {
   markClearJournal,
   removeLoadingMask,
@@ -41,6 +43,8 @@ const store = useGlobalStore();
 const rootPackageJson = readRootPackageJsonSync();
 const newTitle = rootPackageJson?.appConfig?.appTitle;
 newTitle && setHtmlTitle(`${newTitle}`);
+
+const locale = ref<Locale>();
 
 const {
   preStartSystemLoadingData,
@@ -123,6 +127,11 @@ const {
 } = useTradingTask();
 
 onMounted(() => {
+  locale.value =
+    (app?.proxy?.$antLocalesMap || {})[
+      store.globalSetting?.system?.language || langDefault
+    ] || zhCN;
+
   bindIPCListener(store);
   removeLoadingMask();
 
@@ -141,7 +150,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <a-config-provider :locale="zhCN" :autoInsertSpaceInButton="false">
+  <a-config-provider :locale="locale" :autoInsertSpaceInButton="false">
     <div class="app__warp">
       <KfLayoutVue>
         <router-view />

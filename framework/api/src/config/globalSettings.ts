@@ -11,10 +11,10 @@ import {
   CodeTabSetting,
   OrderInputKeySetting,
 } from './tradingConfig';
-// import {
-//   languageList,
-//   langDefault,
-// } from '@kungfu-trader/kungfu-js-api/language';
+import {
+  languageList,
+  langDefault,
+} from '@kungfu-trader/kungfu-js-api/language';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 const { t } = VueI18n.global;
 const numCPUs = os.cpus() ? os.cpus().length : 1;
@@ -49,14 +49,14 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
         ],
         default: '-l info',
       },
-      // {
-      //   key: 'language',
-      //   name: t('globalSettingConfig.language'),
-      //   tip: t('globalSettingConfig.select_language_desc'),
-      //   type: 'select',
-      //   options: languageList,
-      //   default: langDefault,
-      // },
+      {
+        key: 'language',
+        name: t('globalSettingConfig.language'),
+        tip: t('globalSettingConfig.select_language_desc'),
+        type: 'select',
+        options: languageList,
+        default: langDefault,
+      },
       {
         key: 'bypassArchive',
         name: t('globalSettingConfig.bypass_archive'),

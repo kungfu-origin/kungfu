@@ -86,7 +86,7 @@ function handleComfirm() {
           :value="item"
           :disabled="addedBoards.includes(item)"
         >
-          {{ item }}
+          {{ $t(item) }}
         </a-radio-button>
       </a-radio-group>
     </div>

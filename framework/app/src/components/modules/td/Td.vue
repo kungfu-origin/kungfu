@@ -154,8 +154,10 @@ const columns = computed(() =>
   getColumns((dataIndex) => {
     return (a: KungfuApi.KfConfig, b: KungfuApi.KfConfig) => {
       return (
-        (getAssetsByKfConfig(a)[dataIndex as keyof KungfuApi.Asset] || 0) -
-        (getAssetsByKfConfig(b)[dataIndex as keyof KungfuApi.Asset] || 0)
+        (+Number(getAssetsByKfConfig(a)[dataIndex as keyof KungfuApi.Asset]) ||
+          0) -
+        (+Number(getAssetsByKfConfig(b)[dataIndex as keyof KungfuApi.Asset]) ||
+          0)
       );
     };
   }, isShowAssetMargin.value),

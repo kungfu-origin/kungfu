@@ -6,14 +6,14 @@ const { t } = VueI18n.global;
 const buildSorter =
   (dataIndex: keyof KungfuApi.Position) =>
   (a: KungfuApi.Position, b: KungfuApi.Position) =>
-    +Number(a[dataIndex]) - +Number(b[dataIndex]);
+    (+Number(a[dataIndex]) || 0) - (+Number(b[dataIndex]) || 0);
 
 const buildStrSorter =
   (dataIndex: keyof KungfuApi.Position) =>
   (a: KungfuApi.Position, b: KungfuApi.Position) =>
     a[dataIndex].toString().localeCompare(b[dataIndex].toString());
 
-export const columns: KfTradingDataTableHeaderConfig[] = [
+export const getColumns = (): KfTradingDataTableHeaderConfig[] => [
   {
     type: 'string',
     name: t('posGlobalConfig.instrument_id'),
