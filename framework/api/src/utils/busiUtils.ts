@@ -231,9 +231,9 @@ export const kfLogger = {
       process.env.NODE_ENV === 'development' ||
       process.env.APP_TYPE !== 'cli'
     ) {
-      console.warn('<KF_INFO>', ...args);
+      console.warn('<KF_WARN>', ...args);
     }
-    logger.warn('<KF_INFO>', args.join(' '));
+    logger.warn('<KF_WARN>', args.join(' '));
   },
 
   error: (...args: Array<any>) => {
@@ -241,9 +241,9 @@ export const kfLogger = {
       process.env.NODE_ENV === 'development' ||
       process.env.APP_TYPE !== 'cli'
     ) {
-      console.error('<KF_INFO>', ...args);
+      console.error('<KF_ERROR>', ...args);
     }
-    logger.error('<KF_INFO>', args.join(' '));
+    logger.error('<KF_ERROR>', args.join(' '));
   },
 };
 
