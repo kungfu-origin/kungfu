@@ -67,6 +67,8 @@ import { useComponenets } from './useComponents';
 import globalBus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
+import zhCN from 'ant-design-vue/es/locale/zh_CN';
+import enUS from 'ant-design-vue/es/locale/en_US';
 
 const app = createApp(App);
 
@@ -104,6 +106,10 @@ app
   .use(Dropdown)
   .use(VueVirtualScroller);
 
+app.config.globalProperties.$antLocalesMap = {
+  'zh-CN': zhCN,
+  'en-US': enUS,
+};
 app.config.globalProperties.$globalBus = globalBus;
 app.config.globalProperties.$tradingDataSubject = tradingDataSubject;
 

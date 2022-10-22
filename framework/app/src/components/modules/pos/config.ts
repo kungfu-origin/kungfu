@@ -63,7 +63,7 @@ export const getColumns = (
     name: t('posGlobalConfig.sum_volume'),
     dataIndex: 'volume',
     flex: 1,
-    sorter: buildSorter('yesterday_volume'),
+    sorter: buildSorter('volume'),
   },
   {
     type: 'number',

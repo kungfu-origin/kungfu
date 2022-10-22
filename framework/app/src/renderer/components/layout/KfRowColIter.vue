@@ -35,7 +35,7 @@
               @dragstart="handleDragStart(content)"
               @dragend="handleDragEnd"
             >
-              {{ content }}
+              {{ $t(content) }}
             </div>
           </template>
           <a-card style="width: 100%; height: 100%">
@@ -44,7 +44,10 @@
               :is="content"
               :id="content"
             ></component>
-            <KfNoData v-else :txt="`${content} 组件错误`"></KfNoData>
+            <KfNoData
+              v-else
+              :txt="`${$t(content)} ${$t('component_error')}`"
+            ></KfNoData>
           </a-card>
         </a-tab-pane>
       </a-tabs>
@@ -86,7 +89,7 @@
               @dragstart="handleDragStart(content)"
               @dragend="handleDragEnd"
             >
-              {{ content }}
+              {{ $t(content) }}
             </div>
           </template>
           <a-card style="width: 100%; height: 100%">
@@ -95,7 +98,10 @@
               :is="content"
               :id="content"
             ></component>
-            <KfNoData v-else :txt="`${content} 组件错误`"></KfNoData>
+            <KfNoData
+              v-else
+              :txt="`${$t(content)} ${$t('component_error')}`"
+            ></KfNoData>
           </a-card>
         </a-tab-pane>
       </a-tabs>

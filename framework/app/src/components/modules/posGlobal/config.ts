@@ -13,7 +13,7 @@ const buildStrSorter =
   (a: KungfuApi.Position, b: KungfuApi.Position) =>
     a[dataIndex].toString().localeCompare(b[dataIndex].toString());
 
-export const columns: KfTradingDataTableHeaderConfig[] = [
+export const getColumns = (): KfTradingDataTableHeaderConfig[] => [
   {
     type: 'string',
     name: t('posGlobalConfig.instrument_id'),

@@ -258,6 +258,8 @@ function handleClickRow(row: KungfuApi.InstrumentResolved) {
     }
 
     .code {
+      white-space: nowrap;
+
       span {
         font-size: 10px;
         padding-right: 6px;
