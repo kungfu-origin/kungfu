@@ -227,25 +227,6 @@ function getInstrumentsSearchRelated(
   );
 }
 
-function handleInstrumentChange(value: string) {
-  console.log(value);
-  if (value) {
-    const instrumentResolved =
-      transformSearchInstrumentResultToInstrument(value);
-    if (instrumentResolved) {
-      const { instrumentType } = instrumentResolved;
-      if (instrumentType === InstrumentTypeEnum.stockoption) {
-        sideRadiosList.value = [
-          ...Object.keys(Side).slice(0, 2),
-          SideEnum.Exec + '',
-        ];
-      } else {
-        sideRadiosList.value = Object.keys(Side).slice(0, 2);
-      }
-    }
-  }
-}
-
 function getValidatorType(
   type: string,
 ): 'number' | 'string' | 'array' | 'boolean' {
