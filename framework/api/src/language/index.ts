@@ -47,6 +47,7 @@ export const getMergeENLanguage = () => {
 
 // 默认语言
 export const langDefault = process.env.LANG_ENV ?? 'zh-CN';
+let settingLanguage;
 const extraLanguage = getExtraLanguage();
 const mergeCNLanguage = getMergeCNLanguage();
 const mergeENLanguage = getMergeENLanguage();
@@ -56,11 +57,14 @@ const kfConfigPath = path.join(
   'config',
   'kfConfig.json',
 );
-const globalSettingJson = fse.readJSONSync(kfConfigPath) as Record<
-  string,
-  Record<string, KungfuApi.KfConfigValue>
->; // 不直接使用 getKfGlobalSettingsValue 和 KF_CONFIG_PATH 是因为会形成循环引用，会报错
-const settingLanguage = globalSettingJson?.system?.language;
+
+if (fse.existsSync(kfConfigPath)) {
+  const globalSettingJson = fse.readJSONSync(kfConfigPath) as Record<
+    string,
+    Record<string, KungfuApi.KfConfigValue>
+  >; // 不直接使用 getKfGlobalSettingsValue 和 KF_CONFIG_PATH 是因为会形成循环引用，会报错
+  settingLanguage = globalSettingJson?.system?.language;
+}
 
 // 语言库
 const messages = {
