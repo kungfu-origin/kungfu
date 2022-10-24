@@ -1018,6 +1018,10 @@ export const useQuote = (): {
     }
 
     const percent = (last_price - open_price) / open_price;
+    if (percent === Infinity) {
+      return '--';
+    }
+
     return Number(percent * 100).toFixed(2) + '%';
   };
 

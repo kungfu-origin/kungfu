@@ -44,6 +44,10 @@ import {
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import dayjs, { Dayjs } from 'dayjs';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
+import {
+  InstrumentTypeEnum,
+  SideEnum,
+} from '@kungfu-trader/kungfu-js-api/typings/enums';
 const { t } = VueI18n.global;
 
 const props = withDefaults(
@@ -114,6 +118,7 @@ const formState = reactive(props.formState);
 const { td, md, strategy } = toRefs(useAllKfConfigData());
 
 const primaryKeys = ref<string[]>(getPrimaryKeys(props.configSettings || []));
+const sideRadiosList = ref<string[]>(Object.keys(Side).slice(0, 2));
 const instrumentKeys = ref<Record<string, 'instrument' | 'instruments'>>(
   filterInstrumentKeysFromConfigSettings(props.configSettings),
 );
@@ -169,6 +174,29 @@ watch(formState, (newVal) => {
   app && app.emit('update:formState', newVal);
 });
 
+if ('instrument' in formState) {
+  watch(
+    () => formState.instrument,
+    (newInstrument: string) => {
+      if (newInstrument) {
+        const instrumentResolved =
+          transformSearchInstrumentResultToInstrument(newInstrument);
+        if (instrumentResolved) {
+          const { instrumentType } = instrumentResolved;
+          if (instrumentType === InstrumentTypeEnum.stockoption) {
+            sideRadiosList.value = [
+              ...Object.keys(Side).slice(0, 2),
+              SideEnum.Exec + '',
+            ];
+          } else {
+            sideRadiosList.value = Object.keys(Side).slice(0, 2);
+          }
+        }
+      }
+    },
+  );
+}
+
 function getInstrumentsSearchRelated(
   instrumentKeys: Record<string, 'instrument' | 'instruments'>,
 ): InstrumentsSearchRelated {
@@ -197,6 +225,25 @@ function getInstrumentsSearchRelated(
     },
     {} as InstrumentsSearchRelated,
   );
+}
+
+function handleInstrumentChange(value: string) {
+  console.log(value);
+  if (value) {
+    const instrumentResolved =
+      transformSearchInstrumentResultToInstrument(value);
+    if (instrumentResolved) {
+      const { instrumentType } = instrumentResolved;
+      if (instrumentType === InstrumentTypeEnum.stockoption) {
+        sideRadiosList.value = [
+          ...Object.keys(Side).slice(0, 2),
+          SideEnum.Exec + '',
+        ];
+      } else {
+        sideRadiosList.value = Object.keys(Side).slice(0, 2);
+      }
+    }
+  }
 }
 
 function getValidatorType(
@@ -563,7 +610,7 @@ defineExpose({
           item.disabled
         "
       >
-        <a-radio v-for="key in Object.keys(Side).slice(0, 2)" :value="+key">
+        <a-radio v-for="key in sideRadiosList" :key="key" :value="+key">
           {{ dealSide(+key).name }}
         </a-radio>
       </a-radio-group>

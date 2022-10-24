@@ -42,7 +42,7 @@ export default {
   clear_journal: 'Clear journal',
   clear_DB: 'Clear DB',
   reset_main_panel: 'Reset main panel',
-  export_all_transaction_data: 'E`xport all transaction data',
+  export_all_transaction_data: 'Export all transaction data',
 
   website: 'Website',
   user_manual: 'User manual',
@@ -63,6 +63,10 @@ export default {
   add_board: 'Add Board',
   select_board: 'Please select the board to add',
   add_board_error: 'Add board target error',
+  select_date: 'Select Date',
+  date_type: 'Date Type',
+  natural_day: 'Natural Day',
+  trading_day: 'Trading Day',
 
   delete_category:
     'Delete all data in {category}, if the {categoryName} process is running, the process will also be stopped, confirm deletion',
@@ -484,7 +488,8 @@ export default {
 
     porformance: 'Performance',
     rocket_model: 'Open Rocket Model',
-    rocket_model_desc: 'Use CPU 100%, restart is required',
+    rocket_model_desc:
+      'Use CPU 100% (only when the CPU is greater than 4 core can open it) , restart is required',
     bypass_accounting: 'Bypass UI Accounting',
     bypass_accounting_desc:
       'UI process no longer dealing with calculation, restart is required',
