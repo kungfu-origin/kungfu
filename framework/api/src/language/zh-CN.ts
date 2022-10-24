@@ -63,6 +63,10 @@ export default {
   add_board: '添加面板',
   select_board: '请选择要添加的面板',
   add_board_error: '添加面板目标错误',
+  select_date: '选择日期',
+  date_type: '日期类型',
+  natural_day: '自然日',
+  trading_day: '交易日',
 
   delete_category:
     '删除 {category} 所有数据， 如果该 {categoryName} 进程正在运行, 也将停止进程, 确认删除',
@@ -481,7 +485,7 @@ export default {
     porformance: '性能',
     rocket_model: '开启极速模式',
     rocket_model_desc:
-      '开启极速模式会极大的降低系统延迟, 并会使 CPU 使用效率达到100%, 重启后生效',
+      '开启极速模式会极大的降低系统延迟 (只有当 CPU 核数大于 4 时才能开启) , 并会使 CPU 使用效率达到100%, 重启后生效',
     bypass_accounting: '跳过UI进程计算',
     bypass_accounting_desc:
       'UI进程不再处理计算逻辑, 完全通过计算进程更新数据, 减轻UI进程性能占用, 重启后生效',

@@ -46,20 +46,20 @@ function handleConfirm() {
     class="kf-export-date-modal"
     :width="320"
     v-model:visible="modalVisible"
-    title="选择日期"
+    :title="$t('select_date')"
     :destroyOnClose="true"
     @cancel="closeModal"
     @ok="handleConfirm"
   >
     <a-form ref="formRef" :model="formState" :colon="false">
       <a-form-item
-        label="选择日期"
+        :label="$t('select_date')"
         name="date"
         required
         :rules="[
           {
             required: true,
-            message: '该项为必填项',
+            message: $t('validate.mandatory'),
             trigger: 'blur',
           },
         ]"
@@ -70,24 +70,24 @@ function handleConfirm() {
         ></a-date-picker>
       </a-form-item>
       <a-form-item
-        label="日期类型"
+        :label="$t('date_type')"
         name="dateType"
         required
         :rules="[
           {
             type: 'number',
             required: true,
-            message: '该项为必填项',
+            message: $t('validate.mandatory'),
             trigger: 'blur',
           },
         ]"
       >
         <a-radio-group v-model:value="formState.dateType">
           <a-radio-button :value="HistoryDateEnum.naturalDate">
-            自然日
+            {{ $t('natural_day') }}
           </a-radio-button>
           <a-radio-button :value="HistoryDateEnum.tradingDate">
-            交易日
+            {{ $t('trading_day') }}
           </a-radio-button>
         </a-radio-group>
       </a-form-item>
