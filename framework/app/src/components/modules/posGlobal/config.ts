@@ -24,7 +24,7 @@ export const getColumns = (): KfTradingDataTableHeaderConfig[] => [
   {
     name: '',
     dataIndex: 'direction',
-    width: 30,
+    width: 50,
   },
   {
     type: 'number',

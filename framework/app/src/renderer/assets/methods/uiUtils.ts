@@ -574,7 +574,7 @@ export const buildInstrumentSelectOptionLabel = (
   instrument: KungfuApi.InstrumentResolved,
 ): string => {
   return `${instrument.instrumentId} ${instrument.instrumentName} ${
-    ExchangeIds[instrument.exchangeId.toUpperCase()].name
+    ExchangeIds[instrument.exchangeId.toUpperCase()]?.name || ''
   }`;
 };
 
