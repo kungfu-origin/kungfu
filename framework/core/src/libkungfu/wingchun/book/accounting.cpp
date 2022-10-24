@@ -22,6 +22,8 @@ void AccountingMethod::setup_defaults(Bookkeeper &bookkeeper) {
   bookkeeper.set_accounting_method(InstrumentType::Bond, bond_accounting_method);
   bookkeeper.set_accounting_method(InstrumentType::Fund, stock_accounting_method);
   bookkeeper.set_accounting_method(InstrumentType::StockOption, future_accounting_method);
+  bookkeeper.set_accounting_method(InstrumentType::Warrant, future_accounting_method);
+  bookkeeper.set_accounting_method(InstrumentType::Iopt, future_accounting_method);
   bookkeeper.set_accounting_method(InstrumentType::TechStock, stock_accounting_method);
   bookkeeper.set_accounting_method(InstrumentType::Index, stock_accounting_method);
   bookkeeper.set_accounting_method(InstrumentType::Repo, repo_accounting_method);

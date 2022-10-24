@@ -140,6 +140,8 @@ kfc_a = Analysis(
             "setuptools",
             "numpy",
             "pandas",
+            "scipy",
+            "statsmodels",
         ],
         executable_modules=[
             "kungfu",
