@@ -6,7 +6,7 @@ const { t } = VueI18n.global;
 const buildSorter =
   (dataIndex: keyof KungfuApi.TradeResolved) =>
   (a: KungfuApi.TradeResolved, b: KungfuApi.TradeResolved) =>
-    +Number(a[dataIndex]) - +Number(b[dataIndex]);
+    (+Number(a[dataIndex]) || 0) - (+Number(b[dataIndex]) || 0);
 
 const buildStrSorter =
   (dataIndex: keyof KungfuApi.TradeResolved) =>

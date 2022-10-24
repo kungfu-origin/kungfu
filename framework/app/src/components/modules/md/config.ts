@@ -1,7 +1,7 @@
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 const { t } = VueI18n.global;
 
-export const columns: AntTableColumns = [
+export const getColumns = (): AntTableColumns => [
   {
     title: t('mdConfig.counter_name'),
     dataIndex: 'name',

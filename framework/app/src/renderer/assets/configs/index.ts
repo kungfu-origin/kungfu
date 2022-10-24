@@ -1,6 +1,4 @@
-import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import { useBoardFilter } from '../methods/uiUtils';
-const { t } = VueI18n.global;
 
 const { getBoard } = useBoardFilter();
 
@@ -58,7 +56,7 @@ const dealBoardMap = (boardsMap: KfLayout.BoardsMap) => {
 
       if (currentBoard.contents?.length) {
         const contentsResolved = currentBoard.contents
-          .map((contentId) => getBoard(contentId, t(contentId), ''))
+          .map((contentId) => getBoard(contentId, contentId, ''))
           .filter((item) => !!item);
         if (!contentsResolved.length) {
           return -1;

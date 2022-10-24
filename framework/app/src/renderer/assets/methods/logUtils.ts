@@ -32,11 +32,20 @@ export function dealLogMessage(line: string): string {
   }
 
   line = line
-    .replace(/ info /g, '<span class="info"> info </span>')
-    .replace(/warning/g, '<span class="warning"> warning </span>')
-    .replace(/ error /g, '<span class="error"> error </span>')
-    .replace(/ debug /g, '<span class="debug"> debug </span>')
-    .replace(/ trace /g, '<span class="trace"> trace </span>');
+    .replace(
+      /(?<=\[)\s*(info|KF_INFO)\s*(?=\])/g,
+      '<span class="info"> $1 </span>',
+    )
+    .replace(
+      /(?<=\[)\s*(warning|KF_WARN)\s*(?=\])/g,
+      '<span class="warning"> $1 </span>',
+    )
+    .replace(
+      /(?<=\[)\s*(error|KF_ERROR)\s*(?=\])/g,
+      '<span class="error"> $1 </span>',
+    )
+    .replace(/(?<=\[)\s*debug\s*(?=\])/g, '<span class="debug"> debug </span>')
+    .replace(/(?<=\[)\s*trace\s*(?=\])/g, '<span class="trace"> trace </span>');
 
   return line;
 }

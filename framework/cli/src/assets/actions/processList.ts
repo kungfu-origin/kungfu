@@ -574,7 +574,7 @@ const switchMaster = async (status: boolean): Promise<void> => {
     await startMaster(false);
     await delayMilliSeconds(1000);
     await startCacheD(false);
-    await delayMilliSeconds(1000);
+    await delayMilliSeconds(2000);
     await startLedger(false);
     await delayMilliSeconds(1000);
     await startDzxy();

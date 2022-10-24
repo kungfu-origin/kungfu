@@ -12,7 +12,7 @@ import KfProcessStatus from '@kungfu-trader/kungfu-app/src/renderer/components/p
 import KfSetExtensionModal from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfSetExtensionModal.vue';
 import KfSetByConfigModal from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfSetByConfigModal.vue';
 
-import { columns } from './config';
+import { getColumns } from './config';
 import {
   getInstrumentTypeColor,
   handleOpenLogview,
@@ -49,6 +49,7 @@ const setMdConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
   config: {} as KungfuApi.KfExtConfig,
 });
 const currentSelectedSourceId = ref<string>('');
+const columns = getColumns();
 
 const { extConfigs, mdExtTypeMap } = useExtConfigsRelated();
 const { md } = toRefs(useAllKfConfigData());
