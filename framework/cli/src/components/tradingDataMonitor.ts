@@ -228,7 +228,10 @@ export class TradingDataDashboard extends Dashboard {
 
     this.boards.processBoard &&
       this.boards.processBoard.key(['enter'], () => {
-        const selectedIndex: number = this.boards.processBoard?.selected || -1;
+        const selectedIndex: number =
+          this.boards.processBoard?.selected === undefined
+            ? -1
+            : this.boards.processBoard?.selected;
         if (selectedIndex === -1) {
           throw new Error('selectedIndex === -1');
         }
