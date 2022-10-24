@@ -13,7 +13,7 @@ using namespace kungfu::longfist::enums;
 
 static constexpr int INSTRUMENT_ID_LEN = 32;
 static constexpr int ACCOUNT_ID_LEN = 32;
-static constexpr int PRODUCT_ID_LEN = 32;
+static constexpr int PRODUCT_ID_LEN = 128;
 static constexpr int DATE_LEN = 9;
 static constexpr int EXCHANGE_ID_LEN = 16;
 
