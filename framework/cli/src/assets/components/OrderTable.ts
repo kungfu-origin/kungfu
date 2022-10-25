@@ -32,7 +32,7 @@ export class OrderTable extends Table {
       'System LA',
       'Network LA',
     ];
-    this.columnWidth = [10, 0, 0, 0, 8, 12, 8, 9, 10, 10];
+    this.columnWidth = [10, 8, 0, 0, 8, 12, 8, 9, 10, 10];
   }
 
   setItems(orderDataList: KungfuApi.OrderResolved[]) {
