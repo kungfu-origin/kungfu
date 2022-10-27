@@ -5,6 +5,7 @@ import { computed, getCurrentInstance, onBeforeUnmount, ref } from 'vue';
 import { useExtConfigsRelated } from '../../assets/methods/actionsUtils';
 import globalBus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 import KfGlobalSettingModal from '../public/KfGlobalSettingModal.vue';
+import { useLanguage } from '@kungfu-trader/kungfu-js-api/language';
 
 const logo = require('@kungfu-trader/kungfu-app/src/renderer/assets/svg/LOGO.svg');
 
@@ -13,6 +14,8 @@ const globalSettingModalVisible = ref<boolean>(false);
 const menuSelectedKeys = ref<string[]>(['main']);
 
 const { uiExtConfigs } = useExtConfigsRelated();
+const { buildExtLangKey, isLanguageKeyAvailable } = useLanguage();
+
 const sidebarFooterComponentConfigs = computed(() => {
   return Object.keys(uiExtConfigs.value)
     .filter((key) => uiExtConfigs.value[key].position === 'sidebar_footer')
@@ -73,9 +76,9 @@ function handleToPage(pathname: string) {
           <img :src="logo" />
         </div>
         <a-menu
+          v-model:selectedKeys="menuSelectedKeys"
           mode="vertical"
           style="width: 64px"
-          v-model:selectedKeys="menuSelectedKeys"
         >
           <a-menu-item key="main" @click="handleToPage('/')">
             <template #icon>
@@ -91,14 +94,25 @@ function handleToPage(pathname: string) {
             <template #icon>
               <component :is="config.key"></component>
             </template>
-            <span>{{ config.name }}</span>
+            <span>
+              {{
+                isLanguageKeyAvailable(buildExtLangKey(config.key, config.key))
+                  ? $t(buildExtLangKey(config.key, config.key))
+                  : config.name
+              }}
+            </span>
           </a-menu-item>
         </a-menu>
         <div class="kf-sidebar-footer__warp">
           <div
-            class="kf-sidebar-footer-btn__warp"
             v-for="config in sidebarFooterComponentConfigs"
-            :title="config.name"
+            :key="config.key"
+            class="kf-sidebar-footer-btn__warp"
+            :title="
+              isLanguageKeyAvailable(buildExtLangKey(config.key, config.key))
+                ? $t(buildExtLangKey(config.key, config.key))
+                : config.name
+            "
           >
             <component :is="config.key"></component>
           </div>
@@ -118,7 +132,11 @@ function handleToPage(pathname: string) {
     </a-layout>
     <a-layout-footer>
       <KfProcessStatusController></KfProcessStatusController>
-      <div class="kf-footer-box__warp" v-for="config in footerComponentConfigs">
+      <div
+        v-for="config in footerComponentConfigs"
+        :key="config.key"
+        class="kf-footer-box__warp"
+      >
         <component :is="config.key"></component>
       </div>
     </a-layout-footer>
