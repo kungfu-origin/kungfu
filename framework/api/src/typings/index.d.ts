@@ -168,6 +168,11 @@ declare namespace KungfuApi {
         settings: KfConfigItem[];
       }
     >;
+    language: {
+      'zh-CN': Record<string, string>;
+      'en-US': Record<string, string>;
+      [langName: string]: Record<string, string>;
+    };
   }
 
   interface KfExhibitConfig {
@@ -226,6 +231,12 @@ declare namespace KungfuApi {
       script: string;
     }
   >;
+
+  export type KfExtLanguages = {
+    'zh-CN': Record<string, Record<string, string>>;
+    'en-US': Record<string, Record<string, string>>;
+    [langName: string]: Record<string, Record<string, string>>;
+  };
 
   export interface SetKfConfigPayload {
     type: KungfuApi.ModalChangeType;
