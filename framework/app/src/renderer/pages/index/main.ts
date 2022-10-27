@@ -39,6 +39,7 @@ import {
 import {
   postStartAll,
   preStartAll,
+  mergeExtLanguages,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
 import {
@@ -114,9 +115,12 @@ app.config.globalProperties.$globalBus = globalBus;
 app.config.globalProperties.$tradingDataSubject = tradingDataSubject;
 
 app.use(VueI18n);
-useComponenets(app, router).then(() => {
-  app.mount('#app');
-});
+
+mergeExtLanguages().then(() =>
+  useComponenets(app, router).then(() => {
+    app.mount('#app');
+  }),
+);
 
 const globalStore = useGlobalStore();
 

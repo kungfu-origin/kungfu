@@ -21,6 +21,8 @@ public:
 
   void set_service(MarketData_ptr service);
 
+  void on_trading_day(const event_ptr &event, int64_t daytime) override;
+
 protected:
   void on_react() override;
 

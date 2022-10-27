@@ -14,7 +14,7 @@ import {
   StrategyExtTypes,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { useExtConfigsRelated } from '../../assets/methods/actionsUtils';
-import VueI18n from '@kungfu-trader/kungfu-js-api/language';
+import VueI18n, { useLanguage } from '@kungfu-trader/kungfu-js-api/language';
 const { t } = VueI18n.global;
 
 const props = withDefaults(
@@ -42,6 +42,7 @@ const availExtensionList = computed(() => {
 });
 
 const { modalVisible, closeModal } = useModalVisible(props.visible);
+const { buildExtLangKey, isLanguageKeyAvailable } = useLanguage();
 
 const modalTitle = computed(() => {
   if (props.extensionType === 'td' || props.extensionType === 'md') {
@@ -89,9 +90,9 @@ function getKungfuTradeValueCommonDataByExtType(
   >
     <a-radio-group v-model:value="selectedExtension">
       <a-radio
-        :value="item.key"
-        :key="item.key"
         v-for="item in availExtensionList"
+        :key="item.key"
+        :value="item.key"
         :style="{
           height: '36px',
           'line-height': '36px',
@@ -99,7 +100,13 @@ function getKungfuTradeValueCommonDataByExtType(
           'min-width': '45%',
         }"
       >
-        <span class="source-name__txt">{{ item.name }}</span>
+        <span class="source-name__txt">
+          {{
+            isLanguageKeyAvailable(buildExtLangKey(item.key, item.key))
+              ? $t(buildExtLangKey(item.key, item.key))
+              : item.name
+          }}
+        </span>
         <span class="source-id__txt">{{ item.key }}</span>
         <a-tag
           v-for="(extType, index) in item.type"

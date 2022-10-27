@@ -48,7 +48,7 @@ import {
   isShotable,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import OrderConfirmModal from './OrderConfirmModal.vue';
-import VueI18n from '@kungfu-trader/kungfu-js-api/language';
+import VueI18n, { useLanguage } from '@kungfu-trader/kungfu-js-api/language';
 import { useTradingTask } from '../tradingTask/utils';
 import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
 import { storeToRefs } from 'pinia';
@@ -64,7 +64,7 @@ const app = getCurrentInstance();
 const { instrumentKeyAccountsMap, uiExtConfigs } = storeToRefs(
   useGlobalStore(),
 );
-
+const { buildExtLangKey, isLanguageKeyAvailable } = useLanguage();
 const { globalSetting } = storeToRefs(useGlobalStore());
 
 const { handleBodySizeChange } = useDashboardBodySize();
@@ -763,7 +763,13 @@ watch(
                   v-for="item in availTradingTaskExtensionList"
                   @click="handleOpenTradingTaskConfigModal(item)"
                 >
-                  {{ item.name }}
+                  {{
+                    isLanguageKeyAvailable(
+                      buildExtLangKey(item.name, item.name),
+                    )
+                      ? $t(buildExtLangKey(item.name, item.name))
+                      : item.name
+                  }}
                 </a-button>
               </a-card>
             </template>

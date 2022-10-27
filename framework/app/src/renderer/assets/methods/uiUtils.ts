@@ -22,6 +22,7 @@ import {
   removeJournal,
   removeDB,
   getAvailDaemonList,
+  getKfExtensionLanguage,
   loopToRunProcess,
   resolveInstrumentValue,
   transformSearchInstrumentResultToInstrument,
@@ -47,6 +48,24 @@ import md from 'markdown-it';
 import { Router } from 'vue-router';
 
 // this utils file is only for ui components
+
+export const mergeExtLanguages = async () => {
+  const languages = await getKfExtensionLanguage();
+  console.log(languages);
+
+  Object.keys(languages).forEach((langName) => {
+    if (langName in VueI18n.global.messages) {
+      VueI18n.global.mergeLocaleMessage(langName, languages[langName]);
+    } else {
+      console.warn(
+        'Unregistered language: ' + langName,
+        '\nLanguage data: ',
+        languages[langName],
+      );
+    }
+  });
+};
+
 export const getUIComponents = (
   kfUiExtConfigs: KungfuApi.KfUIExtConfigs,
 ): {
