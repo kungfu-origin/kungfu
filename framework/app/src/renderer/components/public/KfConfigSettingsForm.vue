@@ -645,9 +645,11 @@ defineExpose({
           :key="option.value"
           :value="option.value"
         >
-          {{ isLanguageKeyAvailable(option.label + '')
+          {{
+            isLanguageKeyAvailable(option.label + '')
               ? $t(option.label + '')
-              : option.label }}
+              : option.label
+          }}
         </a-radio>
       </a-radio-group>
       <a-checkbox
