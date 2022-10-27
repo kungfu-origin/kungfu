@@ -4,7 +4,7 @@
     "name": "Kungfu Trader",
     "email": "info@kungfu.link"
   },
-  "version": "2.4.18",
+  "version": "2.4.19-alpha.0",
   "description": "Kungfu Extension - SIM",
   "license": "Apache-2.0",
   "main": "package.json",
@@ -29,10 +29,10 @@
     "package": "kfs project package"
   },
   "dependencies": {
-    "@kungfu-trader/kungfu-core": "^2.4.18"
+    "@kungfu-trader/kungfu-core": "^2.4.19-alpha.0"
   },
   "devDependencies": {
-    "@kungfu-trader/kungfu-sdk": "^2.4.18"
+    "@kungfu-trader/kungfu-sdk": "^2.4.19-alpha.0"
   },
   "kungfuBuild": {
     "python": {
@@ -52,49 +52,77 @@
         "settings": [
           {
             "key": "account_id",
-            "name": "account_id",
+            "name": "sim.account_id",
             "type": "str",
-            "errMsg": "请填写账户 account_id",
+            "errMsg": "sim.account_id_error",
             "required": true,
             "primary": true
           },
           {
             "key": "match_mode",
-            "name": "match_mode",
+            "name": "sim.match_mode",
             "type": "select",
             "options": [
               {
                 "value": "reject",
-                "label": "Reject"
+                "label": "sim.reject"
               },
               {
                 "value": "pend",
-                "label": "Pend"
+                "label": "sim.pend"
               },
               {
                 "value": "cancel",
-                "label": "Cancel"
+                "label": "sim.cancel"
               },
               {
                 "value": "partialfillandcancel",
-                "label": "PartialFillAndCancel"
+                "label": "sim.partialfillandcancel"
               },
               {
                 "value": "partialfill",
-                "label": "PartialFillAndPending"
+                "label": "sim.partialfill"
               },
               {
                 "value": "fill",
-                "label": "Fill"
+                "label": "sim.fill"
               }
             ],
-            "errMsg": "请选择撮合模式",
+            "errMsg": "sim.match_mode_error",
             "required": true
           }
         ]
       },
       "md": {
         "type": "multi"
+      }
+    },
+    "language": {
+      "zh-CN": {
+        "sim": "功夫模拟",
+        "account_id": "账户 ID",
+        "account_id_error": "请填写账户 account_id",
+        "match_mode": "撮合模式",
+        "match_mode_error": "请选择撮合模式",
+        "reject": "失败",
+        "pend": "等待中",
+        "cancel": "撤单",
+        "partialfillandcancel": "部分成交部分撤单",
+        "partialfill": "部分成交部分等待",
+        "fill": "成交"
+      },
+      "en-US": {
+        "sim": "SIM",
+        "account_id": "Account ID",
+        "account_id_error": "Please input the Account ID",
+        "match_mode": "Match Mode",
+        "match_mode_error": "Please select the Match Mode",
+        "reject": "Reject",
+        "pend": "Pending",
+        "cancel": "Cancel",
+        "partialfillandcancel": "PartialFillAndCancel",
+        "partialfill": "PartialFillAndPending",
+        "fill": "Fill"
       }
     }
   }

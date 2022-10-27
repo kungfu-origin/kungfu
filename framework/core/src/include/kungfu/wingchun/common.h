@@ -262,6 +262,9 @@ inline longfist::enums::InstrumentType get_instrument_type_by_exchange_hk(const 
 inline longfist::enums::InstrumentType get_instrument_type(const std::string &exchange_id,
                                                            const std::string &instrument_id) {
   if (string_equals(exchange_id, EXCHANGE_SSE)) {
+    if (instrument_id.length() == 8) {
+      return longfist::enums::InstrumentType::StockOption;
+    }
     if (startswith(instrument_id, "00")) {
       return longfist::enums::InstrumentType::Index;
     } else if (startswith(instrument_id, "0")) {
@@ -279,6 +282,9 @@ inline longfist::enums::InstrumentType get_instrument_type(const std::string &ex
 
     return longfist::enums::InstrumentType::Stock;
   } else if (string_equals(exchange_id, EXCHANGE_SZE)) {
+    if (instrument_id.length() == 8) {
+      return longfist::enums::InstrumentType::StockOption;
+    }
     if (startswith(instrument_id, "15") || startswith(instrument_id, "16") || startswith(instrument_id, "18")) {
       return longfist::enums::InstrumentType::Fund;
     } else if (startswith(instrument_id, "13")) {

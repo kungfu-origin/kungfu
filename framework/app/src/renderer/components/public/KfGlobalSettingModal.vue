@@ -28,6 +28,7 @@ import { useExtConfigsRelated } from '../../assets/methods/actionsUtils';
 import globalBus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 import { useGlobalStore } from '../../pages/index/store/global';
 import { storeToRefs } from 'pinia';
+import { useLanguage } from '@kungfu-trader/kungfu-js-api/language';
 
 const props = withDefaults(
   defineProps<{
@@ -46,6 +47,7 @@ defineEmits<{
 const store = useGlobalStore();
 const { globalSetting } = storeToRefs(store);
 const { uiExtConfigs } = useExtConfigsRelated();
+const { buildExtLangKey, isLanguageKeyAvailable } = useLanguage();
 
 const globalSettingComponentConfigs = computed(() => {
   return Object.keys(uiExtConfigs.value)
@@ -270,7 +272,11 @@ function handleAddCommission() {
             <a-tab-pane
               v-for="config in globalSettingComponentConfigs"
               :key="config.key"
-              :tab="config.name"
+              :tab="
+                isLanguageKeyAvailable(buildExtLangKey(config.key, config.key))
+                  ? $t(buildExtLangKey(config.key, config.key))
+                  : config.name
+              "
             >
               <component :is="config.key"></component>
             </a-tab-pane>

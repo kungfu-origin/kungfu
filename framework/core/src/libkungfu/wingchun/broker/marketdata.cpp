@@ -31,6 +31,10 @@ void MarketDataVendor::on_start() {
 
 BrokerService_ptr MarketDataVendor::get_service() { return service_; }
 
+void MarketDataVendor::on_trading_day(const event_ptr &event, int64_t daytime) {
+  service_->on_trading_day(event, daytime);
+}
+
 bool MarketData::has_instrument(const std::string &instrument_id) const {
   return instruments_.find(instrument_id) != instruments_.end();
 }
