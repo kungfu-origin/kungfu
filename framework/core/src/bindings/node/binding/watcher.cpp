@@ -229,6 +229,9 @@ Napi::Value Watcher::RequestStop(const Napi::CallbackInfo &info) {
 
   // stop master
   if (app_location->category == category::SYSTEM && app_location->group == "master") {
+    if (not has_writer(master_cmd_location_->uid)) {
+      return Napi::Boolean::New(info.Env(), false);
+    }
     get_writer(master_cmd_location_->uid)->mark(now(), RequestStop::tag);
     return Napi::Boolean::New(info.Env(), true);
   }
@@ -602,7 +605,7 @@ void Watcher::CancelWorker() { uv_work_live_ = false; }
 
 void Watcher::AfterMasterDown() {
   reader_->disjoin(master_cmd_location_->uid);
-  writers_.erase(master_cmd_location_->uid);
+  writers_.clear();
 }
 
 void Watcher::UpdateBrokerState(uint32_t source_id, uint32_t dest_id, const BrokerStateUpdate &state) {
