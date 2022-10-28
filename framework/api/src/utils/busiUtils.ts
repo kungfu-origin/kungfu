@@ -593,6 +593,40 @@ export const getExhibitConfig =
     }, {});
   };
 
+export const getKfExtensionLanguage = async () => {
+  const kfExtConfigList = await getKfExtConfigList();
+
+  return kfExtConfigList.reduce((languageMap, config) => {
+    if ('language' in config) {
+      const defaultLangData: KungfuApi.KfExtOriginConfig['language'] = {
+        'zh-CN': {},
+        'en-US': {},
+      };
+      const langData =
+        typeof config.language === 'object' ? config.language : defaultLangData;
+
+      const extNames = {
+        'zh-CN': langData['zh-CN'][config.key] ?? config.name,
+        'en-US':
+          langData['en-US'][config.key] ??
+          (config.key[0].toUpperCase() + config.key.slice(1)).replace(
+            /(?<!^)([A-Z])/g,
+            ' $1',
+          ),
+      };
+
+      Object.keys(langData).forEach((langName) => {
+        languageMap[langName] = {
+          ...(languageMap[langName] || {}),
+          [config.key]: langData[langName],
+          [config.name]: extNames[langName] ?? config.name,
+        };
+      });
+    }
+    return languageMap;
+  }, {} as KungfuApi.KfExtLanguages);
+};
+
 export const getAvailDaemonList = async (): Promise<
   KungfuApi.KfDaemonLocation[]
 > => {

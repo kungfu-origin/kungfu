@@ -91,6 +91,7 @@ const locale = settingLanguage || (extraLanguage ? 'extra' : langDefault); //默
 const i18n = createI18n({
   locale,
   messages,
+  silentTranslationWarn: true,
 });
 
 if (extraLanguage) {
@@ -106,6 +107,39 @@ if (mergeENLanguage) {
   console.log('Found en merge language');
   i18n.global.mergeLocaleMessage('en-US', mergeENLanguage);
 }
+
+export const useLanguage = () => {
+  const buildExtLangKey = (extKey: string, extraKeys?: string[] | string) => {
+    if (!extraKeys) return extKey;
+
+    return [
+      extKey,
+      ...(Array.isArray(extraKeys) ? extraKeys : [extraKeys]),
+    ].join('.');
+  };
+
+  const isLanguageKeyAvailable = (keysStr: string) => {
+    if (!keysStr) return false;
+
+    let result: string | undefined;
+    const languageData = i18n.global.messages[i18n.global.locale];
+
+    const keysList = keysStr.split('.');
+    if (keysList.length) {
+      result = keysList.reduce<string | undefined>(
+        (res, key) => res?.[key],
+        languageData,
+      );
+    }
+
+    return typeof result === 'string';
+  };
+
+  return {
+    buildExtLangKey,
+    isLanguageKeyAvailable,
+  };
+};
 
 export default i18n;
 globalThis.i18n = i18n;
