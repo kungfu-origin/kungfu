@@ -132,7 +132,7 @@ export const useLanguage = () => {
       );
     }
 
-    return result !== undefined;
+    return typeof result === 'string';
   };
 
   return {

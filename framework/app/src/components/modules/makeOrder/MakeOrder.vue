@@ -64,7 +64,7 @@ const app = getCurrentInstance();
 const { instrumentKeyAccountsMap, uiExtConfigs } = storeToRefs(
   useGlobalStore(),
 );
-const { buildExtLangKey, isLanguageKeyAvailable } = useLanguage();
+const { isLanguageKeyAvailable } = useLanguage();
 const { globalSetting } = storeToRefs(useGlobalStore());
 
 const { handleBodySizeChange } = useDashboardBodySize();
@@ -764,10 +764,8 @@ watch(
                   @click="handleOpenTradingTaskConfigModal(item)"
                 >
                   {{
-                    isLanguageKeyAvailable(
-                      buildExtLangKey(item.name, item.name),
-                    )
-                      ? $t(buildExtLangKey(item.name, item.name))
+                    isLanguageKeyAvailable(item.name)
+                      ? $t(item.name)
                       : item.name
                   }}
                 </a-button>
