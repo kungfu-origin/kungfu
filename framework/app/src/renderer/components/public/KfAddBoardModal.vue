@@ -3,7 +3,7 @@ import { storeToRefs } from 'pinia';
 import { computed, getCurrentInstance, onMounted, ref } from 'vue';
 import { messagePrompt, useModalVisible } from '../../assets/methods/uiUtils';
 import { useGlobalStore } from '../../pages/index/store/global';
-import VueI18n from '@kungfu-trader/kungfu-js-api/language';
+import VueI18n, { useLanguage } from '@kungfu-trader/kungfu-js-api/language';
 const { t } = VueI18n.global;
 
 const { success, error } = messagePrompt();
@@ -19,6 +19,7 @@ const props = withDefaults(
 );
 
 const app = getCurrentInstance();
+const { isLanguageKeyAvailable } = useLanguage();
 const { modalVisible, closeModal } = useModalVisible(props.visible);
 const availKfBoards = ref<string[]>([]);
 const selectedBoard = ref<string>('');
@@ -86,7 +87,7 @@ function handleComfirm() {
           :value="item"
           :disabled="addedBoards.includes(item)"
         >
-          {{ $t(item) }}
+          {{ isLanguageKeyAvailable(item) ? $t(item) : item }}
         </a-radio-button>
       </a-radio-group>
     </div>

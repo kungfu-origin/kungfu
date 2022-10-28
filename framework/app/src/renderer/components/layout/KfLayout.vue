@@ -14,7 +14,7 @@ const globalSettingModalVisible = ref<boolean>(false);
 const menuSelectedKeys = ref<string[]>(['main']);
 
 const { uiExtConfigs } = useExtConfigsRelated();
-const { buildExtLangKey, isLanguageKeyAvailable } = useLanguage();
+const { isLanguageKeyAvailable } = useLanguage();
 
 const sidebarFooterComponentConfigs = computed(() => {
   return Object.keys(uiExtConfigs.value)
@@ -96,8 +96,8 @@ function handleToPage(pathname: string) {
             </template>
             <span>
               {{
-                isLanguageKeyAvailable(buildExtLangKey(config.key, config.key))
-                  ? $t(buildExtLangKey(config.key, config.key))
+                isLanguageKeyAvailable(config.name)
+                  ? $t(config.name)
                   : config.name
               }}
             </span>
@@ -109,8 +109,8 @@ function handleToPage(pathname: string) {
             :key="config.key"
             class="kf-sidebar-footer-btn__warp"
             :title="
-              isLanguageKeyAvailable(buildExtLangKey(config.key, config.key))
-                ? $t(buildExtLangKey(config.key, config.key))
+              isLanguageKeyAvailable(config.name)
+                ? $t(config.name)
                 : config.name
             "
           >

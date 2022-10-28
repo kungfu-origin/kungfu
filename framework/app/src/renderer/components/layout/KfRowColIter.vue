@@ -35,7 +35,7 @@
               @dragstart="handleDragStart(content)"
               @dragend="handleDragEnd"
             >
-              {{ $t(content) }}
+              {{ getBoardNameByLanguage(content) }}
             </div>
           </template>
           <a-card style="width: 100%; height: 100%">
@@ -46,7 +46,9 @@
             ></component>
             <KfNoData
               v-else
-              :txt="`${$t(content)} ${$t('component_error')}`"
+              :txt="`${getBoardNameByLanguage(content)} ${$t(
+                'component_error',
+              )}`"
             ></KfNoData>
           </a-card>
         </a-tab-pane>
@@ -89,7 +91,7 @@
               @dragstart="handleDragStart(content)"
               @dragend="handleDragEnd"
             >
-              {{ $t(content) }}
+              {{ getBoardNameByLanguage(content) }}
             </div>
           </template>
           <a-card style="width: 100%; height: 100%">
@@ -100,7 +102,9 @@
             ></component>
             <KfNoData
               v-else
-              :txt="`${$t(content)} ${$t('component_error')}`"
+              :txt="`${getBoardNameByLanguage(content)} ${$t(
+                'component_error',
+              )}`"
             ></KfNoData>
           </a-card>
         </a-tab-pane>
@@ -122,6 +126,9 @@ import KfDragCol from '@kungfu-trader/kungfu-app/src/renderer/components/layout/
 import KfNoData from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfNoData.vue';
 
 import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
+import VueI18n, { useLanguage } from '@kungfu-trader/kungfu-js-api/language';
+
+const { t } = VueI18n.global;
 
 interface KfRowColIterData {
   h: KfLayoutDirection;
@@ -158,6 +165,10 @@ export default defineComponent({
     const { boardsMap, dragedContentData, isBoardDragging } = storeToRefs(
       useGlobalStore(),
     );
+    const { isLanguageKeyAvailable } = useLanguage();
+
+    const getBoardNameByLanguage = (contentId: string) =>
+      isLanguageKeyAvailable(contentId) ? t(contentId) : contentId;
 
     const {
       setBoardsMapAttrById,
@@ -188,6 +199,8 @@ export default defineComponent({
       setDragedContentData,
       afterDragMoveBoard,
       markIsBoardDragging,
+
+      getBoardNameByLanguage,
     };
   },
 
