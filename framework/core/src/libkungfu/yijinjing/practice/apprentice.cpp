@@ -228,7 +228,6 @@ void apprentice::on_deregister(const event_ptr &event) {
   }
 
   reader_->disjoin(location_uid);
-  writers_.erase(location_uid);
   deregister_channel(location_uid);
   deregister_location(event->trigger_time(), location_uid);
 }

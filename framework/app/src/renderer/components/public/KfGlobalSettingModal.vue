@@ -47,7 +47,7 @@ defineEmits<{
 const store = useGlobalStore();
 const { globalSetting } = storeToRefs(store);
 const { uiExtConfigs } = useExtConfigsRelated();
-const { buildExtLangKey, isLanguageKeyAvailable } = useLanguage();
+const { isLanguageKeyAvailable } = useLanguage();
 
 const globalSettingComponentConfigs = computed(() => {
   return Object.keys(uiExtConfigs.value)
@@ -273,8 +273,8 @@ function handleAddCommission() {
               v-for="config in globalSettingComponentConfigs"
               :key="config.key"
               :tab="
-                isLanguageKeyAvailable(buildExtLangKey(config.key, config.key))
-                  ? $t(buildExtLangKey(config.key, config.key))
+                isLanguageKeyAvailable(config.name)
+                  ? $t(config.name)
                   : config.name
               "
             >

@@ -42,7 +42,7 @@ const availExtensionList = computed(() => {
 });
 
 const { modalVisible, closeModal } = useModalVisible(props.visible);
-const { buildExtLangKey, isLanguageKeyAvailable } = useLanguage();
+const { isLanguageKeyAvailable } = useLanguage();
 
 const modalTitle = computed(() => {
   if (props.extensionType === 'td' || props.extensionType === 'md') {
@@ -101,11 +101,7 @@ function getKungfuTradeValueCommonDataByExtType(
         }"
       >
         <span class="source-name__txt">
-          {{
-            isLanguageKeyAvailable(buildExtLangKey(item.key, item.key))
-              ? $t(buildExtLangKey(item.key, item.key))
-              : item.name
-          }}
+          {{ isLanguageKeyAvailable(item.name) ? $t(item.name) : item.name }}
         </span>
         <span class="source-id__txt">{{ item.key }}</span>
         <a-tag
