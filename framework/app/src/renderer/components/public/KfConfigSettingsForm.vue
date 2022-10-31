@@ -466,7 +466,9 @@ defineExpose({
       :key="item.key"
       :label="isLanguageKeyAvailable(item.name) ? $t(item.name) : item.name"
       :name="item.key"
-      :extra="item.tip && isLanguageKeyAvailable(item.tip) ? $t(item.tip) : ''"
+      :extra="
+        item.tip && isLanguageKeyAvailable(item.tip) ? $t(item.tip) : item.tip
+      "
       :rules="
         (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
         item.disabled
