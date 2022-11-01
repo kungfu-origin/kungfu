@@ -5,7 +5,7 @@
     "bypassTradingData": false
   },
   "strategy": { "python": false },
-  "system": { "logLevel": "-l info", "language": "" },
+  "system": { "logLevel": "-l info", "language": "zh-CN" },
   "code": { "tabSpaceType": "SPACES", "tabSpaceSize": "TWOINDENT" },
   "trade": { "sound": true, "fatFinger": 0, "close": 100 }
 }

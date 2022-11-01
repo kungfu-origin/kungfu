@@ -529,19 +529,6 @@ export default {
     close_today: '平今',
     close_yesterday: '平昨',
     min: '最小',
-
-    timing_rev_top: '定时起停',
-    use_timing_rev_top: '使用定时起停',
-    timing_task_list: '定时起停任务列表',
-    add_timing: '添加定时',
-    target_process: '目标进程',
-    manner: '方式',
-    daily_time: '每日时间',
-
-    master: '主控进程',
-    start: '启动',
-    stop: '停止',
-    restart: '重启',
   },
 
   风控: '风控',

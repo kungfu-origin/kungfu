@@ -535,19 +535,6 @@ export default {
     close_today: 'Close Today',
     close_yesterday: 'Close Yesterday',
     min: 'Min',
-
-    timing_rev_top: 'Timing Rev. Top',
-    use_timing_rev_top: 'Enable Timing Rev. Top',
-    timing_task_list: 'Timing Task List',
-    add_timing: 'Add Timing',
-    target_process: 'Target Process',
-    manner: 'Manner',
-    daily_time: 'Daily Time',
-
-    master: 'master',
-    start: 'start',
-    stop: 'stop',
-    restart: 'restart',
   },
 
   风控: 'Risk Setting',
