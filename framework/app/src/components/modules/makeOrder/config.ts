@@ -41,7 +41,7 @@ export const getConfigSettings = (
       required: true,
     },
     ...(isShotable(instrumentTypeEnum || InstrumentTypeEnum.unknown)
-      ? [
+      ? ([
           {
             key: 'offset',
             name: t('tradingConfig.offset'),
@@ -49,14 +49,16 @@ export const getConfigSettings = (
             default: OffsetEnum.Open,
             required: true,
           },
-          {
-            key: 'hedge_flag',
-            name: t('tradingConfig.hedge'),
-            type: 'hedgeFlag',
-            default: HedgeFlagEnum.Speculation,
-            required: true,
-          },
-        ]
+          instrumentTypeEnum === InstrumentTypeEnum.future
+            ? {
+                key: 'hedge_flag',
+                name: t('tradingConfig.hedge'),
+                type: 'hedgeFlag',
+                default: HedgeFlagEnum.Speculation,
+                required: true,
+              }
+            : null,
+        ].filter((item) => !!item) as KungfuApi.KfConfigItem[])
       : []),
     {
       key: 'price_type',
