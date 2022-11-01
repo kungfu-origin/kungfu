@@ -1939,8 +1939,10 @@ export const dealByConfigItemType = (
     case 'select':
     case 'radio':
       if (!options?.length) return value;
-      return options.filter((option) => option.value === value)[0]
+      const { isLanguageKeyAvailable } = useLanguage();
+      const label = options.filter((option) => option.value === value)[0]
         .label as string;
+      return isLanguageKeyAvailable(label) ? t(label) : label;
     default:
       return value;
   }
