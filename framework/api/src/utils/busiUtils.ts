@@ -71,7 +71,7 @@ import {
 import { Proc } from 'pm2';
 import { listDir, removeTargetFilesInFolder } from './fileUtils';
 import minimist from 'minimist';
-import VueI18n from '@kungfu-trader/kungfu-js-api/language';
+import VueI18n, { useLanguage } from '../language';
 import { unlinkSync } from 'fs-extra';
 const { t } = VueI18n.global;
 interface SourceAccountId {
@@ -1939,8 +1939,10 @@ export const dealByConfigItemType = (
     case 'select':
     case 'radio':
       if (!options?.length) return value;
-      return options.filter((option) => option.value === value)[0]
+      const { isLanguageKeyAvailable } = useLanguage();
+      const label = options.filter((option) => option.value === value)[0]
         .label as string;
+      return isLanguageKeyAvailable(label) ? t(label) : label;
     default:
       return value;
   }
@@ -1950,10 +1952,11 @@ export const kfConfigItemsToArgsByPrimaryForShow = (
   settings: KungfuApi.KfConfigItem[],
   formState: Record<string, KungfuApi.KfConfigValue>,
 ): string => {
+  const { isLanguageKeyAvailable } = useLanguage();
   return settings
     .filter((item) => item.primary)
     .map((item) => ({
-      label: item.name,
+      label: isLanguageKeyAvailable(item.name) ? t(item.name) : item.name,
       value: dealByConfigItemType(item.type, formState[item.key], item.options),
     }))
     .map((item) => `${item.label} ${item.value}`)
