@@ -18,7 +18,8 @@ const { error } = messagePrompt();
 const store = useCodeStore();
 const ProcessId: string = getProcessId();
 
-setHtmlTitle(`${t('kungfu')} - ${ProcessId}`);
+setHtmlTitle(ProcessId);
+
 const strategy = reactive<Code.Strategy>({
   strategy_id: '',
   strategy_path: '',
