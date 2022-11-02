@@ -120,7 +120,7 @@ function dealRowClassNameResolved(row: KungfuApi.PositionResolved) {
   const locationResolved: KungfuApi.KfExtraLocation = {
     category: categoryRegisterConfig.category,
     group: row.exchange_id,
-    name: row.instrument_id,
+    name: row.instrument_id + row.direction,
     mode: 'live',
   };
 
@@ -135,7 +135,7 @@ function handleClickRow(data: {
   const locationResolved: KungfuApi.KfExtraLocation = {
     category: categoryRegisterConfig.category,
     group: data.row.exchange_id,
-    name: data.row.instrument_id,
+    name: data.row.instrument_id + data.row.direction,
     mode: 'live',
   };
 

@@ -43,7 +43,6 @@ exports.getPagesConfig = (argv) => {
       entry[dir] = path.resolve(pagesDir, dir, 'main.ts');
       plugins.push(
         new HtmlWebpackPlugin({
-          title: '功夫交易系统',
           filename: `${dir}.html`,
           template: path.resolve(appDir, 'public', 'index.ejs'),
           minify: {

@@ -7,7 +7,6 @@ const { spawnSync } = require('child_process');
 const { glob } = require('glob');
 const { promisify } = require('util');
 const { finished } = require('stream');
-const { shell } = require('@kungfu-trader/kungfu-core');
 const {
   customResolve,
   getKfcPath,
@@ -17,6 +16,9 @@ const {
   kfcName,
   dealPath,
 } = require('../utils');
+const { shell, prebuilt } = require('@kungfu-trader/kungfu-core');
+const versioning = require('@mapbox/node-pre-gyp/lib/util/versioning');
+const project = require('./project');
 
 const pypackages = '__pypackages__';
 const kungfulibs = '__kungfulibs__';
@@ -394,4 +396,34 @@ exports.format = () => {
   if (packageJson.kungfuConfig && packageJson.kungfuConfig.ui_config) {
     require('@kungfu-trader/kungfu-core/.gyp/run-format-js').main(srcArgv);
   }
+};
+
+function updatePackageJson(packageJson) {
+  const config = packageJson.kungfuConfig || { key: 'KungfuTraderStrategy' };
+  packageJson.binary = {
+    module_name: config.key,
+    module_path: `dist/${config.key}`,
+    host: 'localhost',
+  };
+  packageJson.main = 'package.json';
+  return packageJson;
+}
+
+exports.package = () => {
+  const packageJson = shell.getPackageJson();
+
+  if (packageJson.host) {
+    project.package();
+    return;
+  }
+
+  const evaluate = versioning.evaluate;
+
+  versioning.evaluate = (packageJson, options, napiBuildVersion) => {
+    updatePackageJson(packageJson);
+    return evaluate(packageJson, options, napiBuildVersion);
+  };
+
+  project.makeBinary(updatePackageJson(packageJson));
+  prebuilt('package');
 };

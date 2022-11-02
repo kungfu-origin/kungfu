@@ -163,7 +163,12 @@ export const readRootPackageJsonSync = () => {
   const rootDir = findPackageRoot();
   const packageJsonPath = path.join(rootDir, 'package.json');
   if (fse.existsSync(packageJsonPath)) {
-    return fse.readJSONSync(packageJsonPath);
+    try {
+      return fse.readJSONSync(packageJsonPath);
+    } catch (err) {
+      console.error(err);
+      return {};
+    }
   }
 
   return {};
