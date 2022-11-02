@@ -289,7 +289,10 @@ const adjustOrderConfig = reactive({
   offsetLeft: 0,
   offsetTop: 0,
 });
-const adjustOrderForm = ref<{ price: number; volume: number }>({
+const adjustOrderForm = ref<{
+  price: number;
+  volume: number;
+}>({
   price: 0,
   volume: 0,
 });
@@ -352,6 +355,13 @@ function handleClickAdjustOrderMask(): void {
   if (!order) {
     adjustOrderMaskVisible.value = false;
     return;
+  }
+
+  if (+Number(order.volume_left) === +adjustOrderForm.value.volume) {
+    if (+order.limit_price === +adjustOrderForm.value.price) {
+      adjustOrderMaskVisible.value = false;
+      return;
+    }
   }
 
   kfCancelOrder(window.watcher, order)
