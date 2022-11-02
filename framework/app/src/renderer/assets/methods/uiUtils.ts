@@ -414,8 +414,15 @@ export const removeLoadingMask = (): void => {
   if ($loadingMask) $loadingMask.remove();
 };
 
-export const setHtmlTitle = (title: string): void => {
-  document.getElementsByTagName('title')[0].innerText = title;
+export const setHtmlTitle = (extraTitle?: string): void => {
+  const rootPackageJson = readRootPackageJsonSync();
+  const titleResolved = rootPackageJson?.kungfuCraft?.appTitle || t('kungfu');
+  document.getElementsByTagName('title')[0].innerText = [
+    `${titleResolved}`,
+    extraTitle,
+  ]
+    .filter((title) => !!title)
+    .join(' - ');
 };
 
 export const parseURIParams = (): Record<string, string> => {

@@ -35,21 +35,11 @@ import {
 import { bindIPCListener } from '@kungfu-trader/kungfu-app/src/renderer/ipcMsg/ipcListener';
 import { useTradingTask } from '@kungfu-trader/kungfu-app/src/components/modules/tradingTask/utils';
 import { setAllRiskSettingList } from '@kungfu-trader/kungfu-js-api/actions';
-import { readRootPackageJsonSync } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
-import VueI18n from '@kungfu-trader/kungfu-js-api/language';
-const { t } = VueI18n.global;
+
+setHtmlTitle();
 
 const app = getCurrentInstance();
 const store = useGlobalStore();
-
-const rootPackageJson = readRootPackageJsonSync();
-const newTitle = rootPackageJson?.appConfig?.appTitle;
-if (newTitle) {
-  setHtmlTitle(`${newTitle}`);
-} else {
-  setHtmlTitle(t('kungfu'));
-}
-
 const locale = ref<Locale>();
 
 const {

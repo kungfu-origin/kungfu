@@ -28,7 +28,7 @@ const { t } = VueI18n.global;
 const { success, error } = messagePrompt();
 
 const LOG_PATH = getLogPath();
-setHtmlTitle(`${t('kungfu')} - ${LOG_PATH}`);
+setHtmlTitle(LOG_PATH);
 
 const boardSize = ref<{ width: number; height: number }>({
   width: 0,
