@@ -490,7 +490,7 @@ inline void order_from_input(const longfist::types::OrderInput &input, longfist:
 
   order.volume = input.volume;
   order.volume_left = input.volume;
-  order.status = longfist::enums::OrderStatus::Submitted;
+  order.status = longfist::enums::OrderStatus::Pending;
 
   order.side = input.side;
   order.offset = input.offset;
