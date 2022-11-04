@@ -2,7 +2,7 @@
 
 const { parseByCli } = require('./utils');
 
-const commands = ['craft', 'extension', 'project', 'strategy'];
+const commands = ['craft', 'extension', 'project', 'strategy', 'broker'];
 
 module.exports = require('@kungfu-trader/kungfu-core').sywac(module, (cli) => {
   if (process.env.NODE_ENV === 'production') {

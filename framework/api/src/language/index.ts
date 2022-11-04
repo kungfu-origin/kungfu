@@ -88,11 +88,13 @@ export const languageList = [
 
 const locale = settingLanguage || (extraLanguage ? 'extra' : langDefault); //默认显示的语言
 
-const i18n = createI18n({
-  locale,
-  messages,
-  silentTranslationWarn: true,
-});
+const i18n =
+  globalThis.i18n ??
+  createI18n({
+    locale,
+    messages,
+    silentTranslationWarn: true,
+  });
 
 if (extraLanguage) {
   console.log('Found extra language');
@@ -142,4 +144,4 @@ export const useLanguage = () => {
 };
 
 export default i18n;
-globalThis.i18n = i18n;
+if (!globalThis.i18n) globalThis.i18n = i18n;

@@ -448,6 +448,11 @@ inline longfist::enums::Direction get_direction(longfist::enums::InstrumentType 
   } else if (side == Side::RepayStock) {
     return Direction::Short;
   }
+
+  if (side == Side::Exec) {
+    return Direction::Long;
+  }
+
   if (not is_shortable(instrument_type)) {
     return Direction::Long;
   }
