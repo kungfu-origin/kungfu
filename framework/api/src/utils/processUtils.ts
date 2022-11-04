@@ -404,7 +404,7 @@ export const graceStopProcess = async (
     }
 
     return requestStop(watcher, kfLocation)
-      .then(() => delayMilliSeconds(1000))
+      .then(() => delayMilliSeconds(200))
       .then(() => stopProcess(processId));
   }
 
