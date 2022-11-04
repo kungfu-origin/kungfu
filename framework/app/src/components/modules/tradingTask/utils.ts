@@ -8,6 +8,10 @@ import {
 import { kfConfigItemsToProcessArgs } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import globalBus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 import { startTradingTask } from '@kungfu-trader/kungfu-js-api/actions/tradingTask';
+import VueI18n, {
+  useLanguage,
+} from '@kungfu-trader/kungfu-js-api/language/index';
+const { t } = VueI18n.global;
 
 export const useTradingTask = (): {
   setTradingTaskModalVisible: Ref<boolean>;
@@ -41,6 +45,7 @@ export const useTradingTask = (): {
   });
   const { extConfigs } = useExtConfigsRelated();
   const { processStatusData } = useProcessStatusDetailData();
+  const { isLanguageKeyAvailable } = useLanguage();
   const app = getCurrentInstance();
   const tradingTaskCategory = 'strategy';
 
@@ -65,7 +70,11 @@ export const useTradingTask = (): {
 
     currentSelectedTradingTaskExtKey.value = selectedExtKey;
     setTradingTaskConfigPayload.value.type = type;
-    setTradingTaskConfigPayload.value.title = `${extConfig.name}`;
+    setTradingTaskConfigPayload.value.title = `${
+      isLanguageKeyAvailable(extConfig.name)
+        ? t(extConfig.name)
+        : extConfig.name
+    }`;
     setTradingTaskConfigPayload.value.config = extConfig;
     setTradingTaskConfigPayload.value.initValue = undefined;
 

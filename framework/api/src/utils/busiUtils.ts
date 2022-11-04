@@ -1999,11 +1999,15 @@ export function dealTradingTaskName(
   name: string,
   extConfigs: KungfuApi.KfExtConfigs,
 ): string {
+  const { isLanguageKeyAvailable } = useLanguage();
   const group = name.toKfGroup();
   const strategyExts = extConfigs['strategy'] || {};
   const groupResolved = strategyExts[group] ? strategyExts[group].name : group;
+  const groupTranslated = isLanguageKeyAvailable(groupResolved)
+    ? t(groupResolved)
+    : groupResolved;
   const timestamp = name.toKfName();
-  return `${groupResolved} ${dayjs(+timestamp).format('HH:mm:ss')}`;
+  return `${groupTranslated} ${dayjs(+timestamp).format('HH:mm:ss')}`;
 }
 
 export const isBrokerStateReady = (state: BrokerStateStatusTypes) => {
