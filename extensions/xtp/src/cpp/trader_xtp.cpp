@@ -300,7 +300,7 @@ void TraderXTP::OnQueryTrade(XTPQueryTradeRsp *trade_info, XTPRI *error_info, in
   if (trade_info == nullptr) {
     SPDLOG_WARN("XTPQueryTradeRsp* trade_info == nullptr, no data returned!");
     history_trade.is_last = true;
-    strncpy(history_trade.error_msg, "返回数据为空, 可能代表无历史Trade数据", ERROR_MSG_LEN);
+    strncpy(history_trade.error_msg, "返回数据为空,可能代表无历史Trade数据", ERROR_MSG_LEN);
     writer->close_data();
     return;
   }
