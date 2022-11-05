@@ -123,17 +123,34 @@ mergeExtLanguages().then(() =>
 );
 
 const globalStore = useGlobalStore();
+const __BYPASS_ARCHIVE__ = false;
 
 if (!booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED)) {
   preStartAll()
-    .then(() => {
-      return startArchiveMakeTask((archiveStatus: Pm2ProcessStatusTypes) => {
+    .then(async () => {
+      if (__BYPASS_ARCHIVE__) {
+        console.log(startArchiveMakeTask);
         globalBus.next({
           tag: 'processStatus',
           name: 'archive',
-          status: archiveStatus,
+          status: 'alive',
         });
-      });
+        await delayMilliSeconds(2000);
+        globalBus.next({
+          tag: 'processStatus',
+          name: 'archive',
+          status: 'stopped',
+        });
+        return;
+      } else {
+        return startArchiveMakeTask((archiveStatus: Pm2ProcessStatusTypes) => {
+          globalBus.next({
+            tag: 'processStatus',
+            name: 'archive',
+            status: archiveStatus,
+          });
+        });
+      }
     })
     .then(() => startMaster(false))
     .catch((err) => console.error(err.message))
