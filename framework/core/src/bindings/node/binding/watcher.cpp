@@ -356,11 +356,11 @@ void Watcher::on_react() {
 
 void Watcher::on_start() {
   broker_client_.on_start(events_);
-  bookkeeper_.add_book_listener(std::make_shared<BookListener>(*this));
 
   if (not bypass_accounting_ and not bypass_trading_data_) {
     bookkeeper_.on_start(events_);
     bookkeeper_.guard_positions();
+    bookkeeper_.add_book_listener(std::make_shared<BookListener>(*this));
 
     events_ | is(Quote::tag) | is_subscribed(subscribed_instruments_) | $$(UpdateBook(event, event->data<Quote>()));
     events_ | is(OrderInput::tag) | $$(UpdateBook(event, event->data<OrderInput>()));

@@ -98,11 +98,12 @@ void cached::handle_cached_feeds() {
       while (iter != feed_map.end() and stored_controller <= STORE_LIMIT) {
         auto &s = iter->second;
         auto source_id = s.source;
+        auto dest_id = s.dest;
         if (app_cache_shift_.find(source_id) != app_cache_shift_.end()) {
           try {
             app_cache_shift_.at(source_id) << s;
-            SPDLOG_TRACE("cache [feed] source {} datatype {} data {}", get_location_uname(source_id),
-                         DataType::type_name.c_str(), s.data.to_string());
+            SPDLOG_TRACE("cache [feed] source {} dest {} {} data {}", get_location_uname(source_id),
+                         get_location_uname(dest_id), DataType::type_name.c_str(), s.data.to_string());
           } catch (const std::exception &e) {
             SPDLOG_ERROR("Unexpected exception by handle_cached_feeds {}", e.what());
             stored_controller++;
@@ -132,10 +133,9 @@ void cached::handle_profile_feeds() {
       auto iter = feed_map.begin();
       while (iter != feed_map.end() and stored_controller <= STORE_LIMIT) {
         auto &s = iter->second;
-
         try {
           profile_ << s;
-          SPDLOG_TRACE("cache [profile] datatype {} data {}", DataType::type_name.c_str(), s.data.to_string());
+          SPDLOG_TRACE("cache [profile] {} data {}", DataType::type_name.c_str(), s.data.to_string());
         } catch (const std::exception &e) {
           SPDLOG_ERROR("Unexpected exception by handle_profile_feeds {}", e.what());
           stored_controller++;
