@@ -19,9 +19,8 @@ TraderVendor::TraderVendor(locator_ptr locator, const std::string &group, const 
 void TraderVendor::set_service(Trader_ptr service) { service_ = std::move(service); }
 
 void TraderVendor::on_react() {
-  events_ | is(ResetBookRequest::tag) | $([&](const event_ptr &event) {
-    get_writer(location::PUBLIC)->mark(now(), ResetBookRequest::tag);
-  });
+  events_ | is(ResetBookRequest::tag) |
+      $([&](const event_ptr &event) { get_writer(location::PUBLIC)->mark(now(), ResetBookRequest::tag); });
 }
 
 void TraderVendor::on_start() {
@@ -37,7 +36,7 @@ void TraderVendor::on_start() {
   events_ | is(RequestHistoryTrade::tag) | $$(service_->req_history_trade(event));
   events_ | is(AssetSync::tag) | $$(service_->handle_asset_sync());
   events_ | is(PositionSync::tag) | $$(service_->handle_position_sync());
-  
+
   events_ | $$(service_->handle_batch_order_tag(event));
 
   clean_orders();
