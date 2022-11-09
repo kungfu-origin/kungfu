@@ -52,8 +52,11 @@ const { searchKeyword, tableData } = useTableSearchKeyword<KungfuApi.Position>(
   ['instrument_id', 'exchange_id', 'direction'],
 );
 
-const { dealRowClassName, setCurrentGlobalKfLocation } =
-  useCurrentGlobalKfLocation(window.watcher);
+const {
+  currentGlobalKfLocation,
+  dealRowClassName,
+  setCurrentGlobalKfLocation,
+} = useCurrentGlobalKfLocation(window.watcher);
 const { instruments } = useInstruments();
 const { triggerOrderBook, triggerMakeOrder } = useTriggerMakeOrder();
 
@@ -120,11 +123,22 @@ function dealRowClassNameResolved(row: KungfuApi.PositionResolved) {
   const locationResolved: KungfuApi.KfExtraLocation = {
     category: categoryRegisterConfig.category,
     group: row.exchange_id,
-    name: row.instrument_id + row.direction,
+    name: row.instrument_id,
     mode: 'live',
+    direction: row.direction,
   };
 
-  return dealRowClassName(locationResolved);
+  const classNameResolved = dealRowClassName(locationResolved);
+
+  if (
+    classNameResolved &&
+    (currentGlobalKfLocation.value as KungfuApi.KfExtraLocation)?.direction ===
+      row.direction
+  ) {
+    return classNameResolved;
+  }
+
+  return '';
 }
 
 function handleClickRow(data: {
@@ -135,8 +149,9 @@ function handleClickRow(data: {
   const locationResolved: KungfuApi.KfExtraLocation = {
     category: categoryRegisterConfig.category,
     group: data.row.exchange_id,
-    name: data.row.instrument_id + data.row.direction,
+    name: data.row.instrument_id,
     mode: 'live',
+    direction: data.row.direction,
   };
 
   setCurrentGlobalKfLocation(locationResolved);
