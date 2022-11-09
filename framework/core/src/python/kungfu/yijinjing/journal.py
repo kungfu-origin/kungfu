@@ -47,17 +47,11 @@ def collect_journal_locations(ctx):
                     "readers": {dest: [page_id]},
                 }
             ctx.logger.debug(
-                "found journal %s %s %s %s",
-                MODES[mode],
-                CATEGORIES[category],
-                group,
-                name,
+                f"found journal {MODES[mode]} {CATEGORIES[category]} {group} {name}"
             )
         else:
             ctx.logger.warn(
-                "unable to match journal file %s to pattern %s",
-                journal,
-                JOURNAL_PAGE_REGEX,
+                f"unable to match journal file {journal} to pattern {JOURNAL_PAGE_REGEX}"
             )
     return locations
 
