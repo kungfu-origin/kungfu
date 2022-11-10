@@ -480,6 +480,10 @@ export default {
     log_level: 'Log Level',
     for_all_log: 'For all Log',
 
+    auto_restart_trading_task: 'Trading Process Auto Restart',
+    auto_restart_trading_task_desc:
+      'While the trade process interruption, if this switch open, it will try to reconnect three times; if closed, it will not. During the restart process (from restart to trade process ready) , the position queried in the strategy will be 0, both `on_deregister` and `on_broker_state_change` methods need to be used within the policy to determine whether the status of the counter is `disconnected` or `restart ready`.',
+
     language: 'Language',
     select_language_desc: 'Select Language, the modified restart takes effect',
     bypass_archive: 'ByPass Archive',

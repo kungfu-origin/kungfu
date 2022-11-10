@@ -54,10 +54,12 @@ export const watcher = ((): KungfuApi.Watcher | null => {
   const globalSetting = getKfGlobalSettingsValue();
   const bypassAccounting =
     process.env.BY_PASS_ACCOUNTING ??
-    globalSetting?.performance?.bypassAccounting;
+    globalSetting?.performance?.bypassAccounting ??
+    false;
   const bypassTradingData =
     process.env.BY_PASS_TRADINGDATA ??
-    globalSetting?.performance?.bypassTradingData;
+    globalSetting?.performance?.bypassTradingData ??
+    false;
 
   kfLogger.info('bypassRestore', bypassRestore);
   kfLogger.info('bypassAccounting', bypassAccounting);
