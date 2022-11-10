@@ -300,11 +300,23 @@ KF_DEFINE_PACK_TYPE(                                         //
     (double, settlement_price), // 结算价
     (double, iopv),             // 基金实时参考净值
 
-    (kungfu::array<double, 10>, bid_price),      // 申买价
-    (kungfu::array<double, 10>, ask_price),      // 申卖价
-    (kungfu::array<int64_t, 10>, bid_volume),    // 申买量
-    (kungfu::array<int64_t, 10>, ask_volume),    // 申卖量
-    (kungfu::array<char, 8>, trading_phase_code) // 交易
+    (kungfu::array<double, 10>, bid_price),   // 申买价
+    (kungfu::array<double, 10>, ask_price),   // 申卖价
+    (kungfu::array<int64_t, 10>, bid_volume), // 申买量
+    (kungfu::array<int64_t, 10>, ask_volume), // 申卖量
+    (kungfu::array<char, 8>,
+     trading_phase_code) // 标的状态，
+                         // 第0位:
+                         // ‘S’表示启动(开市前)时段,‘C’表示集合竞价时段,‘T’表示连续交易时段,
+                         // ‘E’表示闭市时段 ,‘P’表示临时停牌,
+                         // ‘M’表示可恢复交易的熔断(盘中集合竞价),‘N’表示不可恢复交易的熔断(暂停交易至闭市)
+                         // ‘U’表示收盘集合竞价
+                         // 第1位:
+                         // ‘0’表示此产品不可正常交易,‘1’表示此产品可正常交易。
+                         // 第2位:
+                         // ‘0’表示未上市,‘1’表示已上市
+                         // 第3位:
+                         // ‘0’表示此产品在当前时段不接受进行新订单申报,‘1’ 表示此产品在当前时段可接受进行新订单申报。
 );
 
 KF_DEFINE_PACK_TYPE(                                                    //
