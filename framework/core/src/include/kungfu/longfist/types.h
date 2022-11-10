@@ -16,7 +16,7 @@ static constexpr int ACCOUNT_ID_LEN = 32;
 static constexpr int PRODUCT_ID_LEN = 128;
 static constexpr int DATE_LEN = 9;
 static constexpr int EXCHANGE_ID_LEN = 16;
-
+static constexpr int TRAIDNG_PHASE_CODE_LEN = 8;
 static constexpr int ERROR_MSG_LEN = 256;
 
 KF_DEFINE_MARK_TYPE(PageEnd, 10000);
@@ -304,7 +304,7 @@ KF_DEFINE_PACK_TYPE(                                         //
     (kungfu::array<double, 10>, ask_price),   // 申卖价
     (kungfu::array<int64_t, 10>, bid_volume), // 申买量
     (kungfu::array<int64_t, 10>, ask_volume), // 申卖量
-    (kungfu::array<char, 8>,
+    (kungfu::array<char, TRAIDNG_PHASE_CODE_LEN>,
      trading_phase_code) // 标的状态，
                          // 第0位:
                          // ‘S’表示启动(开市前)时段,‘C’表示集合竞价时段,‘T’表示连续交易时段,
