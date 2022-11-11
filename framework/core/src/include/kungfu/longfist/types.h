@@ -305,19 +305,19 @@ KF_DEFINE_PACK_TYPE(                                         //
     (kungfu::array<int64_t, 10>, bid_volume), // 申买量
     (kungfu::array<int64_t, 10>, ask_volume), // 申卖量
     (kungfu::array<char, TRAIDNG_PHASE_CODE_LEN>,
-     trading_phase_code) // 标的状态，
+     trading_phase_code) // 标的状态, 上交所用四位, 上交所用两位
                          // 第0位:
-                         // ‘S’表示启动(开市前)时段,‘C’表示集合竞价时段,‘T’表示连续交易时段,
-                         // ‘E’表示闭市时段 ,‘P’表示临时停牌,
-                         // ‘M’表示可恢复交易的熔断(盘中集合竞价),‘N’表示不可恢复交易的熔断(暂停交易至闭市)
+                         // ‘S’表示启动(开市前)时段, ‘C’表示集合竞价时段, ‘T’表示连续交易时段,
+                         // ‘E’表示闭市时段, ‘P’表示临时停牌,
+                         // ‘M’表示可恢复交易的熔断(盘中集合竞价), ‘N’表示不可恢复交易的熔断(暂停交易至闭市)
                          // ‘U’表示收盘集合竞价
                          // ‘V’表示波动性中断（适用于股票期权)
                          // 第1位:
-                         // ‘0’表示此产品不可正常交易,‘1’表示此产品可正常交易。
+                         // ‘0’表示此产品不可正常交易, ‘1’表示此产品可正常交易。
                          // 第2位:
-                         // ‘0’表示未上市,‘1’表示已上市
+                         // ‘0’表示未上市, ‘1’表示已上市
                          // 第3位:
-                         // ‘0’表示此产品在当前时段不接受进行新订单申报,‘1’ 表示此产品在当前时段可接受进行新订单申报。
+                         // ‘0’表示此产品在当前时段不接受进行新订单申报, ‘1’ 表示此产品在当前时段可接受进行新订单申报。
 );
 
 KF_DEFINE_PACK_TYPE(                                                    //
@@ -460,7 +460,7 @@ KF_DEFINE_PACK_TYPE(                                  //
     (InstrumentType, instrument_type), // 合约类型
 
     (double, limit_price),  // 价格
-    (double, frozen_price), // 冻结价格，市价单冻结价格为0
+    (double, frozen_price), // 冻结价格, 市价单冻结价格为0
 
     (int64_t, volume),      // 数量
     (int64_t, volume_left), // 剩余数量
@@ -501,7 +501,7 @@ KF_DEFINE_PACK_TYPE(                                         //
     (InstrumentType, instrument_type), // 合约类型
 
     (double, limit_price),  // 价格
-    (double, frozen_price), // 冻结价格，市价单冻结价格为0
+    (double, frozen_price), // 冻结价格, 市价单冻结价格为0
 
     (int64_t, volume),      // 数量
     (int64_t, volume_left), // 剩余数量
