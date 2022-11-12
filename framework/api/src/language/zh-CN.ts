@@ -484,7 +484,7 @@ export default {
     select_language_desc: '选择语言, 修改后重启功夫生效',
     bypass_archive: '跳过归档',
     bypass_archive_desc:
-      '仅删除上个交易日留下的journal与log文件, 不再压缩打包, 归档后无法恢复之前的内存数据, 会加快启动速度',
+      '仅删除上个交易日留下的journal与log文件, 不再压缩打包, 跳过归档后无法恢复之前的内存数据, 会加快启动速度',
 
     porformance: '性能',
     rocket_model: '开启极速模式',
