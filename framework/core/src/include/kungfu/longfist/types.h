@@ -16,7 +16,7 @@ static constexpr int ACCOUNT_ID_LEN = 32;
 static constexpr int PRODUCT_ID_LEN = 128;
 static constexpr int DATE_LEN = 9;
 static constexpr int EXCHANGE_ID_LEN = 16;
-
+static constexpr int TRAIDNG_PHASE_CODE_LEN = 8;
 static constexpr int ERROR_MSG_LEN = 256;
 
 KF_DEFINE_MARK_TYPE(PageEnd, 10000);
@@ -300,11 +300,24 @@ KF_DEFINE_PACK_TYPE(                                         //
     (double, settlement_price), // 结算价
     (double, iopv),             // 基金实时参考净值
 
-    (kungfu::array<double, 10>, bid_price),      // 申买价
-    (kungfu::array<double, 10>, ask_price),      // 申卖价
-    (kungfu::array<int64_t, 10>, bid_volume),    // 申买量
-    (kungfu::array<int64_t, 10>, ask_volume),    // 申卖量
-    (kungfu::array<char, 8>, trading_phase_code) // 交易
+    (kungfu::array<double, 10>, bid_price),   // 申买价
+    (kungfu::array<double, 10>, ask_price),   // 申卖价
+    (kungfu::array<int64_t, 10>, bid_volume), // 申买量
+    (kungfu::array<int64_t, 10>, ask_volume), // 申卖量
+    (kungfu::array<char, TRAIDNG_PHASE_CODE_LEN>,
+     trading_phase_code) // 标的状态, 上交所用四位, 深交所用两位
+                         // 第0位:
+                         // ‘S’表示启动(开市前)时段, ‘C’表示集合竞价时段, ‘T’表示连续交易时段,
+                         // ‘E’表示闭市时段, ‘P’表示临时停牌,
+                         // ‘M’表示可恢复交易的熔断(盘中集合竞价), ‘N’表示不可恢复交易的熔断(暂停交易至闭市)
+                         // ‘U’表示收盘集合竞价
+                         // ‘V’表示波动性中断（适用于股票期权)
+                         // 第1位:
+                         // ‘0’表示此产品不可正常交易, ‘1’表示此产品可正常交易。
+                         // 第2位 (深交所无):
+                         // ‘0’表示未上市, ‘1’表示已上市
+                         // 第3位 (深交所无):
+                         // ‘0’表示此产品在当前时段不接受进行新订单申报, ‘1’ 表示此产品在当前时段可接受进行新订单申报。
 );
 
 KF_DEFINE_PACK_TYPE(                                                    //
@@ -346,7 +359,7 @@ KF_DEFINE_PACK_TYPE(                                                        //
     (int64_t, ask_no), // 卖方订单号
 
     (ExecType, exec_type), // SZ: 成交标识
-    (BsFlag, bs_flag),     // SH: 内外盘标识
+    (BsFlag, bs_flag),     // 买卖方向
 
     (int64_t, main_seq), // 主序号
     (int64_t, seq),      // 子序号
@@ -447,7 +460,7 @@ KF_DEFINE_PACK_TYPE(                                  //
     (InstrumentType, instrument_type), // 合约类型
 
     (double, limit_price),  // 价格
-    (double, frozen_price), // 冻结价格，市价单冻结价格为0
+    (double, frozen_price), // 冻结价格, 市价单冻结价格为0
 
     (int64_t, volume),      // 数量
     (int64_t, volume_left), // 剩余数量
@@ -488,7 +501,7 @@ KF_DEFINE_PACK_TYPE(                                         //
     (InstrumentType, instrument_type), // 合约类型
 
     (double, limit_price),  // 价格
-    (double, frozen_price), // 冻结价格，市价单冻结价格为0
+    (double, frozen_price), // 冻结价格, 市价单冻结价格为0
 
     (int64_t, volume),      // 数量
     (int64_t, volume_left), // 剩余数量

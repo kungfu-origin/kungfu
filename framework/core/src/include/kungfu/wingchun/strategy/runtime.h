@@ -111,6 +111,15 @@ public:
                       std::vector<bool> is_swaps) override;
 
   /**
+   *
+   * @param source
+   * @param account
+   * @param order_inputs
+   * @return
+   */
+  std::vector<uint64_t> insert_array_orders(const std::string &source, const std::string &account,
+                                            std::vector<longfist::types::OrderInput> order_inputs) override;
+  /**
    * Cancel order.
    * @param order_id order ID
    * @return order action ID

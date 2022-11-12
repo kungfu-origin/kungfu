@@ -63,7 +63,7 @@ if (fse.existsSync(kfConfigPath)) {
     string,
     Record<string, KungfuApi.KfConfigValue>
   >; // 不直接使用 getKfGlobalSettingsValue 和 KF_CONFIG_PATH 是因为会形成循环引用，会报错
-  settingLanguage = globalSettingJson?.system?.language;
+  settingLanguage = globalSettingJson?.system?.language ?? langDefault;
 }
 
 // 语言库

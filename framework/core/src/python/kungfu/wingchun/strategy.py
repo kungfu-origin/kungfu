@@ -64,6 +64,14 @@ class Strategy(wc.Strategy):
         self._on_trade = getattr(
             self._module, "on_trade", lambda ctx, trade, location: None
         )
+        self._on_deregister = getattr(
+            self._module, "on_deregister", lambda ctx, deregister, location: None
+        )
+        self._on_broker_state_change = getattr(
+            self._module,
+            "on_broker_state_change",
+            lambda ctx, broker_state_update, location: None,
+        )
         self._on_history_order = getattr(
             self._module, "on_history_order", lambda ctx, history_order, location: None
         )
@@ -184,6 +192,7 @@ class Strategy(wc.Strategy):
         self.ctx.insert_block_message = wc_context.insert_block_message
         self.ctx.insert_order = wc_context.insert_order
         self.ctx.insert_batch_orders = wc_context.insert_batch_orders
+        self.ctx.insert_array_orders = wc_context.insert_array_orders
         self.ctx.cancel_order = wc_context.cancel_order
         self.ctx.req_history_order = wc_context.req_history_order
         self.ctx.req_history_trade = wc_context.req_history_trade
@@ -228,6 +237,14 @@ class Strategy(wc.Strategy):
 
     def on_trade(self, wc_context, trade, location):
         self.__call_proxy(self._on_trade, self.ctx, trade, location)
+
+    def on_deregister(self, wc_context, deregister, location):
+        self.__call_proxy(self._on_deregister, self.ctx, deregister, location)
+
+    def on_broker_state_change(self, wc_context, broker_state_update, location):
+        self.__call_proxy(
+            self._on_broker_state_change, self.ctx, broker_state_update, location
+        )
 
     def on_history_order(self, wc_context, history_order, location):
         self.__call_proxy(self._on_history_order, self.ctx, history_order, location)
