@@ -117,6 +117,16 @@ public:
                       std::vector<bool> is_swaps) = 0;
 
   /**
+   * Insert Batch Orders
+   * @param source
+   * @param account
+   * @param order_inputs
+   * @return
+   */
+  virtual std::vector<uint64_t> insert_array_orders(const std::string &source, const std::string &account,
+                                                    std::vector<longfist::types::OrderInput> order_inputs) = 0;
+
+  /**
    * query history order
    */
   virtual void req_history_order(const std::string &source, const std::string &account, uint32_t query_num = 0) = 0;

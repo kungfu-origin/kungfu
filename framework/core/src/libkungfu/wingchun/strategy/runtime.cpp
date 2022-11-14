@@ -162,6 +162,25 @@ std::vector<uint64_t> RuntimeContext::insert_batch_orders(
   return order_ids;
 }
 
+std::vector<uint64_t> RuntimeContext::insert_array_orders(const std::string &source, const std::string &account,
+                                                          std::vector<longfist::types::OrderInput> order_inputs) {
+  std::vector<uint64_t> order_ids{};
+  auto account_location_uid = get_td_location_uid(source, account);
+  auto writer = app_.get_writer(account_location_uid);
+  writer->mark(time::now_in_nano(), BatchOrderBegin::tag);
+
+  for (const OrderInput &input : order_inputs) {
+    uint64_t order_id =
+        insert_order(input.instrument_id, input.exchange_id, source, account, input.limit_price, input.volume,
+                     input.price_type, input.side, input.offset, input.hedge_flag, input.is_swap);
+    order_ids.push_back(order_id);
+  }
+
+  writer->mark(time::now_in_nano(), BatchOrderEnd::tag);
+  writer->close_data();
+  return order_ids;
+}
+
 uint64_t RuntimeContext::cancel_order(uint64_t order_id) {
   uint32_t account_location_uid = (order_id >> 32u) xor (app_.get_home_uid());
   if (not broker_client_.is_ready(account_location_uid)) {
