@@ -7,7 +7,7 @@
   "strategy": { "python": false },
   "system": {
     "logLevel": "-l info",
-    "autoRestartTradingTask": true,
+    "autoRestartTd": true,
     "language": "zh-CN"
   },
   "code": { "tabSpaceType": "SPACES", "tabSpaceSize": "TWOINDENT" },

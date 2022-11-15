@@ -731,6 +731,8 @@ export const startTd = async (
   accountId: string,
   kfConfig: KungfuApi.KfConfig,
 ): Promise<Proc | void> => {
+  const globalSetting = getKfGlobalSettingsValue();
+  const autorestart = globalSetting?.system?.autoRestartTd ?? true;
   const extDirs = await flattenExtensionModuleDirs(EXTENSION_DIRS);
   const { source, id } = (accountId || '').parseSourceAccountId();
   const args = buildArgs(
@@ -749,8 +751,12 @@ export const startTd = async (
         cwd,
         script: `${dealSpaceInPath(path.join(KFC_DIR, kfcName))}`,
         args,
-        max_restarts: 3,
-        autorestart: true,
+        ...(autorestart
+          ? {
+              max_restarts: 4, // pm2 在进程退出时对重启次数进行 +1，所有第一次退出也被计算在内，重启 3 次的话这里就应该填 4
+              autorestart: true,
+            }
+          : {}),
         force: true,
       },
     );
@@ -766,8 +772,6 @@ export const startTask = async (
   args: string,
   configSettings: KungfuApi.KfConfigItem[],
 ): Promise<Proc | void> => {
-  const globalSetting = getKfGlobalSettingsValue();
-  const autorestart = globalSetting?.system?.autoRestartTradingTask ?? true;
   const extDirs = await flattenExtensionModuleDirs(EXTENSION_DIRS);
   const argsResolved: string = buildArgs(
     `-X "${extDirs
@@ -783,12 +787,6 @@ export const startTask = async (
     env: {
       CONFIG_SETTING: JSON.stringify(configSettings),
     },
-    ...(autorestart
-      ? {
-          max_restarts: 3,
-          autorestart: true,
-        }
-      : {}),
     force: true,
   }).catch((err) => {
     kfLogger.error(err);

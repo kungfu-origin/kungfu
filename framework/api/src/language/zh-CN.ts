@@ -476,9 +476,9 @@ export default {
     log_level: '全局日志级别',
     for_all_log: '对系统内所有日志级别的设置',
 
-    auto_restart_trading_task: '交易进程自动重启',
-    auto_restart_trading_task_desc:
-      '交易进程断开时是否自动重启, 如果打开会尝试重连三次, 如果关闭, 则不会；在重启过程中（重启开始到交易进程就绪）, 策略内查询到的持仓会为0, 需要在策略内通过 on_deregister, on_broker_state_change这两个方法来判断柜台状态是否断开/重启就绪',
+    auto_restart_td: '交易进程自动重启',
+    auto_restart_td_desc:
+      '交易进程断开时是否自动重启, 如果打开, 则当交易进程出错后, 会尝试重连三次, 如果关闭, 则不会；在重启过程中（重启开始到交易进程就绪）, 策略内查询到的持仓会为0, 需要在策略内通过 on_deregister, on_broker_state_change这两个方法来判断柜台状态是否断开/重启就绪',
 
     language: '语言',
     select_language_desc: '选择语言, 修改后重启功夫生效',
