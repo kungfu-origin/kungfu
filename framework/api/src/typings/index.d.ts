@@ -87,7 +87,8 @@ declare namespace KungfuApi {
     | 'md'
     | 'strategy'
     | 'instrument'
-    | 'instruments';
+    | 'instruments'
+    | 'instrumentsCsv';
 
   export type KfConfigValue =
     | string

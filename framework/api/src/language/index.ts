@@ -45,6 +45,9 @@ export const getMergeENLanguage = () => {
   }
 };
 
+const canLog =
+  process.env.NODE_ENV === 'development' || process.env.APP_TYPE !== 'cli';
+
 // 默认语言
 export const langDefault = process.env.LANG_ENV ?? 'zh-CN';
 let settingLanguage;
@@ -93,20 +96,22 @@ const i18n =
   createI18n({
     locale,
     messages,
+    fallbackLocale: langDefault,
     silentTranslationWarn: true,
+    silentFallbackWarn: true,
   });
 
 if (extraLanguage) {
-  console.log('Found extra language');
+  if (canLog) console.log('Found extra language');
 }
 
 if (mergeCNLanguage) {
-  console.log('Found cn merge language');
+  if (canLog) console.log('Found cn merge language');
   i18n.global.mergeLocaleMessage('zh-CN', mergeCNLanguage);
 }
 
 if (mergeENLanguage) {
-  console.log('Found en merge language');
+  if (canLog) console.log('Found en merge language');
   i18n.global.mergeLocaleMessage('en-US', mergeENLanguage);
 }
 
