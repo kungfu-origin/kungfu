@@ -58,9 +58,9 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
         default: langDefault,
       },
       {
-        key: 'autoRestartTradingTask',
-        name: t('globalSettingConfig.auto_restart_trading_task'),
-        tip: t('globalSettingConfig.auto_restart_trading_task_desc'),
+        key: 'autoRestartTd',
+        name: t('globalSettingConfig.auto_restart_td'),
+        tip: t('globalSettingConfig.auto_restart_td_desc'),
         type: 'bool',
         default: true,
       },

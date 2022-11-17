@@ -732,7 +732,7 @@ export const startTd = async (
   kfConfig: KungfuApi.KfConfig,
 ): Promise<Proc | void> => {
   const globalSetting = getKfGlobalSettingsValue();
-  const autorestart = globalSetting?.system?.autoRestartTradingTask ?? true;
+  const autorestart = globalSetting?.system?.autoRestartTd ?? true;
   const extDirs = await flattenExtensionModuleDirs(EXTENSION_DIRS);
   const { source, id } = (accountId || '').parseSourceAccountId();
   const args = buildArgs(

@@ -45,6 +45,7 @@ interface GlobalState {
 
   assets: Record<string, KungfuApi.Asset>;
   instruments: KungfuApi.InstrumentResolved[];
+  instrumentsMap: Record<string, KungfuApi.InstrumentResolved>;
   subscribedInstruments: KungfuApi.InstrumentResolved[];
 
   riskSettings: KungfuApi.RiskSetting[];
@@ -79,6 +80,7 @@ export const useGlobalStore = defineStore('global', {
       strategyStates: {},
       assets: {},
       instruments: [],
+      instrumentsMap: {},
       subscribedInstruments: [],
 
       riskSettings: [],
@@ -108,6 +110,12 @@ export const useGlobalStore = defineStore('global', {
 
     setInstruments(instruments: KungfuApi.InstrumentResolved[]) {
       this.instruments = toRaw(instruments);
+    },
+
+    setInstrumentsMap(
+      instrumentsMap: Record<string, KungfuApi.InstrumentResolved>,
+    ) {
+      this.instrumentsMap = toRaw(instrumentsMap);
     },
 
     setCurrentGlobalKfLocation(

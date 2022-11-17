@@ -1700,7 +1700,12 @@ export const KfConfigValueNumberType = [
 
 export const KfConfigValueBooleanType = ['bool', 'checkbox'];
 
-export const KfConfigValueArrayType = ['files', 'instruments', 'table'];
+export const KfConfigValueArrayType = [
+  'files',
+  'instruments',
+  'instrumentsCsv',
+  'table',
+];
 
 export const initFormStateByConfig = (
   configSettings: KungfuApi.KfConfigItem[],

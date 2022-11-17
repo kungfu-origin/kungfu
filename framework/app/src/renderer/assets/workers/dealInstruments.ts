@@ -74,7 +74,7 @@ self.addEventListener('message', (e) => {
       fse.readJSONSync(KF_INSTRUMENTS_PATH);
     self.postMessage({
       updateTime: new Date().getTime(),
-      instruments: Object.values(instruments),
+      instruments,
     });
   }
 });
