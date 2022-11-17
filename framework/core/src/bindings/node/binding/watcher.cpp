@@ -200,7 +200,7 @@ Napi::Value Watcher::GetInstrumentType(const Napi::CallbackInfo &info) {
   auto exchange_id = info[0].ToString().Utf8Value();
   auto instrument_id = info[1].ToString().Utf8Value();
   auto instrument_type = get_instrument_type(exchange_id, instrument_id);
-  return Napi::Number::New(info.Env(), instrument_type);
+  return Napi::Number::New(info.Env(), int(instrument_type));
 }
 
 Napi::Value Watcher::GetConfig(const Napi::CallbackInfo &info) { return config_ref_.Value(); }
