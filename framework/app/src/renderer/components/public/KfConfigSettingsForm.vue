@@ -366,10 +366,22 @@ function instrumentsCsvTransform(
   targetKey: string,
 ) {
   const { instrumentsMap } = useGlobalStore();
-  const resolvedInstruments = instruments.reduce<string[]>((res, item) => {
-    const uKey = hashInstrumentUKey(item.instrument_id, item.exchange_id);
-    if (instrumentsMap[uKey])
-      res.push(buildInstrumentSelectOptionValue(instrumentsMap[uKey]));
+  const resolvedInstruments = instruments.reduce((res, item) => {
+    if (item.exchange_id && item.instrument_id) {
+      const ukey = hashInstrumentUKey(item.instrument_id, item.exchange_id);
+      const instrumentResolved = instrumentsMap[ukey] ?? {
+        instrumentId: item.instrument_id,
+        exchangeId: item.exchange_id,
+        instrumentType: window.watcher.getInstrumentType(
+          item.exchange_id,
+          item.instrument_id,
+        ),
+        ukey,
+        instrumentName: '',
+        id: ukey,
+      };
+      res.push(buildInstrumentSelectOptionValue(instrumentResolved));
+    }
     return res;
   }, [] as string[]);
   const sourceLength = instruments.length;

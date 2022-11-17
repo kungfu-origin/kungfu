@@ -728,6 +728,11 @@ declare namespace KungfuApi {
     getLocationUID(kfLocation: KfLocation | KfConfig): string;
     getLocation(hashedKey: string | number): KfLocation;
     hasLocation(hashedKey: string | number): KfLocation;
+    getInstrumentUID(exchangeId: string, instrumentId: string): number;
+    getInstrumentType(
+      exchangeId: string,
+      instrumentId: string,
+    ): InstrumentTypeEnum;
     requestMarketData(
       kfLocation: KfLocation,
       exchangeId: string,
