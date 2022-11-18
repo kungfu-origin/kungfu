@@ -339,7 +339,7 @@ KF_DEFINE_PACK_TYPE(                                                    //
 
     (int64_t, main_seq), // 主序号,
     (int64_t, seq),      // 子序号,
-    (int64_t, org_order_no), // 原始订单号 上海为原始订单号, 深圳为索引号
+    (int64_t, orig_order_no), // 原始订单号 上海为原始订单号, 深圳为索引号
     (int64_t, biz_index) // 业务序号
 );
 
