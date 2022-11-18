@@ -29,8 +29,8 @@ struct contract_discount_and_margin_ratio {
 };
 class StockAccountingMethod : public AccountingMethod {
 public:
-  static constexpr double min_comission = 5;
-  static constexpr double default_commission_ratio = 0.00032;
+  static constexpr double min_comission = 0;
+  static constexpr double default_commission_ratio = 0;
 
   static constexpr int DEFAULT_STOCK_CONTRACT_MULTIPLIER = 1;
   static constexpr float DEFAULT_STOCK_LONG_MARGIN_RATIO = 1.0;
