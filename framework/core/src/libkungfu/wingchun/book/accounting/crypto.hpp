@@ -80,9 +80,9 @@ protected:
 
   virtual void apply_sell(Book_ptr &book, const Trade &trade) {}
 
-  virtual double calculate_commission(const Trade &trade) { return 0; }
+  virtual double calculate_commission(const Trade &trade) { return trade.comission; }
 
-  virtual double calculate_tax(const Trade &trade) { return 0; }
+  virtual double calculate_tax(const Trade &trade) { return trade.tax; }
 };
 } // namespace kungfu::wingchun::book
 #endif // WINGCHUN_ACCOUNTING_CRYPTO_H
