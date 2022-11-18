@@ -26,6 +26,7 @@ void MarketDataVendor::on_start() {
   BrokerVendor::on_start();
   events_ | is(CustomSubscribe::tag) | $$(service_->subscribe_custom(event->data<CustomSubscribe>()));
   events_ | is(InstrumentKey::tag) | $$(service_->subscribe({event->data<InstrumentKey>()}));
+  events_ | instanceof <journal::frame>() | $$(service_->on_custom_event(event));
   service_->on_start();
 }
 
