@@ -8,7 +8,7 @@ class RepoAccountingMethod : public StockAccountingMethod {
 public:
   RepoAccountingMethod() = default;
 
-  void apply_quote(Book_ptr& book, const Quote& quote) override {}
+  void apply_quote(Book_ptr &book, const Quote &quote) override {}
 
   void apply_order_input(Book_ptr &book, const OrderInput &input) override {
     if (input.side == Side::Sell) {
