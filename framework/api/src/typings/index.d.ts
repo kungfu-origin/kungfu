@@ -363,7 +363,6 @@ declare namespace KungfuApi {
     margin_market_value: number; //融资买入证券市值
     margin_interest: number; //融资融券利息
     settlement: number; //融资融券清算资金
-    commission_ratio: number; //手续费费率
 
     credit: number; //信贷额度
     collateral_ratio: number; //担保比例

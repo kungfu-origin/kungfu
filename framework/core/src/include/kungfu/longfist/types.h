@@ -679,7 +679,6 @@ KF_DEFINE_PACK_TYPE(                               //
     (double, margin_market_value), // 融资买入证券市值
     (double, margin_interest),     // 融资融券利息
     (double, settlement),          // 融资融券清算资金
-    (double, commission_ratio),    // 手续费费率
 
     (double, credit),          // 信贷额度
     (double, collateral_ratio) // 担保比例
