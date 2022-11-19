@@ -87,7 +87,8 @@ declare namespace KungfuApi {
     | 'md'
     | 'strategy'
     | 'instrument'
-    | 'instruments';
+    | 'instruments'
+    | 'instrumentsCsv';
 
   export type KfConfigValue =
     | string
@@ -362,7 +363,6 @@ declare namespace KungfuApi {
     margin_market_value: number; //融资买入证券市值
     margin_interest: number; //融资融券利息
     settlement: number; //融资融券清算资金
-    commission_ratio: number; //手续费费率
 
     credit: number; //信贷额度
     collateral_ratio: number; //担保比例
@@ -727,6 +727,11 @@ declare namespace KungfuApi {
     getLocationUID(kfLocation: KfLocation | KfConfig): string;
     getLocation(hashedKey: string | number): KfLocation;
     hasLocation(hashedKey: string | number): KfLocation;
+    getInstrumentUID(exchangeId: string, instrumentId: string): number;
+    getInstrumentType(
+      exchangeId: string,
+      instrumentId: string,
+    ): InstrumentTypeEnum;
     requestMarketData(
       kfLocation: KfLocation,
       exchangeId: string,

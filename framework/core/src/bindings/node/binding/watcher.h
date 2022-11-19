@@ -51,6 +51,8 @@ public:
 
   Napi::Value GetInstrumentUID(const Napi::CallbackInfo &info);
 
+  Napi::Value GetInstrumentType(const Napi::CallbackInfo &info);
+
   Napi::Value GetConfig(const Napi::CallbackInfo &info);
 
   Napi::Value GetHistory(const Napi::CallbackInfo &info);

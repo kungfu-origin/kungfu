@@ -196,6 +196,13 @@ Napi::Value Watcher::GetInstrumentUID(const Napi::CallbackInfo &info) {
   return Napi::Number::New(info.Env(), key);
 }
 
+Napi::Value Watcher::GetInstrumentType(const Napi::CallbackInfo &info) {
+  auto exchange_id = info[0].ToString().Utf8Value();
+  auto instrument_id = info[1].ToString().Utf8Value();
+  auto instrument_type = get_instrument_type(exchange_id, instrument_id);
+  return Napi::Number::New(info.Env(), int(instrument_type));
+}
+
 Napi::Value Watcher::GetConfig(const Napi::CallbackInfo &info) { return config_ref_.Value(); }
 
 Napi::Value Watcher::GetHistory(const Napi::CallbackInfo &info) { return history_ref_.Value(); }
@@ -321,6 +328,7 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
                       InstanceMethod("getLocation", &Watcher::GetLocation),                             //
                       InstanceMethod("getLocationUID", &Watcher::GetLocationUID),                       //
                       InstanceMethod("getInstrumentUID", &Watcher::GetInstrumentUID),                   //
+                      InstanceMethod("getInstrumentType", &Watcher::GetInstrumentType),                 //
                       InstanceMethod("publishState", &Watcher::PublishState),                           //
                       InstanceMethod("isReadyToInteract", &Watcher::IsReadyToInteract),                 //
                       InstanceMethod("issueBlockMessage", &Watcher::IssueBlockMessage),                 //
