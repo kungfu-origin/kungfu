@@ -1091,15 +1091,20 @@ export const useDealInstruments = (): void => {
   });
 
   window.workers.dealInstruments.onmessage = (event: {
-    data: { tag: string; instruments: KungfuApi.InstrumentResolved[] };
+    data: {
+      tag: string;
+      instruments: Record<string, KungfuApi.InstrumentResolved>;
+    };
   }) => {
     const { instruments } = event.data || {};
 
-    console.log('DealInstruments onmessage', instruments.length);
+    const instrumentsValue = Object.values(instruments);
+    console.log('DealInstruments onmessage', instrumentsValue.length);
     dealInstrumentController.value = false;
-    if (instruments.length) {
-      existedInstrumentsLength.value = instruments.length || 0; //refresh old instruments
-      useGlobalStore().setInstruments(instruments);
+    if (instrumentsValue.length) {
+      existedInstrumentsLength.value = instrumentsValue.length || 0; //refresh old instruments
+      useGlobalStore().setInstruments(instrumentsValue);
+      useGlobalStore().setInstrumentsMap(instruments);
     }
   };
 };

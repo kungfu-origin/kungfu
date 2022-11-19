@@ -560,6 +560,7 @@ export default {
     no_negative_number: 'Cannot contain negative',
     value_existing: '{value} has been in existence',
     mandatory: 'mandatory',
+    resolved_tip: 'Success resolved {success} {value}, failed {fail}',
   },
 
   editor: {

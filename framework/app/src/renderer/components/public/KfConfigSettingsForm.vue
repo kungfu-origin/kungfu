@@ -48,6 +48,10 @@ import {
   InstrumentTypeEnum,
   SideEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
+import { readCSV } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
+import { useGlobalStore } from '../../pages/index/store/global';
+import { hashInstrumentUKey } from '@kungfu-trader/kungfu-js-api/kungfu';
+import { buildInstrumentSelectOptionValue } from '../../assets/methods/uiUtils';
 const { t } = VueI18n.global;
 
 const props = withDefaults(
@@ -120,9 +124,11 @@ const { isLanguageKeyAvailable } = useLanguage();
 
 const primaryKeys = ref<string[]>(getPrimaryKeys(props.configSettings || []));
 const sideRadiosList = ref<string[]>(Object.keys(Side).slice(0, 2));
+const customerFormItemTips = reactive<Record<string, string>>({});
 const instrumentKeys = ref<Record<string, 'instrument' | 'instruments'>>(
   filterInstrumentKeysFromConfigSettings(props.configSettings),
 );
+
 watch(
   () => props.configSettings,
   (newVal) => {
@@ -355,6 +361,60 @@ function getKfTradeValueName(
   return data[key].name;
 }
 
+function instrumentsCsvTransform(
+  instruments: KungfuApi.Instrument[],
+  targetKey: string,
+) {
+  const { instrumentsMap } = useGlobalStore();
+  const resolvedInstruments = instruments.reduce((res, item) => {
+    if (item.exchange_id && item.instrument_id) {
+      const ukey = hashInstrumentUKey(item.instrument_id, item.exchange_id);
+      const instrumentResolved = instrumentsMap[ukey] ?? {
+        instrumentId: item.instrument_id,
+        exchangeId: item.exchange_id,
+        instrumentType: window.watcher.getInstrumentType(
+          item.exchange_id,
+          item.instrument_id,
+        ),
+        ukey,
+        instrumentName: '',
+        id: ukey,
+      };
+      res.push(buildInstrumentSelectOptionValue(instrumentResolved));
+    }
+    return res;
+  }, [] as string[]);
+  const sourceLength = instruments.length;
+  const resolvedLength = resolvedInstruments.length;
+  customerFormItemTips[targetKey] = t('validate.resolved_tip', {
+    success: `${resolvedLength}`,
+    fail: `${sourceLength - resolvedLength}`,
+    value: t('tradingConfig.instrument'),
+  });
+  return resolvedInstruments;
+}
+
+function handleSelectCsv<T, U>(
+  targetKey: string,
+  tranform?: (data: T[], targetKey: string) => U[],
+): void {
+  dialog
+    .showOpenDialog({
+      properties: ['openFile'],
+      filters: [{ name: 'CSV', extensions: ['csv'] }],
+    })
+    .then((res) => {
+      const { filePaths } = res;
+      if (filePaths.length) {
+        readCSV<T>(filePaths[0]).then((data) => {
+          const resolvedData = tranform ? tranform(data, targetKey) : data;
+          formState[targetKey] = resolvedData;
+          formRef.value.validateFields([targetKey]);
+        });
+      }
+    });
+}
+
 function handleSelectFile(targetKey: string): void {
   dialog
     .showOpenDialog({
@@ -531,7 +591,7 @@ defineExpose({
                   ]
                 : []),
 
-              ...(item.type === 'instruments'
+              ...(item.type === 'instruments' || item.type === 'instrumentsCsv'
                 ? [
                     {
                       validator: instrumnetsValidator,
@@ -820,6 +880,33 @@ defineExpose({
           :title="(formState[item.key] || '').toString()"
         >
           <span class="name">{{ formState[item.key] }}</span>
+        </div>
+      </div>
+      <div
+        v-else-if="item.type === 'instrumentsCsv'"
+        class="kf-form-item__warp file"
+      >
+        <a-button
+          size="small"
+          :disabled="
+            (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
+            item.disabled
+          "
+          @click="
+            handleSelectCsv<KungfuApi.Instrument, string>(
+              item.key,
+              instrumentsCsvTransform,
+            )
+          "
+        >
+          <template #icon><DashOutlined /></template>
+        </a-button>
+        <div
+          v-if="customerFormItemTips[item.key]"
+          class="file-path"
+          :title="(customerFormItemTips[item.key] || '').toString()"
+        >
+          <span class="name">{{ customerFormItemTips[item.key] }}</span>
         </div>
       </div>
       <div v-else-if="item.type === 'files'" class="kf-form-item__warp file">

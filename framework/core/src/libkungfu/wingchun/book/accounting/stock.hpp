@@ -29,9 +29,6 @@ struct contract_discount_and_margin_ratio {
 };
 class StockAccountingMethod : public AccountingMethod {
 public:
-  static constexpr double min_comission = 5;
-  static constexpr double default_commission_ratio = 0.00032;
-
   static constexpr int DEFAULT_STOCK_CONTRACT_MULTIPLIER = 1;
   static constexpr float DEFAULT_STOCK_LONG_MARGIN_RATIO = 1.0;
   static constexpr float DEFAULT_STOCK_SHORT_MARGIN_RATIO = 0.6;
@@ -304,7 +301,7 @@ protected:
     auto &position = book->get_position_for(trade);
     double trade_amt = trade.price * trade.volume;
     auto &asset_margin = book->asset_margin;
-    double commission = calculate_commission(trade, asset_margin.commission_ratio);
+    double commission = calculate_commission(trade);
     double tax = calculate_tax(trade);
     position.last_price = position.last_price > 0 ? position.last_price : trade.price;
     if (position.volume + trade.volume > 0 && trade.price > 0) {
@@ -348,7 +345,7 @@ protected:
     double trade_amt = trade.price * trade.volume;
     // TODO: margin_commission requires a dedicate calculate_margin_commission(Trade&);
     auto &asset_margin = book->asset_margin;
-    double commission = calculate_commission(trade, asset_margin.commission_ratio);
+    double commission = calculate_commission(trade);
     auto tax = calculate_tax(trade);
     if (position.volume + trade.volume > 0 && trade.price > 0) {
       position.avg_open_price =
@@ -424,7 +421,7 @@ protected:
     double trade_amt = trade.price * trade.volume;
     // TODO: margin_commission requires a dedicate calculate_margin_commission(Trade&);
     auto &asset_margin = book->asset_margin;
-    double commission = calculate_commission(trade, asset_margin.commission_ratio);
+    double commission = calculate_commission(trade);
     auto tax = calculate_tax(trade);
     // position.last_price = position.last_price > 0 ? position.last_price : position.avg_open_price;
     //  if position.last_price == 0, there is no position, position.volume expected : 0
@@ -493,7 +490,7 @@ protected:
       position.last_price = trade.price;
     }
     auto &asset_margin = book->asset_margin;
-    double commission = calculate_commission(trade, asset_margin.commission_ratio);
+    double commission = calculate_commission(trade);
     auto tax = calculate_tax(trade);
     position.frozen_total = std::max(position.frozen_total - trade.volume, VOLUME_ZERO);
     position.frozen_yesterday = std::max(position.frozen_yesterday - trade.volume, VOLUME_ZERO);
@@ -569,7 +566,7 @@ protected:
 
     auto &position = book->get_position_for(trade);
     auto &asset_margin = book->asset_margin;
-    double commission = calculate_commission(trade, asset_margin.commission_ratio);
+    double commission = calculate_commission(trade);
     auto tax = calculate_tax(trade);
     // Position Direction: Short
     position.frozen_total = std::max(position.frozen_total - trade.volume, VOLUME_ZERO);
@@ -618,7 +615,7 @@ protected:
   virtual void apply_sell(Book_ptr &book, const Trade &trade) {
     auto &position = book->get_position_for(trade);
     auto &asset_margin = book->asset_margin;
-    double commission = calculate_commission(trade, asset_margin.commission_ratio);
+    double commission = calculate_commission(trade);
     double tax = calculate_tax(trade);
     position.frozen_total = std::max(position.frozen_total - trade.volume, VOLUME_ZERO);
     position.frozen_yesterday = std::max(position.frozen_yesterday - trade.volume, VOLUME_ZERO);
@@ -673,40 +670,9 @@ protected:
     }
   }
 
-  virtual double calculate_commission(const Trade &trade) {
-    return calculate_commission(trade, default_commission_ratio);
-  }
+  virtual double calculate_commission(const Trade &trade) { return trade.commission; }
 
-  virtual double calculate_commission(const Trade &trade, double acct_commission_ratio) {
-    if (commission_map_.find(trade.order_id) == commission_map_.end()) {
-      commission_map_.emplace(trade.order_id, min_comission);
-    }
-    auto commission = commission_map_[trade.order_id]; // commission of history trades of the order
-    double commission_ratio = acct_commission_ratio > 0 ? acct_commission_ratio : default_commission_ratio;
-    auto amount = trade.price * trade.volume * commission_ratio;
-    if (commission == min_comission) {
-      if (amount > commission) {
-        commission_map_.emplace(trade.order_id, 0);
-        return amount;
-      } else {
-        commission_map_[trade.order_id] = commission_map_[trade.order_id] - amount;
-        return min_comission;
-      }
-    } else {
-      if (amount > commission) {
-        commission_map_.emplace(trade.order_id, 0);
-        return amount - commission;
-      } else {
-        commission_map_[trade.order_id] = commission_map_[trade.order_id] - amount;
-        return 0;
-      }
-    }
-  }
-
-  virtual double calculate_tax(const Trade &trade) {
-    bool is_short = (trade.side == Side::Sell) || (trade.side == Side::ShortSell) || (trade.side == Side::RepayMargin);
-    return is_short ? trade.price * trade.volume * 0.001 : 0;
-  }
+  virtual double calculate_tax(const Trade &trade) { return trade.tax; }
 
   static contract_discount_and_margin_ratio get_instr_conversion_margin_rate(Book_ptr &book, const Position &position) {
     const char *exchange_id = position.exchange_id;

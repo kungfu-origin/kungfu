@@ -553,6 +553,7 @@ export default {
     no_negative_number: '请输入非负数',
     value_existing: '{value}已存在',
     mandatory: '该项为必填项',
+    resolved_tip: '成功匹配 {success} 个{value}, 失败 {fail} 个',
   },
 
   editor: {

@@ -1,7 +1,7 @@
 import path from 'path';
 import fse from 'fs-extra';
-import * as csv from '@fast-csv/format';
-import { Row } from '@fast-csv/format';
+import * as csv from 'fast-csv';
+import { FormatterRow } from 'fast-csv';
 import findRoot from 'find-root';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 const { t } = VueI18n.global;
@@ -28,10 +28,30 @@ export const addFileSync = (
   }
 };
 
+export const readCSV = <T>(filepath: string) => {
+  filepath = path.normalize(filepath);
+  return new Promise<T[]>((resolve, reject) => {
+    const res: T[] = [];
+    csv
+      .parseFile(filepath, {
+        headers: true,
+      })
+      .on('data', function (row) {
+        res.push(row);
+      })
+      .on('end', function () {
+        resolve(res);
+      })
+      .on('error', (err) => {
+        reject(err);
+      });
+  });
+};
+
 export const writeCSV = (
   filePath: string,
   data: KungfuApi.TradingDataTypes[],
-  transform = (row: KungfuApi.TradingDataTypes) => row as Row,
+  transform = (row: KungfuApi.TradingDataTypes) => row as FormatterRow,
 ): Promise<void> => {
   filePath = path.normalize(filePath);
   return new Promise((resolve, reject) => {
