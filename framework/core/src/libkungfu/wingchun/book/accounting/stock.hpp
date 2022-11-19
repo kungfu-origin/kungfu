@@ -670,13 +670,9 @@ protected:
     }
   }
 
-  virtual double calculate_commission(const Trade &trade, double acct_commission_ratio) {
-    return trade.commission;
-  }
+  virtual double calculate_commission(const Trade &trade) { return trade.commission; }
 
-  virtual double calculate_tax(const Trade &trade) {
-    return trade.tax;
-  }
+  virtual double calculate_tax(const Trade &trade) { return trade.tax; }
 
   static contract_discount_and_margin_ratio get_instr_conversion_margin_rate(Book_ptr &book, const Position &position) {
     const char *exchange_id = position.exchange_id;
