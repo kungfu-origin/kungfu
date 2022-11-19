@@ -610,7 +610,7 @@ export const getKfExtensionLanguage = async () => {
         'en-US':
           langData['en-US'][config.key] ??
           (config.key[0].toUpperCase() + config.key.slice(1)).replace(
-            /(?<!^)([A-Z])/g,
+            /(?<!^)([A-Z])(?=[a-z])/g,
             ' $1',
           ),
       };
