@@ -8,6 +8,8 @@ class RepoAccountingMethod : public StockAccountingMethod {
 public:
   RepoAccountingMethod() = default;
 
+  void apply_quote(Book_ptr &book, const Quote &quote) override {}
+
   void apply_order_input(Book_ptr &book, const OrderInput &input) override {
     if (input.side == Side::Sell) {
       book->asset.frozen_cash += input.volume;
@@ -43,7 +45,7 @@ public:
     auto commission = calculate_commission(trade);
     auto tax = calculate_tax(trade);
     auto days = get_repo_expire_days(trade.instrument_id);
-    auto profit = trade.volume * trade.price / 100 / 360 * days;
+    auto profit = trade.volume / 100 / 360 * days;
 
     position.volume += trade.volume;
     position.realized_pnl += profit;

@@ -394,9 +394,9 @@ function instrumentsCsvTransform(
   return resolvedInstruments;
 }
 
-function handleSelectCsv<T>(
+function handleSelectCsv<T, U>(
   targetKey: string,
-  tranform?: <U>(data: T[], targetKey: string) => U[],
+  tranform?: (data: T[], targetKey: string) => U[],
 ): void {
   dialog
     .showOpenDialog({
@@ -892,7 +892,12 @@ defineExpose({
             (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
             item.disabled
           "
-          @click="handleSelectCsv(item.key, instrumentsCsvTransform)"
+          @click="
+            handleSelectCsv<KungfuApi.Instrument, string>(
+              item.key,
+              instrumentsCsvTransform,
+            )
+          "
         >
           <template #icon><DashOutlined /></template>
         </a-button>

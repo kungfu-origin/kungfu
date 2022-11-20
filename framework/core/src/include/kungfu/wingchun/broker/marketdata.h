@@ -48,6 +48,8 @@ public:
 
   virtual bool unsubscribe(const std::vector<longfist::types::InstrumentKey> &instrument_keys) = 0;
 
+  virtual bool on_custom_event(const event_ptr &event) { return true; }
+
 protected:
   [[nodiscard]] bool has_instrument(const std::string &instrument_id) const;
 

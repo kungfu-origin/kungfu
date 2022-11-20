@@ -37,7 +37,10 @@ void TraderVendor::on_start() {
   events_ | is(AssetSync::tag) | $$(service_->handle_asset_sync());
   events_ | is(PositionSync::tag) | $$(service_->handle_position_sync());
 
-  events_ | $$(service_->handle_batch_order_tag(event));
+  events_ | filter([&](const event_ptr &event) {
+    return event->msg_type() == BatchOrderBegin::tag or event->msg_type() == BatchOrderEnd::tag;
+  }) | $$(service_->handle_batch_order_tag(event));
+  events_ | instanceof <journal::frame>() | $$(service_->on_custom_event(event));
 
   clean_orders();
 

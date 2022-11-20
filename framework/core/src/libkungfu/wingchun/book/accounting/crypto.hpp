@@ -17,9 +17,6 @@ using namespace kungfu::yijinjing::data;
 namespace kungfu::wingchun::book {
 class CryptoAccountingMethod : public AccountingMethod {
 public:
-  static constexpr double min_comission = 5;
-  static constexpr double commission_ratio = 0.0008;
-
   void get_instrument(const Book_ptr &book, const Trade &trade, char *instrument_a, char *instrument_b,
                       char *instrument_commission, int64_t &volume_a, int64_t &volume_b, int64_t &volume_commission) {
     auto instrument_hash = hash_instrument(trade.exchange_id, trade.instrument_id);
@@ -83,9 +80,9 @@ protected:
 
   virtual void apply_sell(Book_ptr &book, const Trade &trade) {}
 
-  virtual double calculate_commission(const Trade &trade) { return 0; }
+  virtual double calculate_commission(const Trade &trade) { return trade.commission; }
 
-  virtual double calculate_tax(const Trade &trade) { return 0; }
+  virtual double calculate_tax(const Trade &trade) { return trade.tax; }
 };
 } // namespace kungfu::wingchun::book
 #endif // WINGCHUN_ACCOUNTING_CRYPTO_H
