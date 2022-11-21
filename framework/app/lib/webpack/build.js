@@ -113,7 +113,7 @@ const run = (distDir, distName = 'app') => {
         console.error(`\n${err}\n`);
         process.exit(1);
       });
-
+    console.log(rendererConfig(argv));
     pack(rendererConfig(argv))
       .then((result) => {
         results += result + '\n\n';

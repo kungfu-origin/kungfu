@@ -556,7 +556,10 @@ function showCloseModal(
       Number(currentPosition.value?.volume || 0),
     )
   ) {
-    return confirmModal(t('prompt'), t('tradingConfig.close_all'));
+    return confirmModal(
+      t('prompt'),
+      t('tradingConfig.continue_close_rate', { rate: closeRange + '' }),
+    );
   }
 
   return Promise.resolve(true);
