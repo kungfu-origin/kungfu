@@ -1776,10 +1776,10 @@ export const initFormStateByConfig = (
 };
 
 export const resolveInstrumentValue = (
-  type: 'instrument' | 'instruments',
+  type: 'instrument' | 'instruments' | 'instrumentsCsv',
   value: string | string[],
 ): string[] => {
-  if (type === 'instruments') {
+  if (type === 'instruments' || type === 'instrumentsCsv') {
     return (value || ['']) as string[];
   }
   if (type === 'instrument') {
