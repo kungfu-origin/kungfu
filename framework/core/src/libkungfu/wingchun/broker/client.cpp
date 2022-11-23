@@ -212,7 +212,7 @@ const ResumePolicy &AutoClient::get_resume_policy() const { return resume_policy
 bool AutoClient::is_custom_subscribed(uint32_t md_location_uid) const { return false; }
 
 bool AutoClient::is_custom_subscribed_all(uint32_t md_location_uid,
-                                          kungfu::longfist::enums::SubscribeDataType subscribed_instrument_type,
+                                          kungfu::longfist::enums::SubscribeDataType data_type,
                                           const std::string &exchange, InstrumentType kf_instrument_type) const {
   return false;
 }
@@ -248,7 +248,7 @@ bool PassiveClient::is_custom_subscribed(uint32_t md_location_uid) const {
 }
 
 bool PassiveClient::is_custom_subscribed_all(uint32_t md_location_uid,
-                                             kungfu::longfist::enums::SubscribeDataType subscribed_instrument_type,
+                                             kungfu::longfist::enums::SubscribeDataType data_type,
                                              const std::string &exchange_id, InstrumentType kf_instrument_type) const {
   if (should_connect_md(app_.get_location(md_location_uid)) and enrolled_md_locations_.at(md_location_uid)) {
     auto &custom_sub = custom_subs_.at(md_location_uid);
@@ -256,41 +256,40 @@ bool PassiveClient::is_custom_subscribed_all(uint32_t md_location_uid,
     SubscribeInstrumentType custom_type = instrument_type_to_subscribe_instrument_type(kf_instrument_type);
 
     for (const auto &it : custom_sub) {
-      std::string custom_exchange("0");
+      std::string custom_exchange("Unknown");
       switch (it.market_type) {
       case MarketType::BSE:
-        custom_exchange = std::string(EXCHANGE_BSE);
+        custom_exchange = EXCHANGE_BSE;
         break;
       case MarketType::SHFE:
-        custom_exchange = std::string(EXCHANGE_SHFE);
+        custom_exchange = EXCHANGE_SHFE;
         break;
       case MarketType::CFFEX:
-        custom_exchange = std::string(EXCHANGE_CFFEX);
+        custom_exchange = EXCHANGE_CFFEX;
         break;
       case MarketType::DCE:
-        custom_exchange = std::string(EXCHANGE_DCE);
+        custom_exchange = EXCHANGE_DCE;
         break;
       case MarketType::CZCE:
-        custom_exchange = std::string(EXCHANGE_CZCE);
+        custom_exchange = EXCHANGE_CZCE;
         break;
       case MarketType::INE:
-        custom_exchange = std::string(EXCHANGE_INE);
+        custom_exchange = EXCHANGE_INE;
         break;
       case MarketType::SSE:
-        custom_exchange = std::string(EXCHANGE_SSE);
+        custom_exchange = EXCHANGE_SSE;
         break;
       case MarketType::SZSE:
-        custom_exchange = std::string(EXCHANGE_SZE);
+        custom_exchange = EXCHANGE_SZE;
         break;
       case MarketType::All:
-        custom_exchange = std::string("");
+        custom_exchange = "";
         break;
       default:
-        custom_exchange = std::string("0");
+        custom_exchange = "Unknown";
         break;
       }
-      if ((it.data_type == SubscribeDataType::All or
-           (uint64_t(it.data_type) & uint64_t(subscribed_instrument_type)) != 0) and
+      if ((it.data_type == SubscribeDataType::All or (uint64_t(it.data_type) & uint64_t(data_type)) != 0) and
           (custom_exchange.empty() || custom_exchange.compare(exchange_id) == 0) and
           (it.instrument_type == SubscribeInstrumentType::All or
            (uint64_t(custom_type) & uint64_t(it.instrument_type)) != 0)) {

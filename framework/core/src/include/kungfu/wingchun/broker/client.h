@@ -81,10 +81,10 @@ public:
 
   [[nodiscard]] virtual bool is_custom_subscribed(uint32_t md_location_uid) const = 0;
 
-  [[nodiscard]] virtual bool
-  is_custom_subscribed_all(uint32_t md_location_uid,
-                           kungfu::longfist::enums::SubscribeDataType subscribed_instrument_type,
-                           const std::string& exchange_id, InstrumentType kf_instrument_type) const = 0;
+  [[nodiscard]] virtual bool is_custom_subscribed_all(uint32_t md_location_uid,
+                                                      kungfu::longfist::enums::SubscribeDataType data_type,
+                                                      const std::string &exchange_id,
+                                                      InstrumentType kf_instrument_type) const = 0;
 
   [[nodiscard]] virtual bool is_all_subscribed(uint32_t md_location_uid) const = 0;
 
@@ -151,8 +151,8 @@ public:
   [[nodiscard]] bool is_custom_subscribed(uint32_t md_location_uid) const override;
 
   [[nodiscard]] bool is_custom_subscribed_all(uint32_t md_location_uid,
-                                              kungfu::longfist::enums::SubscribeDataType subscribed_instrument_type,
-                                              const std::string& exchange_id,
+                                              kungfu::longfist::enums::SubscribeDataType data_type,
+                                              const std::string &exchange_id,
                                               InstrumentType kf_instrument_type) const override;
 
   [[nodiscard]] bool is_all_subscribed(uint32_t md_location) const override;
@@ -203,8 +203,8 @@ public:
   [[nodiscard]] bool is_custom_subscribed(uint32_t md_location_uid) const override;
 
   [[nodiscard]] bool is_custom_subscribed_all(uint32_t md_location_uid,
-                                              kungfu::longfist::enums::SubscribeDataType subscribed_instrument_type,
-                                              const std::string& exchange_id,
+                                              kungfu::longfist::enums::SubscribeDataType data_type,
+                                              const std::string &exchange_id,
                                               InstrumentType kf_instrument_type) const override;
 
   [[nodiscard]] bool is_all_subscribed(uint32_t md_location) const override;
