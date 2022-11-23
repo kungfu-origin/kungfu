@@ -51,7 +51,10 @@ import {
 import { readCSV } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import { useGlobalStore } from '../../pages/index/store/global';
 import { hashInstrumentUKey } from '@kungfu-trader/kungfu-js-api/kungfu';
-import { buildInstrumentSelectOptionValue } from '../../assets/methods/uiUtils';
+import {
+  buildInstrumentSelectOptionValue,
+  buildInstrumentSelectOptionLabel,
+} from '../../assets/methods/uiUtils';
 const { t } = VueI18n.global;
 
 const props = withDefaults(
@@ -109,7 +112,7 @@ type InstrumentsSearchRelated = Record<
     searchInstrumnetOptions: Ref<{ label: string; value: string }[]>;
     handleSearchInstrument: (value: string) => void;
     updateSearchInstrumnetOptions: (
-      type: 'instrument' | 'instruments',
+      type: 'instrument' | 'instruments' | 'instrumentsCsv',
       value: string | string[],
     ) => Promise<{ value: string; label: string }[]>;
   }
@@ -125,9 +128,12 @@ const { isLanguageKeyAvailable } = useLanguage();
 const primaryKeys = ref<string[]>(getPrimaryKeys(props.configSettings || []));
 const sideRadiosList = ref<string[]>(Object.keys(Side).slice(0, 2));
 const customerFormItemTips = reactive<Record<string, string>>({});
-const instrumentKeys = ref<Record<string, 'instrument' | 'instruments'>>(
-  filterInstrumentKeysFromConfigSettings(props.configSettings),
-);
+const instrumentKeys = ref<
+  Record<string, 'instrument' | 'instruments' | 'instrumentsCsv'>
+>(filterInstrumentKeysFromConfigSettings(props.configSettings));
+const instrumentsCsvData = reactive<
+  Record<string, Record<string, KungfuApi.InstrumentResolved>>
+>({});
 
 watch(
   () => props.configSettings,
@@ -205,13 +211,17 @@ if ('instrument' in formState) {
 }
 
 function getInstrumentsSearchRelated(
-  instrumentKeys: Record<string, 'instrument' | 'instruments'>,
+  instrumentKeys: Record<
+    string,
+    'instrument' | 'instruments' | 'instrumentsCsv'
+  >,
 ): InstrumentsSearchRelated {
   return Object.keys(instrumentKeys).reduce(
     (item1: InstrumentsSearchRelated, key: string) => {
       const {
         searchInstrumnetOptions,
         handleSearchInstrument,
+        handleSearchCustomInstrument,
         updateSearchInstrumnetOptions,
       } = useInstruments();
 
@@ -220,12 +230,23 @@ function getInstrumentsSearchRelated(
           instrumentOptionsReactiveData.data[key] = options;
         },
       );
+
       item1[key] = {
-        searchInstrumnetOptions: searchInstrumnetOptions,
-        handleSearchInstrument: (val) =>
-          handleSearchInstrument(val).then((options) => {
-            instrumentOptionsReactiveData.data[key] = options;
-          }),
+        searchInstrumnetOptions,
+        handleSearchInstrument: (val) => {
+          if (instrumentKeys[key] === 'instrumentsCsv') {
+            handleSearchCustomInstrument(
+              val,
+              Object.values(instrumentsCsvData[key]) || [],
+            ).then((options) => {
+              instrumentOptionsReactiveData.data[key] = options;
+            });
+          } else {
+            handleSearchInstrument(val).then((options) => {
+              instrumentOptionsReactiveData.data[key] = options;
+            });
+          }
+        },
         updateSearchInstrumnetOptions,
       };
       return item1;
@@ -252,13 +273,19 @@ function filterInstrumentKeysFromConfigSettings(
   configSettings: KungfuApi.KfConfigItem[],
 ) {
   return configSettings
-    .filter((item) => item.type === 'instrument' || item.type === 'instruments')
+    .filter(
+      (item) =>
+        item.type === 'instrument' ||
+        item.type === 'instruments' ||
+        item.type === 'instrumentsCsv',
+    )
     .reduce((data, setting) => {
       data[setting.key.toString()] = setting.type as
         | 'instrument'
-        | 'instruments';
+        | 'instruments'
+        | 'instrumentsCsv';
       return data;
-    }, {} as Record<string, 'instrument' | 'instruments'>);
+    }, {} as Record<string, 'instrument' | 'instruments' | 'instrumentsCsv'>);
 }
 
 function isNumberInputType(type: string): boolean {
@@ -361,42 +388,65 @@ function getKfTradeValueName(
   return data[key].name;
 }
 
-function instrumentsCsvTransform(
+function instrumentsCsvCallback(
   instruments: KungfuApi.Instrument[],
   targetKey: string,
 ) {
   const { instrumentsMap } = useGlobalStore();
-  const resolvedInstruments = instruments.reduce((res, item) => {
+  if (!instrumentsCsvData[targetKey]) instrumentsCsvData[targetKey] = {};
+  instruments.forEach((item) => {
     if (item.exchange_id && item.instrument_id) {
       const ukey = hashInstrumentUKey(item.instrument_id, item.exchange_id);
-      const instrumentResolved = instrumentsMap[ukey] ?? {
-        instrumentId: item.instrument_id,
-        exchangeId: item.exchange_id,
-        instrumentType: window.watcher.getInstrumentType(
-          item.exchange_id,
-          item.instrument_id,
-        ),
-        ukey,
-        instrumentName: '',
-        id: ukey,
-      };
-      res.push(buildInstrumentSelectOptionValue(instrumentResolved));
+      const existedInstrument = instrumentsCsvData[targetKey][ukey];
+      if (!existedInstrument || !existedInstrument.instrumentName) {
+        const instrumentResolved = instrumentsMap[ukey] ?? {
+          instrumentId: item.instrument_id,
+          exchangeId: item.exchange_id,
+          instrumentType: window.watcher.getInstrumentType(
+            item.exchange_id,
+            item.instrument_id,
+          ),
+          ukey,
+          instrumentName: '',
+          id: `${item.instrument_id}_${''}_${item.exchange_id}`.toLowerCase(),
+        };
+
+        instrumentsCsvData[targetKey][ukey] = instrumentResolved;
+      }
     }
-    return res;
-  }, [] as string[]);
+  });
+
+  const resolvedInstruments = Object.values(instrumentsCsvData[targetKey]);
+
   const sourceLength = instruments.length;
   const resolvedLength = resolvedInstruments.length;
+  const failedLength =
+    Number(
+      /\d/.exec(customerFormItemTips[targetKey]?.split(',')?.[1] || '0')?.[0],
+    ) +
+    (sourceLength - resolvedLength);
   customerFormItemTips[targetKey] = t('validate.resolved_tip', {
     success: `${resolvedLength}`,
-    fail: `${sourceLength - resolvedLength}`,
+    fail: `${failedLength}`,
     value: t('tradingConfig.instrument'),
   });
-  return resolvedInstruments;
+  instrumentOptionsReactiveData.data[targetKey] = resolvedInstruments.map(
+    (item) => ({
+      value: buildInstrumentSelectOptionValue(item),
+      label: buildInstrumentSelectOptionLabel(item),
+    }),
+  );
 }
 
-function handleSelectCsv<T, U>(
+function handleClearInstrumentsCsv(targetKey: string) {
+  formState[targetKey] = [];
+  instrumentOptionsReactiveData.data[targetKey] = [];
+  customerFormItemTips[targetKey] = '';
+}
+
+function handleSelectCsv<T>(
   targetKey: string,
-  tranform?: (data: T[], targetKey: string) => U[],
+  callback?: (data: T[], targetKey: string) => void,
 ): void {
   dialog
     .showOpenDialog({
@@ -407,9 +457,7 @@ function handleSelectCsv<T, U>(
       const { filePaths } = res;
       if (filePaths.length) {
         readCSV<T>(filePaths[0]).then((data) => {
-          const resolvedData = tranform ? tranform(data, targetKey) : data;
-          formState[targetKey] = resolvedData;
-          formRef.value.validateFields([targetKey]);
+          callback && callback(data, targetKey);
         });
       }
     });
@@ -689,6 +737,7 @@ defineExpose({
       >
         <a-radio
           v-for="key in Object.keys(numberEnumRadioType[item.type])"
+          :key="key"
           :value="+key"
         >
           {{ getKfTradeValueName(numberEnumRadioType[item.type], key) }}
@@ -884,8 +933,22 @@ defineExpose({
       </div>
       <div
         v-else-if="item.type === 'instrumentsCsv'"
-        class="kf-form-item__warp file"
+        class="kf-form-item__warp file instruments-csv__wrap"
       >
+        <a-select
+          :value="formState[item.key]"
+          :disabled="
+            (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
+            item.disabled
+          "
+          mode="multiple"
+          show-search
+          :filter-option="false"
+          :options="instrumentOptionsReactiveData.data[item.key]"
+          @search="instrumentsSearchRelated[item.key].handleSearchInstrument"
+          @select="handleInstrumentSelected($event, item.key)"
+          @deselect="handleInstrumentDeselected($event, item.key)"
+        ></a-select>
         <a-button
           size="small"
           :disabled="
@@ -893,13 +956,13 @@ defineExpose({
             item.disabled
           "
           @click="
-            handleSelectCsv<KungfuApi.Instrument, string>(
+            handleSelectCsv<KungfuApi.Instrument>(
               item.key,
-              instrumentsCsvTransform,
+              instrumentsCsvCallback,
             )
           "
         >
-          <template #icon><DashOutlined /></template>
+          {{ $t('tradingConfig.add_csv') }}
         </a-button>
         <div
           v-if="customerFormItemTips[item.key]"
@@ -907,6 +970,9 @@ defineExpose({
           :title="(customerFormItemTips[item.key] || '').toString()"
         >
           <span class="name">{{ customerFormItemTips[item.key] }}</span>
+          <span class="clear" @click="handleClearInstrumentsCsv(item.key)">
+            {{ $t('tradingConfig.clear') }}
+          </span>
         </div>
       </div>
       <div v-else-if="item.type === 'files'" class="kf-form-item__warp file">
@@ -920,19 +986,21 @@ defineExpose({
         >
           <template #icon><PlusOutlined /></template>
         </a-button>
-        <div
-          v-if="formState[item.key]"
-          class="file-path"
-          v-for="file in formState[item.key] as string[] || []"
-          :title="file"
-        >
-          <span class="name">{{ file }}</span>
-          <CloseOutlined
-            v-if="!(item.default as string[]).includes(file)"
-            class="kf-hover"
-            @click="handleRemoveFile(item.key, file)"
-          />
-        </div>
+        <template v-if="formState[item.key]">
+          <div
+            v-for="file in formState[item.key] as string[] || []"
+            :key="file"
+            class="file-path"
+            :title="file"
+          >
+            <span class="name">{{ file }}</span>
+            <CloseOutlined
+              v-if="!(item.default as string[]).includes(file)"
+              class="kf-hover"
+              @click="handleRemoveFile(item.key, file)"
+            />
+          </div>
+        </template>
       </div>
       <a-time-picker
         v-else-if="item.type === 'timePicker'"
@@ -1010,10 +1078,22 @@ export default defineComponent({
           padding-right: 16px;
           box-sizing: border-box;
         }
+
+        .clear {
+          color: #faad14;
+          cursor: pointer;
+        }
       }
 
       button {
         width: 40px;
+      }
+    }
+
+    &.instruments-csv__wrap {
+      button {
+        width: fit-content;
+        margin-top: 8px;
       }
     }
   }

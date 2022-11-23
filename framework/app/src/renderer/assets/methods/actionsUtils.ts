@@ -568,11 +568,15 @@ export const useInstruments = (): {
   searchInstrumentResult: Ref<string | undefined>;
   searchInstrumnetOptions: Ref<{ value: string; label: string }[]>;
   updateSearchInstrumnetOptions: (
-    type: 'instrument' | 'instruments',
+    type: 'instrument' | 'instruments' | 'instrumentsCsv',
     value: string | string[],
   ) => Promise<{ value: string; label: string }[]>;
   handleSearchInstrument: (
     value: string,
+  ) => Promise<{ value: string; label: string }[]>;
+  handleSearchCustomInstrument: (
+    value: string,
+    customInstruments: KungfuApi.InstrumentResolved[],
   ) => Promise<{ value: string; label: string }[]>;
   handleConfirmSearchInstrumentResult: (
     value: string,
@@ -650,7 +654,7 @@ export const useInstruments = (): {
   const searchInstrumnetOptions = ref<{ value: string; label: string }[]>([]);
 
   const updateSearchInstrumnetOptions = (
-    type: 'instrument' | 'instruments',
+    type: 'instrument' | 'instruments' | 'instrumentsCsv',
     value: string | string[],
   ): Promise<{ value: string; label: string }[]> => {
     searchInstrumnetOptions.value = makeSearchOptionFormInstruments(
@@ -660,20 +664,41 @@ export const useInstruments = (): {
     return Promise.resolve(searchInstrumnetOptions.value);
   };
 
-  const handleSearchInstrument = (
-    val: string,
-  ): Promise<{ value: string; label: string }[]> => {
-    searchInstrumnetOptions.value = instruments.value
+  const filterInstrumentsByKeyword = (
+    keyword: string,
+    curInstruments: KungfuApi.InstrumentResolved[],
+  ) => {
+    return curInstruments
       .filter((item) => {
-        const regx = new RegExp(`${val}`, 'ig');
-        return !!val && regx.test(item.id);
+        const regx = new RegExp(`${keyword}`, 'ig');
+        return !!keyword && regx.test(item.id);
       })
       .slice(0, 20)
       .map((item) => ({
         value: buildInstrumentSelectOptionValue(item),
         label: buildInstrumentSelectOptionLabel(item),
       }));
+  };
+
+  const handleSearchInstrument = (
+    val: string,
+  ): Promise<{ value: string; label: string }[]> => {
+    searchInstrumnetOptions.value = filterInstrumentsByKeyword(
+      val,
+      instruments.value,
+    );
     return Promise.resolve(searchInstrumnetOptions.value);
+  };
+
+  const handleSearchCustomInstrument = (
+    val: string,
+    customInstruments: KungfuApi.InstrumentResolved[],
+  ) => {
+    const customInstrumentOptions = filterInstrumentsByKeyword(
+      val,
+      customInstruments,
+    );
+    return Promise.resolve(customInstrumentOptions);
   };
 
   const handleConfirmSearchInstrumentResult = (
@@ -696,6 +721,7 @@ export const useInstruments = (): {
     searchInstrumnetOptions,
     updateSearchInstrumnetOptions,
     handleSearchInstrument,
+    handleSearchCustomInstrument,
     handleConfirmSearchInstrumentResult,
   };
 };
