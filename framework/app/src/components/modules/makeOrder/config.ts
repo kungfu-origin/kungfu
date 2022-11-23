@@ -19,12 +19,6 @@ export const getConfigSettings = (
   priceType?: PriceTypeEnum,
 ): KungfuApi.KfConfigItem[] => {
   const defaultSettings: KungfuApi.KfConfigItem[] = [
-    {
-      key: 'instrumentCsv',
-      name: t('tradingConfig.instrument'),
-      type: 'instrumentsCsv',
-      required: true,
-    },
     category === 'td'
       ? null
       : {
