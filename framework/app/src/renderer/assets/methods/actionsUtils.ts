@@ -574,9 +574,15 @@ export const useInstruments = (): {
   handleSearchInstrument: (
     value: string,
   ) => Promise<{ value: string; label: string }[]>;
-  handleSearchCustomInstrument: (
+  handleSearchByCustom: (
     value: string,
-    customInstruments: KungfuApi.InstrumentResolved[],
+    customOptions: {
+      customInstruments?: KungfuApi.InstrumentResolved[];
+      customFilterCondition?: (
+        keywords: string,
+        pos: KungfuApi.InstrumentResolved,
+      ) => boolean;
+    },
   ) => Promise<{ value: string; label: string }[]>;
   handleConfirmSearchInstrumentResult: (
     value: string,
@@ -665,14 +671,15 @@ export const useInstruments = (): {
   };
 
   const filterInstrumentsByKeyword = (
-    keyword: string,
+    keywords: string,
     curInstruments: KungfuApi.InstrumentResolved[],
+    filterCondition: (
+      keywords: string,
+      pos: KungfuApi.InstrumentResolved,
+    ) => boolean,
   ) => {
     return curInstruments
-      .filter((item) => {
-        const regx = new RegExp(`${keyword}`, 'ig');
-        return !!keyword && regx.test(item.id);
-      })
+      .filter((item) => filterCondition(keywords, item))
       .slice(0, 20)
       .map((item) => ({
         value: buildInstrumentSelectOptionValue(item),
@@ -680,25 +687,41 @@ export const useInstruments = (): {
       }));
   };
 
-  const handleSearchInstrument = (
-    val: string,
-  ): Promise<{ value: string; label: string }[]> => {
-    searchInstrumnetOptions.value = filterInstrumentsByKeyword(
-      val,
-      instruments.value,
-    );
-    return Promise.resolve(searchInstrumnetOptions.value);
+  const defaultFilterCondition = (
+    keywords: string,
+    pos: KungfuApi.InstrumentResolved,
+  ) => {
+    const regx = new RegExp(`${keywords}`, 'ig');
+    return !!keywords && regx.test(pos.id);
   };
 
-  const handleSearchCustomInstrument = (
+  const handleSearchByCustom = (
     val: string,
-    customInstruments: KungfuApi.InstrumentResolved[],
+    customOptions: {
+      customInstruments?: KungfuApi.InstrumentResolved[];
+      customFilterCondition?: (
+        keywords: string,
+        pos: KungfuApi.InstrumentResolved,
+      ) => boolean;
+    },
   ) => {
+    const { customInstruments, customFilterCondition } = customOptions;
     const customInstrumentOptions = filterInstrumentsByKeyword(
       val,
-      customInstruments,
+      customInstruments || instruments.value,
+      customFilterCondition || defaultFilterCondition,
     );
     return Promise.resolve(customInstrumentOptions);
+  };
+
+  const handleSearchInstrument = async (
+    val: string,
+  ): Promise<{ value: string; label: string }[]> => {
+    searchInstrumnetOptions.value = await handleSearchByCustom(val, {
+      customInstruments: instruments.value,
+      customFilterCondition: defaultFilterCondition,
+    });
+    return Promise.resolve(searchInstrumnetOptions.value);
   };
 
   const handleConfirmSearchInstrumentResult = (
@@ -720,8 +743,8 @@ export const useInstruments = (): {
     searchInstrumentResult,
     searchInstrumnetOptions,
     updateSearchInstrumnetOptions,
+    handleSearchByCustom,
     handleSearchInstrument,
-    handleSearchCustomInstrument,
     handleConfirmSearchInstrumentResult,
   };
 };
@@ -1548,7 +1571,7 @@ export const useCurrentPositionList = (
   const { currentGlobalKfLocation } = useCurrentGlobalKfLocation(
     window.watcher,
   );
-  const currentPositionList = ref<KungfuApi.Position[]>([]);
+  const currentPositionList = ref<KungfuApi.PositionResolved[]>([]);
 
   onMounted(() => {
     if (app?.proxy) {
@@ -1622,11 +1645,28 @@ export const useMakeOrderInfo = (
     return offset === OffsetEnum.Open ? 'amount' : 'position';
   });
 
+  const currentAccountLocation = computed(() => {
+    if (currentGlobalKfLocation.value && isCurrentCategoryIsTd.value) {
+      return currentGlobalKfLocation.value;
+    } else if (formState.value.account_id) {
+      const { source, id } = formState.value.account_id.parseSourceAccountId();
+      return {
+        category: 'td',
+        group: source,
+        name: id,
+        mode: 'live',
+      } as KungfuApi.KfLocation;
+    } else {
+      return null;
+    }
+  });
+
   const getPositionByInstrumentAndDirection = (
-    positionList: KungfuApi.Position[],
+    positionList: KungfuApi.PositionResolved[],
     instrument: KungfuApi.InstrumentResolved | null,
     direction: DirectionEnum,
   ) => {
+    if (!currentAccountLocation.value) return null;
     if (!positionList.length || !instrument) return null;
 
     const { exchangeId, instrumentId, instrumentType } = instrument;
@@ -1634,7 +1674,11 @@ export const useMakeOrderInfo = (
       (position) =>
         position.exchange_id === exchangeId &&
         position.instrument_id === instrumentId &&
-        position.instrument_type === instrumentType,
+        position.instrument_type === instrumentType &&
+        position.account_id_resolved ===
+          getIdByKfLocation(
+            currentAccountLocation.value as KungfuApi.KfLocation,
+          ),
     );
 
     if (targetPositionList && targetPositionList.length) {
@@ -1687,19 +1731,9 @@ export const useMakeOrderInfo = (
   });
 
   const currentAvailMoney = computed(() => {
-    if (!currentGlobalKfLocation.value) return '--';
-    if (!formState.value.account_id) {
-      return '--';
-    }
+    if (!currentAccountLocation.value) return '--';
 
-    const { source, id } = (
-      formState.value.account_id || ''
-    ).parseSourceAccountId();
-    const tdLocation = isCurrentCategoryIsTd.value
-      ? currentGlobalKfLocation.value
-      : { category: 'td', group: source, name: id, mode: 'live' };
-
-    const avail = getAssetsByKfConfig(tdLocation).avail;
+    const avail = getAssetsByKfConfig(currentAccountLocation.value).avail;
 
     return dealKfPrice(avail);
   });
