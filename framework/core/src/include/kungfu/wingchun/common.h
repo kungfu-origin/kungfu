@@ -352,6 +352,8 @@ instrument_type_to_subscribe_instrument_type(longfist::enums::InstrumentType ins
     return longfist::enums::SubscribeInstrumentType::Future;
   case longfist::enums::InstrumentType::Bond:
     return longfist::enums::SubscribeInstrumentType::Bond;
+  case longfist::enums::InstrumentType::Repo:
+    return longfist::enums::SubscribeInstrumentType::Bond;
   case longfist::enums::InstrumentType::StockOption:
     return longfist::enums::SubscribeInstrumentType::StockOption;
   case longfist::enums::InstrumentType::TechStock:
