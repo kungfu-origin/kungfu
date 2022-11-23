@@ -605,7 +605,7 @@ export const buildInstrumentSelectOptionLabel = (
 };
 
 export const makeSearchOptionFormInstruments = (
-  type: 'instrument' | 'instruments',
+  type: 'instrument' | 'instruments' | 'instrumentsCsv',
   value: string | string[],
 ): { value: string; label: string }[] => {
   const valResolved = resolveInstrumentValue(type, value);
