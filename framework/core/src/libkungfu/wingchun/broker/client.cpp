@@ -211,7 +211,8 @@ const ResumePolicy &AutoClient::get_resume_policy() const { return resume_policy
 
 bool AutoClient::is_custom_subscribed(uint32_t md_location_uid) const { return false; }
 
-bool AutoClient::is_custom_subscribed_all(uint32_t md_location_uid, kungfu::longfist::enums::SubscribeDataType secu_dt,
+bool AutoClient::is_custom_subscribed_all(uint32_t md_location_uid,
+                                          kungfu::longfist::enums::SubscribeDataType subscribed_instrument_type,
                                           const std::string &exchange, InstrumentType kf_instrument_type) const {
   return false;
 }
@@ -247,8 +248,8 @@ bool PassiveClient::is_custom_subscribed(uint32_t md_location_uid) const {
 }
 
 bool PassiveClient::is_custom_subscribed_all(uint32_t md_location_uid,
-                                             kungfu::longfist::enums::SubscribeDataType secu_dt,
-                                             const std::string &exchange, InstrumentType kf_instrument_type) const {
+                                             kungfu::longfist::enums::SubscribeDataType subscribed_instrument_type,
+                                             const std::string &exchange_id, InstrumentType kf_instrument_type) const {
   if (should_connect_md(app_.get_location(md_location_uid)) and enrolled_md_locations_.at(md_location_uid)) {
     auto &custom_sub = custom_subs_.at(md_location_uid);
 
@@ -288,8 +289,9 @@ bool PassiveClient::is_custom_subscribed_all(uint32_t md_location_uid,
         custom_exchange = std::string("0");
         break;
       }
-      if ((it.data_type == SubscribeDataType::All or (uint64_t(it.data_type) & uint64_t(secu_dt)) != 0) and
-          (custom_exchange.empty() || custom_exchange.compare(exchange) == 0) and
+      if ((it.data_type == SubscribeDataType::All or
+           (uint64_t(it.data_type) & uint64_t(subscribed_instrument_type)) != 0) and
+          (custom_exchange.empty() || custom_exchange.compare(exchange_id) == 0) and
           (it.instrument_type == SubscribeInstrumentType::All or
            (uint64_t(custom_type) & uint64_t(it.instrument_type)) != 0)) {
         /// using & operator because it.instrument_type maybe InstrumentType::Stock | InstrumentType::Future
