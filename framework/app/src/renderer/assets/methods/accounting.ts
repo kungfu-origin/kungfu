@@ -62,7 +62,7 @@ class FutureTradeAmountUsage extends BaseTradeAmountUsage {
     const { exchangeId, instrumentId } = instrumentResolved;
     const { contract_multiplier, long_margin_ratio, short_margin_ratio } =
       this.getInstrumentInWathcer(exchangeId, instrumentId) || {};
-    console.log(contract_multiplier, long_margin_ratio, short_margin_ratio);
+
     if (direction === DirectionEnum.Long) {
       return (
         price * volume * (contract_multiplier || 1) * (long_margin_ratio || 1)

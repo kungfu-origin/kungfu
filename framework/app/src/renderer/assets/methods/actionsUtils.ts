@@ -1779,76 +1779,9 @@ export const useMakeOrderInfo = (
     return '0';
   });
 
-  // function getFutureInstrumentTradeAmount(
-  //   currentPrice: number,
-  //   volume: number,
-  //   instrument,
-  //   direction: DirectionEnum,
-  // ): number | null {
-  //   console.log(instrument, direction);
-  //   if (!instrument) return null;
-
-  //   const { exchangeId, instrumentId } = instrument;
-  //   const instrumentKey = window.watcher.getInstrumentUID(
-  //     instrumentId,
-  //     exchangeId,
-  //   );
-  //   const { contract_multiplier, long_margin_ratio, short_margin_ratio } =
-  //     (window.watcher.ledger.Instrument[instrumentKey] ||
-  //       {}) as KungfuApi.Instrument;
-
-  //   if (direction === DirectionEnum.Long) {
-  //     return (
-  //       currentPrice *
-  //       volume *
-  //       (contract_multiplier || 1) *
-  //       (long_margin_ratio || 1)
-  //     );
-  //   } else if (direction === DirectionEnum.Short) {
-  //     return (
-  //       currentPrice *
-  //       volume *
-  //       (contract_multiplier || 1) *
-  //       (short_margin_ratio || 1)
-  //     );
-  //   }
-
-  //   return null;
-  // }
-
   function dealTradeAmount(preNumber: number | null) {
     return !Number(preNumber) ? '--' : dealKfPrice(preNumber);
   }
-
-  // function getTradeAmount(
-  //   currentPrice: number,
-  //   volume: number,
-  //   currentInstrument?: KungfuApi.InstrumentResolved,
-  //   direction?: DirectionEnum,
-  // ): string | null {
-  //   const instrumentType = currentInstrument?.instrumentType;
-
-  //   if (instrumentType !== undefined) {
-  //     if (
-  //       instrumentType === InstrumentTypeEnum.future &&
-  //       direction !== undefined
-  //     ) {
-  //       const instrumentTradeAmount = getFutureInstrumentTradeAmount(
-  //         currentPrice,
-  //         volume,
-  //         currentInstrument,
-  //         direction,
-  //       );
-  //       return dealTradeAmount(instrumentTradeAmount);
-  //     } else if (instrumentType === InstrumentTypeEnum.stock) {
-  //       return dealTradeAmount(currentPrice * volume);
-  //     }
-  //   } else {
-  //     return dealTradeAmount(currentPrice * volume);
-  //   }
-
-  //   return null;
-  // }
 
   const currentPrice = computed(() => {
     const { price_type, limit_price } = formState.value;
@@ -1865,13 +1798,10 @@ export const useMakeOrderInfo = (
   const currentTradeAmount = computed(() => {
     const { volume } = formState.value;
 
-    console.log(instrumentResolved.value, currentPrice.value, volume);
-
     if (instrumentResolved.value) {
       if (
         instrumentResolved.value.instrumentType === InstrumentTypeEnum.future
       ) {
-        console.log('future', currentFormDirection.value);
         if (currentFormDirection.value !== null) {
           return dealTradeAmount(
             TradeAmountUsageMap[InstrumentTypeEnum.future].getTradeAmount(
@@ -1885,7 +1815,6 @@ export const useMakeOrderInfo = (
       } else if (
         instrumentResolved.value.instrumentType === InstrumentTypeEnum.stock
       ) {
-        console.log('stock');
         return dealTradeAmount(
           TradeAmountUsageMap[InstrumentTypeEnum.stock].getTradeAmount(
             currentPrice.value,
@@ -1893,16 +1822,14 @@ export const useMakeOrderInfo = (
           ),
         );
       }
-    } else {
-      return dealTradeAmount(
-        TradeAmountUsageMap[InstrumentTypeEnum.unknown].getTradeAmount(
-          currentPrice.value,
-          volume,
-        ),
-      );
     }
 
-    return '--';
+    return dealTradeAmount(
+      TradeAmountUsageMap[InstrumentTypeEnum.unknown].getTradeAmount(
+        currentPrice.value,
+        volume,
+      ),
+    );
   });
 
   const currentResidueMoney = computed(() => {
