@@ -249,7 +249,8 @@ KF_DEFINE_PACK_TYPE(                                              //
 
     (double, long_margin_ratio),  // 多头保证金率
     (double, short_margin_ratio), // 空头保证金率
-    (double, conversion_rate)     // 担保品折扣率
+    (double, conversion_rate),    // 担保品折扣率
+    (double, exchange_rate)       // 汇率
 );
 
 KF_DEFINE_PACK_TYPE(                                         //

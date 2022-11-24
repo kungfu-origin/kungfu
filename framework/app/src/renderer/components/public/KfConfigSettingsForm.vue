@@ -221,7 +221,7 @@ function getInstrumentsSearchRelated(
       const {
         searchInstrumnetOptions,
         handleSearchInstrument,
-        handleSearchCustomInstrument,
+        handleSearchByCustom,
         updateSearchInstrumnetOptions,
       } = useInstruments();
 
@@ -235,10 +235,11 @@ function getInstrumentsSearchRelated(
         searchInstrumnetOptions,
         handleSearchInstrument: (val) => {
           if (instrumentKeys[key] === 'instrumentsCsv') {
-            handleSearchCustomInstrument(
-              val,
-              Object.values(instrumentsCsvData[key]) || [],
-            ).then((options) => {
+            handleSearchByCustom(val, {
+              customInstruments: Object.values(instrumentsCsvData[key]) || [],
+              customFilterCondition: (keywords, pos) =>
+                new RegExp(`${keywords}`, 'ig').test(pos.id),
+            }).then((options) => {
               instrumentOptionsReactiveData.data[key] = options;
             });
           } else {
