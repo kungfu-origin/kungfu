@@ -38,10 +38,10 @@ public:
 
   void apply_sell(Book_ptr &book, const Trade &trade) override {
     auto &position = book->get_position_for(trade);
-    //    if (position.volume + trade.volume > 0 && trade.price > 0) {
-    //      position.avg_open_price = (position.avg_open_price * position.volume + trade.price * trade.volume) /
-    //                                (double)(position.volume + trade.volume);
-    //    }
+    if (position.volume + trade.volume > 0 && trade.price > 0) {
+      position.avg_open_price = (position.avg_open_price * position.volume + trade.price * trade.volume) /
+                                (double)(position.volume + trade.volume);
+    }
     position.avg_open_price = 1;
     auto commission = calculate_commission(trade);
     auto tax = calculate_tax(trade);
