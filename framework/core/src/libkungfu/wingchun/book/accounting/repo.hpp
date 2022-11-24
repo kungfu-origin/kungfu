@@ -38,20 +38,21 @@ public:
 
   void apply_sell(Book_ptr &book, const Trade &trade) override {
     auto &position = book->get_position_for(trade);
-    if (position.volume + trade.volume > 0 && trade.price > 0) {
-      position.avg_open_price = (position.avg_open_price * position.volume + trade.price * trade.volume) /
-                                (double)(position.volume + trade.volume);
-    }
+    //    if (position.volume + trade.volume > 0 && trade.price > 0) {
+    //      position.avg_open_price = (position.avg_open_price * position.volume + trade.price * trade.volume) /
+    //                                (double)(position.volume + trade.volume);
+    //    }
+    position.avg_open_price = 1;
     auto commission = calculate_commission(trade);
     auto tax = calculate_tax(trade);
     auto days = get_repo_expire_days(trade.instrument_id);
-    auto profit = trade.volume / 100 / 360 * days;
+    //    auto profit = trade.volume / 100 / 360 * days;
 
     position.volume += trade.volume;
-    position.realized_pnl += profit;
+    //    position.realized_pnl += profit;
     update_position(book, position);
 
-    book->asset.realized_pnl += profit;
+    //    book->asset.realized_pnl += profit;
     book->asset.frozen_cash -= trade.volume;
     book->asset.avail -= commission + tax;
     book->asset.intraday_fee += commission + tax;
