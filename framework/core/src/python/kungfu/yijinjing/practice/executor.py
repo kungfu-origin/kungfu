@@ -209,32 +209,7 @@ class ExtensionExecutor:
     def run_trader(self):
         self.run_broker_vendor(wc.TraderVendor)
 
-    def load_runner(self, ctx):
-        if ctx.runner_name is not None:
-            # ctx.log.warn(f"sys.path: {sys.path}")
-            sys.path.append(ctx.extension_path)
-            # ctx.log.warn(f"sys.path: {sys.path}")
-            module = importlib.import_module(ctx.runner_name)
-            runner_vendor = getattr(module, "Runner")
-            runner = runner_vendor(
-                ctx.runtime_locator,
-                ctx.group,
-                ctx.name,
-                kfj.MODES[ctx.mode],
-                ctx.low_latency,
-            )
-            # runner.ctx = ctx
-            return runner
-        else:
-            return Runner(ctx, kfj.MODES[ctx.mode])
-
     def run_strategy(self):
-        # self.service_vendor = {
-        #     # "td": wc.TraderVendor,
-        #     # "md": wc.MarketDataVendor,
-        #     # "strategy": Strategy,
-        #     "runner": self.load_runner(ctx)
-        # }
         loader = self.loader
         if loader.extension_dir:
             site.setup(loader.extension_dir)
@@ -254,7 +229,7 @@ class ExtensionExecutor:
         )
         os.environ["KF_STG_GROUP"] = ctx.group
         os.environ["KF_STG_NAME"] = ctx.name
-        ctx.runner = self.load_runner(ctx)  # 先load runner才能识别出定制的Strategy
+        ctx.runner = load_runner(ctx)  # 先load runner才能识别出定制的Strategy
         if loader.config is None:
             load = False
             json_config = os.path.join(os.path.dirname(ctx.path), "package.json")
@@ -309,3 +284,23 @@ def try_load_cpp_strategy(ctx, path, key):
         ctx.logger.debug(f"fallback to python loader due to: {e}")
         ctx.path = os.path.join(os.path.dirname(path), key)
         return Strategy(ctx)
+
+
+def load_runner(ctx):
+    if ctx.service_vendor is not None:
+        # ctx.log.warn(f"sys.path: {sys.path}")
+        sys.path.append(ctx.extension_path)
+        # ctx.log.warn(f"sys.path: {sys.path}")
+        module = importlib.import_module(ctx.service_vendor)
+        runner_vendor = getattr(module, "Runner")
+        runner = runner_vendor(
+            ctx.runtime_locator,
+            ctx.group,
+            ctx.name,
+            kfj.MODES[ctx.mode],
+            ctx.low_latency,
+        )
+        # runner.ctx = ctx
+        return runner
+    else:
+        return Runner(ctx, kfj.MODES[ctx.mode])
