@@ -107,6 +107,8 @@ private:
 struct location : public std::enable_shared_from_this<location>, public longfist::types::Location {
   static constexpr uint32_t PUBLIC = 0;
   static constexpr uint32_t SYNC = 1;
+  static constexpr uint32_t EXTRA_JOURNAL_BEGIN = 100;
+  static constexpr uint32_t EXTRA_JOURNAL_END = 200;
 
   const locator_ptr locator;
   const std::string uname;

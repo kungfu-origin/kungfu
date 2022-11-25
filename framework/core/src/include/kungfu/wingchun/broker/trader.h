@@ -17,7 +17,7 @@ FORWARD_DECLARE_CLASS_PTR(Trader)
 
 class TraderVendor : public BrokerVendor {
 public:
-  TraderVendor(locator_ptr locator, const std::string &group, const std::string &name, bool low_latency);
+  TraderVendor(locator_ptr locator, const std::string &group, const std::string &name, bool low_latency, int extra_journal_num);
 
   void set_service(Trader_ptr service);
 

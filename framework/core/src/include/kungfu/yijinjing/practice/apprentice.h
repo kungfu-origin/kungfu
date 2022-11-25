@@ -28,7 +28,7 @@
 namespace kungfu::yijinjing::practice {
 class apprentice : public hero {
 public:
-  explicit apprentice(yijinjing::data::location_ptr home, bool low_latency = false);
+  explicit apprentice(yijinjing::data::location_ptr home, bool low_latency = false, int extra_journal_num = 0);
 
   bool is_started() const;
 
@@ -41,6 +41,8 @@ public:
   int64_t get_checkin_time() const;
 
   int64_t get_trading_day() const;
+
+  int32_t get_extra_journal_num() const;
 
   const cache::bank &get_state_bank() const;
 
@@ -185,6 +187,7 @@ private:
   int64_t checkin_time_ = INT64_MIN;
   int64_t trading_day_ = 0;
   int32_t timer_usage_count_ = 0;
+  int extra_journal_num_;
   std::unordered_map<int, int64_t> timer_checkpoints_ = {};
 
   void checkin();

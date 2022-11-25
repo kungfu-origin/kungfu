@@ -30,8 +30,9 @@ using namespace std::chrono;
 
 namespace kungfu::yijinjing::practice {
 
-apprentice::apprentice(location_ptr home, bool low_latency)
-    : hero(std::make_shared<io_device_client>(home, low_latency)), trading_day_(time::today_start()) {}
+apprentice::apprentice(location_ptr home, bool low_latency, int extra_journal_num)
+    : hero(std::make_shared<io_device_client>(home, low_latency)), trading_day_(time::today_start()),
+      extra_journal_num_(extra_journal_num) {}
 
 bool apprentice::is_started() const { return started_; }
 
@@ -44,6 +45,8 @@ int64_t apprentice::get_checkin_time() const { return checkin_time_; }
 int64_t apprentice::get_last_active_time() const { return last_active_time_; }
 
 int64_t apprentice::get_trading_day() const { return trading_day_; }
+
+int apprentice::get_extra_journal_num() const { return extra_journal_num_; }
 
 const cache::bank &apprentice::get_state_bank() const { return state_bank_; }
 
@@ -264,6 +267,7 @@ void apprentice::checkin() {
   data["name"] = home->name;
   data["location_uid"] = home->uid;
   data["pid"] = GETPID();
+  data["extra_journal_num"] = extra_journal_num_;
   data["checkin_time"] = now;
   data["last_active_time"] = now;
   request["data"] = data;

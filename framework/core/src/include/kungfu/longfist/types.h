@@ -127,6 +127,7 @@ KF_DEFINE_DATA_TYPE(                                //
     (enums::mode, mode),                            //
     (std::string, group),                           //
     (std::string, name),                            //
+    (int, extra_journal_num),                       // 额外journal
     (int32_t, pid),                                 //
     (int64_t, last_active_time),                    //
     (int64_t, checkin_time)                         //

@@ -22,7 +22,7 @@ public:
   typedef yijinjing::data::location_ptr location_ptr;
   typedef longfist::enums::BrokerState BrokerState;
 
-  BrokerVendor(location_ptr location, bool low_latency);
+  BrokerVendor(location_ptr location, bool low_latency, int extra_journal_num);
 
   void on_exit() override;
 
