@@ -1,5 +1,6 @@
 #include "py-wingchun.h"
 
+#include <kungfu/wingchun/service/bar.h>
 #include <kungfu/wingchun/service/ledger.h>
 
 using namespace kungfu::longfist::enums;
@@ -23,5 +24,9 @@ void bind_service(pybind11::module &m) {
       .def("now", &Ledger::now)
       .def("run", &Ledger::run)
       .def("on_exit", &Ledger::on_exit);
+
+  py::class_<BarGenerator, apprentice, std::shared_ptr<BarGenerator>>(m, "BarGenerator")
+      .def(py::init<locator_ptr, mode, bool, std::string &>())
+      .def("run", &service::BarGenerator::run);
 }
 } // namespace kungfu::wingchun::pybind

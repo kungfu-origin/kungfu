@@ -81,7 +81,7 @@ public:
 
 void bind_broker(pybind11::module &m) {
   py::class_<BrokerVendor, PyBrokerVendor, std::shared_ptr<BrokerVendor>>(m, "BrokerVendor")
-      .def(py::init<location_ptr, bool, int>())
+      .def(py::init<location_ptr, bool>())
       .def_property_readonly("home", &BrokerVendor::get_home)
       .def("run", &BrokerVendor::run);
 
@@ -129,11 +129,11 @@ void bind_broker(pybind11::module &m) {
       .def("req_history_trade", &Trader::req_history_trade);
 
   py::class_<MarketDataVendor, BrokerVendor, std::shared_ptr<MarketDataVendor>>(m, "MarketDataVendor")
-      .def(py::init<locator_ptr, const std::string &, const std::string &, bool, int>())
+      .def(py::init<locator_ptr, const std::string &, const std::string &, bool>())
       .def("set_service", &MarketDataVendor::set_service);
 
   py::class_<TraderVendor, BrokerVendor, std::shared_ptr<TraderVendor>>(m, "TraderVendor")
-      .def(py::init<locator_ptr, const std::string &, const std::string &, bool, int>())
+      .def(py::init<locator_ptr, const std::string &, const std::string &, bool>())
       .def("set_service", &TraderVendor::set_service);
 }
 } // namespace kungfu::wingchun::pybind

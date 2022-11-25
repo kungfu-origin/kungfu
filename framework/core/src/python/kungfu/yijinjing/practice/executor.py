@@ -193,7 +193,7 @@ class ExtensionExecutor:
         module = importlib.import_module(ctx.group)
         self.ctx.logger.info(f"loading {ctx.group} from {loader.extension_dir}")
         vendor = vendor_builder(
-            ctx.runtime_locator, ctx.group, ctx.name, ctx.low_latency, ctx.extra_journal_num
+            ctx.runtime_locator, ctx.group, ctx.name, ctx.low_latency
         )
         service_builder = getattr(module, ctx.category)
         self.ctx.logger.debug(f"loaded service builder")

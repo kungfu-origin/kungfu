@@ -17,8 +17,7 @@ using namespace kungfu::yijinjing::data;
 using namespace kungfu::yijinjing::journal;
 
 namespace kungfu::wingchun::broker {
-BrokerVendor::BrokerVendor(location_ptr location, bool low_latency, int extra_journal_num)
-    : apprentice(std::move(location), low_latency, extra_journal_num) {}
+BrokerVendor::BrokerVendor(location_ptr location, bool low_latency) : apprentice(std::move(location), low_latency) {}
 
 void BrokerVendor::on_start() {
   events_ | is(RequestWriteTo::tag, RequestReadFrom::tag, RequestReadFromPublic::tag, RequestReadFromSync::tag) |

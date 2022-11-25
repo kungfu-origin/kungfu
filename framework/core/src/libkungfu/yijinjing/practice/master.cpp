@@ -114,25 +114,19 @@ void master::register_app(const event_ptr &event) {
   register_location(event->gen_time(), register_data);
 
   writers_.emplace(app_location->uid, app_cmd_writer);
+  reader_->join(app_location, location::PUBLIC, now);
+  reader_->join(app_location, location::SYNC, now);
+  reader_->join(app_location, master_cmd_location->uid, now);
+
   session_builder_.open_session(app_location, event->gen_time());
   app_cmd_writer->mark(event->gen_time(), SessionStart::tag);
 
   public_writer->write(event->gen_time(), *std::dynamic_pointer_cast<Location>(app_location));
   public_writer->write(event->gen_time(), register_data);
 
-  reader_->join(app_location, location::PUBLIC, now);
-  reader_->join(app_location, location::SYNC, now);
-  reader_->join(app_location, master_cmd_location->uid, now);
   require_write_to(event->gen_time(), app_location->uid, location::PUBLIC);
   require_write_to(event->gen_time(), app_location->uid, location::SYNC);
   require_write_to(event->gen_time(), app_location->uid, master_cmd_location->uid);
-  if (register_data.extra_journal_num != 0) {
-    int extra_journal_num_resolved = std::max(register_data.extra_journal_num, (int)location::EXTRA_JOURNAL_END);
-    for (int i = 0; i < extra_journal_num_resolved; i++) {
-      reader_->join(app_location, location::EXTRA_JOURNAL_BEGIN + i, now);
-      require_write_to(event->gen_time(), app_location->uid, location::EXTRA_JOURNAL_BEGIN + i);
-    }
-  }
 
   write_time_reset(event->gen_time(), app_cmd_writer);
   write_trading_day(event->gen_time(), app_cmd_writer);
