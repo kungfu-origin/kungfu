@@ -156,6 +156,7 @@ void master::deregister_app(int64_t trigger_time, uint32_t app_location_uid) {
 void master::publish_trading_day() { write_trading_day(0, get_writer(location::PUBLIC)); }
 
 void master::react() {
+  events_ | is(RequestBuildTunnel::tag) | $$(on_request_build_tunnel(event));
   events_ | is(RequestWriteTo::tag) | $$(on_request_write_to(event));
   events_ | is(RequestReadFrom::tag) | $$(on_request_read_from(event));
   events_ | is(RequestReadFrom::tag) | $$(check_cached_ready_to_read(event));
@@ -243,6 +244,30 @@ void master::feed(const event_ptr &event) {
 }
 
 void master::pong(const event_ptr &event) { get_io_device()->get_publisher()->publish("{}"); }
+
+void master::on_request_build_tunnel(const event_ptr &event) {
+  const RequestBuildTunnel &request = event->data<RequestBuildTunnel>();
+  auto trigger_time = event->gen_time();
+  auto app_uid = event->source();
+  auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());
+  auto home = io_device->get_home();
+  auto target_location = location::make_shared(request, home->locator);
+  SPDLOG_INFO("on_request_build_tunnel for {} to {}", get_location_uname(app_uid), request.name);
+  if (not is_location_live(app_uid)) {
+    return;
+  }
+
+  try_add_location(event->gen_time(), target_location);
+  register_location(event->gen_time(), target_location->to<Register>());
+  reader_->join(get_location(app_uid), request.location_uid, trigger_time);
+  require_build_tunnel(trigger_time, app_uid, target_location);
+
+  Channel channel = {};
+  channel.source_id = app_uid;
+  channel.dest_id = target_location->location_uid;
+  register_channel(trigger_time, channel);
+  get_writer(location::PUBLIC)->write(trigger_time, channel);
+}
 
 void master::on_request_write_to(const event_ptr &event) {
   const RequestWriteTo &request = event->data<RequestWriteTo>();

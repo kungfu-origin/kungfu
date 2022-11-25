@@ -71,6 +71,12 @@ void apprentice::request_write_to(int64_t trigger_time, uint32_t dest_id) {
   }
 }
 
+void apprentice::request_build_tunnel(int64_t trigger_time, const location_ptr &location) {
+  if (get_io_device()->get_home()->mode == mode::LIVE) {
+    require_build_tunnel(trigger_time, master_cmd_location_->uid, location);
+  }
+}
+
 void apprentice::request_cached_reader_writer() {
   if (get_io_device()->get_home()->mode == mode::LIVE) {
     if (writers_.find(master_cmd_location_->uid) == writers_.end()) {

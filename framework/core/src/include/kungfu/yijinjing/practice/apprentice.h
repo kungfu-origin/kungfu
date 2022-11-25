@@ -52,6 +52,8 @@ public:
 
   void request_write_to(int64_t trigger_time, uint32_t dest_id);
 
+  void request_build_tunnel(int64_t trigger_time, const yijinjing::data::location_ptr& location);
+
   void request_cached_reader_writer();
 
   void request_cached(uint32_t source_id);

@@ -253,6 +253,14 @@ void hero::require_write_to(int64_t trigger_time, uint32_t source_id, uint32_t d
   writer->close_data();
 }
 
+void hero::require_build_tunnel(int64_t trigger_time, uint32_t source_id,
+                                const yijinjing::data::location_ptr &location) {
+  auto writer = get_writer(source_id);
+  RequestBuildTunnel msg = {};
+  location->to<RequestBuildTunnel>(msg);
+  writer->write(trigger_time, msg);
+}
+
 void hero::produce(const rx::subscriber<event_ptr> &sb) {
   try {
     do {

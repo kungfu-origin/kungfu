@@ -135,6 +135,8 @@ protected:
 
   void require_write_to(int64_t trigger_time, uint32_t source_id, uint32_t dest_id);
 
+  void require_build_tunnel(int64_t trigger_time, uint32_t source_id, const yijinjing::data::location_ptr &location);
+
   virtual void react() = 0;
 
   virtual void on_active() = 0;

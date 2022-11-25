@@ -71,6 +71,8 @@ private:
 
   void on_request_cached_done(const event_ptr &event);
 
+  void on_request_build_tunnel(const event_ptr& event);
+
   void on_request_write_to(const event_ptr &event);
 
   void on_request_read_from(const event_ptr &event);
