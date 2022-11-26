@@ -250,6 +250,8 @@ export default {
     no_empty: '下单量不可为空',
     total_order_amount: '总下单量',
     every_volume: '每次下单量',
+    add_csv: '添加 csv',
+    clear: '清除',
 
     fat_finger_buy_modal:
       '买入价格超出警戒线, 当前价格为 {price}, 警戒线为 {warningLine}, 当前乌龙指阈值为 {fatFinger}%',
@@ -259,7 +261,7 @@ export default {
       '下单量为 {volume}, 当前标的可平{direction}仓为 {closable_volume}, 超出数量为 {open_volume}\n点击 “超出部分反向开仓”, 将会 平{direction} {closable_volume}, 开{direction} {open_volume}\n点击“按原方案下单”, 将会继续平{direction} {volume}',
     start_process: '请先启动{process}交易进程',
     place_confirm: '下单确认',
-    close_all: '是否全部平仓?',
+    continue_close_rate: '超过平仓阈值 ({rate}%), 是否继续下单?',
     Continue: '继续下单',
     original_plan: '按原方案下单',
     beyond_to_open: '超出部分反向开仓',

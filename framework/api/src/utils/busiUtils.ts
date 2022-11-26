@@ -610,7 +610,7 @@ export const getKfExtensionLanguage = async () => {
         'en-US':
           langData['en-US'][config.key] ??
           (config.key[0].toUpperCase() + config.key.slice(1)).replace(
-            /(?<!^)([A-Z])/g,
+            /(?<!^)([A-Z])(?![A-Z])/g,
             ' $1',
           ),
       };
@@ -1776,10 +1776,10 @@ export const initFormStateByConfig = (
 };
 
 export const resolveInstrumentValue = (
-  type: 'instrument' | 'instruments',
+  type: 'instrument' | 'instruments' | 'instrumentsCsv',
   value: string | string[],
 ): string[] => {
-  if (type === 'instruments') {
+  if (type === 'instruments' || type === 'instrumentsCsv') {
     return (value || ['']) as string[];
   }
   if (type === 'instrument') {
