@@ -175,15 +175,6 @@ KF_DEFINE_PACK_TYPE(                                 //
     (uint32_t, dest_id)                              //
 );
 
-KF_DEFINE_DATA_TYPE(                                          //
-    RequestBuildTunnel, 10032, PK(location_uid), PERPETUAL(), //
-    (uint32_t, location_uid),                                 //
-    (enums::category, category),                              //
-    (enums::mode, mode),                                      //
-    (std::string, group),                                     //
-    (std::string, name)                                       //
-);
-
 KF_DEFINE_PACK_TYPE(                               //
     TradingDay, 10027, PK(timestamp), PERPETUAL(), //
     (int64_t, timestamp)                           //
@@ -199,6 +190,21 @@ KF_DEFINE_PACK_TYPE(                                            //
     ChannelRequest, 10029, PK(source_id, dest_id), PERPETUAL(), //
     (uint32_t, source_id),                                      //
     (uint32_t, dest_id)                                         //
+);
+
+KF_DEFINE_DATA_TYPE(                                          //
+    RequestWriteToPipe, 10032, PK(location_uid), PERPETUAL(), //
+    (uint32_t, location_uid),                                 //
+    (enums::category, category),                              //
+    (enums::mode, mode),                                      //
+    (std::string, group),                                     //
+    (std::string, name)                                       //
+);
+
+KF_DEFINE_PACK_TYPE(                                     //
+    Pipe, 10033, PK(source_id, dest_id), PERPETUAL(),    //
+    (uint32_t, source_id),                               //
+    (uint32_t, dest_id)                                  //
 );
 
 KF_DEFINE_PACK_TYPE(                                    //

@@ -140,6 +140,7 @@ bool Client::try_sync(int64_t trigger_time, const location_ptr &td_location) {
 
 void Client::on_start(const rx::connectable_observable<event_ptr> &events) {
   events | is(Register::tag) | $$(connect(event, event->data<Register>()));
+  events | is(Pipe::tag) | $$(connect(event, event->data<Pipe>()));
   events | is(BrokerStateUpdate::tag) | $$(update_broker_state(event, event->data<BrokerStateUpdate>()));
   events | is(Deregister::tag) | $$(update_broker_state(event, event->data<Deregister>()));
 }
@@ -166,6 +167,16 @@ void Client::connect(const event_ptr &event, const Register &register_data) {
     app_.request_read_from_public(app_.now(), app_location->uid, resume_time_point);
     SPDLOG_INFO("resume {} connection from {}", app_.get_location_uname(app_uid), time::strftime(resume_time_point));
   }
+}
+
+void Client::connect(const event& even_t, const Pipe& pipe) {
+  auto source_id = pipe.source_uid;
+  auto dest_id = pipe.dest_uid;
+  auto app_location = app_.get_location(source_id);
+  auto resume_time_point = now();
+
+
+
 }
 
 void Client::update_broker_state(const event_ptr &event, const BrokerStateUpdate &state) {

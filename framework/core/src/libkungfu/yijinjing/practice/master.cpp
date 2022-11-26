@@ -142,9 +142,11 @@ void master::register_app(const event_ptr &event) {
 void master::deregister_app(int64_t trigger_time, uint32_t app_location_uid) {
   auto location = get_location(app_location_uid);
   SPDLOG_INFO("app {} gone", location->uname);
+
   session_builder_.close_session(location, trigger_time);
   get_writer(app_location_uid)->mark(trigger_time, SessionEnd::tag);
   deregister_channel(app_location_uid);
+  deregister_pipe(app_location_uid);
   deregister_location(trigger_time, app_location_uid);
   registry_.erase(app_location_uid);
   reader_->disjoin(app_location_uid);
@@ -156,8 +158,8 @@ void master::deregister_app(int64_t trigger_time, uint32_t app_location_uid) {
 void master::publish_trading_day() { write_trading_day(0, get_writer(location::PUBLIC)); }
 
 void master::react() {
-  events_ | is(RequestBuildTunnel::tag) | $$(on_request_build_tunnel(event));
   events_ | is(RequestWriteTo::tag) | $$(on_request_write_to(event));
+  events_ | is(RequestWriteToPipe::tag) | $$(on_request_write_to_pipe(event));
   events_ | is(RequestReadFrom::tag) | $$(on_request_read_from(event));
   events_ | is(RequestReadFrom::tag) | $$(check_cached_ready_to_read(event));
   events_ | is(RequestReadFromPublic::tag) | $$(on_request_read_from_public(event));
@@ -245,28 +247,25 @@ void master::feed(const event_ptr &event) {
 
 void master::pong(const event_ptr &event) { get_io_device()->get_publisher()->publish("{}"); }
 
-void master::on_request_build_tunnel(const event_ptr &event) {
-  const RequestBuildTunnel &request = event->data<RequestBuildTunnel>();
+void master::on_request_write_to_pipe(const event_ptr &event) {
+  const RequestWriteToPipe &request = event->data<RequestWriteToPipe>();
   auto trigger_time = event->gen_time();
   auto app_uid = event->source();
   auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());
   auto home = io_device->get_home();
   auto target_location = location::make_shared(request, home->locator);
-  SPDLOG_INFO("on_request_build_tunnel for {} to {}", get_location_uname(app_uid), request.name);
-  if (not is_location_live(app_uid)) {
-    return;
-  }
-
-  try_add_location(event->gen_time(), target_location);
-  register_location(event->gen_time(), target_location->to<Register>());
+  SPDLOG_INFO("on_request_write_to_pipe for {} to {}", get_location_uname(app_uid), request.name);
+  try_add_location(trigger_time, target_location);
   reader_->join(get_location(app_uid), request.location_uid, trigger_time);
-  require_build_tunnel(trigger_time, app_uid, target_location);
+  require_write_to_pipe(trigger_time, app_uid, target_location);
+  auto app_cmd_writer = get_writer(event->source());
+  write_locations(event->gen_time(), app_cmd_writer);
 
-  Channel channel = {};
-  channel.source_id = app_uid;
-  channel.dest_id = target_location->location_uid;
-  register_channel(trigger_time, channel);
-  get_writer(location::PUBLIC)->write(trigger_time, channel);
+  Pipe pipe = {};
+  pipe.source_id = app_uid;
+  pipe.dest_id = target_location->location_uid;
+  register_pipe(trigger_time, pipe);
+  get_writer(location::PUBLIC)->write(trigger_time, pipe);
 }
 
 void master::on_request_write_to(const event_ptr &event) {
@@ -324,8 +323,10 @@ void master::on_request_cached_done(const event_ptr &event) {
   if (has_writer(app_uid)) {
     auto app_cmd_writer = get_writer(app_uid);
     app_cmd_writer->mark(now(), RequestStart::tag);
+    write_locations(event->gen_time(), app_cmd_writer);
     write_registries(event->gen_time(), app_cmd_writer);
     write_channels(event->gen_time(), app_cmd_writer);
+    write_pipes(event->gen_time(), app_cmd_writer);
   } else {
     SPDLOG_WARN("no writer {} {}", app_uid, get_location_uname(app_uid));
   }
@@ -388,6 +389,12 @@ void master::write_locations(int64_t trigger_time, const writer_ptr &writer) {
 
 void master::write_channels(int64_t trigger_time, const writer_ptr &writer) {
   for (const auto &item : channels_) {
+    writer->write(trigger_time, item.second);
+  }
+}
+
+void master::write_pipes(int64_t trigger_time, const writer_ptr &writer) {
+  for (const auto &item : pipes_) {
     writer->write(trigger_time, item.second);
   }
 }

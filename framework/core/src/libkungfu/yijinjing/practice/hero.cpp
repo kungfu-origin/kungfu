@@ -169,11 +169,11 @@ bool hero::check_location_live(uint32_t source_id, uint32_t dest_id) const {
   if (not check_location_exists(source_id, dest_id)) {
     return false;
   }
-  if (registry_.find(source_id) == registry_.end()) {
+  if (!is_location_live(source_id)) {
     SPDLOG_ERROR("{} is not live", get_location_uname(source_id));
     return false;
   }
-  if (registry_.find(dest_id) == registry_.end()) {
+  if (!is_location_live(dest_id)) {
     SPDLOG_ERROR("{} is not live", get_location_uname(dest_id));
     return false;
   }
@@ -231,6 +231,32 @@ void hero::deregister_channel(uint32_t source_location_uid) {
   }
 }
 
+void hero::register_pipe(int64_t trigger_time, const Pipe &pipe) {
+  uint64_t pipe_uid = make_chanel_hash(pipe.source_id, pipe.dest_id);
+  auto result = pipes_.try_emplace(pipe_uid, pipe);
+  if (result.second) {
+    auto source_uname = get_location_uname(pipe.source_id);
+    auto dest_uname = get_location_uname(pipe.dest_id);
+    SPDLOG_TRACE("pipe [{:08x}] {} -> {} up", pipe_uid, source_uname, dest_uname);
+  }
+}
+
+void hero::deregister_pipe(uint32_t source_location_uid) {
+  auto pipe_it = pipes_.begin();
+  while (pipe_it != pipes_.end()) {
+    if (pipe_it->second.source_id == source_location_uid) {
+      const auto &pipe_uid = pipe_it->first;
+      const auto &pipe = pipe_it->second;
+      auto source_uname = get_location_uname(pipe.source_id);
+      auto dest_uname = get_location_uname(pipe.dest_id);
+      SPDLOG_TRACE("pipe [{:08x}] {} -> {} down", pipe_uid, source_uname, dest_uname);
+      pipe_it = pipes_.erase(pipe_it);
+      continue;
+    }
+    pipe_it++;
+  }
+}
+
 void hero::require_read_from(int64_t trigger_time, uint32_t dest_id, uint32_t source_id, int64_t from_time) {
   do_require_read_from<RequestReadFrom>(get_writer(dest_id), trigger_time, dest_id, source_id, from_time);
 }
@@ -253,11 +279,11 @@ void hero::require_write_to(int64_t trigger_time, uint32_t source_id, uint32_t d
   writer->close_data();
 }
 
-void hero::require_build_tunnel(int64_t trigger_time, uint32_t source_id,
-                                const yijinjing::data::location_ptr &location) {
+void hero::require_write_to_pipe(int64_t trigger_time, uint32_t source_id,
+                                 const yijinjing::data::location_ptr &location) {
   auto writer = get_writer(source_id);
-  RequestBuildTunnel msg = {};
-  location->to<RequestBuildTunnel>(msg);
+  RequestWriteToPipe msg = {};
+  location->to<RequestWriteToPipe>(msg);
   writer->write(trigger_time, msg);
 }
 
