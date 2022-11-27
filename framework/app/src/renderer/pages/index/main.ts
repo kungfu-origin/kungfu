@@ -132,7 +132,7 @@ if (!booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED)) {
         globalBus.next({
           tag: 'processStatus',
           name: 'archive',
-          status: 'alive',
+          status: 'online',
         });
         await delayMilliSeconds(2000);
         globalBus.next({
