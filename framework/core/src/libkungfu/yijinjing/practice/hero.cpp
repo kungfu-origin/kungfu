@@ -284,7 +284,6 @@ void hero::require_write_to_pipe(int64_t trigger_time, uint32_t source_id,
   auto writer = get_writer(source_id);
   RequestWriteToPipe msg = {};
   location->to<RequestWriteToPipe>(msg);
-  SPDLOG_INFO("require_write_to_pipe: {}", msg.to_string());
   writer->write(trigger_time, msg);
 }
 

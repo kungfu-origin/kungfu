@@ -65,6 +65,13 @@ void apprentice::request_read_from_sync(int64_t trigger_time, uint32_t source_id
   }
 }
 
+void apprentice::request_read_from_source_to_dest(int64_t trigger_time, const location_ptr &source_location,
+                                                  uint32_t dest_id) {
+  if (get_io_device()->get_home()->mode == mode::LIVE) {
+    reader_->join(source_location, dest_id, trigger_time);
+  }
+}
+
 void apprentice::request_write_to(int64_t trigger_time, uint32_t dest_id) {
   if (get_io_device()->get_home()->mode == mode::LIVE) {
     require_write_to(trigger_time, master_cmd_location_->uid, dest_id);
@@ -253,7 +260,7 @@ void apprentice::on_write_to(const event_ptr &event) {
   }
 }
 
-void apprentice::on_write_to_pipe(const event_ptr& event) {
+void apprentice::on_write_to_pipe(const event_ptr &event) {
   auto dest_id = event->data<RequestWriteToPipe>().location_uid;
   if (writers_.find(dest_id) == writers_.end()) {
     writers_.emplace(dest_id, get_io_device()->open_writer(dest_id));

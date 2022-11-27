@@ -44,10 +44,10 @@ MarketDataXTP::~MarketDataXTP() {
 
 void MarketDataXTP::on_start() {
 
-  auto test_location_ptr =
-      location::make_shared(mode::LIVE, category::MD, "xtp", "test-pipe", get_vendor().get_locator());
-  get_vendor().request_write_to_pipe(now(), test_location_ptr);
-  test_pipe_uid_ = test_location_ptr->uid;
+  auto market_data_pipe_location =
+      location::make_shared(mode::LIVE, category::MD, "xtp", "market-data-pipe", get_vendor().get_locator());
+  get_vendor().request_write_to_pipe(now(), market_data_pipe_location);
+  market_data_pipe_uid_ = market_data_pipe_location->uid;
 
   MDConfiguration config = nlohmann::json::parse(get_config());
   if (config.client_id < 1 or config.client_id > 99) {
@@ -161,27 +161,27 @@ void MarketDataXTP::OnQueryAllTickers(XTPQSI *ticker_info, XTPRI *error_info, bo
     return;
   }
 
-  Instrument &instrument = get_writer(0)->open_data<Instrument>(0);
+  Instrument &instrument = get_writer(market_data_pipe_uid_)->open_data<Instrument>(0);
   from_xtp(ticker_info, instrument);
-  get_writer(0)->close_data();
+  get_writer(market_data_pipe_uid_)->close_data();
 }
 
 void MarketDataXTP::OnDepthMarketData(XTPMD *market_data, int64_t *bid1_qty, int32_t bid1_count, int32_t max_bid1_count,
                                       int64_t *ask1_qty, int32_t ask1_count, int32_t max_ask1_count) {
-  Quote &quote = get_writer(test_pipe_uid_)->open_data<Quote>(0);
+  Quote &quote = get_writer(market_data_pipe_uid_)->open_data<Quote>(0);
   from_xtp(*market_data, quote);
-  get_writer(test_pipe_uid_)->close_data();
+  get_writer(market_data_pipe_uid_)->close_data();
 }
 
 void MarketDataXTP::OnTickByTick(XTPTBT *tbt_data) {
   if (tbt_data->type == XTP_TBT_ENTRUST) {
-    Entrust &entrust = get_writer(test_pipe_uid_)->open_data<Entrust>(0);
+    Entrust &entrust = get_writer(market_data_pipe_uid_)->open_data<Entrust>(0);
     from_xtp(*tbt_data, entrust);
-    get_writer(test_pipe_uid_)->close_data();
+    get_writer(market_data_pipe_uid_)->close_data();
   } else if (tbt_data->type == XTP_TBT_TRADE) {
-    Transaction &transaction = get_writer(test_pipe_uid_)->open_data<Transaction>(0);
+    Transaction &transaction = get_writer(market_data_pipe_uid_)->open_data<Transaction>(0);
     from_xtp(*tbt_data, transaction);
-    get_writer(test_pipe_uid_)->close_data();
+    get_writer(market_data_pipe_uid_)->close_data();
   }
 }
 
@@ -196,7 +196,7 @@ void MarketDataXTP::OnQueryAllTickersFullInfo(XTPQFI *ticker_info, XTPRI *error_
     return;
   }
 
-  Instrument &instrument = get_writer(0)->open_data<Instrument>(0);
+  Instrument &instrument = get_writer(market_data_pipe_uid_)->open_data<Instrument>(0);
   strcpy(instrument.instrument_id, ticker_info->ticker);
   if (ticker_info->exchange_id == 1) {
     instrument.exchange_id = EXCHANGE_SSE;
@@ -205,6 +205,6 @@ void MarketDataXTP::OnQueryAllTickersFullInfo(XTPQFI *ticker_info, XTPRI *error_
   }
   memcpy(instrument.product_id, ticker_info->ticker_name, PRODUCT_ID_LEN);
   instrument.instrument_type = get_instrument_type(instrument.exchange_id, instrument.instrument_id);
-  get_writer(0)->close_data();
+  get_writer(market_data_pipe_uid_)->close_data();
 }
 } // namespace kungfu::wingchun::xtp

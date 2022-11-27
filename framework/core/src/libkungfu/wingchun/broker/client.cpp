@@ -170,15 +170,13 @@ void Client::connect(const event_ptr &event, const Register &register_data) {
 }
 
 void Client::connect(const event_ptr &event, const Pipe &pipe) {
-  SPDLOG_INFO(11111);
   auto source_id = pipe.source_id;
   auto dest_id = pipe.dest_id;
   auto source_location = app_.get_location(source_id);
-  SPDLOG_INFO(123123);
   SPDLOG_INFO("resume pipe from source {} {} to dest {} {}", source_id, app_.get_location_uname(source_id), dest_id,
               app_.get_location_uname(dest_id));
   if (source_location->category == category::MD and should_connect_md(source_location)) {
-    app_.get_reader()->join(source_location, dest_id, app_.now());
+    app_.request_read_from_source_to_dest(event->gen_time(), source_location, dest_id);
   }
 }
 
@@ -200,14 +198,12 @@ void Client::update_broker_state(const event_ptr &event, const BrokerStateUpdate
       SPDLOG_INFO("{} reset, state {}", broker_location->uname, (int)state_value);
     }
   };
-
   if (broker_location->category == category::MD) {
     switch_broker_state(category::MD, ready_md_locations_, [&]() { renew(event->gen_time(), broker_location); });
   }
   if (broker_location->category == category::TD) {
     switch_broker_state(category::TD, ready_td_locations_, [&]() { sync(event->gen_time(), broker_location); });
   }
-
   broker_states_.emplace(broker_location->uid, state_value);
 }
 
@@ -249,7 +245,7 @@ SilentAutoClient::SilentAutoClient(practice::apprentice &app) : AutoClient(app) 
 //   return false;
 // }
 
-void SilentAutoClient::renew(int64_t trigger_time, const location_ptr &md_location) {}
+void SilentAutoClient::renew(int64_t trigger_time, const location_ptr &md_location){};
 
 void SilentAutoClient::sync(int64_t trigger_time, const location_ptr &td_location) {}
 

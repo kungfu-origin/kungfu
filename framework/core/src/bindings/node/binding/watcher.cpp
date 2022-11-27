@@ -439,11 +439,17 @@ Napi::Value Watcher::Start(const Napi::CallbackInfo &info) {
 }
 
 Napi::Value Watcher::Sync(const Napi::CallbackInfo &info) {
+  SPDLOG_INFO(1111);
   SyncEventCache();
+  SPDLOG_INFO(2222);
   SyncLedger();
+  SPDLOG_INFO(3333);
   SyncOrder();
+  SPDLOG_INFO(4444);
   SyncAppStates();
+  SPDLOG_INFO(5555);
   SyncStrategyStates();
+  SPDLOG_INFO(6666);
   return {};
 }
 

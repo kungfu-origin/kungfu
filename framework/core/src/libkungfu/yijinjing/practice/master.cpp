@@ -249,18 +249,15 @@ void master::pong(const event_ptr &event) { get_io_device()->get_publisher()->pu
 
 void master::on_request_write_to_pipe(const event_ptr &event) {
   const RequestWriteToPipe &request = event->data<RequestWriteToPipe>();
-  SPDLOG_INFO("on_request_write_to_pipe {}", request.to_string());
   auto trigger_time = event->gen_time();
   auto app_uid = event->source();
   auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());
   auto home = io_device->get_home();
   auto target_location = location::make_shared(request, home->locator);
   SPDLOG_INFO("on_request_write_to_pipe for {} to {}", get_location_uname(app_uid), request.name);
-  try_add_location(trigger_time, target_location);
   reader_->join(get_location(app_uid), request.location_uid, trigger_time);
   require_write_to_pipe(trigger_time, app_uid, target_location);
-  auto app_cmd_writer = get_writer(event->source());
-  write_locations(event->gen_time(), app_cmd_writer);
+  auto app_cmd_writer = get_writer(app_uid);
 
   Pipe pipe = {};
   pipe.source_id = app_uid;

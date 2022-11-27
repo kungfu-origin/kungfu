@@ -116,28 +116,32 @@
             "name": "account_id",
             "type": "str",
             "required": true,
-            "tip": "请填写账户, 例如:1504091"
+            "tip": "请填写账户, 例如: 15011218",
+            "default": "15011218"
           },
           {
             "key": "password",
             "name": "password",
             "type": "password",
             "required": true,
-            "tip": "请填写密码, 例如:123456"
+            "tip": "请填写密码, 例如: PsVqy99v",
+            "default": "PsVqy99v"
           },
           {
             "key": "md_ip",
             "name": "md_ip",
             "type": "str",
             "required": true,
-            "tip": "请填写行情IP, 例如:61.152.102.110"
+            "tip": "请填写行情IP, 例如: 119.3.103.38",
+            "default": "119.3.103.38"
           },
           {
             "key": "md_port",
             "name": "md_port",
             "type": "int",
             "required": true,
-            "tip": "请填写行情端口, 例如:8602"
+            "tip": "请填写行情端口, 例如:6002",
+            "default": 6002
           },
           {
             "key": "protocol",
@@ -168,7 +172,8 @@
             "name": "client_id",
             "type": "int",
             "required": true,
-            "tip": "请填写自定义多点登录ID 1-99整数,不同节点之间不要重复"
+            "tip": "请填写自定义多点登录ID 1-99整数,不同节点之间不要重复",
+            "default": 23
           }
         ]
       }
