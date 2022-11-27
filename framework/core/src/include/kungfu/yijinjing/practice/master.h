@@ -71,6 +71,8 @@ private:
 
   void on_request_cached_done(const event_ptr &event);
 
+  void on_request_write_to_pipe(const event_ptr &event);
+
   void on_request_write_to(const event_ptr &event);
 
   void on_request_read_from(const event_ptr &event);
@@ -94,6 +96,8 @@ private:
   void write_registries(int64_t trigger_time, const journal::writer_ptr &writer);
 
   void write_channels(int64_t trigger_time, const journal::writer_ptr &writer);
+
+  void write_pipes(int64_t trigger_time, const journal::writer_ptr &writer);
 };
 } // namespace kungfu::yijinjing::practice
 #endif // KUNGFU_MASTER_H

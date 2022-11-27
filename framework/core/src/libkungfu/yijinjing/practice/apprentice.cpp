@@ -65,9 +65,22 @@ void apprentice::request_read_from_sync(int64_t trigger_time, uint32_t source_id
   }
 }
 
+void apprentice::request_read_from_source_to_dest(int64_t trigger_time, const location_ptr &source_location,
+                                                  uint32_t dest_id) {
+  if (get_io_device()->get_home()->mode == mode::LIVE) {
+    reader_->join(source_location, dest_id, trigger_time);
+  }
+}
+
 void apprentice::request_write_to(int64_t trigger_time, uint32_t dest_id) {
   if (get_io_device()->get_home()->mode == mode::LIVE) {
     require_write_to(trigger_time, master_cmd_location_->uid, dest_id);
+  }
+}
+
+void apprentice::request_write_to_pipe(int64_t trigger_time, const location_ptr &location) {
+  if (get_io_device()->get_home()->mode == mode::LIVE) {
+    require_write_to_pipe(trigger_time, master_cmd_location_->uid, location);
   }
 }
 
@@ -145,6 +158,7 @@ void apprentice::react() {
   events_ | is(RequestReadFromPublic::tag) | $$(on_read_from_public(event));
   events_ | is(RequestReadFromSync::tag) | $$(on_read_from_sync(event));
   events_ | is(RequestWriteTo::tag) | $$(on_write_to(event));
+  events_ | is(RequestWriteToPipe::tag) | $$(on_write_to_pipe(event));
   events_ | is(Channel::tag) | $$(register_channel(event->gen_time(), event->data<Channel>()));
   events_ | is(TradingDay::tag) | $$(on_trading_day(event, event->data<TradingDay>().timestamp));
   events_ | is(RequestStop::tag) | to(get_home_uid()) | $$(signal_stop());
@@ -229,6 +243,7 @@ void apprentice::on_deregister(const event_ptr &event) {
 
   reader_->disjoin(location_uid);
   deregister_channel(location_uid);
+  deregister_pipe(location_uid);
   deregister_location(event->trigger_time(), location_uid);
 }
 
@@ -240,6 +255,13 @@ void apprentice::on_read_from_sync(const event_ptr &event) { do_read_from<Reques
 
 void apprentice::on_write_to(const event_ptr &event) {
   auto dest_id = event->data<RequestWriteTo>().dest_id;
+  if (writers_.find(dest_id) == writers_.end()) {
+    writers_.emplace(dest_id, get_io_device()->open_writer(dest_id));
+  }
+}
+
+void apprentice::on_write_to_pipe(const event_ptr &event) {
+  auto dest_id = event->data<RequestWriteToPipe>().location_uid;
   if (writers_.find(dest_id) == writers_.end()) {
     writers_.emplace(dest_id, get_io_device()->open_writer(dest_id));
   }

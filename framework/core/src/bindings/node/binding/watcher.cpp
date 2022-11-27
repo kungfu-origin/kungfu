@@ -86,9 +86,19 @@ void WatcherAutoClient::connect(const event_ptr &event, const longfist::types::R
       SPDLOG_INFO("resume {} connection from {}", app_.get_location_uname(app_uid), time::strftime(resume_time_point));
     }
     return;
-  };
+  }
 
   wingchun::broker::SilentAutoClient::connect(event, register_data);
+}
+
+void WatcherAutoClient::connect(const event_ptr &event, const longfist::types::Pipe &pipe) {
+  // TODO:
+  // if (bypass_trading_data_) {
+  //   return;
+  // }
+
+  // wingchun::broker::SilentAutoClient::connect(event, pipe);
+  return;
 }
 
 Watcher::Watcher(const Napi::CallbackInfo &info)

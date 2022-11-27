@@ -88,7 +88,7 @@ private:
 };
 
 inline static uint32_t find_page_size(const data::location_ptr &location, uint32_t dest_id) {
-  if (location->category == longfist::enums::category::MD && dest_id == 0) {
+  if (location->category == longfist::enums::category::MD && dest_id != 1) {
     return 128 * MB;
   }
   if ((location->category == longfist::enums::category::TD ||
