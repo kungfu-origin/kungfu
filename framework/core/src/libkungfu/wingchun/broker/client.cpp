@@ -169,14 +169,17 @@ void Client::connect(const event_ptr &event, const Register &register_data) {
   }
 }
 
-void Client::connect(const event& even_t, const Pipe& pipe) {
-  auto source_id = pipe.source_uid;
-  auto dest_id = pipe.dest_uid;
-  auto app_location = app_.get_location(source_id);
-  auto resume_time_point = now();
-
-
-
+void Client::connect(const event_ptr &event, const Pipe &pipe) {
+  SPDLOG_INFO(11111);
+  auto source_id = pipe.source_id;
+  auto dest_id = pipe.dest_id;
+  auto source_location = app_.get_location(source_id);
+  SPDLOG_INFO(123123);
+  SPDLOG_INFO("resume pipe from source {} {} to dest {} {}", source_id, app_.get_location_uname(source_id), dest_id,
+              app_.get_location_uname(dest_id));
+  if (source_location->category == category::MD and should_connect_md(source_location)) {
+    app_.get_reader()->join(source_location, dest_id, app_.now());
+  }
 }
 
 void Client::update_broker_state(const event_ptr &event, const BrokerStateUpdate &state) {

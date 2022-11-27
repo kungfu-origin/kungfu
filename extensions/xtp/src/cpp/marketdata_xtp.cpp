@@ -5,6 +5,9 @@
 #include "marketdata_xtp.h"
 #include "type_convert.h"
 
+using namespace kungfu::yijinjing;
+using namespace kungfu::yijinjing::data;
+
 namespace kungfu::wingchun::xtp {
 struct MDConfiguration {
   int client_id;
@@ -40,6 +43,12 @@ MarketDataXTP::~MarketDataXTP() {
 }
 
 void MarketDataXTP::on_start() {
+
+  auto test_location_ptr =
+      location::make_shared(mode::LIVE, category::MD, "xtp", "test-pipe", get_vendor().get_locator());
+  get_vendor().request_write_to_pipe(now(), test_location_ptr);
+  test_pipe_uid_ = test_location_ptr->uid;
+
   MDConfiguration config = nlohmann::json::parse(get_config());
   if (config.client_id < 1 or config.client_id > 99) {
     throw wingchun_error("client_id must between 1 and 99");
@@ -159,20 +168,20 @@ void MarketDataXTP::OnQueryAllTickers(XTPQSI *ticker_info, XTPRI *error_info, bo
 
 void MarketDataXTP::OnDepthMarketData(XTPMD *market_data, int64_t *bid1_qty, int32_t bid1_count, int32_t max_bid1_count,
                                       int64_t *ask1_qty, int32_t ask1_count, int32_t max_ask1_count) {
-  Quote &quote = get_writer(0)->open_data<Quote>(0);
+  Quote &quote = get_writer(test_pipe_uid_)->open_data<Quote>(0);
   from_xtp(*market_data, quote);
-  get_writer(0)->close_data();
+  get_writer(test_pipe_uid_)->close_data();
 }
 
 void MarketDataXTP::OnTickByTick(XTPTBT *tbt_data) {
   if (tbt_data->type == XTP_TBT_ENTRUST) {
-    Entrust &entrust = get_writer(0)->open_data<Entrust>(0);
+    Entrust &entrust = get_writer(test_pipe_uid_)->open_data<Entrust>(0);
     from_xtp(*tbt_data, entrust);
-    get_writer(0)->close_data();
+    get_writer(test_pipe_uid_)->close_data();
   } else if (tbt_data->type == XTP_TBT_TRADE) {
-    Transaction &transaction = get_writer(0)->open_data<Transaction>(0);
+    Transaction &transaction = get_writer(test_pipe_uid_)->open_data<Transaction>(0);
     from_xtp(*tbt_data, transaction);
-    get_writer(0)->close_data();
+    get_writer(test_pipe_uid_)->close_data();
   }
 }
 

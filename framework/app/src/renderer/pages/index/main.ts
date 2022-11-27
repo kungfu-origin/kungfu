@@ -129,7 +129,6 @@ if (!booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED)) {
   preStartAll()
     .then(async () => {
       if (__BYPASS_ARCHIVE__) {
-        console.log(startArchiveMakeTask);
         globalBus.next({
           tag: 'processStatus',
           name: 'archive',

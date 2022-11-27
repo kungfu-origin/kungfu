@@ -249,6 +249,7 @@ void master::pong(const event_ptr &event) { get_io_device()->get_publisher()->pu
 
 void master::on_request_write_to_pipe(const event_ptr &event) {
   const RequestWriteToPipe &request = event->data<RequestWriteToPipe>();
+  SPDLOG_INFO("on_request_write_to_pipe {}", request.to_string());
   auto trigger_time = event->gen_time();
   auto app_uid = event->source();
   auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());

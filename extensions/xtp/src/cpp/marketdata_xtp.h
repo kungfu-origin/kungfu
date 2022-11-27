@@ -6,6 +6,7 @@
 #define KUNGFU_XTP_EXT_MARKET_DATA_H
 
 #include <kungfu/wingchun/broker/marketdata.h>
+#include <kungfu/yijinjing/common.h>
 #include <xtp_quote_api.h>
 
 namespace kungfu::wingchun::xtp {
@@ -223,6 +224,7 @@ protected:
 
 private:
   XTP::API::QuoteApi *api_{};
+  uint32_t test_pipe_uid_;
 
   bool subscribe(const std::vector<std::string> &instruments, const std::string &exchange_id);
 };
