@@ -287,11 +287,11 @@ def try_load_cpp_strategy(ctx, path, key):
 
 
 def load_runner(ctx):
-    if ctx.service_vendor is not None:
+    if ctx.vendor is not None:
         # ctx.log.warn(f"sys.path: {sys.path}")
         sys.path.append(ctx.extension_path)
         # ctx.log.warn(f"sys.path: {sys.path}")
-        module = importlib.import_module(ctx.service_vendor)
+        module = importlib.import_module(ctx.vendor)
         runner_vendor = getattr(module, "Runner")
         runner = runner_vendor(
             ctx.runtime_locator,

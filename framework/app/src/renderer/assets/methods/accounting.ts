@@ -2,6 +2,7 @@ import {
   DirectionEnum,
   InstrumentTypeEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
+import { hashInstrumentUKey } from '@kungfu-trader/kungfu-js-api/kungfu';
 
 class BaseTradeAmountUsage {
   constructor() {
@@ -14,10 +15,8 @@ class BaseTradeAmountUsage {
   }
 
   getInstrumentInWathcer(exchangeId: string, instrumentId: string) {
-    const instrumentKey = window.watcher.getInstrumentUID(
-      exchangeId,
-      instrumentId,
-    );
+    const instrumentKey = hashInstrumentUKey(instrumentId, exchangeId);
+
     const instrument = window.watcher.ledger.Instrument[
       instrumentKey
     ] as KungfuApi.Instrument | null;
