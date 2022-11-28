@@ -31,9 +31,7 @@ service_command_context = kfc.pass_context("low_latency")
 @click.option("-a", "--arguments", type=str, required=False)
 @click.option("-v", "--vendor", type=str, required=False)
 @kfc.pass_context()
-def run(
-    ctx, mode, category, group, name, low_latency, reference, arguments, vendor
-):
+def run(ctx, mode, category, group, name, low_latency, reference, arguments, vendor):
     ctx.mode = mode
     ctx.category = category
     ctx.group = group
