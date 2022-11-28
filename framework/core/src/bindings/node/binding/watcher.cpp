@@ -199,6 +199,7 @@ Napi::Value Watcher::GetLocationUID(const Napi::CallbackInfo &info) {
   return Napi::Number::New(info.Env(), target_location->uid);
 }
 
+// TODO: 返回十进制，但需要16进制
 Napi::Value Watcher::GetInstrumentUID(const Napi::CallbackInfo &info) {
   auto exchange_id = info[0].ToString().Utf8Value();
   auto instrument_id = info[1].ToString().Utf8Value();
@@ -337,7 +338,6 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
                       InstanceMethod("hasLocation", &Watcher::HasLocation),                             //
                       InstanceMethod("getLocation", &Watcher::GetLocation),                             //
                       InstanceMethod("getLocationUID", &Watcher::GetLocationUID),                       //
-                      InstanceMethod("getInstrumentUID", &Watcher::GetInstrumentUID),                   //
                       InstanceMethod("getInstrumentType", &Watcher::GetInstrumentType),                 //
                       InstanceMethod("publishState", &Watcher::PublishState),                           //
                       InstanceMethod("isReadyToInteract", &Watcher::IsReadyToInteract),                 //
