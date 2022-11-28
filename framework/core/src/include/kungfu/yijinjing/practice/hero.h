@@ -97,6 +97,7 @@ protected:
   int64_t end_time_;
   yijinjing::journal::reader_ptr reader_;
   std::unordered_map<uint32_t, yijinjing::journal::writer_ptr> writers_ = {};
+  std::unordered_map<uint32_t, longfist::types::Pipe> pipes_ = {};
   std::unordered_map<uint64_t, longfist::types::Channel> channels_ = {};
   std::unordered_map<uint32_t, yijinjing::data::location_ptr> locations_ = {};
   std::unordered_map<uint32_t, longfist::types::Register> registry_ = {};
@@ -127,6 +128,10 @@ protected:
 
   void deregister_channel(uint32_t source_location_uid);
 
+  void register_pipe(int64_t trigger_time, const longfist::types::Pipe &pipe);
+
+  void deregister_pipe(uint32_t source_location_uid);
+
   void require_read_from(int64_t trigger_time, uint32_t dest_id, uint32_t source_id, int64_t from_time);
 
   void require_read_from_public(int64_t trigger_time, uint32_t dest_id, uint32_t source_id, int64_t from_time);
@@ -134,6 +139,8 @@ protected:
   void require_read_from_sync(int64_t trigger_time, uint32_t dest_id, uint32_t source_id, int64_t from_time);
 
   void require_write_to(int64_t trigger_time, uint32_t source_id, uint32_t dest_id);
+
+  void require_write_to_pipe(int64_t trigger_time, uint32_t source_id, const yijinjing::data::location_ptr &location);
 
   virtual void react() = 0;
 

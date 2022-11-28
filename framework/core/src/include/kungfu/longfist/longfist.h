@@ -54,6 +54,8 @@ constexpr auto AllTypes = boost::hana::make_map( //
     TYPE_PAIR(RequestReadFromPublic),            //
     TYPE_PAIR(RequestReadFromSync),              //
     TYPE_PAIR(RequestWriteTo),                   //
+    TYPE_PAIR(RequestWriteToPipe),               //
+    TYPE_PAIR(Pipe),                             //
     TYPE_PAIR(TradingDay),                       //
     TYPE_PAIR(Channel),                          //
     TYPE_PAIR(ChannelRequest),                   //
@@ -101,6 +103,8 @@ constexpr auto AllDataTypes = boost::hana::make_map( //
     TYPE_PAIR(RequestReadFromPublic),                //
     TYPE_PAIR(RequestReadFromSync),                  //
     TYPE_PAIR(RequestWriteTo),                       //
+    TYPE_PAIR(RequestWriteToPipe),                   //
+    TYPE_PAIR(Pipe),                                 //
     TYPE_PAIR(TradingDay),                           //
     TYPE_PAIR(Channel),                              //
     TYPE_PAIR(ChannelRequest),                       //

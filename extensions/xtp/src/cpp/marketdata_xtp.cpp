@@ -5,6 +5,9 @@
 #include "marketdata_xtp.h"
 #include "type_convert.h"
 
+using namespace kungfu::yijinjing;
+using namespace kungfu::yijinjing::data;
+
 namespace kungfu::wingchun::xtp {
 struct MDConfiguration {
   int client_id;
@@ -40,6 +43,12 @@ MarketDataXTP::~MarketDataXTP() {
 }
 
 void MarketDataXTP::on_start() {
+
+  auto market_data_pipe_location =
+      location::make_shared(mode::LIVE, category::MD, "xtp", "market-data-pipe", get_vendor().get_locator());
+  get_vendor().request_write_to_pipe(now(), market_data_pipe_location);
+  market_data_pipe_uid_ = market_data_pipe_location->uid;
+
   MDConfiguration config = nlohmann::json::parse(get_config());
   if (config.client_id < 1 or config.client_id > 99) {
     throw wingchun_error("client_id must between 1 and 99");
