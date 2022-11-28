@@ -28,6 +28,7 @@ public:
   ~WatcherAutoClient() = default;
 
   void connect(const event_ptr &event, const longfist::types::Register &register_data) override;
+  void connect(const event_ptr &event, const longfist::types::Pipe &pipe) override;
 
 private:
   bool bypass_trading_data_;
@@ -272,7 +273,7 @@ private:
     while (iter != target_map.end() and target_map.size() > 0) {
       auto &state = iter->second;
       update_ledger(state.update_time, state.source, state.dest, state.data);
-      iter = target_map.erase(iter);
+      iter = target_map.erase(iter); // TODO: erase will trigger segmenation violation, when accepting pipe data;
     }
   }
 

@@ -87,7 +87,7 @@ public:
 
   void request_deregister() { vendor_.request_deregister(); }
 
-  BrokerVendor &get_vender() { return vendor_; }
+  BrokerVendor &get_vendor() { return vendor_; }
 
 protected:
   volatile BrokerState state_;
