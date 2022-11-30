@@ -91,13 +91,13 @@ void WatcherAutoClient::connect(const event_ptr &event, const longfist::types::R
   wingchun::broker::SilentAutoClient::connect(event, register_data);
 }
 
-void WatcherAutoClient::connect(const event_ptr &event, const longfist::types::Pipe &pipe) {
+void WatcherAutoClient::connect(const event_ptr &event, const longfist::types::Band &band) {
   // TODO:
   // if (bypass_trading_data_) {
   //   return;
   // }
 
-  // wingchun::broker::SilentAutoClient::connect(event, pipe);
+  // wingchun::broker::SilentAutoClient::connect(event, band);
   return;
 }
 

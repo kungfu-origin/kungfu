@@ -231,29 +231,29 @@ void hero::deregister_channel(uint32_t source_location_uid) {
   }
 }
 
-void hero::register_pipe(int64_t trigger_time, const Pipe &pipe) {
-  uint64_t pipe_uid = make_chanel_hash(pipe.source_id, pipe.dest_id);
-  auto result = pipes_.try_emplace(pipe_uid, pipe);
+void hero::register_band(int64_t trigger_time, const Band &band) {
+  uint64_t band_uid = make_chanel_hash(band.source_id, band.dest_id);
+  auto result = bands_.try_emplace(band_uid, band);
   if (result.second) {
-    auto source_uname = get_location_uname(pipe.source_id);
-    auto dest_uname = get_location_uname(pipe.dest_id);
-    SPDLOG_TRACE("pipe [{:08x}] {} -> {} up", pipe_uid, source_uname, dest_uname);
+    auto source_uname = get_location_uname(band.source_id);
+    auto dest_uname = get_location_uname(band.dest_id);
+    SPDLOG_TRACE("band [{:08x}] {} -> {} up", band_uid, source_uname, dest_uname);
   }
 }
 
-void hero::deregister_pipe(uint32_t source_location_uid) {
-  auto pipe_it = pipes_.begin();
-  while (pipe_it != pipes_.end()) {
-    if (pipe_it->second.source_id == source_location_uid) {
-      const auto &pipe_uid = pipe_it->first;
-      const auto &pipe = pipe_it->second;
-      auto source_uname = get_location_uname(pipe.source_id);
-      auto dest_uname = get_location_uname(pipe.dest_id);
-      SPDLOG_TRACE("pipe [{:08x}] {} -> {} down", pipe_uid, source_uname, dest_uname);
-      pipe_it = pipes_.erase(pipe_it);
+void hero::deregister_band(uint32_t source_location_uid) {
+  auto band_it = bands_.begin();
+  while (band_it != bands_.end()) {
+    if (band_it->second.source_id == source_location_uid) {
+      const auto &band_uid = band_it->first;
+      const auto &band = band_it->second;
+      auto source_uname = get_location_uname(band.source_id);
+      auto dest_uname = get_location_uname(band.dest_id);
+      SPDLOG_TRACE("band [{:08x}] {} -> {} down", band_uid, source_uname, dest_uname);
+      band_it = bands_.erase(band_it);
       continue;
     }
-    pipe_it++;
+    band_it++;
   }
 }
 
@@ -279,11 +279,11 @@ void hero::require_write_to(int64_t trigger_time, uint32_t source_id, uint32_t d
   writer->close_data();
 }
 
-void hero::require_write_to_pipe(int64_t trigger_time, uint32_t source_id,
+void hero::require_write_to_band(int64_t trigger_time, uint32_t source_id,
                                  const yijinjing::data::location_ptr &location) {
   auto writer = get_writer(source_id);
-  RequestWriteToPipe msg = {};
-  location->to<RequestWriteToPipe>(msg);
+  RequestWriteToBand msg = {};
+  location->to<RequestWriteToBand>(msg);
   writer->write(trigger_time, msg);
 }
 

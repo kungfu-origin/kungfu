@@ -55,7 +55,9 @@ public:
 
   void request_write_to(int64_t trigger_time, uint32_t dest_id);
 
-  void request_write_to_pipe(int64_t trigger_time, const yijinjing::data::location_ptr &location);
+  void request_write_to_band(int64_t trigger_time, const yijinjing::data::location_ptr &location);
+
+  uint32_t request_band(const std::string &band_name);
 
   void request_cached_reader_writer();
 
@@ -97,7 +99,7 @@ protected:
 
   void on_write_to(const event_ptr &event);
 
-  void on_write_to_pipe(const event_ptr &event);
+  void on_write_to_band(const event_ptr &event);
 
   std::function<rx::observable<event_ptr>(rx::observable<event_ptr>)> timer(int64_t nanotime) {
     auto writer = get_writer(master_cmd_location_->uid);
