@@ -142,11 +142,6 @@ public:
     return const_cast<T &>(frame->template data<T>());
   }
 
-  template <typename T> std::enable_if_t<size_fixed_v<T>, T &> open_data(int32_t msg_type, int64_t trigger_time = 0) {
-    auto frame = open_frame(trigger_time, msg_type, sizeof(T));
-    return const_cast<T &>(frame->template data<T>());
-  }
-
   void close_data();
 
   template <typename T>
