@@ -101,6 +101,7 @@ public:
 protected:
   const bool bypass_accounting_;
   const bool bypass_trading_data_;
+  const bool refresh_ledger_before_sync_;
 
   void on_react() override;
 

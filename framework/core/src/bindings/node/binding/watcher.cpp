@@ -60,6 +60,13 @@ inline bool GetBypassTradingData(const Napi::CallbackInfo &info) {
   return info[4].As<Napi::Boolean>().Value();
 }
 
+inline bool GetRefreshLedgerBeforeSync(const Napi::CallbackInfo &info) {
+  if (not IsValid(info, 5, &Napi::Value::IsBoolean)) {
+    throw Napi::Error::New(info.Env(), "Invalid refreshBeforeSync argument");
+  }
+  return info[5].As<Napi::Boolean>().Value();
+}
+
 WatcherAutoClient::WatcherAutoClient(yijinjing::practice::apprentice &app, bool bypass_trading_data)
     : SilentAutoClient(app), bypass_trading_data_(bypass_trading_data) {}
 
@@ -106,6 +113,7 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
       apprentice(GetWatcherLocation(info), true),                                                         //
       bypass_accounting_(GetBypassAccounting(info)),                                                      //
       bypass_trading_data_(GetBypassTradingData(info)),                                                   //
+      refresh_ledger_before_sync_(GetRefreshLedgerBeforeSync(info)),                                      //
       broker_client_(*this, bypass_trading_data_),                                                        //
       bookkeeper_(*this, broker_client_),                                                                 //
       state_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),                           //
@@ -442,10 +450,14 @@ Napi::Value Watcher::Start(const Napi::CallbackInfo &info) {
 
 Napi::Value Watcher::Sync(const Napi::CallbackInfo &info) {
   SyncEventCache();
-  SyncLedger();
-  SyncOrder();
   SyncAppStates();
   SyncStrategyStates();
+  SyncLedger();
+  if (refresh_ledger_before_sync_) {
+    serialize::InitTradingDataMap(info, ledger_ref_, "ledger");
+  }
+  SyncOrder();
+
   return {};
 }
 
