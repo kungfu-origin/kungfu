@@ -9,7 +9,7 @@
       class="kf-drag-row__content"
       @mousedown="handleMouseDown"
       @mousemove="handleMouseMove"
-      @mouseup="hanleMouseUp"
+      @mouseup="handleMouseUp"
     >
       <slot></slot>
     </div>
@@ -23,13 +23,15 @@ import { storeToRefs } from 'pinia';
 import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
 
 interface KfDragRowData {
+  resizeing: boolean;
+  isOutOfBoardListenerAdded: boolean;
   leftCol$: HTMLElement | null;
   leftBoardId: string;
   leftColWidth: number;
   rightCol$: HTMLElement | null;
   rightBoardId: string;
   rightColWidth: number;
-  paWidth: number;
+  paBoundingRect: DOMRect | { [x: string]: number };
   preX: number;
 }
 
@@ -45,13 +47,15 @@ export default defineComponent({
 
   setup() {
     const rowData = reactive<KfDragRowData>({
+      resizeing: false,
+      isOutOfBoardListenerAdded: false,
       leftCol$: null,
       leftBoardId: '',
       leftColWidth: 0,
       rightCol$: null,
       rightBoardId: '',
       rightColWidth: 0,
-      paWidth: 0,
+      paBoundingRect: {},
       preX: 0,
     });
 
@@ -85,6 +89,15 @@ export default defineComponent({
   },
 
   methods: {
+    isMouseOutOfParent(currentX: number, currentY: number) {
+      return (
+        currentX <= this.paBoundingRect.left + 16 ||
+        currentX >= this.paBoundingRect.right - 16 ||
+        currentY <= this.paBoundingRect.top + 16 ||
+        currentY >= this.paBoundingRect.bottom - 16
+      );
+    },
+
     handleMouseDown(e: MouseEvent) {
       const target = e.target as HTMLElement;
 
@@ -97,15 +110,28 @@ export default defineComponent({
         this.rightColWidth = this.rightCol$?.clientWidth || 0;
         const paElement = this.leftCol$?.parentElement;
         if (paElement) {
-          this.paWidth = paElement?.clientWidth;
+          this.paBoundingRect = paElement.getBoundingClientRect();
         }
         this.preX = e.x;
+        this.resizeing = true;
       }
     },
 
     handleMouseMove(e: MouseEvent) {
+      if (!this.resizeing) return;
+
+      const currentY: number = e.y;
       const currentX: number = e.x;
       const deltaX = currentX - this.preX;
+
+      if (
+        this.paBoundingRect &&
+        this.isMouseOutOfParent(currentX, currentY) &&
+        !this.isOutOfBoardListenerAdded
+      ) {
+        document.addEventListener('mouseup', this.handleMouseUp);
+        this.isOutOfBoardListenerAdded = true;
+      }
 
       if (
         !this.leftCol$ ||
@@ -116,6 +142,9 @@ export default defineComponent({
         return;
       }
 
+      if (this.leftColWidth + deltaX <= 16 || this.rightColWidth - deltaX <= 16)
+        return;
+
       this.leftColWidth += deltaX;
       this.rightColWidth -= deltaX;
       this.leftCol$.style.width = this.leftColWidth + 'px';
@@ -125,7 +154,7 @@ export default defineComponent({
       this.preX = currentX;
     },
 
-    hanleMouseUp() {
+    handleMouseUp() {
       if (
         !this.leftCol$ ||
         !this.rightCol$ ||
@@ -140,12 +169,16 @@ export default defineComponent({
       this.setBoardsMapAttrById(
         +this.leftBoardId,
         'width',
-        Number((this.leftColWidth * 100) / this.paWidth).toFixed(3) + '%',
+        Number((this.leftColWidth * 100) / this.paBoundingRect.width).toFixed(
+          3,
+        ) + '%',
       );
       this.setBoardsMapAttrById(
         +this.rightBoardId,
         'width',
-        Number((this.rightColWidth * 100) / this.paWidth).toFixed(3) + '%',
+        Number((this.rightColWidth * 100) / this.paBoundingRect.width).toFixed(
+          3,
+        ) + '%',
       );
 
       this.$globalBus.next({
@@ -156,11 +189,14 @@ export default defineComponent({
     },
 
     clearState() {
+      this.resizeing = false;
+      this.isOutOfBoardListenerAdded = false;
       this.leftCol$ = null;
       this.leftColWidth = 0;
       this.rightCol$ = null;
       this.rightColWidth = 0;
       this.preX = 0;
+      document.removeEventListener('mouseup', this.handleMouseUp);
     },
   },
 });

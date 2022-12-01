@@ -64,7 +64,6 @@ if (fse.existsSync(defaultInstrumentsJson)) {
 
 module.exports = {
   generateUpdatesFilesForAllChannels: true,
-  appId: 'Kungfu.Origin.KungFu.Trader',
   electronVersion:
     kungfuCore.devDependencies.electron || kungfuCore.dependencies.electron,
   publish: [

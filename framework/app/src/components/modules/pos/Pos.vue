@@ -46,6 +46,7 @@ const pos = ref<KungfuApi.PositionResolved[]>([]);
 const { searchKeyword, tableData } =
   useTableSearchKeyword<KungfuApi.PositionResolved>(pos, [
     'instrument_id_resolved',
+    'exchange_id',
     'direction',
     'account_id_resolved',
   ]);
