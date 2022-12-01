@@ -292,6 +292,9 @@ export default defineComponent({
           boardId,
         });
       }
+      setTimeout(() => {
+        console.log(this.boardsMap);
+      });
     },
 
     handleClickTab(e: KfLayout.BoardInfo['current']) {
