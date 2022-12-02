@@ -42,12 +42,14 @@ export const getConfigSettings = (
       key: 'limit_price',
       name: t('blockTradeConfig.limit_price'),
       type: 'float',
+      min: 0,
       required: true,
     },
     {
       key: 'volume',
       name: t('blockTradeConfig.volume'),
       type: 'int',
+      min: 0,
       required: true,
     },
     {

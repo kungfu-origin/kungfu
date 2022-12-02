@@ -533,8 +533,8 @@ function formatterPercentNumber(value: number): string {
   return `${value}%`;
 }
 
-function parserPercentString(value: string): string {
-  return value.replace('%', '');
+function parserPercentString(value: string): number {
+  return +Number(value.replace('%', ''));
 }
 
 function handleAddItemIntoTableRows(item: KungfuApi.KfConfigItem) {
@@ -671,6 +671,8 @@ defineExpose({
       <a-input-number
         v-else-if="item.type === 'int'"
         v-model:value="formState[item.key]"
+        :max="item.max ?? Infinity"
+        :min="item.min ?? -Infinity"
         :disabled="
           (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
           item.disabled
@@ -678,9 +680,11 @@ defineExpose({
       ></a-input-number>
       <a-input-number
         v-else-if="item.type === 'float'"
+        v-model:value="formState[item.key]"
+        :max="item.max ?? Infinity"
+        :min="item.min ?? -Infinity"
         :precision="4"
         :step="steps[item.key] || 0.0001"
-        v-model:value="formState[item.key]"
         :disabled="
           (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
           item.disabled
@@ -688,11 +692,13 @@ defineExpose({
       ></a-input-number>
       <a-input-number
         v-else-if="item.type === 'percent'"
+        v-model:value="formState[item.key]"
+        :max="item.max ?? Infinity"
+        :min="item.min ?? -Infinity"
         :precision="2"
         :step="steps[item.key] || 0.01"
         :formatter="formatterPercentNumber"
         :parser="parserPercentString"
-        v-model:value="formState[item.key]"
         :disabled="
           (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
           item.disabled

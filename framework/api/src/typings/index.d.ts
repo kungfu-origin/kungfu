@@ -114,6 +114,8 @@ declare namespace KungfuApi {
     errMsg?: string;
     default?: KfConfigValue;
     required?: boolean;
+    max?: number;
+    min?: number;
     disabled?: boolean;
     primary?: boolean;
     options?: KfSelectOption[];

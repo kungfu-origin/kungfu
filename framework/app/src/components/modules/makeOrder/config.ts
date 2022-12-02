@@ -74,12 +74,14 @@ export const getConfigSettings = (
           ? t('tradingConfig.price')
           : t('tradingConfig.protect_price'),
       type: 'float',
+      min: 0,
       required: priceType !== PriceTypeEnum.Market ? true : false,
     },
     {
       key: 'volume',
       name: t('tradingConfig.volume'),
       type: 'int',
+      min: 0,
       required: true,
     },
   ].filter((item) => !!item) as KungfuApi.KfConfigItem[];
