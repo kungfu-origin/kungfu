@@ -18,6 +18,8 @@ export default {
   watcher_error: 'Watcher is NULL',
   instrument_error: '标的错误',
   component_error: '组件错误',
+  board_empty: '未添加任何面板',
+  add_board_now: '立即添加',
   prompt: '提示',
   warning: '警告',
   confirm: '确 认',

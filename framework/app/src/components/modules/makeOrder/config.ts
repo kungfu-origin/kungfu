@@ -16,6 +16,7 @@ export const WRAPPER_COL = 14;
 export const getConfigSettings = (
   category?: KfCategoryTypes,
   instrumentTypeEnum?: InstrumentTypeEnum,
+  sideEnum?: SideEnum,
   priceType?: PriceTypeEnum,
 ): KungfuApi.KfConfigItem[] => {
   const defaultSettings: KungfuApi.KfConfigItem[] = [
@@ -42,13 +43,16 @@ export const getConfigSettings = (
     },
     ...(isShotable(instrumentTypeEnum || InstrumentTypeEnum.unknown)
       ? ([
-          {
-            key: 'offset',
-            name: t('tradingConfig.offset'),
-            type: 'offset',
-            default: OffsetEnum.Open,
-            required: true,
-          },
+          instrumentTypeEnum === InstrumentTypeEnum.stockoption &&
+          sideEnum === SideEnum.Exec
+            ? null
+            : {
+                key: 'offset',
+                name: t('tradingConfig.offset'),
+                type: 'offset',
+                default: OffsetEnum.Open,
+                required: true,
+              },
           instrumentTypeEnum === InstrumentTypeEnum.future
             ? {
                 key: 'hedge_flag',
