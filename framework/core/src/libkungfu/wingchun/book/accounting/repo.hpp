@@ -11,9 +11,11 @@ public:
   void apply_quote(Book_ptr &book, const Quote &quote) override {}
 
   void apply_order_input(Book_ptr &book, const OrderInput &input) override {
+    auto &position = book->get_position_for(input);
+    auto cd_mr = get_instr_conversion_margin_rate(book, position);
     if (input.side == Side::Sell) {
-      book->asset.frozen_cash += input.volume;
-      book->asset.avail -= input.volume;
+      book->asset.frozen_cash += input.volume * cd_mr.exchange_rate;
+      book->asset.avail -= input.volume * cd_mr.exchange_rate;
       update_position(book, book->get_position_for(input));
     }
   }
@@ -24,9 +26,11 @@ public:
     }
 
     if (is_final_status(order.status)) {
+      auto &position = book->get_position_for(order);
+      auto cd_mr = get_instr_conversion_margin_rate(book, position);
       if (order.side == Side::Sell) {
-        book->asset.frozen_cash -= order.volume_left;
-        book->asset.avail += order.volume_left;
+        book->asset.frozen_cash -= order.volume_left * cd_mr.exchange_rate;
+        book->asset.avail += order.volume_left * cd_mr.exchange_rate;
       }
     }
     update_position(book, book->get_position_for(order));
@@ -42,8 +46,9 @@ public:
       position.avg_open_price = (position.avg_open_price * position.volume + trade.price * trade.volume) /
                                 (double)(position.volume + trade.volume);
     }
+    auto cd_mr = get_instr_conversion_margin_rate(book, position);
     position.avg_open_price = 1;
-    auto commission = calculate_commission(trade);
+    auto commission = calculate_commission(book, trade);
     auto tax = calculate_tax(trade);
     auto days = get_repo_expire_days(trade.instrument_id);
     //    auto profit = trade.volume / 100 / 360 * days;
@@ -53,15 +58,17 @@ public:
     update_position(book, position);
 
     //    book->asset.realized_pnl += profit;
-    book->asset.frozen_cash -= trade.volume;
+    book->asset.frozen_cash -= trade.volume * cd_mr.exchange_rate;
     book->asset.avail -= commission + tax;
     book->asset.intraday_fee += commission + tax;
     book->asset.accumulated_fee += commission + tax;
   }
 
-  double calculate_commission(const Trade &trade) override {
+  double calculate_commission(const Book_ptr &book, const Trade &trade) {
+    auto &position = book->get_position_for(trade);
+    auto cd_mr = get_instr_conversion_margin_rate(book, position);
     auto rate = get_repo_commission_rate(trade.instrument_id);
-    return trade.volume * rate;
+    return trade.volume * rate * cd_mr.exchange_rate;
   }
 
   double calculate_tax(const Trade &trade) override { return 0.0; }
