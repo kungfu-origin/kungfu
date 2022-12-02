@@ -209,7 +209,7 @@ export const OrderInputKeySetting: Record<
   OrderInputKeyEnum,
   KungfuApi.KfTradeValueCommonData
 > = {
-  [OrderInputKeyEnum.VOLUME]: { name: t('tradeConfig.volume') },
+  [OrderInputKeyEnum.VOLUME]: { name: t('tradingConfig.volume') },
   [OrderInputKeyEnum.PRICE]: { name: t('globalSettingConfig.single_price') },
 };
 
