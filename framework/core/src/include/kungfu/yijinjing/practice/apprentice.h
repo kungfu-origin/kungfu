@@ -73,7 +73,7 @@ public:
   void write_to(int64_t trigger_time, DataType &data, uint32_t dest_id = yijinjing::data::location::PUBLIC) {
     get_writer(dest_id)->write(trigger_time, data);
   }
-  
+
 protected:
   cache::bank state_bank_;
 
