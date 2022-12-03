@@ -2,6 +2,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 ############################################################
 
+# set the global compile options. some of which may replaced by target_compiles_options at rumtime.
 if (UNIX)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC") # set -fPIC for nng
   set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
