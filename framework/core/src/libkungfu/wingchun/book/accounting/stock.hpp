@@ -26,7 +26,7 @@ struct contract_discount_and_margin_ratio {
   double short_margin_ratio;
   double margin_ratio;
   double conversion_rate; // For collateral/avail_margin calculation
-  double exchange_rate;   //汇率
+  double exchange_rate;   // 汇率
 };
 class StockAccountingMethod : public AccountingMethod {
 public:

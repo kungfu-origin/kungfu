@@ -137,8 +137,8 @@ public:
     for (size_t i = head_; i != tail_; ++i)
       (&queue_[i & capacityMask_])->~T();
     (pop_value_)->~T();
-    delete[](char *) queue_;
-    delete[](char *) pop_value_;
+    delete[] reinterpret_cast<char *>(queue_);
+    delete[] reinterpret_cast<char *>(pop_value_);
   }
   size_t capacity() const { return capacity_; }
   size_t size() const {

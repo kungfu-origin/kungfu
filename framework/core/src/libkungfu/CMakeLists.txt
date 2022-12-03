@@ -1,24 +1,9 @@
 project(${LIBKUNGFU_NAME})
-file(GLOB_RECURSE SOURCE_FILES PROJECT_SOURCE_DIR *.cpp)
 
-file(GLOB_RECURSE WINGCHUN_SOURCE_FILES wingchun/*.cpp)
-# message ("WINGCHUN: ${WINGCHUN_SOURCE_FILES}")
-
-file(GLOB_RECURSE YIJINJING_CACHE_SOURCE_FILES yijinjing/cache/*.cpp)
-# message ("YIYINJING_CACHE: ${YIJINJING_CACHE_SOURCE_FILES}")
-
-file(GLOB_RECURSE YIJINJING_OTHER_SOURCE_FILES 
-    yijinjing/index/*.cpp
-    yijinjing/io/*.cpp
-    yijinjing/journal/*.cpp
-    yijinjing/practice/*.cpp
-    yijinjing/util/*.cpp
-)
-# message ("YIYINJING_OTHER: ${YIJINJING_OTHER_SOURCE_FILES}")
-
-## those make configuring incomplete. wired
-# file(GLOB_RECURSE YIJINJING_OTHER_SOURCE_FILES yijinjing/*.cpp)
-# list(FILTER ${YIJINJING_OTHER_SOURCE_FILES} EXCLUDE REGEX "cache")
+file(GLOB_RECURSE WINGCHUN_SOURCE_FILES ${PROJECT_SOURCE_DIR}/wingchun/*.cpp)
+file(GLOB_RECURSE YIJINJING_CACHE_SOURCE_FILES ${PROJECT_SOURCE_DIR}/yijinjing/cache/*.cpp)
+file(GLOB_RECURSE YIJINJING_OTHER_SOURCE_FILES ${PROJECT_SOURCE_DIR}/yijinjing/*.cpp)
+list(REMOVE_ITEM YIJINJING_OTHER_SOURCE_FILES ${YIJINJING_CACHE_SOURCE_FILES})
 
 ## set the target compile options variable to replace some of options set by .cmake/compiler.cmake
 if (UNIX)
@@ -29,9 +14,10 @@ endif ()
 
 if (MSVC)
     set(COMPILE_DEBUG_OPTIONS "/O0")
-    ## TODO seems the compile option set here has no impect.
     set(COMPILE_RELEASE_OPTIONS "/O2")
-    set(COMPILE_RELEASE_BYPASS_OPTIONS "/2")
+    ## TODO seems the compile option set here has no impact.
+    # set(COMPILE_RELEASE_BYPASS_OPTIONS "/2")
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)  # enable msvc to generate kungfu.lib
 endif ()
 
 add_library(yijinjing_cache OBJECT ${YIJINJING_CACHE_SOURCE_FILES})
@@ -52,9 +38,6 @@ set_target_properties(wingchun PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${KUNGFU_BUIL
 target_compile_options(wingchun PRIVATE "$<$<CONFIG:Debug>:${COMPILE_DEBUG_OPTIONS}>")
 target_compile_options(wingchun PRIVATE "$<$<CONFIG:Release>:${COMPILE_RELEASE_OPTIONS}>")
 
-
-
-set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)  # enable msvc to generate kungfu.lib
 add_library(${LIBKUNGFU_NAME} SHARED $<TARGET_OBJECTS:wingchun> $<TARGET_OBJECTS:yijinjing_cache> $<TARGET_OBJECTS:yijinjing_other>)
 set_target_properties(${LIBKUNGFU_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 set_target_properties(${LIBKUNGFU_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${KUNGFU_BUILD_DIR})

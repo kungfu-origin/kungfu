@@ -5,9 +5,6 @@ set(CMAKE_CXX_STANDARD 20)
 # set the global compile options. some of which may replaced by target_compiles_options at rumtime.
 if (UNIX)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC") # set -fPIC for nng
-  set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
-  set(CMAKE_CXX_FLAGS_RELEASE "-O0")
-
   set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE})
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE})
   set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)

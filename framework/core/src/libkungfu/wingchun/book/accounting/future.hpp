@@ -75,7 +75,7 @@ public:
         position.margin = cm_mr.contract_multiplier * position.settlement_price * cm_mr.exchange_rate *
                           position.volume * cm_mr.margin_ratio;
 
-        position.settlement_price = quote.settlement_price; //这行代码为啥在上一行代码的下面？
+        position.settlement_price = quote.settlement_price; // 这行代码为啥在上一行代码的下面？
         book->asset.avail -= position.margin - margin_pre;
       }
 
