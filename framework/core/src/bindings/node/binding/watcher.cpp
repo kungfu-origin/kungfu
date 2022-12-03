@@ -98,15 +98,7 @@ void WatcherAutoClient::connect(const event_ptr &event, const longfist::types::R
   wingchun::broker::SilentAutoClient::connect(event, register_data);
 }
 
-void WatcherAutoClient::connect(const event_ptr &event, const longfist::types::Band &band) {
-  // TODO:
-  // if (bypass_trading_data_) {
-  //   return;
-  // }
-
-  // wingchun::broker::SilentAutoClient::connect(event, band);
-  return;
-}
+void WatcherAutoClient::connect(const event_ptr &event, const longfist::types::Band &band) { return; }
 
 Watcher::Watcher(const Napi::CallbackInfo &info)
     : ObjectWrap(info),                                                                                   //
@@ -448,25 +440,29 @@ Napi::Value Watcher::Start(const Napi::CallbackInfo &info) {
   return {};
 }
 
-Napi::Value Watcher::Sync(const Napi::CallbackInfo &info) {
+void Watcher::Sync(const Napi::CallbackInfo &info) {
+  feed_mutex_.lock();
   SyncEventCache();
   SyncAppStates();
   SyncStrategyStates();
   SyncLedger();
-  if (refresh_ledger_before_sync_) {
-    serialize::InitTradingDataMap(info, ledger_ref_, "ledger");
-  }
-  SyncOrder();
-
-  return {};
+  TryRefreshTradingData(info);
+  SyncTradingData();
+  feed_mutex_.unlock();
 }
 
 void Watcher::SyncLedger() {
   boost::hana::for_each(StateDataTypes, [&](auto it) { UpdateLedger(+boost::hana::second(it)); });
 }
 
-void Watcher::SyncOrder() {
-  boost::hana::for_each(TradingDataTypes, [&](auto it) { UpdateOrder(+boost::hana::second(it)); });
+void Watcher::TryRefreshTradingData(const Napi::CallbackInfo &info) {
+  if (refresh_ledger_before_sync_) {
+    serialize::InitTradingDataMap(info, ledger_ref_, "ledger");
+  }
+}
+
+void Watcher::SyncTradingData() {
+  boost::hana::for_each(TradingDataTypes, [&](auto it) { UpdateTradingData(+boost::hana::second(it)); });
 }
 
 void Watcher::SyncAppStates() {
@@ -607,8 +603,9 @@ void Watcher::StartWorker() {
       if (not watcher->is_live() and not watcher->is_started() and watcher->is_usable()) {
         watcher->setup();
       }
-      if (watcher->is_live()) {
+      if (watcher->is_live() && watcher->feed_mutex_.try_lock()) {
         watcher->step();
+        watcher->feed_mutex_.unlock();
       }
     }
     watcher->signal_stop();

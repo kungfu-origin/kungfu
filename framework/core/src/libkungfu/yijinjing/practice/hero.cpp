@@ -134,7 +134,9 @@ std::string hero::get_location_uname(uint32_t uid) const {
 
 bool hero::is_location_live(uint32_t uid) const { return registry_.find(uid) != registry_.end(); }
 
-bool hero::has_channel(uint32_t source, uint32_t dest) const { return has_channel(make_chanel_hash(source, dest)); }
+bool hero::has_channel(uint32_t source, uint32_t dest) const {
+  return has_channel(make_source_dest_hash(source, dest));
+}
 
 bool hero::has_channel(uint64_t hash) const { return channels_.find(hash) != channels_.end(); }
 
@@ -149,7 +151,7 @@ void hero::on_notify() {}
 
 void hero::on_exit() {}
 
-uint64_t hero::make_chanel_hash(uint32_t source_id, uint32_t dest_id) const {
+uint64_t hero::make_source_dest_hash(uint32_t source_id, uint32_t dest_id) const {
   return uint64_t(source_id) << 32u | uint64_t(dest_id);
 }
 
@@ -206,7 +208,7 @@ void hero::deregister_location(int64_t trigger_time, const uint32_t location_uid
 }
 
 void hero::register_channel(int64_t trigger_time, const Channel &channel) {
-  uint64_t channel_uid = make_chanel_hash(channel.source_id, channel.dest_id);
+  uint64_t channel_uid = make_source_dest_hash(channel.source_id, channel.dest_id);
   auto result = channels_.try_emplace(channel_uid, channel);
   if (result.second) {
     auto source_uname = get_location_uname(channel.source_id);
@@ -232,7 +234,7 @@ void hero::deregister_channel(uint32_t source_location_uid) {
 }
 
 void hero::register_band(int64_t trigger_time, const Band &band) {
-  uint64_t band_uid = make_chanel_hash(band.source_id, band.dest_id);
+  uint64_t band_uid = make_source_dest_hash(band.source_id, band.dest_id);
   auto result = bands_.try_emplace(band_uid, band);
   if (result.second) {
     auto source_uname = get_location_uname(band.source_id);

@@ -97,7 +97,7 @@ protected:
   int64_t end_time_;
   yijinjing::journal::reader_ptr reader_;
   std::unordered_map<uint32_t, yijinjing::journal::writer_ptr> writers_ = {};
-  std::unordered_map<uint32_t, longfist::types::Band> bands_ = {};
+  std::unordered_map<uint64_t, longfist::types::Band> bands_ = {};
   std::unordered_map<uint64_t, longfist::types::Channel> channels_ = {};
   std::unordered_map<uint32_t, yijinjing::data::location_ptr> locations_ = {};
   std::unordered_map<uint32_t, longfist::types::Register> registry_ = {};
@@ -108,7 +108,7 @@ protected:
   const yijinjing::data::location_ptr cached_home_location_;
   const yijinjing::data::location_ptr ledger_home_location_;
 
-  uint64_t make_chanel_hash(uint32_t source_id, uint32_t dest_id) const;
+  uint64_t make_source_dest_hash(uint32_t source_id, uint32_t dest_id) const;
 
   bool check_location_exists(uint32_t source_id, uint32_t dest_id) const;
 
