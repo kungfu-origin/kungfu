@@ -782,6 +782,7 @@ declare namespace KungfuApi {
       bypassRestore = false,
       bypassAccounting = false,
       bypassTradingData = false,
+      refreshLedgerBeforeSync = false,
     ): Watcher | null;
     shutdown(): void;
     formatStringToHashHex(id: string): string;
