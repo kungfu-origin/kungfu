@@ -149,7 +149,7 @@ public:
   bool push(const T &p_data) {
     T *node;
     size_t tail = tail_.load(std::memory_order_relaxed);
-    size_t head = head_.load(std::memory_order_relaxed);
+    size_t head = head_.load(std::memory_order_acquire);
     node = &queue_[tail & capacityMask_];
     memset(node, 0, sizeof(T));
     new (node) T(p_data);
@@ -163,7 +163,7 @@ public:
     T *node;
     result = nullptr;
     size_t head = head_.load(std::memory_order_relaxed);
-    size_t tail = tail_.load(std::memory_order_relaxed);
+    size_t tail = tail_.load(std::memory_order_acquire);
     if (head >= tail) {
       // std::cout << "pop empty queue..........................." << std::endl;
       return false;
