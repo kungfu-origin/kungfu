@@ -18,6 +18,8 @@ function getNodeVersionOptions() {
     `electron_version=${electronVersion}`,
     '-o',
     `node_version=${nodeVersion}`,
+    '-o',
+    'with_yarn=True',
   ];
 }
 

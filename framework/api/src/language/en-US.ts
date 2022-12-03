@@ -18,6 +18,8 @@ export default {
   watcher_error: 'Watcher is NULL',
   instrument_error: 'instrument error',
   component_error: 'component error',
+  board_empty: 'Not added any board',
+  add_board_now: 'Add now',
   prompt: 'prompt',
   warning: 'warning',
   confirm: 'confirm',

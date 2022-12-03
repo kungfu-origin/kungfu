@@ -111,9 +111,11 @@ const configSettings = computed(() => {
   }
 
   const { category } = currentGlobalKfLocation.value;
+  const { side } = formState.value;
   return getConfigSettings(
     category,
     makeOrderInstrumentType.value,
+    side,
     +formState.value.price_type,
   );
 });
@@ -386,16 +388,16 @@ function dealFatFingerMessage(
 
   const fatFingerRange = +globalSetting.value?.trade?.fatFinger || 0;
 
+  if (fatFingerRange === 0) return '';
+
   const { exchangeId, instrumentId } = instrumentResolved.value;
   const ukey = hashInstrumentUKey(instrumentId, exchangeId);
 
   const { limit_price: price, side } = makeOrderInput;
   const lastPrice = window.watcher.ledger.Quote[ukey]?.last_price;
 
-  const fatFingerBuyRate =
-    fatFingerRange === 0 ? 100 : (100 + fatFingerRange) / 100;
-  const fatFingerSellRate =
-    fatFingerRange === 0 ? 0 : (100 - fatFingerRange) / 100;
+  const fatFingerBuyRate = (100 + fatFingerRange) / 100;
+  const fatFingerSellRate = (100 - fatFingerRange) / 100;
 
   if (SideEnum.Buy == side && price > lastPrice * fatFingerBuyRate) {
     return t('tradingConfig.fat_finger_buy_modal', {

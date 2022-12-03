@@ -114,6 +114,8 @@ declare namespace KungfuApi {
     errMsg?: string;
     default?: KfConfigValue;
     required?: boolean;
+    max?: number;
+    min?: number;
     disabled?: boolean;
     primary?: boolean;
     options?: KfSelectOption[];
@@ -780,6 +782,7 @@ declare namespace KungfuApi {
       bypassRestore = false,
       bypassAccounting = false,
       bypassTradingData = false,
+      refreshLedgerBeforeSync = false,
     ): Watcher | null;
     shutdown(): void;
     formatStringToHashHex(id: string): string;

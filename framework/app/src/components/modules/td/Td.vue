@@ -395,7 +395,7 @@ function handleRemoveTd(item: KungfuApi.KfConfig) {
             "
           >
             <div class="td-name__warp">
-              <a-tag color="#FAAD14">账户组</a-tag>
+              <a-tag color="#FAAD14">{{ $t('tdConfig.account_group') }}</a-tag>
               <span>
                 {{ record.name }}
               </span>

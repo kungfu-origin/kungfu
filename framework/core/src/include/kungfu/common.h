@@ -135,7 +135,7 @@ template <typename T, size_t N> struct array {
   using type = T[N];
   type value;
 
-  array<T, N>() {
+  array() {
     if constexpr (std::is_same_v<T, char>) {
       memset(value, '\0', sizeof(value));
     } else {
@@ -247,12 +247,12 @@ static constexpr bool is_unsigned_int_v = std::is_integral_v<ValueType> and (siz
                                           not std::is_same_v<ValueType, bool> and std::is_unsigned_v<ValueType>;
 
 template <typename ValueType>
-static constexpr bool is_signed_bigint_v = std::is_integral_v<ValueType> and
-                                           (sizeof(ValueType) > 4) and std::is_signed_v<ValueType>;
+static constexpr bool is_signed_bigint_v = //
+    std::is_integral_v<ValueType> and (sizeof(ValueType) > 4) and std::is_signed_v<ValueType>;
 
 template <typename ValueType>
-static constexpr bool is_unsigned_bigint_v = std::is_integral_v<ValueType> and
-                                             (sizeof(ValueType) > 4) and std::is_unsigned_v<ValueType>;
+static constexpr bool is_unsigned_bigint_v = //
+    std::is_integral_v<ValueType> and (sizeof(ValueType) > 4) and std::is_unsigned_v<ValueType>;
 
 template <typename ValueType>
 static constexpr bool is_numeric_v = std::is_arithmetic_v<ValueType> or std::is_enum_v<ValueType>;
