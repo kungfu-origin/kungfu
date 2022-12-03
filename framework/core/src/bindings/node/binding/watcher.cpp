@@ -441,14 +441,13 @@ Napi::Value Watcher::Start(const Napi::CallbackInfo &info) {
 }
 
 void Watcher::Sync(const Napi::CallbackInfo &info) {
-  feed_mutex_.lock();
+  std::lock_guard<std::mutex> guard(feed_mutex_);
   SyncEventCache();
   SyncAppStates();
   SyncStrategyStates();
   SyncLedger();
   TryRefreshTradingData(info);
   SyncTradingData();
-  feed_mutex_.unlock();
 }
 
 void Watcher::SyncLedger() {
