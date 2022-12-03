@@ -15,8 +15,7 @@ endif ()
 if (MSVC)
     set(COMPILE_DEBUG_OPTIONS "/O0")
     set(COMPILE_RELEASE_OPTIONS "/O2")
-    ## TODO seems the compile option set here has no impact.
-    # set(COMPILE_RELEASE_BYPASS_OPTIONS "/2")
+    set(COMPILE_RELEASE_BYPASS_OPTIONS "/O2")
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)  # enable msvc to generate kungfu.lib
 endif ()
 

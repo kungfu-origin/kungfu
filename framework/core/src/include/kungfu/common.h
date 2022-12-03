@@ -135,7 +135,7 @@ template <typename T, size_t N> struct array {
   using type = T[N];
   type value;
 
-  array<T, N>() {
+  array() {
     if constexpr (std::is_same_v<T, char>) {
       memset(value, '\0', sizeof(value));
     } else {

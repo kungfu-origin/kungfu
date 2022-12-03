@@ -245,7 +245,7 @@ class KungfuCoreConan(ConanFile):
         build_option = (
             toolset_option + ["--platform", str(self.options.arch)]
             if tools.detected_os() == "Windows"
-            else []
+            else ["--parallel", str(parallel_level)]
         )
 
         debug_option = ["--debug"] if build_type == "Debug" else []

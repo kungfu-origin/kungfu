@@ -5,6 +5,10 @@ message(STATUS "Configuring for node bindings")
 use_node_addon_api()
 use_libnode()
 
+if (${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
+endif ()
+
 aux_source_directory(binding SOURCE_FILES_KUNGFU_NODE)
 aux_source_directory(drone SOURCE_FILES_DRONE)
 
