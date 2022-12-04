@@ -15,6 +15,15 @@ function clean() {
   fs.rmSync('build', { recursive: true, force: true });
 }
 
+function makePackage() {
+  const prebuilt = glob.sync('build/stage/**/*.tar.gz');
+  const wheel = glob.sync('build/python/dist/*.whl');
+  const packageDir = path.dirname(prebuilt[0]);
+  const wheelFileName = path.basename(wheel[0]);
+  console.log(`$ cp ${wheel} ${packageDir}`);
+  fs.copyFileSync(wheel[0], path.join(packageDir, wheelFileName));
+}
+
 function callPrebuilt(args, check = true) {
   const buildType = process.env.npm_package_config_build_type;
   const buildTypeOpt = buildType === 'Debug' ? ['--debug'] : [];
@@ -37,15 +46,6 @@ module.exports = require('../lib/sywac')(module, (cli) => {
       build();
     })
     .command('package', () => {
-      callPrebuilt(['package']).onSuccess(() => {
-        const prebuilt = glob.sync('build/stage/**/*.tar.gz');
-        const wheel = glob.sync('build/python/dist/*.whl');
-        if (prebuilt.length > 0 && wheel.length > 0) {
-          const packageDir = path.dirname(prebuilt[0]);
-          const wheelFileName = path.basename(wheel[0]);
-          console.log(`$ cp ${wheel} ${packageDir}`);
-          fs.copyFileSync(wheel[0], path.join(packageDir, wheelFileName));
-        }
-      });
+      callPrebuilt(['package']).onSuccess(makePackage);
     });
 });
