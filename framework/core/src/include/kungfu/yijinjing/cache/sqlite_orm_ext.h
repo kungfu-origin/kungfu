@@ -11,7 +11,8 @@
 
 namespace sqlite_orm {
 
-template <typename T> struct [[maybe_unused]] type_printer<T, std::enable_if_t<kungfu::is_enum_class_v<T>>> : public integer_printer {};
+template <typename T>
+struct [[maybe_unused]] type_printer<T, std::enable_if_t<kungfu::is_enum_class_v<T>>> : public integer_printer {};
 
 template <size_t N> struct [[maybe_unused]] type_printer<kungfu::array<char, N>> : public text_printer {};
 
@@ -39,7 +40,8 @@ template <typename V, size_t N> struct [[maybe_unused]] statement_binder<kungfu:
   }
 };
 
-template <typename V> struct [[maybe_unused]] statement_binder<std::vector<V>, std::enable_if_t<not std::is_same_v<V, char>>> {
+template <typename V>
+struct [[maybe_unused]] statement_binder<std::vector<V>, std::enable_if_t<not std::is_same_v<V, char>>> {
   int bind(sqlite3_stmt *stmt, int index, const std::vector<V> &value) {
     if (value.size()) {
       int size = value.size() * sizeof(V);
@@ -52,11 +54,16 @@ template <typename V> struct [[maybe_unused]] statement_binder<std::vector<V>, s
 } // namespace sqlite_orm
 
 namespace sqlite_orm {
+
 template <typename V>
-struct [[maybe_unused]] row_extractor<V, std::enable_if_t<kungfu::is_enum_class_v<V> and not std::is_same_v<V, journal_mode>>> {
+static constexpr bool is_kungfu_enum = kungfu::is_enum_class_v<V> and not std::is_same_v<V, journal_mode>;
+
+template <typename V> struct [[maybe_unused]] row_extractor<V, std::enable_if_t<is_kungfu_enum<V>>> {
   [[maybe_unused]] V extract(const char *row_value) { return static_cast<V>(atoi(row_value)); }
 
-  [[maybe_unused]] V extract(sqlite3_stmt *stmt, int columnIndex) { return static_cast<V>(sqlite3_column_int(stmt, columnIndex)); }
+  [[maybe_unused]] V extract(sqlite3_stmt *stmt, int columnIndex) {
+    return static_cast<V>(sqlite3_column_int(stmt, columnIndex));
+  }
 };
 
 template <size_t N> struct [[maybe_unused]] row_extractor<kungfu::array<char, N>> {
