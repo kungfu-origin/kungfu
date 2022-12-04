@@ -3,6 +3,8 @@
 Market data generator script.
 """
 
+#  SPDX-License-Identifier: Apache-2.0
+
 import argparse
 import csv
 import itertools

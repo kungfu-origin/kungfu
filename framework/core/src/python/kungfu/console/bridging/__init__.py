@@ -1,3 +1,5 @@
+#  SPDX-License-Identifier: Apache-2.0
+
 def run_module(module_name):
     from importlib.util import find_spec, module_from_spec
 

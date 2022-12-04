@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 set(CMAKE_CXX_STANDARD 20)
 
 ############################################################

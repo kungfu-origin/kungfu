@@ -1,3 +1,5 @@
+#  SPDX-License-Identifier: Apache-2.0
+
 # Environment Variables
 ###########################################################
 # KF_HOME - base folder for kungfu files

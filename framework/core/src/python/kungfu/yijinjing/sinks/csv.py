@@ -1,3 +1,5 @@
+#  SPDX-License-Identifier: Apache-2.0
+
 import csv
 import kungfu
 import os

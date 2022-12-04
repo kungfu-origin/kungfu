@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 const path = require('path');
 
 function resolve(name) {
