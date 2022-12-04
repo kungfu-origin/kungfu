@@ -19,10 +19,12 @@ namespace kungfu::wingchun::book {
 #define DEFAULT_INSTRUMENT_CONTRACT_MULTIPLIER 10
 #define DEFAULT_INSTRUMENT_LONG_MARGIN_RATIO 0.1
 #define DEFAULT_INSTRUMENT_SHORT_MARGIN_RATIO 0.1
+#define DEFAULT_INSTRUMENT_EXCHANGE_RATE 1.0
 
 struct contract_multiplier_and_margin_ratio {
   int32_t contract_multiplier;
   double margin_ratio;
+  double exchange_rate;
 };
 
 class FutureAccountingMethod : public AccountingMethod {
@@ -70,9 +72,10 @@ public:
       // 此处仅计算结算价，但需要根据实时行情变化
       if (is_valid_price(quote.settlement_price)) {
         auto margin_pre = position.margin;
-        position.margin = cm_mr.contract_multiplier * position.settlement_price * position.volume * cm_mr.margin_ratio;
+        position.margin = cm_mr.contract_multiplier * position.settlement_price * cm_mr.exchange_rate *
+                          position.volume * cm_mr.margin_ratio;
 
-        position.settlement_price = quote.settlement_price;
+        position.settlement_price = quote.settlement_price; // 这行代码为啥在上一行代码的下面？
         book->asset.avail -= position.margin - margin_pre;
       }
 
@@ -98,7 +101,8 @@ public:
         get_instrument_contract_multiplier_and_margin_ratio(book, input.exchange_id, input.instrument_id, position);
 
     if (input.offset == Offset::Open) {
-      auto frozen_margin = cm_mr.contract_multiplier * input.frozen_price * input.volume * cm_mr.margin_ratio;
+      auto frozen_margin =
+          cm_mr.contract_multiplier * input.frozen_price * cm_mr.exchange_rate * input.volume * cm_mr.margin_ratio;
 
       book->asset.avail -= frozen_margin;
       book->asset.frozen_cash += frozen_margin;
@@ -132,7 +136,8 @@ public:
           get_instrument_contract_multiplier_and_margin_ratio(book, order.exchange_id, order.instrument_id, position);
 
       if (order.offset == Offset::Open) {
-        auto frozen_margin = cm_mr.contract_multiplier * order.frozen_price * order.volume_left * cm_mr.margin_ratio;
+        auto frozen_margin = cm_mr.contract_multiplier * order.frozen_price * cm_mr.exchange_rate * order.volume_left *
+                             cm_mr.margin_ratio;
 
         book->asset.avail += frozen_margin;
         book->asset.frozen_cash -= frozen_margin;
@@ -175,8 +180,8 @@ public:
         auto &commission = book->commissions.at(product_key);
         auto close_today_volume = double(position.volume - position.yesterday_volume);
         if (commission.mode == CommissionRateMode::ByAmount) {
-          cost = (position.last_price * position.yesterday_volume * commission.close_ratio) +
-                 (position.last_price * close_today_volume * commission.close_today_ratio);
+          cost = (position.last_price * cm_mr.exchange_rate * position.yesterday_volume * commission.close_ratio) +
+                 (position.last_price * cm_mr.exchange_rate * close_today_volume * commission.close_today_ratio);
         } else {
           cost = (position.yesterday_volume * commission.close_ratio) +
                  (close_today_volume * commission.close_today_ratio);
@@ -186,7 +191,7 @@ public:
 
       auto multiplier = contract_multiplier * (position.direction == Direction::Long ? 1 : -1);
       auto price_diff = position.last_price - position.avg_open_price;
-      position.unrealized_pnl = (price_diff * position.volume) * multiplier - cost;
+      position.unrealized_pnl = (price_diff * position.volume) * cm_mr.exchange_rate * multiplier - cost;
     }
   }
 
@@ -199,10 +204,10 @@ private:
 
     auto contract_multiplier = cm_mr.contract_multiplier;
     auto margin_ratio_by_pos = cm_mr.margin_ratio;
-    auto margin = contract_multiplier * trade.price * trade.volume * margin_ratio_by_pos;
+    auto margin = contract_multiplier * trade.price * cm_mr.exchange_rate * trade.volume * margin_ratio_by_pos;
     auto commission = calculate_commission(book, trade, position, 0);
-    auto frozen_margin =
-        contract_multiplier * book->get_frozen_price(trade.order_id) * trade.volume * margin_ratio_by_pos;
+    auto frozen_margin = contract_multiplier * book->get_frozen_price(trade.order_id) * cm_mr.exchange_rate *
+                         trade.volume * margin_ratio_by_pos;
     position.margin += margin;
     position.avg_open_price = (position.avg_open_price * position.volume + trade.price * trade.volume) /
                               double(position.volume + trade.volume);
@@ -227,7 +232,7 @@ private:
         get_instrument_contract_multiplier_and_margin_ratio(book, trade.exchange_id, trade.instrument_id, position);
 
     auto contract_multiplier = cm_mr.contract_multiplier;
-    auto margin = contract_multiplier * trade.price * trade.volume * cm_mr.margin_ratio;
+    auto margin = contract_multiplier * trade.price * cm_mr.exchange_rate * trade.volume * cm_mr.margin_ratio;
     auto delta_margin = std::min(position.margin, margin);
     position.margin -= delta_margin;
     position.volume -= trade.volume;
@@ -238,7 +243,8 @@ private:
     }
     auto close_today_volume = position.volume - position.yesterday_volume - today_volume_pre;
     auto commission = calculate_commission(book, trade, position, close_today_volume);
-    auto realized_pnl = (trade.price - position.avg_open_price) * trade.volume * contract_multiplier;
+    auto realized_pnl =
+        (trade.price - position.avg_open_price) * cm_mr.exchange_rate * trade.volume * contract_multiplier;
     if (position.direction == Direction::Short) {
       realized_pnl = -realized_pnl;
     }
@@ -265,11 +271,12 @@ private:
     auto &commission = book->commissions.at(product_key);
     if (commission.mode == CommissionRateMode::ByAmount) {
       if (trade.offset == Offset::Open) {
-        return trade.price * trade.volume * contract_multiplier * commission.open_ratio;
+        return trade.price * cm_mr.exchange_rate * trade.volume * contract_multiplier * commission.open_ratio;
       } else {
         auto volume_left = double(trade.volume) - close_today_volume;
-        return (trade.price * volume_left * contract_multiplier * commission.close_ratio) +
-               (trade.price * close_today_volume * contract_multiplier * commission.close_today_ratio);
+        return (trade.price * cm_mr.exchange_rate * volume_left * contract_multiplier * commission.close_ratio) +
+               (trade.price * cm_mr.exchange_rate * close_today_volume * contract_multiplier *
+                commission.close_today_ratio);
       }
     } else {
       if (trade.offset == Offset::Open) {
@@ -292,12 +299,14 @@ private:
       cm_mr.contract_multiplier = DEFAULT_INSTRUMENT_CONTRACT_MULTIPLIER;
       cm_mr.margin_ratio = position.direction == Direction::Long ? DEFAULT_INSTRUMENT_LONG_MARGIN_RATIO
                                                                  : DEFAULT_INSTRUMENT_SHORT_MARGIN_RATIO;
+      cm_mr.exchange_rate = DEFAULT_INSTRUMENT_EXCHANGE_RATE;
       return cm_mr;
     }
 
     auto &instrument = book->instruments.at(hashed_instrument_key);
     cm_mr.contract_multiplier = instrument.contract_multiplier;
     cm_mr.margin_ratio = margin_ratio(instrument, position);
+    cm_mr.exchange_rate = is_equal(instrument.exchange_rate, 0.0) ? 1.0 : instrument.exchange_rate;
     return cm_mr;
   }
 

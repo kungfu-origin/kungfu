@@ -4,7 +4,7 @@
       class="kf-drag-col__content"
       @mousedown="handleMouseDown"
       @mousemove="handleMouseMove"
-      @mouseup="hanleMouseUp"
+      @mouseup="handleMouseUp"
     >
       <slot></slot>
     </div>
@@ -29,22 +29,26 @@ export default defineComponent({
 
   setup() {
     const colData = reactive<{
+      resizeing: boolean;
+      isOutOfBoardListenerAdded: boolean;
       upRow$: HTMLElement | null;
       upBoardId: string;
       upRowHeight: number;
       bottomRow$: HTMLElement | null;
       bottomBoardId: string;
       bottomRowHeight: number;
-      paHeight: number;
+      paBoundingRect: DOMRect | { [x: string]: number };
       preY: number;
     }>({
+      resizeing: false,
+      isOutOfBoardListenerAdded: false,
       upRow$: null,
       upBoardId: '',
       upRowHeight: 0,
       bottomRow$: null,
       bottomBoardId: '',
       bottomRowHeight: 0,
-      paHeight: 0,
+      paBoundingRect: {},
       preY: 0,
     });
 
@@ -77,6 +81,15 @@ export default defineComponent({
   },
 
   methods: {
+    isMouseOutOfParent(currentX: number, currentY: number) {
+      return (
+        currentX <= this.paBoundingRect.left + 16 ||
+        currentX >= this.paBoundingRect.right - 16 ||
+        currentY <= this.paBoundingRect.top + 16 ||
+        currentY >= this.paBoundingRect.bottom - 16
+      );
+    },
+
     handleMouseDown(e: MouseEvent) {
       const target = e.target as HTMLElement;
 
@@ -89,15 +102,28 @@ export default defineComponent({
         this.bottomRowHeight = this.bottomRow$?.clientHeight || 0;
         const paElement = this.upRow$?.parentElement;
         if (paElement) {
-          this.paHeight = paElement?.clientHeight || 0;
+          this.paBoundingRect = paElement.getBoundingClientRect();
         }
         this.preY = e.y;
+        this.resizeing = true;
       }
     },
 
     handleMouseMove(e: MouseEvent) {
+      if (!this.resizeing) return;
+
       const currentY: number = e.y;
+      const currentX: number = e.x;
       const deltaY = currentY - this.preY;
+
+      if (
+        this.paBoundingRect &&
+        this.isMouseOutOfParent(currentX, currentY) &&
+        !this.isOutOfBoardListenerAdded
+      ) {
+        document.addEventListener('mouseup', this.handleMouseUp);
+        this.isOutOfBoardListenerAdded = true;
+      }
 
       if (
         !this.upRow$ ||
@@ -107,6 +133,12 @@ export default defineComponent({
       ) {
         return;
       }
+
+      if (
+        this.upRowHeight + deltaY <= 16 ||
+        this.bottomRowHeight - deltaY <= 16
+      )
+        return;
 
       this.upRowHeight += deltaY;
       this.bottomRowHeight -= deltaY;
@@ -117,12 +149,13 @@ export default defineComponent({
       this.preY = currentY;
     },
 
-    hanleMouseUp() {
+    handleMouseUp() {
       if (
         !this.upRow$ ||
         !this.bottomRow$ ||
         !this.upBoardId ||
-        !this.bottomBoardId
+        !this.bottomBoardId ||
+        !this.resizeing
       ) {
         this.clearState();
         return;
@@ -131,16 +164,19 @@ export default defineComponent({
       this.setBoardsMapAttrById(
         +this.upBoardId,
         'height',
-        this.paHeight
-          ? Number((this.upRowHeight * 100) / this.paHeight).toFixed(3) + '%'
+        this.paBoundingRect.height
+          ? Number(
+              (this.upRowHeight * 100) / this.paBoundingRect.height,
+            ).toFixed(3) + '%'
           : this.upRowHeight,
       );
       this.setBoardsMapAttrById(
         +this.bottomBoardId,
         'height',
-        this.paHeight
-          ? Number((this.bottomRowHeight * 100) / this.paHeight).toFixed(3) +
-              '%'
+        this.paBoundingRect.height
+          ? Number(
+              (this.bottomRowHeight * 100) / this.paBoundingRect.height,
+            ).toFixed(3) + '%'
           : 0,
       );
 
@@ -152,12 +188,15 @@ export default defineComponent({
     },
 
     clearState() {
+      this.resizeing = false;
+      this.isOutOfBoardListenerAdded = false;
       this.upRow$ = null;
       this.upRowHeight = 0;
       this.bottomRow$ = null;
       this.bottomRowHeight = 0;
-      this.paHeight = 0;
+      this.paBoundingRect = {};
       this.preY = 0;
+      document.removeEventListener('mouseup', this.handleMouseUp);
     },
   },
 });

@@ -141,6 +141,7 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
         tip: t('globalSettingConfig.set_fat_finger'),
         default: '',
         type: 'percent',
+        min: 0,
       },
       {
         key: 'close',

@@ -1,7 +1,6 @@
 import json
 import getpass
 import os
-import psutil
 import pathlib
 import platform
 import datetime
@@ -12,10 +11,10 @@ import sys
 
 from conans import ConanFile
 from conans import tools
+from conans.errors import ConanException
 from distutils import sysconfig
 from os import environ
 from os import path
-from wcmatch import glob
 
 with open(path.join("package.json"), "r") as package_json_file:
     package_json = json.load(package_json_file)
@@ -27,8 +26,8 @@ class KungfuCoreConan(ConanFile):
     generators = "cmake"
     requires = [
         "fmt/8.1.1",
-        "hana/1.7.0",
-        "nlohmann_json/3.10.5",
+        "hana/1.79.0",
+        "nlohmann_json/3.11.2",
         "nng/1.5.2",
         "rxcpp/4.1.1",
         "sqlite3/3.39.2",
@@ -44,17 +43,18 @@ class KungfuCoreConan(ConanFile):
         "node_version": "ANY",
         "electron_version": "ANY",
         "vs_toolset": ["auto", "ClangCL"],
+        "with_yarn": [True, False],
     }
     default_options = {
-        "fmt:header_only": "True",
-        "spdlog:header_only": "True",
-        "spdlog:shared": "False",
-        "sqlite3:enable_column_metadata": "True",
-        "sqlite3:enable_json1": "True",
-        "sqlite3:enable_preupdate_hook": "True",
-        "sqlite3:enable_dbstat_vtab": "True",
-        "sqlite3:shared": "False",
-        "nng:http": "False",
+        "fmt:header_only": True,
+        "spdlog:header_only": True,
+        "spdlog:shared": False,
+        "sqlite3:enable_column_metadata": True,
+        "sqlite3:enable_json1": True,
+        "sqlite3:enable_preupdate_hook": True,
+        "sqlite3:enable_dbstat_vtab": True,
+        "sqlite3:shared": False,
+        "nng:http": False,
         "log_level": "info",
         "arch": "x64",
         "freezer": "pyinstaller",
@@ -65,13 +65,15 @@ class KungfuCoreConan(ConanFile):
         "vs_toolset": "auto"
         if "CONAN_VS_TOOLSET" not in environ
         else environ["CONAN_VS_TOOLSET"],
+        "with_yarn": False,
     }
+    gyp_call = "NODE_GYP_RUN" in os.environ
+    exports = "package.json"
+    exports_sources = "src/*", "package.json", "CMakeLists.txt", ".cmake/*"
     conanfile_dir = path.dirname(path.realpath(__file__))
     pyi_hooks_dir = path.join(conanfile_dir, "src", "python", "pyi-hooks")
     build_info_file = "kungfubuildinfo.json"
     build_dir = path.join(conanfile_dir, "build")
-    build_python_dir = path.join(build_dir, "python")
-    build_extensions_dir = path.join(build_dir, "build_extensions")
     dist_dir = path.join(conanfile_dir, "dist")
     kfc_dir = path.join(dist_dir, "kfc")
     kfs_dir = path.join(dist_dir, "kfs")
@@ -86,7 +88,8 @@ class KungfuCoreConan(ConanFile):
 
     def generate(self):
         """Updates mtime of lock files for node-gyp sake"""
-        self.__touch_lockfile()
+        if self.gyp_call:
+            self.__touch_lockfile()
 
     def imports(self):
         python_inc_src = sysconfig.get_python_inc(plat_specific=True)
@@ -108,9 +111,19 @@ class KungfuCoreConan(ConanFile):
 
     def package(self):
         build_type = self.__get_build_type()
-        self.__clean_dist_dir()
-        self.__run_freeze(build_type)
-        self.__show_build_info(build_type)
+        if self.gyp_call:
+            self.__clean_dist_dir()
+            self.__run_freeze(build_type)
+            self.__show_build_info(build_type)
+        else:
+            self.copy("*", dst="include", src="src/include")
+            self.copy("*", dst="lib", src=build_type)
+            self.copy("*", dst="bin", src=path.join("src", "libkungfu", build_type))
+
+    def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "kungfu"
+        self.cpp_info.names["cmake_find_package_multi"] = "kungfu"
+        self.cpp_info.libs = ["kungfu"]
 
     def __get_build_type(self):
         build_type = str(self.settings.build_type)
@@ -151,24 +164,29 @@ class KungfuCoreConan(ConanFile):
             self.output.info("Deleted dist directory")
 
     def __gen_build_info(self, build_type):
-        git = tools.Git()
         now = datetime.datetime.now()
         build_info = {
             "version": self.version,
             "pythonVersion": platform.python_version(),
-            "git": {
-                "tag": git.get_tag(),
-                "branch": git.get_branch(),
-                "revision": git.get_revision(),
-                "pristine": git.is_pristine(),
-            },
             "build": {
                 "user": getpass.getuser(),
                 "osVersion": tools.os_info.os_version,
                 "timestamp": now.strftime("%Y/%m/%d %H:%M:%S"),
             },
         }
-        tools.mkdir(build_type)
+
+        try:
+            git = tools.Git()
+            build_info["git"] = {
+                "tag": git.get_tag(),
+                "branch": git.get_branch(),
+                "revision": git.get_revision(),
+                "pristine": git.is_pristine(),
+            }
+        except ConanException:
+            pass
+
+        tools.mkdir(path.join(self.build_dir, build_type))
         with open(self.__get_build_info_path(build_type), "w") as output:
             json.dump(build_info, output, indent=2)
 
@@ -200,9 +218,33 @@ class KungfuCoreConan(ConanFile):
             self.output.warn(f"disabled build for runtime {runtime}")
             return
         toolset = self.__get_toolset()
+        parallel_opt = (
+            []
+            if tools.detected_os() == "Windows"
+            else ["--", "-j", f"{os.cpu_count()}"]
+        )
         self.__enable_modules(runtime)
-        self.__run_cmake_js(build_type, "configure", runtime, toolset)
-        self.__run_cmake_js(build_type, "build", runtime, toolset)
+        if str(self.options.with_yarn) == "True":
+            self.__run_cmake_js(build_type, "configure", runtime, toolset)
+            self.__run_cmake_js(build_type, "build", runtime, toolset)
+        elif runtime == "node":
+            environ["KUNGFU_BUILD_SKIP_KUNGFU_NODE"] = "on"
+            environ["KUNGFU_BUILD_SKIP_PYKUNGFU"] = "on"
+            self.__run_cmake(
+                "-S",
+                ".." if self.gyp_call else ".",
+                "-B",
+                "../build" if self.gyp_call else ".",
+                "-DCMAKE_BUILD_TYPE=Release",
+                "-DSPDLOG_LOG_LEVEL_COMPILE=trace",
+            )
+            self.__run_cmake("--build", ".", "--config", "Release", *parallel_opt)
+
+    def __run_cmake(self, *args):
+        rc = subprocess.Popen([tools.which("cmake"), *args]).wait()
+        if rc != 0:
+            self.output.error(f"cmake {args} failed with return code {rc}")
+            sys.exit(rc)
 
     def __run_cmake_js(self, build_type, cmd, runtime, toolset):
         [
@@ -210,12 +252,11 @@ class KungfuCoreConan(ConanFile):
             for env_key in os.environ
             if env_key.upper().startswith("NPM_")
         ]  # workaround for msvc
-        tools.rmdir(self.build_extensions_dir)
         self.__run_yarn(*self.__build_cmake_js_cmd(build_type, cmd, runtime, toolset))
         self.output.success(f"cmake-js {cmd} done")
 
     def __run_yarn(self, *args):
-        rc = psutil.Popen([tools.which("yarn"), *args]).wait()
+        rc = subprocess.Popen([tools.which("yarn"), *args]).wait()
         if rc != 0:
             self.output.error(f"yarn {args} failed with return code {rc}")
             sys.exit(rc)
@@ -234,7 +275,7 @@ class KungfuCoreConan(ConanFile):
         parallel_level = os.cpu_count()
 
         python_path = (
-            psutil.Popen(["pipenv", "--py"], stdout=subprocess.PIPE)
+            subprocess.Popen(["pipenv", "--py"], stdout=subprocess.PIPE)
             .stdout.read()
             .decode()
             .strip()
@@ -245,7 +286,7 @@ class KungfuCoreConan(ConanFile):
         build_option = (
             toolset_option + ["--platform", str(self.options.arch)]
             if tools.detected_os() == "Windows"
-            else []
+            else ["--parallel", str(parallel_level)]
         )
 
         debug_option = ["--debug"] if build_type == "Debug" else []
@@ -282,6 +323,8 @@ class KungfuCoreConan(ConanFile):
                     path.join(".", "src", "python", "kfc.spec"),
                 ]
             )
+
+        from wcmatch import glob
 
         for file in glob.glob("*kfs*", flags=glob.EXTGLOB, root_dir=self.kfs_dir):
             shutil.copy(path.join(self.kfs_dir, file), self.kfc_dir)

@@ -93,12 +93,14 @@ export const getConfigSettings = (
       key: 'limit_price',
       name: t('futureArbitrageConfig.limit_price'),
       type: 'float',
+      min: 0,
       required: true,
     },
     {
       key: 'volume',
       name: t('futureArbitrageConfig.volume'),
       type: 'int',
+      min: 0,
       required: true,
     },
   ].filter((item) => !!item) as KungfuApi.KfConfigItem[];
