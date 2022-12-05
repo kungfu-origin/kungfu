@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 //
 // Created by Keren Dong on 2020/3/12.
 //
@@ -99,7 +101,7 @@ public:
 
   virtual void connect(const event_ptr &event, const longfist::types::Register &register_data);
 
-  virtual void connect(const event_ptr &event, const longfist::types::Pipe &pipe);
+  virtual void connect(const event_ptr &event, const longfist::types::Band &band);
 
   virtual void renew(int64_t trigger_time, const yijinjing::data::location_ptr &md_location);
 

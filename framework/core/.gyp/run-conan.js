@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 const fse = require('fs-extra');
 const path = require('path');
 const { shell } = require('../lib');
@@ -18,6 +20,8 @@ function getNodeVersionOptions() {
     `electron_version=${electronVersion}`,
     '-o',
     `node_version=${nodeVersion}`,
+    '-o',
+    'with_yarn=True',
   ];
 }
 

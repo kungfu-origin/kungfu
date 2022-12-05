@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 //
 // Created by Keren Dong on 2020/3/27.
 //
@@ -28,20 +30,20 @@ std::enable_if_t<not is_numeric_v<ValueType> and not is_array_v<ValueType>, Valu
 constexpr auto make_storage_ptr = [](const std::string &db_file, const auto &types) {
   using namespace boost::hana;
   using namespace sqlite_orm;
-
   constexpr auto make_tables = [](const auto &types) {
     return [&](auto key) {
       using DataType = typename decltype(+types[key])::type;
-      auto columns = transform(accessors<DataType>(), [](auto it) {
+      auto data_accessors = accessors<DataType>();
+      DataType *image = {}; // workaround for visual studio 17.4 sake
+      auto columns = transform(data_accessors, [&](auto it) {
         auto name = first(it);
         auto accessor = second(it);
         auto member_pointer = member_pointer_trait<decltype(accessor)>().pointer();
-        using MemberType = std::decay_t<decltype(accessor(DataType()))>;
+        using MemberType = std::decay_t<decltype(accessor(*image))>;
         return make_column(name.c_str(), member_pointer, default_value(make_default<MemberType>()));
       });
-      auto pk_members = transform(DataType::primary_keys, [](auto pk) {
-        auto filter = [&](auto it) { return pk == first(it); };
-        auto pk_member = find_if(accessors<DataType>(), filter);
+      auto pk_members = transform(DataType::primary_keys, [&](auto pk) {
+        auto pk_member = find_if(data_accessors, hana::on(equal.to(pk), first));
         auto accessor = second(*pk_member);
         return member_pointer_trait<decltype(accessor)>().pointer();
       });

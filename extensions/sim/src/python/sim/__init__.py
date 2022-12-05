@@ -1,3 +1,5 @@
+#  SPDX-License-Identifier: Apache-2.0
+
 def td(vendor):
     from . import trader
 
