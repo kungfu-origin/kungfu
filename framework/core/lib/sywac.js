@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 module.exports = function (module, setup, opts = {}) {
   const cli = require('sywac').strict();
   const exitHandler = (result) => {

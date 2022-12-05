@@ -1,6 +1,8 @@
 #!/usr/bin/python
 
 
+#  SPDX-License-Identifier: Apache-2.0
+
 import csv
 
 csv.register_dialect("mdmaker", delimiter=",", lineterminator="\n")

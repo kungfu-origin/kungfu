@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 #include "py-longfist.h"
 
 namespace kungfu::longfist {

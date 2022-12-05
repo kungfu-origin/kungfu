@@ -1,3 +1,5 @@
+//  SPDX-License-Identifier: Apache-2.0
+
 //
 // Created by Keren Dong on 2021/12/15.
 //

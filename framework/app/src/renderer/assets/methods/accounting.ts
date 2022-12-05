@@ -40,8 +40,15 @@ class StockTradeAmountUsage extends BaseTradeAmountUsage {
     super();
   }
 
-  getTradeAmount(price: number, volume: number) {
-    return price * volume;
+  getTradeAmount(
+    price: number,
+    volume: number,
+    instrumentResolved: KungfuApi.InstrumentResolved,
+  ) {
+    const { exchangeId, instrumentId } = instrumentResolved;
+    const { exchange_rate } =
+      this.getInstrumentInWathcer(exchangeId, instrumentId) || {};
+    return price * volume * (exchange_rate || 1);
   }
 }
 
@@ -59,16 +66,28 @@ class FutureTradeAmountUsage extends BaseTradeAmountUsage {
     if (!instrumentResolved) return null;
 
     const { exchangeId, instrumentId } = instrumentResolved;
-    const { contract_multiplier, long_margin_ratio, short_margin_ratio } =
-      this.getInstrumentInWathcer(exchangeId, instrumentId) || {};
+    const {
+      contract_multiplier,
+      long_margin_ratio,
+      short_margin_ratio,
+      exchange_rate,
+    } = this.getInstrumentInWathcer(exchangeId, instrumentId) || {};
 
     if (direction === DirectionEnum.Long) {
       return (
-        price * volume * (contract_multiplier || 1) * (long_margin_ratio || 1)
+        price *
+        volume *
+        (contract_multiplier || 1) *
+        (long_margin_ratio || 1) *
+        (exchange_rate || 1)
       );
     } else if (direction === DirectionEnum.Short) {
       return (
-        price * volume * (contract_multiplier || 1) * (short_margin_ratio || 1)
+        price *
+        volume *
+        (contract_multiplier || 1) *
+        (short_margin_ratio || 1) *
+        (exchange_rate || 1)
       );
     }
 

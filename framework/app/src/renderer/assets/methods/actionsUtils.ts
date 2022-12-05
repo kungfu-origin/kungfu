@@ -1819,6 +1819,7 @@ export const useMakeOrderInfo = (
           TradeAmountUsageMap[InstrumentTypeEnum.stock].getTradeAmount(
             currentPrice.value,
             volume,
+            instrumentResolved.value,
           ),
         );
       }

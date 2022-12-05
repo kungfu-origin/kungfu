@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 #include "py-wingchun.h"
 
 #include <pybind11/stl.h>

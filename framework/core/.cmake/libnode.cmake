@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 macro(use_node_addon_api)
   execute_process(
           COMMAND

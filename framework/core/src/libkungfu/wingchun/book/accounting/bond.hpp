@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 #ifndef WINGCHUN_ACCOUNTING_BOND_H
 #define WINGCHUN_ACCOUNTING_BOND_H
 

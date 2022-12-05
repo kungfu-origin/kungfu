@@ -1,3 +1,5 @@
+#  SPDX-License-Identifier: Apache-2.0
+
 # ***************************************************************************
 # ``pre_safe_import_module/`` |docname| - make this directory a dummy package
 # ***************************************************************************
