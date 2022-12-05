@@ -189,6 +189,8 @@ export default {
     tech_stock: 'TechStock',
     index: 'Index',
     repo: 'Repo',
+    warrant: 'Warrant',
+    iopt: 'Iopt',
     crypto: 'Crypto',
     crypto_future: 'CryptoFuture',
     multi: 'Multi',
