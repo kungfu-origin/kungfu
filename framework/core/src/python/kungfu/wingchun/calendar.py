@@ -1,3 +1,5 @@
+#  SPDX-License-Identifier: Apache-2.0
+
 import datetime
 import kungfu.yijinjing.time as kft
 

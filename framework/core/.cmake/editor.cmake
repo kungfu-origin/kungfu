@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 # to corporate clion with cmake-js:
 # https://github.com/cmake-js/cmake-js/issues/23
 if (EDITOR)

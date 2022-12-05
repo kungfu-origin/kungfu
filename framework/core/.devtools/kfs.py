@@ -1,3 +1,5 @@
+#  SPDX-License-Identifier: Apache-2.0
+
 from env import __frozen__, kfc_dir
 from kungfu import __tool__ as origin
 from os import environ

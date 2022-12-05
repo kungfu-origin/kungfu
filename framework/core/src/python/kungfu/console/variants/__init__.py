@@ -1,3 +1,5 @@
+#  SPDX-License-Identifier: Apache-2.0
+
 from os import environ
 
 ENV_VARIANT_KEY = "KFC_AS_VARIANT"

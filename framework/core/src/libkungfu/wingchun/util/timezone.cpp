@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 #include <assert.h>
 #include <iomanip>
 #include <unordered_map>

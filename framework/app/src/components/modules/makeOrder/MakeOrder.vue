@@ -806,10 +806,13 @@ watch(
     height: 100%;
     display: flex;
     justify-content: space-between;
+    position: relative;
 
     .make-order-content {
       flex: 1;
       height: 100%;
+      width: calc(100% - 44px);
+      margin-right: 44px;
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
@@ -888,6 +891,8 @@ watch(
       height: 100%;
       display: flex;
       flex-direction: column;
+      position: absolute;
+      right: 0;
 
       .ant-btn {
         height: 26%;

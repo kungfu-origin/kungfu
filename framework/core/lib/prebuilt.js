@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 const main = (...argv) => {
   const node_pre_gyp = require('@mapbox/node-pre-gyp');
   const shell = require('./shell');
