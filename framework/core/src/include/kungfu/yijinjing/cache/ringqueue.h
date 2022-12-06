@@ -1,4 +1,6 @@
 
+// SPDX-License-Identifier: Apache-2.0
+
 #pragma once
 
 #include <atomic>
@@ -137,8 +139,8 @@ public:
     for (size_t i = head_; i != tail_; ++i)
       (&queue_[i & capacityMask_])->~T();
     (pop_value_)->~T();
-    delete[](char *) queue_;
-    delete[](char *) pop_value_;
+    delete[] reinterpret_cast<char *>(queue_);
+    delete[] reinterpret_cast<char *>(pop_value_);
   }
   size_t capacity() const { return capacity_; }
   size_t size() const {
@@ -149,7 +151,7 @@ public:
   bool push(const T &p_data) {
     T *node;
     size_t tail = tail_.load(std::memory_order_relaxed);
-    size_t head = head_.load(std::memory_order_relaxed);
+    size_t head = head_.load(std::memory_order_acquire);
     node = &queue_[tail & capacityMask_];
     memset(node, 0, sizeof(T));
     new (node) T(p_data);
@@ -163,7 +165,7 @@ public:
     T *node;
     result = nullptr;
     size_t head = head_.load(std::memory_order_relaxed);
-    size_t tail = tail_.load(std::memory_order_relaxed);
+    size_t tail = tail_.load(std::memory_order_acquire);
     if (head >= tail) {
       // std::cout << "pop empty queue..........................." << std::endl;
       return false;

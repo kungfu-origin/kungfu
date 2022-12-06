@@ -1,3 +1,5 @@
+#  SPDX-License-Identifier: Apache-2.0
+
 Quote = 101
 Entrust = 102
 Transaction = 103

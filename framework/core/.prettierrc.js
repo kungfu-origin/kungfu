@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 module.exports = {
   endOfLine: 'auto',
   printWidth: 80, //单行长度

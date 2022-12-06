@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 //
 // Created by Keren Dong on 2020/2/11.
 //
@@ -348,6 +350,8 @@ private:
 };
 
 void InitStateMap(const Napi::CallbackInfo &info, Napi::ObjectReference &state, const std::string &name);
+
+void InitTradingDataMap(const Napi::CallbackInfo &info, Napi::ObjectReference &state, const std::string &name);
 } // namespace kungfu::node::serialize
 
 #endif // KUNGFU_NODE_SERIALIZE_H

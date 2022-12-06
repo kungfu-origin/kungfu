@@ -1,3 +1,5 @@
+#  SPDX-License-Identifier: Apache-2.0
+
 # *************************************************************************
 # ``pre_find_module_path/`` |docname| - make this directory a dummy package
 # *************************************************************************

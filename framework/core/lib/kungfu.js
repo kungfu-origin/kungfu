@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 module.exports = function () {
   const binding = (() => {
     try {
@@ -68,6 +70,7 @@ module.exports = function () {
       bypassRestore = false,
       bypassAccounting = false,
       bypassTradingData = false,
+      refreshLedgerBeforeSync = false,
     ) {
       return new binding.Watcher(
         home,
@@ -75,6 +78,7 @@ module.exports = function () {
         bypassRestore,
         bypassAccounting,
         bypassTradingData,
+        refreshLedgerBeforeSync,
       );
     },
   };

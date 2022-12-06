@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 //
 // Created by Keren Dong on 2019-06-15.
 //
@@ -97,7 +99,7 @@ protected:
   int64_t end_time_;
   yijinjing::journal::reader_ptr reader_;
   std::unordered_map<uint32_t, yijinjing::journal::writer_ptr> writers_ = {};
-  std::unordered_map<uint32_t, longfist::types::Pipe> pipes_ = {};
+  std::unordered_map<uint64_t, longfist::types::Band> bands_ = {};
   std::unordered_map<uint64_t, longfist::types::Channel> channels_ = {};
   std::unordered_map<uint32_t, yijinjing::data::location_ptr> locations_ = {};
   std::unordered_map<uint32_t, longfist::types::Register> registry_ = {};
@@ -108,7 +110,7 @@ protected:
   const yijinjing::data::location_ptr cached_home_location_;
   const yijinjing::data::location_ptr ledger_home_location_;
 
-  uint64_t make_chanel_hash(uint32_t source_id, uint32_t dest_id) const;
+  uint64_t make_source_dest_hash(uint32_t source_id, uint32_t dest_id) const;
 
   bool check_location_exists(uint32_t source_id, uint32_t dest_id) const;
 
@@ -128,9 +130,9 @@ protected:
 
   void deregister_channel(uint32_t source_location_uid);
 
-  void register_pipe(int64_t trigger_time, const longfist::types::Pipe &pipe);
+  void register_band(int64_t trigger_time, const longfist::types::Band &band);
 
-  void deregister_pipe(uint32_t source_location_uid);
+  void deregister_band(uint32_t source_location_uid);
 
   void require_read_from(int64_t trigger_time, uint32_t dest_id, uint32_t source_id, int64_t from_time);
 
@@ -140,7 +142,7 @@ protected:
 
   void require_write_to(int64_t trigger_time, uint32_t source_id, uint32_t dest_id);
 
-  void require_write_to_pipe(int64_t trigger_time, uint32_t source_id, const yijinjing::data::location_ptr &location);
+  void require_write_to_band(int64_t trigger_time, uint32_t source_id, const yijinjing::data::location_ptr &location);
 
   virtual void react() = 0;
 

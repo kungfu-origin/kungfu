@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 const { spawnSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
