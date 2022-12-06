@@ -277,6 +277,20 @@ export const useGlobalStore = defineStore('global', {
       (<typeof value>this.boardsMap[id][attrKey]) = value;
     },
 
+    addBoardFromEmpty(targetContentId: string) {
+      const newBoardInfo: KfLayout.BoardInfo = {
+        paId: 0,
+        direction: KfLayoutDirection.v,
+        contents: [targetContentId],
+        current: targetContentId,
+        width: '100%',
+        height: '100%',
+      };
+      this.boardsMap[1] = newBoardInfo;
+      this.boardsMap[0].children = [1];
+      return Promise.resolve();
+    },
+
     addBoardByContentId(
       targetBoardId: number,
       targetContentId: string,
