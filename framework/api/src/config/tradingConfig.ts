@@ -417,17 +417,25 @@ export const InstrumentType: Record<
     color: 'blue',
     level: 10,
   },
-  [InstrumentTypeEnum.fund]: {
-    name: t('tradingConfig.fund'),
-    color: 'purple',
-  },
   [InstrumentTypeEnum.techstock]: {
     name: t('tradingConfig.tech_stock'),
     color: 'blue',
   },
+  [InstrumentTypeEnum.fund]: {
+    name: t('tradingConfig.fund'),
+    color: 'purple',
+  },
   [InstrumentTypeEnum.index]: {
     name: t('tradingConfig.index'),
     color: 'purple',
+  },
+  [InstrumentTypeEnum.warrant]: {
+    name: t('tradingConfig.warrant'),
+    color: 'blue',
+  },
+  [InstrumentTypeEnum.iopt]: {
+    name: t('tradingConfig.iopt'),
+    color: 'blue',
   },
   [InstrumentTypeEnum.repo]: {
     name: t('tradingConfig.repo'),
@@ -511,6 +519,8 @@ export const AbleSubscribeInstrumentTypesBySourceType: Record<
     InstrumentTypeEnum.techstock,
     InstrumentTypeEnum.index,
     InstrumentTypeEnum.repo,
+    InstrumentTypeEnum.warrant,
+    InstrumentTypeEnum.iopt,
   ],
 
   future: [InstrumentTypeEnum.future],
@@ -526,6 +536,10 @@ export const AbleSubscribeInstrumentTypesBySourceType: Record<
   index: [InstrumentTypeEnum.index],
 
   repo: [InstrumentTypeEnum.repo],
+
+  warrant: [InstrumentTypeEnum.warrant],
+
+  iopt: [InstrumentTypeEnum.iopt],
 
   crypto: [InstrumentTypeEnum.crypto],
 
