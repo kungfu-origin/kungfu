@@ -496,6 +496,8 @@ export const T0InstrumentTypes = [
   InstrumentTypeEnum.bond,
 ];
 
+export const T0ExchangeIds = ['US', 'HK'];
+
 export const AbleSubscribeInstrumentTypesBySourceType: Record<
   InstrumentTypes,
   InstrumentTypeEnum[]

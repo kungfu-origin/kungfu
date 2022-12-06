@@ -30,6 +30,7 @@ import {
   UnderweightType,
   ShotableInstrumentTypes,
   T0InstrumentTypes,
+  T0ExchangeIds,
 } from '../config/tradingConfig';
 import {
   KfCategoryEnum,
@@ -1178,8 +1179,15 @@ export const isShotable = (instrumentType: InstrumentTypeEnum): boolean => {
     : false;
 };
 
-export const isT0 = (instrumentType: InstrumentTypeEnum): boolean => {
-  return instrumentType ? T0InstrumentTypes.includes(instrumentType) : false;
+export const isT0 = (
+  instrumentType: InstrumentTypeEnum,
+  exchangeId?: string,
+): boolean => {
+  return instrumentType
+    ? T0InstrumentTypes.includes(instrumentType)
+    : exchangeId
+    ? T0ExchangeIds.includes(exchangeId)
+    : false;
 };
 
 export const dealKfNumber = (
