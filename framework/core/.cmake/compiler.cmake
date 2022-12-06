@@ -25,6 +25,7 @@ if (APPLE)
       "@loader_path/../../"
       "@executable_path/../../../../Resources/kfc"
       )
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-value")
   set(CMAKE_INSTALL_RPATH "${KFC_INSTALL_RPATH}")
   set(CMAKE_MACOSX_RPATH ON)
   set(CONAN_DISABLE_CHECK_COMPILER on)
