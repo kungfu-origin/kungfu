@@ -372,11 +372,14 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
 
 void Watcher::on_react() {
   SPDLOG_INFO("watcher on react");
-  events_ | is(Quote::tag) | is_subscribed(subscribed_instruments_) | $$(feed_state_data(event, data_bank_));
-  events_ | is(Instrument::tag) | $$(Feed(event, event->data<Instrument>()));
-  events_ | skip_while(while_is(Quote::tag)) | is_trading_data() | $$(feed_trading_data(event, trading_bank_));
-  events_ | skip_while(while_is(Quote::tag, Instrument::tag)) | skip_while(while_is_trading_data) |
-      $$(feed_state_data(event, data_bank_));
+  // for receive history data
+  auto before_start_events = events_ | take_until(events_ | is(RequestStart::tag));
+  before_start_events | is_subscribed(subscribed_instruments_) | $$(feed_state_data(event, data_bank_));
+  before_start_events | is(Instrument::tag) | $$(Feed(event, event->data<Instrument>()));
+  before_start_events | skip_while(while_is(Quote::tag)) | is_trading_data() |
+      $$(feed_trading_data(event, trading_bank_));
+  before_start_events | skip_while(while_is(Quote::tag, Instrument::tag)) |
+      skip_while(while_is_trading_data) | $$(feed_state_data(event, data_bank_));
 }
 
 void Watcher::on_start() {
@@ -386,6 +389,13 @@ void Watcher::on_start() {
     bookkeeper_.on_start(events_);
     bookkeeper_.guard_positions();
     bookkeeper_.add_book_listener(std::make_shared<BookListener>(*this));
+
+    // for receive runtime data
+    events_ | is(Quote::tag) | is_subscribed(subscribed_instruments_) | $$(feed_state_data(event, data_bank_));
+    events_ | is(Instrument::tag) | $$(Feed(event, event->data<Instrument>()));
+    events_ | skip_while(while_is(Quote::tag)) | is_trading_data() | $$(feed_trading_data(event, trading_bank_));
+    events_ | skip_while(while_is(Quote::tag, Instrument::tag)) | skip_while(while_is_trading_data) |
+        $$(feed_state_data(event, data_bank_));
 
     events_ | is(Quote::tag) | is_subscribed(subscribed_instruments_) | $$(UpdateBook(event, event->data<Quote>()));
     events_ | is(OrderInput::tag) | $$(UpdateBook(event, event->data<OrderInput>()));
@@ -615,14 +625,14 @@ void Watcher::StartWorker() {
   auto worker = [](uv_work_t *req) {
     auto watcher = (Watcher *)(req->data);
     while (req->data && watcher->uv_work_live_) {
-      watcher->feed_mutex_.try_lock();
+
       if (not watcher->is_live() and not watcher->is_started() and watcher->is_usable()) {
         watcher->setup();
       }
-      if (watcher->is_live()) {
+      if (watcher->is_live() && watcher->feed_mutex_.try_lock()) {
         watcher->step();
+        watcher->feed_mutex_.unlock();
       }
-      watcher->feed_mutex_.unlock();
       std::this_thread::sleep_for(std::chrono::microseconds(watcher->milliseconds_sleep_after_step_));
     }
     watcher->signal_stop();
