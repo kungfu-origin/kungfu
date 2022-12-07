@@ -104,6 +104,7 @@ protected:
   const bool bypass_accounting_;
   const bool bypass_trading_data_;
   const bool refresh_trading_data_before_sync_;
+  const int milliseconds_sleep_after_step_;
   std::mutex feed_mutex_;
 
   void on_react() override;

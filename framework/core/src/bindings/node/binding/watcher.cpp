@@ -69,6 +69,13 @@ inline bool GetRefreshLedgerBeforeSync(const Napi::CallbackInfo &info) {
   return info[5].As<Napi::Boolean>().Value();
 }
 
+inline int GetMillisecondsSleepAfterStep(const Napi::CallbackInfo &info) {
+  if (not IsValid(info, 6, &Napi::Value::IsNumber)) {
+    throw Napi::Error::New(info.Env(), "Invalid millisecondsSleepAfterStep argument");
+  }
+  return info[6].As<Napi::Number>().Int32Value();
+}
+
 WatcherAutoClient::WatcherAutoClient(yijinjing::practice::apprentice &app, bool bypass_trading_data)
     : SilentAutoClient(app), bypass_trading_data_(bypass_trading_data) {}
 
@@ -105,6 +112,7 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
       bypass_accounting_(GetBypassAccounting(info)),                                                      //
       bypass_trading_data_(GetBypassTradingData(info)),                                                   //
       refresh_trading_data_before_sync_(GetRefreshLedgerBeforeSync(info)),                                //
+      milliseconds_sleep_after_step_(GetMillisecondsSleepAfterStep(info)),                                //
       broker_client_(*this, bypass_trading_data_),                                                        //
       bookkeeper_(*this, broker_client_),                                                                 //
       state_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),                           //
@@ -615,7 +623,7 @@ void Watcher::StartWorker() {
         watcher->step();
       }
       watcher->feed_mutex_.unlock();
-      std::this_thread::sleep_for(std::chrono::microseconds(200));
+      std::this_thread::sleep_for(std::chrono::microseconds(watcher->milliseconds_sleep_after_step_));
     }
     watcher->signal_stop();
     watcher->pause();
