@@ -68,6 +68,8 @@ private:
   void rebuild_positions(int64_t trigger_time, uint32_t strategy_uid);
 
   void write_broker_state(int64_t trigger_time, uint32_t source_id);
+  
+  void write_broker_state_to_public();
 
   void write_book_reset(int64_t trigger_time, uint32_t book_uid);
 
