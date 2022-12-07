@@ -50,6 +50,22 @@ function handleComfirm() {
     return;
   }
 
+  if (props.targetBoardId === 0) {
+    if (!boardsMap.value[0]) return error(t('add_board_error'));
+
+    useGlobalStore()
+      .addBoardFromEmpty(selectedBoard.value)
+      .then(() => {
+        success();
+        closeModal();
+      })
+      .catch(() => {
+        error();
+      });
+
+    return;
+  }
+
   if (
     props.targetBoardId === -1 ||
     !boardsMap.value[props.targetBoardId] ||
@@ -72,11 +88,11 @@ function handleComfirm() {
 </script>
 <template>
   <a-modal
+    v-model:visible="modalVisible"
     :width="520"
     class="kf-add-board-modal"
-    v-model:visible="modalVisible"
     :title="$t('add_board')"
-    :destroyOnClose="true"
+    :destroy-on-close="true"
     @cancel="closeModal"
     @ok="handleComfirm"
   >
@@ -84,6 +100,7 @@ function handleComfirm() {
       <a-radio-group v-model:value="selectedBoard">
         <a-radio-button
           v-for="item in availKfBoards"
+          :key="item"
           :value="item"
           :disabled="addedBoards.includes(item)"
         >

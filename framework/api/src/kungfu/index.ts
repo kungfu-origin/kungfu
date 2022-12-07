@@ -597,7 +597,8 @@ export const dealTrade = (
 };
 
 export const getPosClosableVolume = (position: KungfuApi.Position): bigint => {
-  return isShotable(position.instrument_type) || isT0(position.instrument_type)
+  return isShotable(position.instrument_type) ||
+    isT0(position.instrument_type, position.exchange_id)
     ? BigInt(Math.max(+Number(position.volume - position.frozen_total), 0))
     : BigInt(
         Math.max(+Number(position.yesterday_volume - position.frozen_total), 0),

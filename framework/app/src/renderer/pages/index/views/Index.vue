@@ -1,16 +1,31 @@
 <template>
   <div class="kf-index__warp">
-    <KfRowColIter :board-id="0" :closable="true"></KfRowColIter>
+    <KfRowColIter
+      v-if="boardsMap?.[0]?.children?.length"
+      :board-id="0"
+      :closable="true"
+    ></KfRowColIter>
+    <a-empty v-else class="kf-index__empty" :image="simpleImage">
+      <template #description>
+        <span>
+          {{ $t('board_empty') }}
+        </span>
+      </template>
+      <a-button type="primary" @click="handleAddBoardFromEmpty">
+        {{ $t('add_board_now') }}
+      </a-button>
+    </a-empty>
     <KfAddBoardModalVue
       v-if="addBoardModalVisible"
       v-model:visible="addBoardModalVisible"
-      :targetBoardId="addBoardTargetBoardId"
+      :target-board-id="addBoardTargetBoardId"
     ></KfAddBoardModalVue>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, onBeforeUnmount, ref } from 'vue';
+import { storeToRefs } from 'pinia';
 
 import KfRowColIter from '@kungfu-trader/kungfu-app/src/renderer/components/layout/KfRowColIter.vue';
 
@@ -21,6 +36,7 @@ import {
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/configs';
 import { usePreStartAndQuitApp } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import KfAddBoardModalVue from '../../../components/public/KfAddBoardModal.vue';
+import { Empty } from 'ant-design-vue';
 import globalBus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 import { messagePrompt } from '../../../assets/methods/uiUtils';
 const { success } = messagePrompt();
@@ -28,14 +44,22 @@ const { success } = messagePrompt();
 export default defineComponent({
   name: 'Index',
 
+  components: {
+    KfRowColIter,
+    KfAddBoardModalVue,
+  },
+
   setup() {
+    const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
+    const { initBoardsMap } = useGlobalStore();
+    const { boardsMap } = storeToRefs(useGlobalStore());
+
     const dealDefaultBoardsHook =
       globalThis.HookKeeper.getHooks().dealBoardsMap;
-    const boardsMap: KfLayout.BoardsMap =
+    const curBoardsMap: KfLayout.BoardsMap =
       getIndexBoardsMap() || dealDefaultBoardsHook.trigger(defaultBoardsMap);
 
-    const { initBoardsMap } = useGlobalStore();
-    initBoardsMap(boardsMap);
+    initBoardsMap(curBoardsMap);
 
     const addBoardModalVisible = ref<boolean>(false);
     const addBoardTargetBoardId = ref<number>(-1);
@@ -59,20 +83,23 @@ export default defineComponent({
       }
     });
 
+    const handleAddBoardFromEmpty = () => {
+      addBoardModalVisible.value = true;
+      addBoardTargetBoardId.value = 0;
+    };
+
     onBeforeUnmount(() => {
       subscription.unsubscribe();
       saveBoardsMap();
     });
 
     return {
+      simpleImage,
+      boardsMap,
       addBoardModalVisible,
       addBoardTargetBoardId,
+      handleAddBoardFromEmpty,
     };
-  },
-
-  components: {
-    KfRowColIter,
-    KfAddBoardModalVue,
   },
 });
 </script>
@@ -81,6 +108,10 @@ export default defineComponent({
 .kf-index__warp {
   height: 100%;
   width: 100%;
+
+  .kf-index__empty {
+    margin: 25% auto;
+  }
 
   & > .kf-drag-row__warp {
     height: 100%;
