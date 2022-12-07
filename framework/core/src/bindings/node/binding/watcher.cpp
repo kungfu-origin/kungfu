@@ -378,8 +378,8 @@ void Watcher::on_react() {
   before_start_events | is(Instrument::tag) | $$(Feed(event, event->data<Instrument>()));
   before_start_events | skip_while(while_is(Quote::tag)) | is_trading_data() |
       $$(feed_trading_data(event, trading_bank_));
-  before_start_events | skip_while(while_is(Quote::tag, Instrument::tag)) |
-      skip_while(while_is_trading_data) | $$(feed_state_data(event, data_bank_));
+  before_start_events | skip_while(while_is(Quote::tag, Instrument::tag)) | skip_while(while_is_trading_data) |
+      $$(feed_state_data(event, data_bank_));
 }
 
 void Watcher::on_start() {
