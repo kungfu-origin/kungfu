@@ -615,6 +615,7 @@ void Watcher::StartWorker() {
         watcher->step();
       }
       watcher->feed_mutex_.unlock();
+      std::this_thread::sleep_for(std::chrono::microseconds(100));
     }
     watcher->signal_stop();
     watcher->pause();
