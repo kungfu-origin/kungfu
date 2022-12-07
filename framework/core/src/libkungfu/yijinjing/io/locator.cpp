@@ -4,8 +4,8 @@
 // Created by Keren Dong on 2021/5/21.
 //
 
-#include <cstdlib>
 #include <algorithm>
+#include <cstdlib>
 #include <kungfu/common.h>
 #include <kungfu/yijinjing/common.h>
 #include <regex>
