@@ -103,7 +103,7 @@ public:
 protected:
   const bool bypass_accounting_;
   const bool bypass_trading_data_;
-  const bool refresh_ledger_before_sync_;
+  const bool refresh_trading_data_before_sync_;
   std::mutex feed_mutex_;
 
   void on_react() override;

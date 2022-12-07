@@ -104,7 +104,7 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
       apprentice(GetWatcherLocation(info), true),                                                         //
       bypass_accounting_(GetBypassAccounting(info)),                                                      //
       bypass_trading_data_(GetBypassTradingData(info)),                                                   //
-      refresh_ledger_before_sync_(GetRefreshLedgerBeforeSync(info)),                                      //
+      refresh_trading_data_before_sync_(GetRefreshLedgerBeforeSync(info)),                                //
       broker_client_(*this, bypass_trading_data_),                                                        //
       bookkeeper_(*this, broker_client_),                                                                 //
       state_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),                           //
@@ -454,7 +454,7 @@ void Watcher::SyncLedger() {
 }
 
 void Watcher::TryRefreshTradingData(const Napi::CallbackInfo &info) {
-  if (refresh_ledger_before_sync_) {
+  if (refresh_trading_data_before_sync_) {
     serialize::InitTradingDataMap(info, ledger_ref_, "ledger");
   }
 }
@@ -615,7 +615,7 @@ void Watcher::StartWorker() {
         watcher->step();
       }
       watcher->feed_mutex_.unlock();
-      std::this_thread::sleep_for(std::chrono::microseconds(100));
+      std::this_thread::sleep_for(std::chrono::microseconds(200));
     }
     watcher->signal_stop();
     watcher->pause();
