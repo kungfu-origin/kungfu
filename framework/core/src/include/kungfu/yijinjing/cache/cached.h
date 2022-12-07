@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 #ifndef KUNGFU_CACHED_H
 #define KUNGFU_CACHED_H
 

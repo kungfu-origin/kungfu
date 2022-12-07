@@ -1,3 +1,5 @@
+#  SPDX-License-Identifier: Apache-2.0
+
 from kungfu.console.commands import kfc
 import kungfu
 import sys

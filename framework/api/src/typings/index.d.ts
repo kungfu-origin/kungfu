@@ -392,6 +392,8 @@ declare namespace KungfuApi {
     long_margin_ratio: number; //多头保证金率
     short_margin_ratio: number; //空头保证金率
 
+    exchange_rate: number; // 利率
+
     uid_key: string;
     ukey: string;
   }
