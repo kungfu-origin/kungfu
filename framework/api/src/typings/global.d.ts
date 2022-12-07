@@ -23,10 +23,11 @@ declare global {
       ELECTRON_RUN_AS_NODE: boolean;
       ELECTRON_ENABLE_STACK_DUMPING: boolean;
       RELOAD_AFTER_CRASHED: 'true' | 'false' | undefined; // 需要作为pm2 env参数传递，为了统一识别，用string
-      REFRESH_LEDGER_BEFORE_SYNC: boolean;
       BY_PASS_RESTORE: boolean;
       BY_PASS_ACCOUNTING: boolean;
       BY_PASS_TRADINGDATA: boolean;
+      REFRESH_LEDGER_BEFORE_SYNC: boolean;
+      MILLISECONDS_SLEEP_AFTER_STEP: number;
     }
 
     interface Process {
