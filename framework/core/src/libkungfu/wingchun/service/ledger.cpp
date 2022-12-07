@@ -55,12 +55,14 @@ void Ledger::on_start() {
 
 void Ledger::update_broker_state_map(uint32_t location_uid, const BrokerStateUpdate &state) {
   broker_states_.insert_or_assign(location_uid, state);
+  write_broker_state_to_public();
 }
 
 void Ledger::update_broker_state_map(uint32_t location_uid, const Deregister &deregister) {
   if (broker_states_.find(location_uid) != broker_states_.end()) {
     broker_states_.erase(location_uid);
   }
+  write_broker_state_to_public();
 }
 
 void Ledger::refresh_books() {
@@ -194,6 +196,14 @@ void Ledger::write_broker_state(int64_t trigger_time, uint32_t source_id) {
   for (const auto &pair : broker_states_) {
     auto &broker_state = pair.second;
     writer->write(trigger_time, broker_state);
+  }
+}
+
+void Ledger::write_broker_state_to_public() {
+  auto writer = get_writer(0);
+  for (const auto &pair : broker_states_) {
+    auto &broker_state = pair.second;
+    writer->write(now(), broker_state);
   }
 }
 
