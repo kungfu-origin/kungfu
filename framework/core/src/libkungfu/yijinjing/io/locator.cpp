@@ -18,6 +18,7 @@
 //
 
 #include <cstdlib>
+#include <algorithm>
 #include <kungfu/common.h>
 #include <kungfu/yijinjing/common.h>
 #include <regex>
@@ -95,6 +96,7 @@ std::vector<uint32_t> locator::list_page_id(const location_ptr &location, uint32
       result.push_back(index);
     }
   }
+  std::sort(result.begin(), result.end());
   return result;
 }
 
