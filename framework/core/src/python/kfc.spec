@@ -210,7 +210,7 @@ def copy_dll_x64(dll_pattern):
 
     for dll_file in glob.glob(dll_pattern, flags=glob.EXTGLOB, root_dir=kfc_dir):
         dll_path = pathlib.Path(dll_file)
-        x64_dll = make_path(dll_path.parent, dll_path.stem + '-x64' + '.dll')
+        x64_dll = make_path(dll_path.parent, dll_path.stem + "-x64" + ".dll")
         logger.info(f"Copying {locate(dll_path)} to {locate(x64_dll)}")
         shutil.copyfile(locate(dll_path), locate(x64_dll))
 
