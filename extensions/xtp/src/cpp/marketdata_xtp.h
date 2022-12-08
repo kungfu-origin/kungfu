@@ -224,7 +224,7 @@ protected:
 
 private:
   XTP::API::QuoteApi *api_{};
-  uint32_t market_data_band_uid_;
+  uint32_t level2_tick_band_uid_;
 
   bool subscribe(const std::vector<std::string> &instruments, const std::string &exchange_id);
 };

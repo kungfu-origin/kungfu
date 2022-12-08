@@ -69,6 +69,13 @@ inline bool GetRefreshLedgerBeforeSync(const Napi::CallbackInfo &info) {
   return info[5].As<Napi::Boolean>().Value();
 }
 
+inline int GetMillisecondsSleepAfterStep(const Napi::CallbackInfo &info) {
+  if (not IsValid(info, 6, &Napi::Value::IsNumber)) {
+    throw Napi::Error::New(info.Env(), "Invalid millisecondsSleepAfterStep argument");
+  }
+  return info[6].As<Napi::Number>().Int32Value();
+}
+
 WatcherAutoClient::WatcherAutoClient(yijinjing::practice::apprentice &app, bool bypass_trading_data)
     : SilentAutoClient(app), bypass_trading_data_(bypass_trading_data) {}
 
@@ -80,13 +87,11 @@ void WatcherAutoClient::connect(const event_ptr &event, const longfist::types::R
 
     if (app_location->category == category::MD and should_connect_md(app_location)) {
       app_.request_write_to(app_.now(), app_uid);
-      app_.request_read_from_public(app_.now(), app_uid, resume_time_point);
       SPDLOG_INFO("resume {} connection from {}", app_.get_location_uname(app_uid), time::strftime(resume_time_point));
     }
 
     if (app_location->category == category::TD and should_connect_td(app_location)) {
       app_.request_write_to(app_.now(), app_uid);
-      app_.request_read_from_public(app_.now(), app_uid, resume_time_point);
       SPDLOG_INFO("resume {} connection from {}", app_.get_location_uname(app_uid), time::strftime(resume_time_point));
     }
 
@@ -96,7 +101,6 @@ void WatcherAutoClient::connect(const event_ptr &event, const longfist::types::R
     }
     return;
   }
-
   wingchun::broker::SilentAutoClient::connect(event, register_data);
 }
 
@@ -107,7 +111,8 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
       apprentice(GetWatcherLocation(info), true),                                                         //
       bypass_accounting_(GetBypassAccounting(info)),                                                      //
       bypass_trading_data_(GetBypassTradingData(info)),                                                   //
-      refresh_ledger_before_sync_(GetRefreshLedgerBeforeSync(info)),                                      //
+      refresh_trading_data_before_sync_(GetRefreshLedgerBeforeSync(info)),                                //
+      milliseconds_sleep_after_step_(GetMillisecondsSleepAfterStep(info)),                                //
       broker_client_(*this, bypass_trading_data_),                                                        //
       bookkeeper_(*this, broker_client_),                                                                 //
       state_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),                           //
@@ -367,10 +372,13 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
 
 void Watcher::on_react() {
   SPDLOG_INFO("watcher on react");
-  events_ | is(Quote::tag) | is_subscribed(subscribed_instruments_) | $$(feed_state_data(event, data_bank_));
-  events_ | is(Instrument::tag) | $$(Feed(event, event->data<Instrument>()));
-  events_ | skip_while(while_is(Quote::tag)) | is_trading_data() | $$(feed_trading_data(event, trading_bank_));
-  events_ | skip_while(while_is(Quote::tag, Instrument::tag)) | skip_while(while_is_trading_data) |
+  // for receive history data
+  auto before_start_events = events_ | take_until(events_ | is(RequestStart::tag));
+  before_start_events | is_subscribed(subscribed_instruments_) | $$(feed_state_data(event, data_bank_));
+  before_start_events | is(Instrument::tag) | $$(Feed(event, event->data<Instrument>()));
+  before_start_events | skip_while(while_is(Quote::tag)) | is_trading_data() |
+      $$(feed_trading_data(event, trading_bank_));
+  before_start_events | skip_while(while_is(Quote::tag, Instrument::tag)) | skip_while(while_is_trading_data) |
       $$(feed_state_data(event, data_bank_));
 }
 
@@ -381,6 +389,13 @@ void Watcher::on_start() {
     bookkeeper_.on_start(events_);
     bookkeeper_.guard_positions();
     bookkeeper_.add_book_listener(std::make_shared<BookListener>(*this));
+
+    // for receive runtime data
+    events_ | is(Quote::tag) | is_subscribed(subscribed_instruments_) | $$(feed_state_data(event, data_bank_));
+    events_ | is(Instrument::tag) | $$(Feed(event, event->data<Instrument>()));
+    events_ | skip_while(while_is(Quote::tag)) | is_trading_data() | $$(feed_trading_data(event, trading_bank_));
+    events_ | skip_while(while_is(Quote::tag, Instrument::tag)) | skip_while(while_is_trading_data) |
+        $$(feed_state_data(event, data_bank_));
 
     events_ | is(Quote::tag) | is_subscribed(subscribed_instruments_) | $$(UpdateBook(event, event->data<Quote>()));
     events_ | is(OrderInput::tag) | $$(UpdateBook(event, event->data<OrderInput>()));
@@ -457,7 +472,7 @@ void Watcher::SyncLedger() {
 }
 
 void Watcher::TryRefreshTradingData(const Napi::CallbackInfo &info) {
-  if (refresh_ledger_before_sync_) {
+  if (refresh_trading_data_before_sync_) {
     serialize::InitTradingDataMap(info, ledger_ref_, "ledger");
   }
 }
@@ -569,17 +584,26 @@ void Watcher::MonitorMarketData(int64_t trigger_time, const location_ptr &md_loc
 }
 
 void Watcher::OnRegister(int64_t trigger_time, const Register &register_data) {
-  if (register_data.location_uid == get_home_uid()) {
+  auto app_uid = register_data.location_uid;
+  if (app_uid == get_home_uid()) {
     return;
   }
 
-  auto app_location = get_location(register_data.location_uid);
+  auto app_location = get_location(app_uid);
   if (app_location->category == category::MD or app_location->category == category::TD) {
     location_uid_states_map_.insert_or_assign(app_location->uid, int(BrokerState::Pending));
   }
 
   if (app_location->category == category::MD and app_location->mode == mode::LIVE) {
     MonitorMarketData(trigger_time, app_location);
+  }
+
+  // for write msg and get msg from ledger public
+  // TODO: suppose to be put in watcher client connect
+  auto ledger_uid = ledger_home_location_->uid;
+  if ((uint32_t)app_uid == (uint32_t)ledger_uid) {
+    request_read_from_public(now(), ledger_uid, trigger_time);
+    return;
   }
 }
 
@@ -601,6 +625,7 @@ void Watcher::StartWorker() {
   auto worker = [](uv_work_t *req) {
     auto watcher = (Watcher *)(req->data);
     while (req->data && watcher->uv_work_live_) {
+
       if (not watcher->is_live() and not watcher->is_started() and watcher->is_usable()) {
         watcher->setup();
       }
@@ -608,6 +633,7 @@ void Watcher::StartWorker() {
         watcher->step();
         watcher->feed_mutex_.unlock();
       }
+      std::this_thread::sleep_for(std::chrono::microseconds(watcher->milliseconds_sleep_after_step_));
     }
     watcher->signal_stop();
     watcher->pause();
@@ -637,18 +663,9 @@ void Watcher::AfterMasterDown() {
 }
 
 void Watcher::UpdateBrokerState(uint32_t source_id, uint32_t dest_id, const BrokerStateUpdate &state) {
-  auto source_location = get_location(source_id);
+  auto source_location = get_location(state.location_uid);
   if (source_location->category == category::TD or source_location->category == category::MD) {
     location_uid_states_map_.insert_or_assign(source_location->uid, int(state.state));
-  }
-
-  if (dest_id == location::PUBLIC) {
-    return;
-  }
-
-  auto dest_location = get_location(dest_id);
-  if (dest_location->category == category::TD or dest_location->category == category::MD) {
-    location_uid_states_map_.insert_or_assign(dest_location->uid, int(state.state));
   }
 }
 
