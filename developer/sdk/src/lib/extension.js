@@ -22,7 +22,7 @@ const project = require('./project');
 
 const pypackages = '__pypackages__';
 const kungfulibs = '__kungfulibs__';
-const kungfuLibDirPattern = path.resolve(kungfulibs, '*', '*');
+const kungfuLibDirPattern = `${kungfulibs}/*/*`;
 const cwd = process.cwd().toString();
 
 const spawnOptsShell = {
@@ -102,8 +102,8 @@ function generateCMakeFiles(projectName, kungfuBuild) {
     {
       kfcDir: dealPath(kfcDir),
       kfcExec: dealPath(path.join(kfcDir, kfcName)),
-      includes: glob.sync(path.join(kungfuLibDirPattern, 'include')),
-      links: glob.sync(path.join(kungfuLibDirPattern, 'lib')),
+      includes: glob.sync(`${kungfuLibDirPattern}/include`),
+      links: glob.sync(`${kungfuLibDirPattern}/lib`),
       sources: cppSources,
       extraSource: extraSources[kungfuBuild.cpp.target],
       makeTarget: targetMakers[kungfuBuild.cpp.target],
