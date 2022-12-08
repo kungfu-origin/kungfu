@@ -13,9 +13,21 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   },
+  "binary": {
+    "module_name": "kungfu-js-api",
+    "module_path": "dist/api",
+    "remote_path": "{module_name}/v{major}/v{version}",
+    "package_name": "{module_name}-v{version}-{platform}-{arch}-{configuration}.tar.gz",
+    "host": "https://prebuilt.libkungfu.cc"
+  },
   "types": "./src/typings/index.d.ts",
   "main": "lib/index.js",
   "scripts": {
+    "build": "node lib/webpack/build.js",
+    "clean": "rimraf build dist",
+    "install": "node -e \"require('@kungfu-trader/kungfu-core').prebuilt('install')\"",
+    "package": "node -e \"require('@kungfu-trader/kungfu-core').prebuilt('package')\"",
+    "lint": "eslint src",
     "format": "prettier -l -w --config ../core/.prettierrc.js ."
   },
   "dependencies": {
