@@ -6,7 +6,7 @@ const { shell } = require('../lib');
 
 function conan(cmd) {
   const pipenv_args = ['run', 'conan', ...cmd];
-  shell.run('pipenv', pipenv_args);
+  shell.run('pipenv', pipenv_args, true, {env: {NODE_GYP_RUN: 'on', ...process.env}});
 }
 
 function getNodeVersionOptions() {
