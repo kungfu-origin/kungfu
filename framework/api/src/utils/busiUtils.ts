@@ -1183,11 +1183,10 @@ export const isT0 = (
   instrumentType: InstrumentTypeEnum,
   exchangeId?: string,
 ): boolean => {
-  return instrumentType
-    ? T0InstrumentTypes.includes(instrumentType)
-    : exchangeId
-    ? T0ExchangeIds.includes(exchangeId)
-    : false;
+  return (
+    (instrumentType ? T0InstrumentTypes.includes(instrumentType) : false) ||
+    (exchangeId ? T0ExchangeIds.includes(exchangeId) : false)
+  );
 };
 
 export const dealKfNumber = (

@@ -695,7 +695,7 @@ async function preStartProcess(
 //启动md
 export const startMd = async (
   sourceId: string,
-  kfConfig: KungfuApi.KfConfig,
+  kfConfig: KungfuApi.DerivedKfLocation,
 ): Promise<Proc | void> => {
   const extDirs = await flattenExtensionModuleDirs(EXTENSION_DIRS);
   const args = buildArgs(
@@ -729,7 +729,7 @@ export const startMd = async (
 //启动td
 export const startTd = async (
   accountId: string,
-  kfConfig: KungfuApi.KfConfig,
+  kfConfig: KungfuApi.DerivedKfLocation,
 ): Promise<Proc | void> => {
   const globalSetting = getKfGlobalSettingsValue();
   const autorestart = globalSetting?.system?.autoRestartTd ?? true;

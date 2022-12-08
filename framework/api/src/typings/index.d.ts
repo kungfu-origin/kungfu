@@ -846,7 +846,7 @@ declare namespace KungfuApi {
   export type DerivedKfLocation =
     | KfLocation
     | KfExtraLocation
-    | kfConfig
+    | KfConfig
     | KfDaemonLocation;
 
   export type ScheduleTaskMode = 'restart' | 'start' | 'stop';

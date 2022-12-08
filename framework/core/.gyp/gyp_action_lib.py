@@ -18,7 +18,6 @@ class Shell:
 
     @staticmethod
     def run(cmd, exit_on_error=True):
-        os.environ["NODE_GYP_RUN"] = "on"
         sys.stdout.write(f"$ {' '.join(cmd)}{os.linesep}")
         sys.stdout.flush()
         result = subprocess.run(cmd, check=True, shell=platform.system() == "Windows")
