@@ -14,6 +14,7 @@ export interface KfTradingDataTableHeaderConfig {
     | 'priceType'
     | 'direction'
     | 'actions';
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   sorter?: (a: any, b: any) => number;
 }
 
@@ -23,6 +24,7 @@ export interface AntTableColumn {
   key?: string;
   width?: number | string;
   minWidth?: number | string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   sorter?: boolean | { compare: (a: any, b: any) => number };
   align?: string;
   fixed?: string;
