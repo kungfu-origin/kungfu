@@ -28,23 +28,81 @@ interface AntTableColumn {
   fixed?: string;
 }
 
-export type TradingTableTypes = 'position' | 'trade' | 'order' | 'td';
+export type TradingTableTypes =
+  | 'position'
+  | 'trade'
+  | 'order'
+  | 'td'
+  | 'unkown';
 
 export type TradingTableColumnsTypes =
   | AntTableColumn
   | KfTradingDataTableHeaderConfig;
 
-export type TradingTableDealer = <T extends TradingTableColumnsTypes>(
-  columns: T[],
-  kfLocation: KungfuApi.DerivedKfLocation,
-  tableType: TradingTableTypes,
-) => T[];
+export type TradingDataTypes =
+  | KungfuApi.PositionResolved
+  | KungfuApi.TradeResolved
+  | KungfuApi.OrderResolved;
+
+export class TradingTableDealer {
+  locationKey: string;
+  tradingTableType: TradingTableTypes;
+  columnsDealers: Array<
+    <ColumnsType extends TradingTableColumnsTypes>(
+      columns: ColumnsType[],
+    ) => ColumnsType[]
+  >;
+  dataResolvers: Array<
+    <DataType extends TradingDataTypes>(datas: DataType[]) => DataType[]
+  >;
+
+  constructor(loactionKey: string, tradingTableType: TradingTableTypes) {
+    this.locationKey = loactionKey;
+    this.tradingTableType = tradingTableType;
+    this.columnsDealers = [];
+    this.dataResolvers = [];
+  }
+
+  getColumns<ColumnsType extends TradingTableColumnsTypes>(
+    columns: ColumnsType[],
+  ) {
+    if (this.columnsDealers.length) {
+      console.log(
+        `DealTradingTable hook ${this.locationKey} ${this.tradingTableType} trigger getColumns success`,
+      );
+
+      return this.columnsDealers.reduce(
+        (dealedColumns, dealer) => dealer(dealedColumns),
+        columns,
+      );
+    }
+
+    return columns;
+  }
+
+  resolveData<DataType extends TradingDataTypes>(datas: DataType[]) {
+    if (this.dataResolvers.length) {
+      console.log(
+        `DealTradingTable hook ${this.locationKey} ${this.tradingTableType} trigger resolveDatas success`,
+      );
+
+      return this.dataResolvers.reduce(
+        (resolvedDatas, resolver) => resolver(resolvedDatas),
+        datas,
+      );
+    }
+
+    return datas;
+  }
+}
 
 export type TradingTableDealerMap = Partial<
-  Record<TradingTableTypes, TradingTableDealer[]>
+  Record<TradingTableTypes, TradingTableDealer>
 >;
 
 const DefaultUnkownTrdaingTableDealerMap = {};
+
+const DefaultTradingTableDealer = new TradingTableDealer('unkown', 'unkown');
 
 export class DealTradingTableHooks {
   hooks: Record<string, TradingTableDealerMap>;
@@ -76,18 +134,45 @@ export class DealTradingTableHooks {
         set(
           target: Record<string, TradingTableDealerMap>,
           prop: string,
-          value: TradingTableDealerMap,
+          value: Record<
+            TradingTableTypes,
+            {
+              getColumns: <ColumnsType extends TradingTableColumnsTypes>(
+                columns: ColumnsType[],
+              ) => ColumnsType[];
+              resolvedDatas: <DataType extends TradingDataTypes>(
+                datas: DataType[],
+              ) => DataType[];
+            }
+          >,
         ) {
-          let exsitedDealerMap = {};
+          let exsitedDealerMap: TradingTableDealerMap = {};
           if (Reflect.has(target, prop)) {
             exsitedDealerMap = Reflect.get(target, prop);
           }
 
           Object.keys(value).forEach((key) => {
-            if (exsitedDealerMap[key] && Array.isArray(exsitedDealerMap[key])) {
-              exsitedDealerMap[key].push(value[key]);
+            const tradingTableType = key as TradingTableTypes;
+            if (exsitedDealerMap[tradingTableType]) {
+              value[tradingTableType].getColumns &&
+                exsitedDealerMap[tradingTableType]?.columnsDealers.push(
+                  value[tradingTableType].getColumns,
+                );
+              value[tradingTableType].resolvedDatas &&
+                exsitedDealerMap[tradingTableType]?.dataResolvers.push(
+                  value[tradingTableType].resolvedDatas,
+                );
             } else {
-              exsitedDealerMap[key] = [value[key]];
+              const newDealer = new TradingTableDealer(prop, tradingTableType);
+              value[tradingTableType].getColumns &&
+                newDealer.columnsDealers.push(
+                  value[tradingTableType].getColumns,
+                );
+              value[tradingTableType].resolvedDatas &&
+                newDealer.dataResolvers.push(
+                  value[tradingTableType].resolvedDatas,
+                );
+              exsitedDealerMap[tradingTableType] = newDealer;
             }
           });
 
@@ -102,36 +187,28 @@ export class DealTradingTableHooks {
   register(
     kfLocation: KungfuApi.DerivedKfLocation,
     tradingTableType: TradingTableTypes,
-    dealer: TradingTableDealer,
+    dealer: {
+      getColumns?: (
+        columns: TradingTableColumnsTypes[],
+      ) => TradingTableColumnsTypes[];
+      resolvedDatas?: (datas: TradingDataTypes[]) => TradingDataTypes[];
+    },
   ) {
     const { category, group, name } = kfLocation;
     const key = `${category}_${group}_${name}`;
     Reflect.set(this.hooks, key, { [tradingTableType]: dealer });
   }
 
-  trigger<T extends TradingTableColumnsTypes>(
+  trigger(
     kfLocation: KungfuApi.DerivedKfLocation,
     tradingTableType: TradingTableTypes,
-    columns: T[],
   ) {
     const { category, group, name } = kfLocation;
     const key = `${category}_${group}_${name}`;
-    const dealers = (Reflect.get(this.hooks, key) as TradingTableDealerMap)[
+    const dealer = (Reflect.get(this.hooks, key) as TradingTableDealerMap)[
       tradingTableType
     ];
 
-    if (dealers?.length) {
-      console.log(
-        `DealTradingTable hook ${key} ${tradingTableType} trigger success`,
-      );
-
-      return dealers.reduce(
-        (dealedColumns, dealer) =>
-          dealer<T>(dealedColumns, kfLocation, tradingTableType),
-        columns,
-      );
-    }
-
-    return columns;
+    return dealer ?? DefaultTradingTableDealer;
   }
 }

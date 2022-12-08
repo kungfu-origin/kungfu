@@ -16,92 +16,92 @@ const buildStrSorter =
 export const getColumns = (
   kfLocation: KungfuApi.KfLocation,
 ): KfTradingDataTableHeaderConfig[] =>
-  (
-    globalThis.HookKeeper.getHooks().dealTradingTable as DealTradingTableHooks
-  ).trigger(kfLocation, 'position', [
-    {
-      type: 'string',
-      name: t('posGlobalConfig.instrument_id'),
-      dataIndex: 'instrument_id_resolved',
-      sorter: buildStrSorter('instrument_id_resolved'),
-      width: 120,
-    },
-    ...(isTdStrategyCategory(kfLocation.category)
-      ? []
-      : [
-          {
-            name: t('posGlobalConfig.account_id_resolved'),
-            dataIndex: 'account_id_resolved',
-            sorter: buildStrSorter('account_id_resolved'),
-            width: 120,
-          },
-        ]),
-    {
-      type: 'string',
-      name: '',
-      dataIndex: 'direction',
-      sorter: buildSorter('direction'),
-      width: 40,
-    },
-    {
-      type: 'number',
-      name: t('posGlobalConfig.yesterday_volume'),
-      dataIndex: 'yesterday_volume',
-      flex: 1,
-      sorter: buildSorter('yesterday_volume'),
-    },
-    {
-      type: 'number',
-      name: t('posGlobalConfig.today_volume'),
-      dataIndex: 'today_volume',
-      flex: 1,
-      sorter: (a: KungfuApi.Position, b: KungfuApi.Position) => {
-        const deltaA = a.volume - a.yesterday_volume;
-        const deltaB = b.volume - b.yesterday_volume;
-        return +Number(deltaA) - +Number(deltaB);
+  (globalThis.HookKeeper.getHooks().dealTradingTable as DealTradingTableHooks)
+    .trigger(kfLocation, 'position')
+    .getColumns<KfTradingDataTableHeaderConfig>([
+      {
+        type: 'string',
+        name: t('posGlobalConfig.instrument_id'),
+        dataIndex: 'instrument_id_resolved',
+        sorter: buildStrSorter('instrument_id_resolved'),
+        width: 120,
       },
-    },
-    {
-      type: 'number',
-      name: t('posGlobalConfig.sum_volume'),
-      dataIndex: 'volume',
-      flex: 1,
-      sorter: buildSorter('volume'),
-    },
-    {
-      type: 'number',
-      name: t('posGlobalConfig.frozen_volume'),
-      dataIndex: 'frozen_total',
-      flex: 1,
-      sorter: buildSorter('frozen_total'),
-    },
-    {
-      type: 'number',
-      name: t('posGlobalConfig.closable_volume'),
-      dataIndex: 'closable_volume',
-      flex: 1,
-      sorter: buildSorter('closable_volume'),
-    },
+      ...(isTdStrategyCategory(kfLocation.category)
+        ? []
+        : [
+            {
+              name: t('posGlobalConfig.account_id_resolved'),
+              dataIndex: 'account_id_resolved',
+              sorter: buildStrSorter('account_id_resolved'),
+              width: 120,
+            },
+          ]),
+      {
+        type: 'string',
+        name: '',
+        dataIndex: 'direction',
+        sorter: buildSorter('direction'),
+        width: 40,
+      },
+      {
+        type: 'number',
+        name: t('posGlobalConfig.yesterday_volume'),
+        dataIndex: 'yesterday_volume',
+        flex: 1,
+        sorter: buildSorter('yesterday_volume'),
+      },
+      {
+        type: 'number',
+        name: t('posGlobalConfig.today_volume'),
+        dataIndex: 'today_volume',
+        flex: 1,
+        sorter: (a: KungfuApi.Position, b: KungfuApi.Position) => {
+          const deltaA = a.volume - a.yesterday_volume;
+          const deltaB = b.volume - b.yesterday_volume;
+          return +Number(deltaA) - +Number(deltaB);
+        },
+      },
+      {
+        type: 'number',
+        name: t('posGlobalConfig.sum_volume'),
+        dataIndex: 'volume',
+        flex: 1,
+        sorter: buildSorter('volume'),
+      },
+      {
+        type: 'number',
+        name: t('posGlobalConfig.frozen_volume'),
+        dataIndex: 'frozen_total',
+        flex: 1,
+        sorter: buildSorter('frozen_total'),
+      },
+      {
+        type: 'number',
+        name: t('posGlobalConfig.closable_volume'),
+        dataIndex: 'closable_volume',
+        flex: 1,
+        sorter: buildSorter('closable_volume'),
+      },
 
-    {
-      type: 'number',
-      name: t('posGlobalConfig.avg_open_price'),
-      dataIndex: 'avg_open_price',
-      flex: 1.2,
-      sorter: buildSorter('avg_open_price'),
-    },
-    {
-      type: 'number',
-      name: t('posGlobalConfig.last_price'),
-      dataIndex: 'last_price',
-      flex: 1.5,
-      sorter: buildSorter('last_price'),
-    },
-    {
-      type: 'number',
-      name: t('posGlobalConfig.unrealized_pnl'),
-      dataIndex: 'unrealized_pnl',
-      flex: 1.5,
-      sorter: buildSorter('unrealized_pnl'),
-    },
-  ]);
+      {
+        type: 'number',
+        name: t('posGlobalConfig.avg_open_price'),
+        dataIndex: 'avg_open_price',
+        flex: 1.2,
+        sorter: buildSorter('avg_open_price'),
+      },
+      {
+        type: 'number',
+        name: t('posGlobalConfig.last_price'),
+        dataIndex: 'last_price',
+        flex: 1.5,
+        sorter: buildSorter('last_price'),
+      },
+      {
+        type: 'number',
+        name: t('posGlobalConfig.unrealized_pnl'),
+        dataIndex: 'unrealized_pnl',
+        flex: 1.5,
+        sorter: buildSorter('unrealized_pnl'),
+      },
+    ]);
