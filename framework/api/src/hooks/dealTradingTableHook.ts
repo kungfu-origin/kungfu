@@ -1,4 +1,4 @@
-interface KfTradingDataTableHeaderConfig {
+export interface KfTradingDataTableHeaderConfig {
   name: string;
   dataIndex: string;
   width?: number;
@@ -17,7 +17,7 @@ interface KfTradingDataTableHeaderConfig {
   sorter?: (a: any, b: any) => number;
 }
 
-interface AntTableColumn {
+export interface AntTableColumn {
   title: string;
   dataIndex: string;
   key?: string;
