@@ -61,11 +61,15 @@ const { instruments } = useInstruments();
 
 const columns = computed(() => {
   if (currentGlobalKfLocation.value === null) {
-    return getColumns('td');
+    return getColumns({
+      category: 'td',
+      group: '*',
+      name: '*',
+      mode: 'live',
+    });
   }
 
-  const category = currentGlobalKfLocation.value?.category;
-  return getColumns(category);
+  return getColumns(currentGlobalKfLocation.value);
 });
 
 onMounted(() => {
