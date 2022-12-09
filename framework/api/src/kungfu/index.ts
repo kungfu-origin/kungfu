@@ -53,7 +53,7 @@ export const dealKfTime = (nano: bigint, date = false): string => {
 export const dealTradingDataItem = (
   item: KungfuApi.TradingDataTypes,
   watcher: KungfuApi.Watcher | null,
-  isShowOrigin: boolean = false,
+  isShowOrigin = false,
 ): Record<string, string | number | bigint> => {
   const itemResolved = { ...item } as Record<string, string | number | bigint>;
   const instrument_type =

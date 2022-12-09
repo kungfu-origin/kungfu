@@ -450,18 +450,21 @@ export const graceDeleteProcess = async (
 
 export function startProcessGetStatusUntilStop(
   options: Pm2StartOptions,
-  cb?: Function,
+  cb?: (processStatus: Pm2ProcessStatusTypes) => void,
 ) {
   return new Promise((resolve) => {
     startProcess({ ...options }).then(() => {
-      let timer = startGetProcessStatusByName(options.name, (res: any[]) => {
-        const status = res[0]?.pm2_env?.status as Pm2ProcessStatusTypes;
-        cb && cb(status);
-        if (status !== 'online') {
-          timer.clearLoop();
-          resolve(status);
-        }
-      });
+      const timer = startGetProcessStatusByName(
+        options.name,
+        (res: ProcessDescription[]) => {
+          const status = res[0]?.pm2_env?.status as Pm2ProcessStatusTypes;
+          cb && cb(status);
+          if (status !== 'online') {
+            timer.clearLoop();
+            resolve(status);
+          }
+        },
+      );
     });
   });
 }
@@ -496,7 +499,7 @@ export const listProcessStatus = (): Promise<{
   processStatus: Pm2ProcessStatusData;
   processStatusWithDetail: Pm2ProcessStatusDetailData;
 }> => {
-  return pm2List().then((pList: any[]) => {
+  return pm2List().then((pList: ProcessDescription[]) => {
     const processStatus = buildProcessStatus(pList);
     const processStatusWithDetail = buildProcessStatusWidthDetail(pList);
     return { processStatus, processStatusWithDetail };
@@ -505,7 +508,7 @@ export const listProcessStatus = (): Promise<{
 
 export const listProcessStatusWithDetail =
   (): Promise<Pm2ProcessStatusDetailData> => {
-    return pm2List().then((pList: any[]) =>
+    return pm2List().then((pList: ProcessDescription[]) =>
       buildProcessStatusWidthDetail(pList),
     );
   };
@@ -588,7 +591,10 @@ function buildArgs(args: string): string {
 }
 
 //循环获取processStatus
-function startGetProcessStatusByName(name: string, callback: Function) {
+function startGetProcessStatusByName(
+  name: string,
+  callback: (pList: ProcessDescription[]) => void,
+) {
   const timer = setTimerPromiseTask(() => {
     return pm2Describe(name)
       .then((pList: ProcessDescription[]) => {
@@ -604,7 +610,9 @@ function startGetProcessStatusByName(name: string, callback: Function) {
 
 //================ business related start ===============
 
-export function startArchiveMakeTask(cb?: Function) {
+export function startArchiveMakeTask(
+  cb?: (processStatus: Pm2ProcessStatusTypes) => void,
+) {
   const globalSetting = getKfGlobalSettingsValue();
   const bypassArchive = globalSetting?.system?.bypassArchive ?? false;
   return startProcessGetStatusUntilStop(

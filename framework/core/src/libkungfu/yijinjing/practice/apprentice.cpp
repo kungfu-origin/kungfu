@@ -170,7 +170,7 @@ void apprentice::react() {
                                                     })) |
                                first();
 
-    self_register_event | rx::timeout(seconds(180), observe_on_new_thread()) |
+    self_register_event | rx::timeout(seconds(60), observe_on_new_thread()) |
         $(
             [&](const event_ptr &event) {
               // this subscriber will quit when register is done, no worry for performance.
