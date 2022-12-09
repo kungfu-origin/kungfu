@@ -24,7 +24,7 @@
     "types": ["jschardet"],
     "typeRoots": [],
     "paths": {
-      "@kungfu-trader/kungfu-js-api/*": ["./src/*"],
+      "@kungfu-trader/kungfu-js-api/*": ["./src/*"]
     },
     "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
   },

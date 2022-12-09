@@ -1,3 +1,3 @@
 module.exports = {
-    webpackBuild: require('./webpack/build.js'),
+  webpackBuild: require('./webpack/build.js'),
 };

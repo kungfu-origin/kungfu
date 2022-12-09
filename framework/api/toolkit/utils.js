@@ -139,7 +139,7 @@ exports.getCliDefaultDistDir = () => {
 
 exports.getApiDefaultDistDir = () => {
   return path.resolve(this.getApiDir(), 'dist');
-}
+};
 
 exports.getSdkDefaultDistDir = () => {
   return path.resolve(this.getSdkDir(), 'dist');
