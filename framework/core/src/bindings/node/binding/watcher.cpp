@@ -80,10 +80,11 @@ WatcherAutoClient::WatcherAutoClient(yijinjing::practice::apprentice &app, bool 
     : SilentAutoClient(app), bypass_trading_data_(bypass_trading_data) {}
 
 void WatcherAutoClient::connect(const event_ptr &event, const longfist::types::Register &register_data) {
+  auto resume_time_point = get_resume_policy().get_connect_time(app_, register_data);
+  auto app_uid = register_data.location_uid;
+
   if (bypass_trading_data_) {
-    auto app_uid = register_data.location_uid;
     auto app_location = app_.get_location(app_uid);
-    auto resume_time_point = get_resume_policy().get_connect_time(app_, register_data);
 
     if (app_location->category == category::MD and should_connect_md(app_location)) {
       app_.request_write_to(app_.now(), app_uid);
@@ -101,6 +102,14 @@ void WatcherAutoClient::connect(const event_ptr &event, const longfist::types::R
     }
     return;
   }
+
+  // for write msg and get msg from ledger public
+  auto ledger_uid = app_.get_ledger_home_location()->uid;
+  if ((uint32_t)app_uid == (uint32_t)ledger_uid) {
+    app_.request_read_from_public(app_.now(), ledger_uid, resume_time_point);
+    return;
+  }
+
   wingchun::broker::SilentAutoClient::connect(event, register_data);
 }
 
@@ -596,14 +605,6 @@ void Watcher::OnRegister(int64_t trigger_time, const Register &register_data) {
 
   if (app_location->category == category::MD and app_location->mode == mode::LIVE) {
     MonitorMarketData(trigger_time, app_location);
-  }
-
-  // for write msg and get msg from ledger public
-  // TODO: suppose to be put in watcher client connect
-  auto ledger_uid = ledger_home_location_->uid;
-  if ((uint32_t)app_uid == (uint32_t)ledger_uid) {
-    request_read_from_public(now(), ledger_uid, trigger_time);
-    return;
   }
 }
 
