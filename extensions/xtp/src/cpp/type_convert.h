@@ -341,7 +341,6 @@ inline void from_xtp(XTPQSI *ticker_info, Instrument &quote) {
   } else {
     quote.exchange_id = "false_id";
   }
-<<<<<<< HEAD
   memcpy(quote.product_id, ticker_info->ticker_name, strlen(ticker_info->ticker_name));
   quote.instrument_type = get_instrument_type(quote.exchange_id, quote.instrument_id);
   quote.is_trading = true;
