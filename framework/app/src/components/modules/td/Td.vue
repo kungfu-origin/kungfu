@@ -85,9 +85,8 @@ const tdIdList = computed(() => {
     (item: KungfuApi.KfLocation): string => `${item.group}_${item.name}`,
   );
 });
-const { dealRowClassName, customRow } = useCurrentGlobalKfLocation(
-  window.watcher,
-);
+const { dealRowClassName, customRow, currentGlobalKfLocation } =
+  useCurrentGlobalKfLocation(window.watcher);
 
 const { processStatusData, getProcessStatusName } =
   useProcessStatusDetailData();
@@ -150,8 +149,8 @@ const { getAssetMarginsByKfConfig, getAssetMarginsByTdGroup } =
 const { handleConfirmAddUpdateKfConfig, handleRemoveKfConfig } =
   useAddUpdateRemoveKfConfig();
 
-const columns = computed(() =>
-  getColumns((dataIndex) => {
+const columns = computed(() => {
+  const sorter = (dataIndex) => {
     return (a: KungfuApi.KfConfig, b: KungfuApi.KfConfig) => {
       return (
         (+Number(getAssetsByKfConfig(a)[dataIndex as keyof KungfuApi.Asset]) ||
@@ -160,8 +159,26 @@ const columns = computed(() =>
           0)
       );
     };
-  }, isShowAssetMargin.value),
-);
+  };
+  if (currentGlobalKfLocation.value === null) {
+    return getColumns(
+      {
+        category: 'td',
+        group: '*',
+        name: '*',
+        mode: 'live',
+      },
+      sorter,
+      isShowAssetMargin.value,
+    );
+  }
+
+  return getColumns(
+    currentGlobalKfLocation.value,
+    sorter,
+    isShowAssetMargin.value,
+  );
+});
 
 const getPrefixByLocation = (kfLocation: KungfuApi.KfLocation) =>
   globalThis.HookKeeper.getHooks().prefix.trigger(kfLocation);
