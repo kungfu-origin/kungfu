@@ -70,7 +70,11 @@ import {
   startTd,
 } from './processUtils';
 import { Proc } from 'pm2';
-import { listDir, removeTargetFilesInFolder } from './fileUtils';
+import {
+  listDir,
+  readRootPackageJsonSync,
+  removeTargetFilesInFolder,
+} from './fileUtils';
 import minimist from 'minimist';
 import VueI18n, { useLanguage } from '../language';
 import { unlinkSync } from 'fs-extra';
@@ -1179,13 +1183,36 @@ export const isShotable = (instrumentType: InstrumentTypeEnum): boolean => {
     : false;
 };
 
+export const getT0Config = (): {
+  instrumentTypes: InstrumentTypeEnum[];
+  exchangeIds: string[];
+} => {
+  const rootPackageJson = readRootPackageJsonSync();
+  const T0Config = rootPackageJson?.appConfig?.T0T1?.T0 || {};
+  const instrumentTypes = (
+    Array.isArray(T0Config.instrumentTypes) ? T0Config.instrumentTypes : []
+  ).map((item) => InstrumentTypeEnum[item]);
+  const exchangeIds = Array.isArray(T0Config.exchangeIds)
+    ? T0Config.exchangeIds
+    : [];
+  return {
+    instrumentTypes,
+    exchangeIds,
+  };
+};
+
 export const isT0 = (
   instrumentType: InstrumentTypeEnum,
   exchangeId?: string,
 ): boolean => {
+  const { instrumentTypes, exchangeIds } = getT0Config();
   return (
-    (instrumentType ? T0InstrumentTypes.includes(instrumentType) : false) ||
-    (exchangeId ? T0ExchangeIds.includes(exchangeId) : false)
+    (instrumentType
+      ? [...T0InstrumentTypes, ...instrumentTypes].includes(instrumentType)
+      : false) ||
+    (exchangeId
+      ? [...T0ExchangeIds, ...exchangeIds].includes(exchangeId)
+      : false)
   );
 };
 
