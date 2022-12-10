@@ -15,17 +15,20 @@ exports.build = () => {
     getAppDir,
     getCliDir,
     getSdkDir,
+    getJsApi,
   } = require('@kungfu-trader/kungfu-js-api/toolkit/utils');
 
   const appDistDir = path.join(getAppDir(), 'dist', 'app');
   const publicDir = path.join(getAppDir(), 'public');
   const cliDistDir = path.join(getCliDir(), 'dist', 'cli');
+  const apiDistDir = path.join(getJsApi(), 'dist', 'api');
   const kfsDistDir = path.join(getSdkDir(), 'dist', 'sdk');
 
   const targetDistDir = ensureDir(process.cwd().toString(), 'dist');
   const targetAppDistDir = ensureDir(targetDistDir, 'app');
   const targetPublicDistDir = ensureDir(targetDistDir, 'public');
   const targetCliDistDir = ensureDir(targetDistDir, 'cli');
+  const targetApiDistDir = ensureDir(targetDistDir, 'api');
   const targetKfsDistDir = ensureDir(targetDistDir, 'kfs');
   const targetCliDistPublicDir = ensureDir(getCliDir(), 'dist', 'public');
 
@@ -35,6 +38,7 @@ exports.build = () => {
   fse.copySync(appDistDir, targetAppDistDir, {});
   fse.copySync(publicDir, targetPublicDistDir, {});
   fse.copySync(cliDistDir, targetCliDistDir, {});
+  fse.copySync(apiDistDir, targetApiDistDir, {});
   fse.copySync(kfsDistDir, targetKfsDistDir, {});
   fse.copySync(publicDir, targetCliDistPublicDir, {});
 };

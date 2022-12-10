@@ -229,21 +229,24 @@ private:
 
   void apply_close(Book_ptr &book, const Trade &trade) {
     auto &position = book->get_position_for(trade);
-    auto today_volume_pre = position.volume - position.yesterday_volume;
+    // auto today_volume_pre = position.volume - position.yesterday_volume;
     auto cm_mr =
         get_instrument_contract_multiplier_and_margin_ratio(book, trade.exchange_id, trade.instrument_id, position);
-
     auto contract_multiplier = cm_mr.contract_multiplier;
     auto margin = contract_multiplier * trade.price * cm_mr.exchange_rate * trade.volume * cm_mr.margin_ratio;
     auto delta_margin = std::min(position.margin, margin);
     position.margin -= delta_margin;
     position.volume -= trade.volume;
     position.frozen_total -= trade.volume;
+    auto close_today_volume = 0.0;
     if (trade.offset != Offset::CloseToday) {
+      close_today_volume = std::max(trade.volume - position.yesterday_volume, VOLUME_ZERO);
       position.yesterday_volume = std::max(position.yesterday_volume - trade.volume, VOLUME_ZERO);
       position.frozen_yesterday = std::max(position.frozen_yesterday - trade.volume, VOLUME_ZERO);
+    } else {
+      close_today_volume = trade.volume;
     }
-    auto close_today_volume = position.volume - position.yesterday_volume - today_volume_pre;
+    // auto close_today_volume = position.volume - position.yesterday_volume - today_volume_pre;
     auto commission = calculate_commission(book, trade, position, close_today_volume);
     auto realized_pnl =
         (trade.price - position.avg_open_price) * cm_mr.exchange_rate * trade.volume * contract_multiplier;

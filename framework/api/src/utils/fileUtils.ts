@@ -75,7 +75,7 @@ export const getFileContent = (targetPath: string): Promise<string> => {
   targetPath = path.normalize(targetPath);
   return new Promise((resolve, reject): void => {
     const file = fse.createReadStream(targetPath);
-    let fileContextList: Array<Buffer> = [];
+    const fileContextList: Array<Buffer> = [];
     file.on('data', (data) => {
       fileContextList.push(data as Buffer);
     });
@@ -109,7 +109,7 @@ export const removeFileFolder = (targetPath: string): Promise<void> => {
 export const removeFilesInFolder = (targetDir: string) => {
   targetDir = path.normalize(targetDir);
   if (!fse.existsSync(targetDir)) throw new Error(`${targetDir} not existed!`);
-  const promises = fse.readdirSync(targetDir).map((file: any) => {
+  const promises = fse.readdirSync(targetDir).map((file: string) => {
     const filePath = path.join(targetDir, file);
     return removeFileFolder(filePath);
   });

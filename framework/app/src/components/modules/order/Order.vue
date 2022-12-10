@@ -88,11 +88,18 @@ const statisticModalVisible = ref<boolean>(false);
 
 const columns = computed(() => {
   if (currentGlobalKfLocation.value === null) {
-    return getColumns('td', !!historyDate.value);
+    return getColumns(
+      {
+        category: 'td',
+        group: '*',
+        name: '*',
+        mode: 'live',
+      },
+      !!historyDate.value,
+    );
   }
 
-  const { category } = currentGlobalKfLocation.value;
-  return getColumns(category, !!historyDate.value);
+  return getColumns(currentGlobalKfLocation.value, !!historyDate.value);
 });
 
 onMounted(() => {

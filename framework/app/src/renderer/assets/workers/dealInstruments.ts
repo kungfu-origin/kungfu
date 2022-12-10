@@ -4,16 +4,32 @@ import iconv from 'iconv-lite';
 import { KF_INSTRUMENTS_PATH } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 import { InstrumentTypeEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 
+const defaultCharset = 'utf8';
+
+const charsetTransformMap = {
+  'UTF-8': 'utf8',
+  GBK: 'gbk',
+  GB2312: 'gb2312',
+  GB18030: 'gb18030',
+  Big5: 'big5',
+};
+
+function getBufferCharset(buffer: Buffer) {
+  const { encoding, confidence } = jschardet.detect(buffer);
+
+  if (confidence < 0.8) return defaultCharset;
+
+  return encoding in charsetTransformMap
+    ? charsetTransformMap[encoding]
+    : defaultCharset;
+}
+
 function decodeBuffer(name: number[]) {
   name = name.filter((n) => !!n);
   const bufferFrom = Buffer.from(name as unknown as ArrayBuffer);
-  return isBufferGBK(bufferFrom)
-    ? iconv.decode(bufferFrom, 'gbk')
-    : iconv.decode(bufferFrom, 'utf8');
-}
+  const charset = getBufferCharset(bufferFrom);
 
-function isBufferGBK(bufferFrom: Buffer) {
-  return jschardet.detect(bufferFrom).encoding !== 'UTF-8';
+  return iconv.decode(bufferFrom, charset);
 }
 
 type InstrumentResolvedData = Record<string, KungfuApi.InstrumentResolved>;
