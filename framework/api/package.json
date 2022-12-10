@@ -4,7 +4,7 @@
     "name": "Kungfu Trader",
     "email": "info@kungfu.link"
   },
-  "version": "2.4.34-alpha.0",
+  "version": "2.4.34-alpha.1",
   "description": "Kungfu Javascript/Typescript API",
   "license": "Apache-2.0",
   "repository": {
@@ -13,13 +13,25 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   },
+  "binary": {
+    "module_name": "kungfu-js-api",
+    "module_path": "dist/api",
+    "remote_path": "{module_name}/v{major}/v{version}",
+    "package_name": "{module_name}-v{version}-{platform}-{arch}-{configuration}.tar.gz",
+    "host": "https://prebuilt.libkungfu.cc"
+  },
   "types": "./src/typings/index.d.ts",
   "main": "lib/index.js",
   "scripts": {
+    "build": "node lib/webpack/build.js",
+    "clean": "rimraf build dist",
+    "install": "node -e \"require('@kungfu-trader/kungfu-core').prebuilt('install')\"",
+    "package": "node -e \"require('@kungfu-trader/kungfu-core').prebuilt('package')\"",
+    "lint": "eslint src",
     "format": "prettier -l -w --config ../core/.prettierrc.js ."
   },
   "dependencies": {
-    "@kungfu-trader/kungfu-core": "^2.4.34-alpha.0",
+    "@kungfu-trader/kungfu-core": "^2.4.34-alpha.1",
     "cfonts": "^2.10.0",
     "chalk": "^4.1.0",
     "fast-csv": "^4.3.5",
