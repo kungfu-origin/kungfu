@@ -153,6 +153,12 @@ void hero::on_notify() {}
 
 void hero::on_exit() {}
 
+location_ptr hero::get_ledger_home_location() { return ledger_home_location_; }
+
+location_ptr hero::get_master_home_location() { return master_home_location_; }
+
+location_ptr hero::get_master_cmd_location() { return master_cmd_location_; }
+
 uint64_t hero::make_source_dest_hash(uint32_t source_id, uint32_t dest_id) const {
   return uint64_t(source_id) << 32u | uint64_t(dest_id);
 }

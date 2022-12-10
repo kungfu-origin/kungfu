@@ -199,7 +199,8 @@ void MarketDataXTP::OnQueryAllTickersFullInfo(XTPQFI *ticker_info, XTPRI *error_
   } else if (ticker_info->exchange_id == 2) {
     instrument.exchange_id = EXCHANGE_SZE;
   }
-  memcpy(instrument.product_id, ticker_info->ticker_name, PRODUCT_ID_LEN);
+
+  memcpy(instrument.product_id, ticker_info->ticker_name, strlen(ticker_info->ticker_name));
   instrument.instrument_type = get_instrument_type(instrument.exchange_id, instrument.instrument_id);
   get_writer(0)->close_data();
 }
