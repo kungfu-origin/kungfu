@@ -16,19 +16,19 @@ const charsetTransformMap = {
 
 function getBufferCharset(buffer: Buffer) {
   const { encoding, confidence } = jschardet.detect(buffer);
-  console.log(encoding, confidence);
+
   if (confidence < 0.8) return defaultCharset;
 
   return encoding in charsetTransformMap
     ? charsetTransformMap[encoding]
-    : encoding;
+    : defaultCharset;
 }
 
 function decodeBuffer(name: number[]) {
-  // name = name.filter((n) => !!n);
+  name = name.filter((n) => !!n);
   const bufferFrom = Buffer.from(name as unknown as ArrayBuffer);
   const charset = getBufferCharset(bufferFrom);
-  console.log(charset);
+
   return iconv.decode(bufferFrom, charset);
 }
 
@@ -38,12 +38,11 @@ const resolveInstruments = (
   existedInstruments: InstrumentResolvedData,
   instruments: KungfuApi.Instrument[],
 ): InstrumentResolvedData => {
-  return (instruments || []).slice(10, 20).reduce((existedData, item) => {
+  return (instruments || []).reduce((existedData, item) => {
     const { instrument_id, instrument_type, product_id, exchange_id, ukey } =
       item;
     const oldInstrument = existedData[ukey] || null;
     const instrumentName = decodeBuffer(product_id);
-    console.log(instrumentName);
     const instrumentNameResolved =
       instrumentName || oldInstrument?.instrumentName || '';
     const instrumentType =

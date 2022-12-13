@@ -37,6 +37,7 @@ cmake_dir = abspath(make_path(cwd, ".cmake"))
 
 # cpp dependencies
 deps_dir = abspath(make_path(cwd, ".deps"))
+dep_hana_dir = abspath(make_path(deps_dir, "hana-*"))
 dep_pybind11_dir = abspath(make_path(deps_dir, "pybind11*"))
 
 # kungfu source files
@@ -118,6 +119,7 @@ kfc_a = Analysis(
     datas=extend_datas(
         [
             (cmake_dir, "cmake"),
+            (make_path(dep_hana_dir, "include"), "include"),
             (dep_pybind11_dir, "pybind11"),
             (make_path(build_output_dir, "*"), "."),
             (make_path(build_dir, "include"), "include"),

@@ -94,6 +94,12 @@ public:
     live_ = false;
   }
 
+  yijinjing::data::location_ptr get_ledger_home_location();
+
+  yijinjing::data::location_ptr get_master_home_location();
+
+  yijinjing::data::location_ptr get_master_cmd_location();
+
 protected:
   int64_t begin_time_;
   int64_t end_time_;

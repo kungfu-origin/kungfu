@@ -4,6 +4,9 @@ declare const __git_commit_version: string;
 declare const __build_timestamp: number;
 declare const __resources: string;
 
+type AnyFunction = (...args: unknown[]) => unknown;
+type AnyPromiseFunction = (...args: unknown[]) => Promise<unknown>;
+
 declare namespace KungfuApi {
   import {
     BrokerStateStatusEnum,
