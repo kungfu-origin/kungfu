@@ -204,6 +204,7 @@ void Ledger::write_broker_state_to_public() {
   for (const auto &pair : broker_states_) {
     auto &broker_state = pair.second;
     writer->write(now(), broker_state);
+    SPDLOG_INFO("write to public location {}, broker state {}", get_location_uname(broker_state.location_uid), int(broker_state.state));
   }
 }
 

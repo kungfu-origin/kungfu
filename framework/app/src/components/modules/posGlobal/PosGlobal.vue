@@ -32,7 +32,10 @@ import {
   useCurrentGlobalKfLocation,
   useInstruments,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
-import { getPosClosableVolume } from '@kungfu-trader/kungfu-js-api/kungfu';
+import {
+  dealPosition,
+  getPosClosableVolume,
+} from '@kungfu-trader/kungfu-js-api/kungfu';
 
 globalThis.HookKeeper.getHooks().dealTradingData.register(
   {
@@ -45,12 +48,15 @@ globalThis.HookKeeper.getHooks().dealTradingData.register(
 
 const app = getCurrentInstance();
 const columns = getColumns();
-const pos = ref<KungfuApi.Position[]>([]);
+const pos = ref<KungfuApi.PositionResolved[]>([]);
 const { handleBodySizeChange } = useDashboardBodySize();
-const { searchKeyword, tableData } = useTableSearchKeyword<KungfuApi.Position>(
-  pos,
-  ['instrument_id', 'exchange_id', 'direction'],
-);
+const { searchKeyword, tableData } =
+  useTableSearchKeyword<KungfuApi.PositionResolved>(pos, [
+    'instrument_id_resolved',
+    'instrument_id',
+    'exchange_id',
+    'direction',
+  ]);
 
 const {
   currentGlobalKfLocation,
@@ -72,7 +78,11 @@ onMounted(() => {
             .filter('ledger_category', LedgerCategoryEnum.td)
             .list();
 
-          pos.value = toRaw(buildGlobalPositions(positions));
+          pos.value = toRaw(
+            buildGlobalPositions(positions).map((position) =>
+              dealPosition(window.watcher, position),
+            ),
+          );
         });
       },
     );
