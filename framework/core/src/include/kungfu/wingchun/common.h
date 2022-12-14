@@ -510,6 +510,8 @@ inline void order_from_input(const longfist::types::OrderInput &input, longfist:
   order.price_type = input.price_type;
   order.volume_condition = input.volume_condition;
   order.time_condition = input.time_condition;
+
+  order.parent_id = input.parent_id;
 }
 
 } // namespace kungfu::wingchun

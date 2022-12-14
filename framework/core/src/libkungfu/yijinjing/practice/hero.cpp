@@ -151,7 +151,7 @@ const std::unordered_map<uint64_t, longfist::types::Channel> &hero::get_channels
 
 void hero::on_notify() {}
 
-void hero::on_exit() {}
+void hero::on_exit() { SPDLOG_INFO("default on_exit"); }
 
 location_ptr hero::get_ledger_home_location() { return ledger_home_location_; }
 

@@ -26,4 +26,3 @@ RemoveStrategy = 404
 PublishAllAssetInfo = 405
 Calendar = 601
 PositionEnd = 800
-InstrumentEnd = 802

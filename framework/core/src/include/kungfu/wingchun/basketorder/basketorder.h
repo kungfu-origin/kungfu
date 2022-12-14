@@ -17,8 +17,8 @@ typedef std::unordered_map<uint64_t, longfist::types::Trade> TradeMap;
 
 struct BasketOrder {
   uint64_t basket_order_id;
-    int64_t volume_total;
-    double asset_total;
+  int64_t volume_total;
+  double asset_total;
   OrderMap orders = {};
   TradeMap trades = {};
 }

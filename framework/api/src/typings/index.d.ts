@@ -404,6 +404,7 @@ declare namespace KungfuApi {
   export interface Order {
     order_id: bigint; //订单ID
     external_id: bigint; //外部委托ID
+    parent_id: bigint; //母单号
     insert_time: bigint; //订单写入时间
     update_time: bigint; //订单更新时间
 
@@ -456,6 +457,7 @@ declare namespace KungfuApi {
 
   export interface OrderInput {
     order_id: bigint; //订单ID
+    parent_id: bigint; //母单号
 
     instrument_id: string; //合约代码
     exchange_id: string; //交易所代码

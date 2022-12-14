@@ -45,7 +45,6 @@ KF_DEFINE_MARK_TYPE(AssetSync, 404);
 KF_DEFINE_MARK_TYPE(PositionSync, 405);
 KF_DEFINE_MARK_TYPE(KeepPositionsRequest, 406);
 KF_DEFINE_MARK_TYPE(RebuildPositionsRequest, 407);
-KF_DEFINE_MARK_TYPE(InstrumentEnd, 802);
 KF_DEFINE_MARK_TYPE(AlgoOrderInput, 20010);
 KF_DEFINE_MARK_TYPE(AlgoOrderReport, 20011);
 KF_DEFINE_MARK_TYPE(AlgoOrderModify, 20012);
@@ -114,15 +113,6 @@ KF_DEFINE_DATA_TYPE(                                                     //
 );
 
 KF_DEFINE_DATA_TYPE(                                //
-    Location, 10026, PK(location_uid), PERPETUAL(), //
-    (uint32_t, location_uid),                       //
-    (enums::category, category),                    //
-    (enums::mode, mode),                            //
-    (std::string, group),                           //
-    (std::string, name)                             //
-);
-
-KF_DEFINE_DATA_TYPE(                                //
     Register, 10011, PK(location_uid), PERPETUAL(), //
     (uint32_t, location_uid),                       //
     (enums::category, category),                    //
@@ -143,15 +133,15 @@ KF_DEFINE_DATA_TYPE(                                  //
     (std::string, name)                               //
 );
 
+KF_DEFINE_PACK_TYPE(                              //
+    CacheReset, 10013, PK(msg_type), PERPETUAL(), //
+    (int32_t, msg_type)                           //
+);
+
 KF_DEFINE_PACK_TYPE(                                  //
     BrokerStateUpdate, 10014, PK(state), PERPETUAL(), //
     (uint32_t, location_uid),                         //
     (BrokerState, state)                              //
-);
-
-KF_DEFINE_PACK_TYPE(                              //
-    CacheReset, 10013, PK(msg_type), PERPETUAL(), //
-    (int32_t, msg_type)                           //
 );
 
 KF_DEFINE_PACK_TYPE(                                    //
@@ -164,6 +154,15 @@ KF_DEFINE_PACK_TYPE(                                          //
     RequestReadFromPublic, 10022, PK(source_id), PERPETUAL(), //
     (uint32_t, source_id),                                    //
     (int64_t, from_time)                                      //
+);
+
+KF_DEFINE_DATA_TYPE(                                //
+    Location, 10026, PK(location_uid), PERPETUAL(), //
+    (uint32_t, location_uid),                       //
+    (enums::category, category),                    //
+    (enums::mode, mode),                            //
+    (std::string, group),                           //
+    (std::string, name)                             //
 );
 
 KF_DEFINE_PACK_TYPE(                                        //
@@ -207,6 +206,23 @@ KF_DEFINE_PACK_TYPE(                                  //
     Band, 10033, PK(source_id, dest_id), PERPETUAL(), //
     (uint32_t, source_id),                            //
     (uint32_t, dest_id)                               //
+);
+
+KF_DEFINE_DATA_TYPE(                             //
+    Basket, 100040, PK(basket_uid), PERPETUAL(), //
+    (uint32_t, basket_uid),                      //
+    (std::string, basket_name),                  //
+    (BasketVolumeType, volume_type)              // 比例/数量
+);
+
+KF_DEFINE_PACK_TYPE(                                                                   //
+    BasketInstrument, 100041, PK(basket_uid, instrument_id, exchange_id), PERPETUAL(), //
+    (uint32_t, basket_uid),                                                            //
+    (kungfu::array<char, INSTRUMENT_ID_LEN>, instrument_id),                           // 合约ID
+    (kungfu::array<char, EXCHANGE_ID_LEN>, exchange_id),                               // 交易所ID
+    (InstrumentType, instrument_type),                                                 // 合约类型
+    (double, volume_multiple),                                                         // volume比例
+    (int64_t, volume)                                                                  // 数量
 );
 
 KF_DEFINE_PACK_TYPE(                                    //
@@ -411,6 +427,7 @@ KF_DEFINE_PACK_TYPE(                                                 //
 KF_DEFINE_PACK_TYPE(                                       //
     OrderInput, 201, PK(order_id), TIMESTAMP(insert_time), //
     (uint64_t, order_id),                                  // 订单ID
+    (uint64_t, parent_id),                                 // 母单号
 
     (kungfu::array<char, INSTRUMENT_ID_LEN>, instrument_id), // 合约代码
     (kungfu::array<char, EXCHANGE_ID_LEN>, exchange_id),     // 交易所代码
@@ -468,6 +485,7 @@ KF_DEFINE_PACK_TYPE(                                  //
     Order, 203, PK(order_id), TIMESTAMP(insert_time), //
     (uint64_t, order_id),                             // 订单ID
     (uint64_t, external_id),                          // 柜台订单id, 字符型则hash转换
+    (uint64_t, parent_id),                            // 母单号
 
     (int64_t, insert_time), // 订单写入时间
     (int64_t, update_time), // 订单更新时间
@@ -713,6 +731,26 @@ KF_DEFINE_PACK_TYPE(                                  //
     (double, total_price),                            //
     (double, total_volume),                           //
     (double, avg_price)                               //
+);
+
+KF_DEFINE_PACK_TYPE(                                        //
+    BasketOrder, 220, PK(order_id), TIMESTAMP(insert_time), //
+    (uint64_t, order_id),                                   // 篮子单uid
+    (uint64_t, parent_id),                                  // 母单号
+
+    (int64_t, insert_time), // 下单时间
+    (int64_t, update_time), // 更新时间
+
+    (InstrumentType, instrument_type), // 合约类型
+
+    (Side, side),     // 买卖方向
+    (Offset, offset), // 开平方向
+
+    (double, price),        // 成交价格
+    (int64_t, volume),      // 成交量
+    (int64_t, volume_left), // 剩余数量
+
+    (BasketOrderStatus, status) // 订单状态
 );
 
 KF_DEFINE_PACK_TYPE(                                                       //
