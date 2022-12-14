@@ -99,6 +99,8 @@ export const useGlobalStore = defineStore('global', {
           tag: 'update:tdGroup',
           tdGroups: this.tdGroupList,
         });
+        this.setCurrentGlobalKfLocation(null);
+        this.setDefaultCurrentGlobalKfLocation();
       });
     },
 
@@ -174,18 +176,7 @@ export const useGlobalStore = defineStore('global', {
           strategys: strategy,
         });
 
-        if (
-          this.currentGlobalKfLocation === null ||
-          !this.checkCurrentGlobalKfLocationExisted()
-        ) {
-          if (td.length) {
-            this.setCurrentGlobalKfLocation(td[0]);
-          } else if (strategy.length) {
-            this.setCurrentGlobalKfLocation(strategy[0]);
-          } else {
-            this.setCurrentGlobalKfLocation(null);
-          }
-        }
+        this.setDefaultCurrentGlobalKfLocation();
       });
     },
 
@@ -238,6 +229,21 @@ export const useGlobalStore = defineStore('global', {
       );
 
       return afterFilter.length > 0;
+    },
+
+    setDefaultCurrentGlobalKfLocation() {
+      if (
+        this.currentGlobalKfLocation === null ||
+        !this.checkCurrentGlobalKfLocationExisted()
+      ) {
+        if (this.tdList.length) {
+          this.setCurrentGlobalKfLocation(this.tdList[0]);
+        } else if (this.strategyList.length) {
+          this.setCurrentGlobalKfLocation(this.strategyList[0]);
+        } else {
+          this.setCurrentGlobalKfLocation(null);
+        }
+      }
     },
 
     setKfExtConfigs() {

@@ -1834,20 +1834,18 @@ export const useMakeOrderInfo = (
   });
 
   const currentResidueMoney = computed(() => {
-    const { side } = formState.value;
+    const { offset } = formState.value;
     if (currentAvailMoney.value !== '--') {
       if (currentTradeAmount.value !== '--') {
-        if (side === SideEnum.Buy) {
+        if (offset === OffsetEnum.Open) {
           return dealKfPrice(
             Number(currentAvailMoney.value) - Number(currentTradeAmount.value),
           );
-        } else if (side === SideEnum.Sell) {
+        } else {
           return dealKfPrice(
             Number(currentAvailMoney.value) + Number(currentTradeAmount.value),
           );
         }
-
-        return '--';
       } else {
         return currentAvailMoney.value;
       }
