@@ -9,6 +9,9 @@ export const getColumns = (
   sorter: (
     dataIndex: string,
   ) => (a: KungfuApi.KfConfig, b: KungfuApi.KfConfig) => number,
+  marginSorter: (
+    dataIndex: string,
+  ) => (a: KungfuApi.KfConfig, b: KungfuApi.KfConfig) => number,
   isShowAssetMargin: boolean,
 ): AntTableColumns =>
   (globalThis.HookKeeper.getHooks().dealTradingTable as DealTradingTableHooks)
@@ -87,7 +90,7 @@ export const getColumns = (
               dataIndex: 'avail_margin',
               align: 'right',
               sorter: {
-                compare: sorter('avail_margin'),
+                compare: marginSorter('avail_margin'),
               },
               width: 110,
             },
@@ -96,7 +99,7 @@ export const getColumns = (
               dataIndex: 'cash_debt',
               align: 'right',
               sorter: {
-                compare: sorter('cash_debt'),
+                compare: marginSorter('cash_debt'),
               },
               width: 110,
             },
@@ -105,7 +108,7 @@ export const getColumns = (
               dataIndex: 'total_asset',
               align: 'right',
               sorter: {
-                compare: sorter('total_asset'),
+                compare: marginSorter('total_asset'),
               },
               width: 110,
             },
