@@ -83,6 +83,14 @@ void WatcherAutoClient::connect(const event_ptr &event, const longfist::types::R
   auto resume_time_point = get_resume_policy().get_connect_time(app_, register_data);
   auto app_uid = register_data.location_uid;
 
+  // for write msg and get msg from ledger public
+  auto ledger_uid = app_.get_ledger_home_location()->uid;
+  if ((uint32_t)app_uid == (uint32_t)ledger_uid) {
+    // resume time has to be 0, otherwise the broker state be lost in cli mode
+    app_.request_read_from_public(app_.now(), ledger_uid, 0);
+    return;
+  }
+
   if (bypass_trading_data_) {
     auto app_location = app_.get_location(app_uid);
 
@@ -100,17 +108,9 @@ void WatcherAutoClient::connect(const event_ptr &event, const longfist::types::R
       app_.request_write_to(app_.now(), app_location->uid);
       SPDLOG_INFO("resume {} connection from {}", app_.get_location_uname(app_uid), time::strftime(resume_time_point));
     }
-    return;
+  } else {
+    wingchun::broker::SilentAutoClient::connect(event, register_data);
   }
-
-  // for write msg and get msg from ledger public
-  auto ledger_uid = app_.get_ledger_home_location()->uid;
-  if ((uint32_t)app_uid == (uint32_t)ledger_uid) {
-    app_.request_read_from_public(app_.now(), ledger_uid, resume_time_point);
-    return;
-  }
-
-  wingchun::broker::SilentAutoClient::connect(event, register_data);
 }
 
 void WatcherAutoClient::connect(const event_ptr &event, const longfist::types::Band &band) { return; }

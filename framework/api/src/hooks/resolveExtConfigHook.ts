@@ -5,7 +5,6 @@ export type ResolveExtConfigHook = (
   extConfig: KungfuApi.KfExtConfig,
 ) => KungfuApi.KfExtConfig;
 
-export default new ResetOptionHook<
-  ResolveExtConfigHook,
-  KungfuApi.KfExhibitConfig
->('ResolveExtConfigHook');
+export default new ResetOptionHook<ResolveExtConfigHook, KungfuApi.KfExtConfig>(
+  'ResolveExtConfigHook',
+);
