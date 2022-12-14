@@ -664,7 +664,6 @@ void Watcher::AfterMasterDown() {
 }
 
 void Watcher::UpdateBrokerState(uint32_t source_id, uint32_t dest_id, const BrokerStateUpdate &state) {
-  SPDLOG_INFO("UpdateBrokerState location {}, state {}", get_location_uname(state.location_uid), state.state);
   auto source_location = get_location(state.location_uid);
   if (source_location->category == category::TD or source_location->category == category::MD) {
     location_uid_states_map_.insert_or_assign(source_location->uid, int(state.state));
