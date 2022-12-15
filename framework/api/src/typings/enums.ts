@@ -48,8 +48,15 @@ export enum InstrumentTypeEnum {
   cryptofuture,
   multi,
 }
-
 export type InstrumentTypes = keyof typeof InstrumentTypeEnum;
+
+export enum BasketVolumeTypeEnum {
+  Unknown,
+  Quantity,
+  Proportion,
+}
+
+export type BasketVolumeTypes = keyof typeof BasketVolumeTypeEnum;
 
 export type StrategyExtTypes = 'trade' | 'default' | 'unknown';
 
@@ -156,6 +163,14 @@ export enum OrderStatusEnum {
 }
 
 export type OrderStatusTypes = keyof typeof OrderStatusEnum;
+
+export enum BasketOrderStatusEnum {
+  Unknown,
+  Pending,
+  PartialFilledNotActive,
+  PartialFilledActive,
+  Filled,
+}
 
 export enum KfCategoryEnum {
   md,

@@ -64,6 +64,12 @@ module.exports = function () {
     CommissionStore: function (home) {
       return new binding.CommissionStore(home);
     },
+    BasketStore: function (home) {
+      return new binding.BasketStore(home);
+    },
+    BasketInstrumentStore: function (home) {
+      return new binding.BasketInstrumentStore(home);
+    },
     watcher: function (
       home,
       name,

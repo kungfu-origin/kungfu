@@ -98,6 +98,8 @@ export default {
 
   tradingConfig: {
     unknown: '未知',
+    quantity: '按数量',
+    proportion: '按比例',
     default: '封装策略',
     order_task: '下单任务',
 

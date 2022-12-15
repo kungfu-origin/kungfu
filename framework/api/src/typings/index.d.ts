@@ -33,6 +33,7 @@ declare namespace KungfuApi {
     OrderActionFlagEnum,
     OrderInputKeyEnum,
     KfExtConfigTypes,
+    BasketVolumeTypeEnum,
   } from './enums';
   import { Dayjs } from 'dayjs';
 
@@ -316,6 +317,16 @@ declare namespace KungfuApi {
     setAllRiskSetting(riskSettings: RiskSettingOrigin[]): boolean;
   }
 
+  export interface BasketStore {
+    getAllBasket(): Basket[] | false;
+    setAllBasket(baskets: Basket[]): boolean;
+  }
+
+  export interface BasketInstrumentStore {
+    getAllBasketInstrument(): BasketInstrument[] | false;
+    setAllBasketInstrument(basketInstruments: BasketInstrument[]): boolean;
+  }
+
   export interface DataTable<T> {
     [hashed: string]: T;
     filter(key: string, value: string | number | bigint): DataTable<T>;
@@ -489,6 +500,20 @@ declare namespace KungfuApi {
     match_number: bigint; // 成交约定号
     is_specific: boolean; // 是否受限股份
     insert_time: bigint;
+  }
+
+  export interface BasketOrder {
+    order_id: bigint; //订单ID
+    parent_id: number; //母单号
+    insert_time: bigint; //订单写入时间
+    update_time: bigint; //订单更新时间
+    instrument_type: InstrumentTypeEnum; //合约类型
+    side: SideEnum;
+    offset: OffsetEnum;
+    price: number;
+    volume: bigint;
+    volume_left: bigint;
+    volume_alive: bigint;
   }
 
   export interface OrderStat {
@@ -689,6 +714,20 @@ declare namespace KungfuApi {
     min_commission: number;
   }
 
+  export interface Basket {
+    id: number;
+    name: string;
+    volume_type: BasketVolumeTypeEnum;
+  }
+
+  export interface BasketInstrument {
+    basket_id: number;
+    instrument_id: string;
+    exchange_id: string;
+    instrument_type: InstrumentTypeEnum;
+    volume: number;
+  }
+
   export interface RiskSetting {
     max_order_volume: number;
     max_daily_volume: number;
@@ -759,6 +798,7 @@ declare namespace KungfuApi {
       blockMessage: BlockMessage,
       tdLocation: KfLocation,
     ): bigint;
+    IssueBasketOrder(basketOrder: BasketOrder, tdLocation: KfLocation): bigint;
     now(): bigint;
   }
 
@@ -775,12 +815,17 @@ declare namespace KungfuApi {
     Trade(): Trade;
     Commission(): Commission;
     RiskSetting(): RiskSettingOrigin;
+    Basket(): Basket;
+    BasketInstrument(): BasketInstrument;
+    BasketOrder(): BasketOrder;
   }
 
   export interface Kungfu {
     ConfigStore(kfHome: string): ConfigStore;
     RiskSettingStore(kfHome: string): RiskSettingStore;
     CommissionStore(kfHome: string): CommissionStore;
+    BasketStore(kfHome: string): BasketStore;
+    BasketInstrumentStore(kfHome: string): BasketInstrumentStore;
     History(kfHome: string): HistoryStore;
     longfist: Longfist;
     watcher(

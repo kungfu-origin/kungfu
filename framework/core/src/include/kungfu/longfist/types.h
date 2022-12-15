@@ -208,11 +208,11 @@ KF_DEFINE_PACK_TYPE(                                  //
     (uint32_t, dest_id)                               //
 );
 
-KF_DEFINE_DATA_TYPE(                             //
-    Basket, 100040, PK(basket_uid), PERPETUAL(), //
-    (uint32_t, basket_uid),                      //
-    (std::string, basket_name),                  //
-    (BasketVolumeType, volume_type)              // 比例/数量
+KF_DEFINE_DATA_TYPE(                     //
+    Basket, 100040, PK(id), PERPETUAL(), //
+    (uint32_t, id),                      //
+    (std::string, name),                 //
+    (BasketVolumeType, volume_type)      // 比例/数量
 );
 
 KF_DEFINE_PACK_TYPE(                                                                   //
@@ -220,9 +220,8 @@ KF_DEFINE_PACK_TYPE(                                                            
     (uint32_t, basket_uid),                                                            //
     (kungfu::array<char, INSTRUMENT_ID_LEN>, instrument_id),                           // 合约ID
     (kungfu::array<char, EXCHANGE_ID_LEN>, exchange_id),                               // 交易所ID
-    (InstrumentType, instrument_type),                                                 // 合约类型
-    (double, volume_multiple),                                                         // volume比例
-    (int64_t, volume)                                                                  // 数量
+    (InstrumentType, instrument_type), // 合约类型                                                // volume比例
+    (int64_t, volume)                  // 数量
 );
 
 KF_DEFINE_PACK_TYPE(                                    //
@@ -741,14 +740,13 @@ KF_DEFINE_PACK_TYPE(                                        //
     (int64_t, insert_time), // 下单时间
     (int64_t, update_time), // 更新时间
 
-    (InstrumentType, instrument_type), // 合约类型
-
     (Side, side),     // 买卖方向
     (Offset, offset), // 开平方向
 
-    (double, price),        // 成交价格
-    (int64_t, volume),      // 成交量
-    (int64_t, volume_left), // 剩余数量
+    (double, traded_amount), // 成交金额
+    (int64_t, volume),       // 成交量
+    (int64_t, volume_left),  // 剩余数量
+    (int64_t, volume_alive), // 活跃数量, 子单已结束, 活跃数量volume_alive则会减子单volume
 
     (BasketOrderStatus, status) // 订单状态
 );

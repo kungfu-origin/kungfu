@@ -127,6 +127,16 @@ inline bool is_final_status(const longfist::enums::OrderStatus &status) {
   }
 }
 
+inline bool is_final_basket_order_status(const longfist::enums::BasketOrderStatus &status) {
+  switch (status) {
+  case longfist::enums::BasketOrderStatus::Unknown:
+  case longfist::enums::BasketOrderStatus::Pending:
+    return false;
+  default:
+    return true;
+  }
+}
+
 inline bool is_convertible_bond(const std::string &instrument_id, const std::string &exchange_id) {
   return ((string_equals_n(instrument_id, "123", 3) || string_equals_n(instrument_id, "128", 3) ||
            string_equals_n(instrument_id, "117", 3) || string_equals_n(instrument_id, "127", 3) ||
@@ -480,6 +490,10 @@ inline longfist::enums::Direction get_direction(longfist::enums::InstrumentType 
 
 inline uint32_t hash_instrument(const char *exchange_id, const char *instrument_id) {
   return yijinjing::util::hash_str_32(instrument_id) ^ yijinjing::util::hash_str_32(exchange_id);
+}
+
+inline uint32_t hash_basket_instrument(uint32_t basket_uid, const char *exchange_id, const char *instrument_id) {
+  return basket_uid ^ yijinjing::util::hash_str_32(instrument_id) ^ yijinjing::util::hash_str_32(exchange_id);
 }
 
 inline uint32_t hash_account(const std::string &source_name, const std::string &account_id) {

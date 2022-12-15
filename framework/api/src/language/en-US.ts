@@ -98,6 +98,8 @@ export default {
 
   tradingConfig: {
     unknown: 'Unknown',
+    quantity: 'Quantity',
+    proportion: 'Proportion',
     default: 'Default',
     order_task: 'Trade',
 

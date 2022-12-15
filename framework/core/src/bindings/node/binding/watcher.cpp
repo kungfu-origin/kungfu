@@ -116,24 +116,23 @@ void WatcherAutoClient::connect(const event_ptr &event, const longfist::types::R
 void WatcherAutoClient::connect(const event_ptr &event, const longfist::types::Band &band) { return; }
 
 Watcher::Watcher(const Napi::CallbackInfo &info)
-    : ObjectWrap(info),                                                                                   //
-      apprentice(GetWatcherLocation(info), true),                                                         //
-      bypass_accounting_(GetBypassAccounting(info)),                                                      //
-      bypass_trading_data_(GetBypassTradingData(info)),                                                   //
-      refresh_trading_data_before_sync_(GetRefreshLedgerBeforeSync(info)),                                //
-      milliseconds_sleep_after_step_(GetMillisecondsSleepAfterStep(info)),                                //
-      broker_client_(*this, bypass_trading_data_),                                                        //
-      bookkeeper_(*this, broker_client_),                                                                 //
-      state_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),                           //
-      ledger_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),                          //
-      app_states_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),                      //
-      history_ref_(Napi::ObjectReference::New(History::NewInstance({info[0]}).ToObject(), 1)),            //
-      config_ref_(Napi::ObjectReference::New(ConfigStore::NewInstance({info[0]}).ToObject(), 1)),         //
-      commission_ref_(Napi::ObjectReference::New(CommissionStore::NewInstance({info[0]}).ToObject(), 1)), //
-      strategy_states_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),                 //
-      update_state(state_ref_),                                                                           //
-      update_ledger(ledger_ref_),                                                                         //
-      publish(*this, state_ref_),                                                                         //
+    : ObjectWrap(info),                                                                           //
+      apprentice(GetWatcherLocation(info), true),                                                 //
+      bypass_accounting_(GetBypassAccounting(info)),                                              //
+      bypass_trading_data_(GetBypassTradingData(info)),                                           //
+      refresh_trading_data_before_sync_(GetRefreshLedgerBeforeSync(info)),                        //
+      milliseconds_sleep_after_step_(GetMillisecondsSleepAfterStep(info)),                        //
+      broker_client_(*this, bypass_trading_data_),                                                //
+      bookkeeper_(*this, broker_client_),                                                         //
+      basketorder_engine_(*this),                                                                 //
+      state_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),                   //
+      ledger_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),                  //
+      app_states_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),              //
+      config_ref_(Napi::ObjectReference::New(ConfigStore::NewInstance({info[0]}).ToObject(), 1)), //
+      strategy_states_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),         //
+      update_state(state_ref_),                                                                   //
+      update_ledger(ledger_ref_),                                                                 //
+      publish(*this, state_ref_),                                                                 //
       reset_cache(*this, ledger_ref_) {
   serialize::InitStateMap(info, state_ref_, "state");
   serialize::InitStateMap(info, ledger_ref_, "ledger");
@@ -169,9 +168,7 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
 Watcher::~Watcher() {
   uv_work_.data = nullptr;
   strategy_states_ref_.Unref();
-  commission_ref_.Unref();
   config_ref_.Unref();
-  history_ref_.Unref();
   app_states_ref_.Unref();
   ledger_ref_.Unref();
   state_ref_.Unref();
@@ -229,12 +226,6 @@ Napi::Value Watcher::GetInstrumentType(const Napi::CallbackInfo &info) {
   auto instrument_type = get_instrument_type(exchange_id, instrument_id);
   return Napi::Number::New(info.Env(), int(instrument_type));
 }
-
-Napi::Value Watcher::GetConfig(const Napi::CallbackInfo &info) { return config_ref_.Value(); }
-
-Napi::Value Watcher::GetHistory(const Napi::CallbackInfo &info) { return history_ref_.Value(); }
-
-Napi::Value Watcher::GetCommission(const Napi::CallbackInfo &info) { return commission_ref_.Value(); }
 
 Napi::Value Watcher::GetState(const Napi::CallbackInfo &info) { return state_ref_.Value(); }
 
@@ -299,6 +290,11 @@ Napi::Value Watcher::IssueOrder(const Napi::CallbackInfo &info) {
   return InteractWithTD<OrderInput>(info, &OrderInput::order_id);
 }
 
+Napi::Value Watcher::IssueBasketOrder(const Napi::CallbackInfo &info) {
+  SPDLOG_INFO("issue basket order manually");
+  return InteractWithTD<BasketOrder>(info, &BasketOrder::order_id);
+}
+
 Napi::Value Watcher::CancelOrder(const Napi::CallbackInfo &info) {
   SPDLOG_INFO("cancel order manually");
   return InteractWithTD<OrderAction>(info, &OrderAction::order_action_id);
@@ -359,11 +355,9 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
                       InstanceMethod("isReadyToInteract", &Watcher::IsReadyToInteract),                 //
                       InstanceMethod("issueBlockMessage", &Watcher::IssueBlockMessage),                 //
                       InstanceMethod("issueOrder", &Watcher::IssueOrder),                               //
+                      InstanceMethod("issueBasketOrder", &Watcher::IssueBasketOrder),                   //
                       InstanceMethod("cancelOrder", &Watcher::CancelOrder),                             //
                       InstanceMethod("requestMarketData", &Watcher::RequestMarketData),                 //
-                      InstanceAccessor("config", &Watcher::GetConfig, &Watcher::NoSet),                 //
-                      InstanceAccessor("history", &Watcher::GetHistory, &Watcher::NoSet),               //
-                      InstanceAccessor("commission", &Watcher::GetCommission, &Watcher::NoSet),         //
                       InstanceAccessor("state", &Watcher::GetState, &Watcher::NoSet),                   //
                       InstanceAccessor("ledger", &Watcher::GetLedger, &Watcher::NoSet),                 //
                       InstanceAccessor("appStates", &Watcher::GetAppStates, &Watcher::NoSet),           //
@@ -393,6 +387,7 @@ void Watcher::on_react() {
 
 void Watcher::on_start() {
   broker_client_.on_start(events_);
+  basketorder_engine_.on_start(events_);
 
   if (not bypass_accounting_ and not bypass_trading_data_) {
     bookkeeper_.on_start(events_);
@@ -409,6 +404,7 @@ void Watcher::on_start() {
     events_ | is(Quote::tag) | is_subscribed(subscribed_instruments_) | $$(UpdateBook(event, event->data<Quote>()));
     events_ | is(OrderInput::tag) | $$(UpdateBook(event, event->data<OrderInput>()));
     events_ | is(Order::tag) | $$(UpdateBook(event, event->data<Order>()));
+    events_ | is(Order::tag) | $$(UpdateBasketOrder(event->trigger_time(), event->data<Order>()));
     events_ | is(Trade::tag) | $$(UpdateBook(event, event->data<Trade>()));
     events_ | is(Position::tag) | $$(UpdateBook(event, event->data<Position>()));
     events_ | is(PositionEnd::tag) | $$(UpdateAsset(event, event->data<PositionEnd>().holder_uid));

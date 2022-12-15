@@ -227,11 +227,11 @@ enum class OrderStatus : int8_t {
 
 inline std::ostream &operator<<(std::ostream &os, OrderStatus t) { return os << int8_t(t); }
 
-enum class BasketOrderStatus : int8_t { Unknown, Pending, Done, Error };
+enum class BasketOrderStatus : int8_t { Unknown, Pending, PartialFilledNotActive, PartialFilledActive, Filled };
 
 inline std::ostream &operator<<(std::ostream &os, BasketOrderStatus t) { return os << int8_t(t); }
 
-enum class BasketVolumeType : int8_t { Unknown, Equal, Proportion };
+enum class BasketVolumeType : int8_t { Unknown, Quantity, Proportion };
 
 inline std::ostream &operator<<(std::ostream &os, BasketVolumeType t) { return os << int8_t(t); }
 

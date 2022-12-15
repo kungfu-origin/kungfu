@@ -180,7 +180,8 @@ constexpr auto TradingDataTypes = boost::hana::make_map( //
     TYPE_PAIR(OrderInput),                               //
     TYPE_PAIR(Order),                                    //
     TYPE_PAIR(Trade),                                    //
-    TYPE_PAIR(OrderStat)                                 //
+    TYPE_PAIR(OrderStat),                                //
+    TYPE_PAIR(BasketOrder)                               //
 );
 
 constexpr auto build_data_map = [](auto types) {
