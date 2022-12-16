@@ -14,7 +14,7 @@
 #include "io.h"
 #include "journal.h"
 #include "operators.h"
-#include <kungfu/wingchun/basketorder/engine.h>
+#include <kungfu/wingchun/basketorder/basketorderengine.h>
 #include <kungfu/wingchun/book/bookkeeper.h>
 #include <kungfu/wingchun/broker/client.h>
 #include <kungfu/yijinjing/cache/runtime.h>
@@ -244,7 +244,7 @@ private:
   }
 
   void UpdateBasketOrder(int64_t trigger_time, const longfist::types::Order &order) {
-    if (basketorder_engine_.has_basket_order(order.parent_id)) {
+    if (basketorder_engine_.has_basket_order_state(order.parent_id)) {
       basketorder_engine_.update_basket_order(trigger_time, order);
       trading_bank_ << basketorder_engine_.get_basket_order(order.parent_id);
     }
