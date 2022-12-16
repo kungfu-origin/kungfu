@@ -100,6 +100,8 @@ public:
 
   static void Init(Napi::Env env, Napi::Object exports);
 
+  void Quit(const Napi::CallbackInfo& info);
+
 protected:
   const bool bypass_accounting_;
   const bool bypass_trading_data_;
