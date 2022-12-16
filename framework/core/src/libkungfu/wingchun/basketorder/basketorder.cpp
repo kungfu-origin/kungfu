@@ -15,5 +15,5 @@ BasketOrderState::BasketOrderState(uint32_t source, uint32_t dest, int64_t trigg
 
 void BasketOrderState::update(const longfist::types::Order &order) { orders.insert_or_assign(order.order_id, order); }
 
-const state<longfist::types::BasketOrder> &BasketOrderState::get_state() { return state_data; }
+state<longfist::types::BasketOrder> &BasketOrderState::get_state() { return state_data; }
 } // namespace kungfu::wingchun::basketorder

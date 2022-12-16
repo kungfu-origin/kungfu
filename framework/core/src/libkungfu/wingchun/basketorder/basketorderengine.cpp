@@ -28,6 +28,7 @@ void BasketOrderEngine::on_basket_order(int64_t trigger_time, uint32_t source, u
 void BasketOrderEngine::update_basket_order(int64_t trigger_time, const longfist::types::Order &order) {
 
   if (not has_basket_order_state(order.parent_id)) {
+      throw wingchun_error(fmt::format("basket order is not exist {} {}", order.parent_id));
     return;
   }
 
@@ -64,7 +65,7 @@ bool BasketOrderEngine::has_basket_order_state(uint64_t basket_order_id) {
   return basket_order_states_.find(basket_order_id) != basket_order_states_.end();
 }
 
-const state<longfist::types::BasketOrder> &BasketOrderEngine::get_basket_order(uint64_t basket_order_id) {
+state<longfist::types::BasketOrder> &BasketOrderEngine::get_basket_order(uint64_t basket_order_id) {
   return basket_order_states_.at(basket_order_id)->get_state();
 }
 

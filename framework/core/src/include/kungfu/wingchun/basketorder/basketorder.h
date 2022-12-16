@@ -22,7 +22,7 @@ struct BasketOrderState {
 
   void update(const longfist::types::Order &order);
 
-  const kungfu::state<longfist::types::BasketOrder> &get_state();
+    kungfu::state<longfist::types::BasketOrder> &get_state();
 
   //   int64_t get_total_volume();
 
