@@ -757,6 +757,7 @@ declare namespace KungfuApi {
       blockMessage: BlockMessage,
       tdLocation: KfLocation,
     ): bigint;
+    quit(): void;
     now(): bigint;
   }
 

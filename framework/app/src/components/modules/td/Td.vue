@@ -160,6 +160,24 @@ const columns = computed(() => {
       );
     };
   };
+
+  const marginSorter = (dataIndex) => {
+    return (a: KungfuApi.KfConfig, b: KungfuApi.KfConfig) => {
+      return (
+        (+Number(
+          getAssetMarginsByKfConfig(a)[
+            dataIndex as keyof KungfuApi.AssetMargin
+          ],
+        ) || 0) -
+        (+Number(
+          getAssetMarginsByKfConfig(b)[
+            dataIndex as keyof KungfuApi.AssetMargin
+          ],
+        ) || 0)
+      );
+    };
+  };
+
   if (currentGlobalKfLocation.value === null) {
     return getColumns(
       {
@@ -169,6 +187,7 @@ const columns = computed(() => {
         mode: 'live',
       },
       sorter,
+      marginSorter,
       isShowAssetMargin.value,
     );
   }
@@ -176,6 +195,7 @@ const columns = computed(() => {
   return getColumns(
     currentGlobalKfLocation.value,
     sorter,
+    marginSorter,
     isShowAssetMargin.value,
   );
 });
