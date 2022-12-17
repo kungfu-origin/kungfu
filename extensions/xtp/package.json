@@ -4,7 +4,7 @@
     "name": "Kungfu Trader",
     "email": "info@kungfu.link"
   },
-  "version": "2.4.35",
+  "version": "2.4.36-alpha.0",
   "description": "Kungfu Extension - XTP Demo",
   "license": "Apache-2.0",
   "main": "package.json",
@@ -29,10 +29,10 @@
     "package": "kfs project package"
   },
   "dependencies": {
-    "@kungfu-trader/kungfu-core": "^2.4.35"
+    "@kungfu-trader/kungfu-core": "^2.4.36-alpha.0"
   },
   "devDependencies": {
-    "@kungfu-trader/kungfu-sdk": "^2.4.35"
+    "@kungfu-trader/kungfu-sdk": "^2.4.36-alpha.0"
   },
   "kungfuDependencies": {
     "xtp": "v2.2.32.2"
@@ -40,15 +40,75 @@
   "kungfuBuild": {
     "cpp": {
       "target": "bind/python",
-      "links": [
-        "xtptraderapi",
-        "xtpquoteapi"
-      ]
+      "links": {
+        "windows": [
+          "xtptraderapi",
+          "xtpquoteapi"
+        ],
+        "linux": [
+          "xtptraderapi",
+          "xtpquoteapi"
+        ],
+        "macos": [
+          "xtptraderapi",
+          "xtpquoteapi"
+        ]
+      }
     }
   },
   "kungfuConfig": {
     "key": "xtp",
     "name": "XTP",
+    "language": {
+      "zh-CN": {
+        "account_name": "账户别名",
+        "account_name_tip": "请填写账户别名",
+        "account_id": "账户",
+        "account_id_tip": "请填写账户, 例如:1504091",
+        "password": "密码",
+        "password_tip": "请填写密码, 例如:123456",
+        "software_key": "软件密钥",
+        "software_key_tip": "请填写软件密钥, 例如:b8aa7173bba3470e390d787219b2112",
+        "td_ip": "交易IP",
+        "td_ip_tip": "请填写交易IP, 例如:61.152.102.111",
+        "td_port": "交易端口",
+        "td_port_tip": "请填写交易端口, 例如:8601",
+        "client_id": "客户ID",
+        "client_id_tip": "请填写自定义多点登录ID 1-99整数,不同节点之间不要重复",
+        "md_ip": "行情IP",
+        "md_ip_tip": "请填写行情IP, 例如:61.152.102.110",
+        "md_port": "行情端口",
+        "md_port_tip": "请填写行情端口, 例如:8602",
+        "protocol": "协议",
+        "protocol_tip": "请选择协议, tcp 或者 udp",
+        "buffer_size": "缓冲区大小",
+        "buffer_size_tip": "请填写 缓冲区大小(mb)"
+      },
+      "en-US": {
+        "account_name": "account name",
+        "account_name_tip": "Please enter account name",
+        "account_id": "account id",
+        "account_id_tip": "Please enter account id",
+        "password": "password",
+        "password_tip": "Please enter password, for example:123456",
+        "software_key": "software key",
+        "software_key_tip": "Please enter software key, for example :b8aa7173bba3470e390d787219b2112",
+        "td_ip": "td IP",
+        "td_ip_tip": "Please enter td IP, for example:61.152.102.111",
+        "td_port": "td port",
+        "td_port_tip": "Please enter td port, for example:8601",
+        "client_id": "client id",
+        "client_id_tip": "Please enter t user-defined multipoint client ID, which is an integer ranging from 1 to 99. The value must be unique on different nodes",
+        "md_ip": "md IP",
+        "md_ip_tip": "Please enter md IP, for example :61.152.102.110",
+        "md_port": "md port",
+        "md_port_tip": "Please enter md port, for example:8602",
+        "protocol": "protocol",
+        "protocol_tip": "Please select protocol, tcp or udp",
+        "buffer_size": "buffer size",
+        "buffer_size_tip": "Please enter buffer size(mb)"
+      }
+    },
     "config": {
       "td": {
         "type": [
@@ -57,52 +117,52 @@
         "settings": [
           {
             "key": "account_name",
-            "name": "account_name",
+            "name": "xtp.account_name",
             "type": "str",
-            "tip": "请填写账户别名"
+            "tip": "xtp.account_name_tip"
           },
           {
             "key": "account_id",
-            "name": "account_id",
+            "name": "xtp.account_id",
             "type": "str",
             "required": true,
             "primary": true,
-            "tip": "请填写账户, 例如:1504091"
+            "tip": "xtp.account_id_tip"
           },
           {
             "key": "password",
-            "name": "password",
+            "name": "xtp.password",
             "type": "password",
             "required": true,
-            "tip": "请填写密码, 例如:123456"
+            "tip": "xtp.password_tip"
           },
           {
             "key": "software_key",
-            "name": "software_key",
+            "name": "xtp.software_key",
             "type": "str",
             "required": true,
-            "tip": "请填写, 例如:b8aa7173bba3470e390d787219b2112"
+            "tip": "xtp.software_key_tip"
           },
           {
             "key": "td_ip",
-            "name": "td_ip",
+            "name": "xtp.td_ip",
             "type": "str",
             "required": true,
-            "tip": "请填写交易IP, 例如:61.152.102.111"
+            "tip": "xtp.td_ip_tip"
           },
           {
             "key": "td_port",
-            "name": "td_port",
+            "name": "xtp.td_port",
             "type": "int",
             "required": true,
-            "tip": "请填写交易端口, 例如:8601"
+            "tip": "xtp.td_port_tip"
           },
           {
             "key": "client_id",
-            "name": "client_id",
+            "name": "xtp.client_id",
             "type": "int",
             "required": true,
-            "tip": "请填写自定义多点登录ID 1-99整数,不同节点之间不要重复"
+            "tip": "xtp.client_id_tip"
           }
         ]
       },
@@ -113,39 +173,39 @@
         "settings": [
           {
             "key": "account_id",
-            "name": "account_id",
+            "name": "xtp.account_id",
             "type": "str",
             "required": true,
-            "tip": "请填写账户, 例如: 15011218",
+            "tip": "xtp.account_id_tip",
             "default": "15011218"
           },
           {
             "key": "password",
-            "name": "password",
+            "name": "xtp.password",
             "type": "password",
             "required": true,
-            "tip": "请填写密码, 例如: PsVqy99v",
+            "tip": "xtp.password_tip",
             "default": "PsVqy99v"
           },
           {
             "key": "md_ip",
-            "name": "md_ip",
+            "name": "xtp.md_ip",
             "type": "str",
             "required": true,
-            "tip": "请填写行情IP, 例如: 119.3.103.38",
+            "tip": "xtp.md_ip_tip",
             "default": "119.3.103.38"
           },
           {
             "key": "md_port",
-            "name": "md_port",
+            "name": "xtp.md_port",
             "type": "int",
             "required": true,
-            "tip": "请填写行情端口, 例如:6002",
+            "tip": "xtp.md_port_tip",
             "default": 6002
           },
           {
             "key": "protocol",
-            "name": "protocol",
+            "name": "xtp.protocol",
             "type": "select",
             "options": [
               {
@@ -158,21 +218,21 @@
               }
             ],
             "required": false,
-            "tip": "请选择 protocol, tcp or udp"
+            "tip": "xtp.protocol_tip"
           },
           {
             "key": "buffer_size",
-            "name": "buffer_size",
+            "name": "xtp.buffer_size",
             "type": "int",
-            "tip": "请填写 buffer size(mb)",
+            "tip": "xtp.buffer_size_tip",
             "required": false
           },
           {
             "key": "client_id",
-            "name": "client_id",
+            "name": "xtp.client_id",
             "type": "int",
             "required": true,
-            "tip": "请填写自定义多点登录ID 1-99整数,不同节点之间不要重复",
+            "tip": "xtp.client_id_tip",
             "default": 23
           }
         ]

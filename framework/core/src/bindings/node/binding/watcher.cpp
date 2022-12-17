@@ -361,6 +361,9 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
                       InstanceMethod("issueOrder", &Watcher::IssueOrder),                               //
                       InstanceMethod("cancelOrder", &Watcher::CancelOrder),                             //
                       InstanceMethod("requestMarketData", &Watcher::RequestMarketData),                 //
+                      InstanceMethod("start", &Watcher::Start),                                         //
+                      InstanceMethod("sync", &Watcher::Sync),                                           //
+                      InstanceMethod("quit", &Watcher::Quit),                                           //
                       InstanceAccessor("config", &Watcher::GetConfig, &Watcher::NoSet),                 //
                       InstanceAccessor("history", &Watcher::GetHistory, &Watcher::NoSet),               //
                       InstanceAccessor("commission", &Watcher::GetCommission, &Watcher::NoSet),         //
@@ -369,8 +372,6 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
                       InstanceAccessor("appStates", &Watcher::GetAppStates, &Watcher::NoSet),           //
                       InstanceAccessor("strategyStates", &Watcher::GetStrategyStates, &Watcher::NoSet), //
                       InstanceAccessor("tradingDay", &Watcher::GetTradingDay, &Watcher::NoSet),         //
-                      InstanceMethod("start", &Watcher::Start),
-                      InstanceMethod("sync", &Watcher::Sync),
                   });
 
   constructor = Napi::Persistent(func);
@@ -657,6 +658,8 @@ void Watcher::StartWorker() {
 }
 
 void Watcher::CancelWorker() { uv_work_live_ = false; }
+
+void Watcher::Quit(const Napi::CallbackInfo &info) { uv_work_live_ = false; }
 
 void Watcher::AfterMasterDown() {
   reader_->disjoin(master_cmd_location_->uid);

@@ -79,6 +79,7 @@ export default defineComponent({
 
         if (data.name == 'record-before-quit') {
           saveBoardsMap();
+          window.watcher && window.watcher.quit();
         }
       }
     });
