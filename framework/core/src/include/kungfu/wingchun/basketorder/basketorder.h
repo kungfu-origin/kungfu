@@ -22,13 +22,15 @@ struct BasketOrderState {
 
   void update(const longfist::types::Order &order);
 
-    kungfu::state<longfist::types::BasketOrder> &get_state();
+  kungfu::state<longfist::types::BasketOrder> &get_state();
 
-  //   int64_t get_total_volume();
+  bool is_all_order_end();
 
-  //   int64_t get_volume_left();
+  bool is_all_order_filled();
 
-  //   int64_t get_volume_alive();
+  int64_t get_total_volume();
+
+  int64_t get_total_volume_left();
 };
 
 } // namespace kungfu::wingchun::basketorder

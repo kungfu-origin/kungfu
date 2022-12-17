@@ -743,10 +743,8 @@ KF_DEFINE_PACK_TYPE(                                        //
     (Side, side),     // 买卖方向
     (Offset, offset), // 开平方向
 
-    (double, traded_amount), // 成交金额
     (int64_t, volume),       // 成交量
     (int64_t, volume_left),  // 剩余数量
-    (int64_t, volume_alive), // 活跃数量, 子单已结束, 活跃数量volume_alive则会减子单volume
 
     (BasketOrderStatus, status) // 订单状态
 );

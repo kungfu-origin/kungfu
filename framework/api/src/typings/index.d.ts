@@ -510,10 +510,8 @@ declare namespace KungfuApi {
     instrument_type: InstrumentTypeEnum; //合约类型
     side: SideEnum;
     offset: OffsetEnum;
-    price: number;
     volume: bigint;
     volume_left: bigint;
-    volume_alive: bigint;
   }
 
   export interface OrderStat {

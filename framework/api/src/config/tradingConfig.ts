@@ -501,8 +501,8 @@ export const BasketVolumeType: Record<
   [BasketVolumeTypeEnum.Proportion]: {
     name: t('tradingConfig.proportion'),
     color: 'default',
-  }
-});
+  },
+};
 
 export const UnderweightType: Record<
   UnderweightEnum,

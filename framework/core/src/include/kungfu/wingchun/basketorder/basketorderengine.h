@@ -30,6 +30,9 @@ public:
   void on_basket_order(int64_t trigger_time, uint32_t source, uint32_t dest,
                        const longfist::types::BasketOrder &basket_order);
 
+  void insert_basket_order(int64_t trigger_time, uint32_t source, uint32_t dest,
+                       const longfist::types::BasketOrder &basket_order);
+
   void update_basket_order(int64_t trigger_time, const longfist::types::Order &order);
 
   bool has_basket_order_state(uint64_t basket_order_id);

@@ -261,7 +261,7 @@ private:
   template <typename TradingData>
   std::enable_if_t<std::is_same_v<TradingData, longfist::types::BasketOrder>> UpdateBook(uint32_t source, uint32_t dest,
                                                                                          const TradingData &data) {
-    basketorder_engine_.on_basket_order(now(), source, dest, data);
+    basketorder_engine_.insert_basket_order(now(), source, dest, data);
     state<kungfu::longfist::types::BasketOrder> cache_state_basket_order(source, dest, now(), data);
     trading_bank_ << cache_state_basket_order;
   }

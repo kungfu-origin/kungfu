@@ -155,7 +155,9 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
   for (const auto &item : config_store->profile_.get_all(Location{})) {
     auto saved_location = location::make_shared(item, get_locator());
     if (saved_location->category == longfist::enums::category::SYSTEM) {
-      continue;
+      if (saved_location->group != "node") {
+        continue;
+      }
     }
     // add_location(now(), saved_location);
     RestoreState(saved_location, today, INT64_MAX, sync_schema);
