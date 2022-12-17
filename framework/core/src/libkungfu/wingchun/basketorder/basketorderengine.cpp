@@ -39,11 +39,12 @@ void BasketOrderEngine::update_basket_order(int64_t trigger_time, const longfist
 
   auto basket_order_state = get_basket_order_state(order.parent_id);
   basket_order_state->update(order);
+  auto &basket_order = basket_order_state->get_state().data;
   auto is_all_order_end = basket_order_state->is_all_order_end();
   auto is_all_order_filled = basket_order_state->is_all_order_filled();
-  auto total_volume = basket_order_state->get_total_volume();
+  // after supplementing order, the total volume may be changed, bigger than the original volume
+  auto total_volume = std::max(basket_order.volume, basket_order_state->get_total_volume());
   auto total_volume_left = basket_order_state->get_total_volume_left();
-  auto &basket_order = basket_order_state->get_state().data;
 
   basket_order.update_time = trigger_time;
   basket_order.volume = total_volume;
@@ -53,7 +54,7 @@ void BasketOrderEngine::update_basket_order(int64_t trigger_time, const longfist
     basket_order.status = BasketOrderStatus::Filled;
   } else if (is_all_order_end) {
     basket_order.status = BasketOrderStatus::PartialFilledNotActive;
-  } else if (basket_order.volume_left < basket_order.volume) {
+  } else if (basket_order.volume_left < total_volume) {
     basket_order.status = BasketOrderStatus::PartialFilledActive;
   } else {
     basket_order.status = BasketOrderStatus::Pending;
