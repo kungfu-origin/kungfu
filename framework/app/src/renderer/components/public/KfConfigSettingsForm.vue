@@ -51,10 +51,7 @@ import {
 import { readCSV } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import { useGlobalStore } from '../../pages/index/store/global';
 import { hashInstrumentUKey } from '@kungfu-trader/kungfu-js-api/kungfu';
-import {
-  buildInstrumentSelectOptionValue,
-  buildInstrumentSelectOptionLabel,
-} from '../../assets/methods/uiUtils';
+import { buildInstrumentSelectOptionValue } from '../../assets/methods/uiUtils';
 const { t } = VueI18n.global;
 
 const props = withDefaults(
@@ -221,7 +218,6 @@ function getInstrumentsSearchRelated(
       const {
         searchInstrumnetOptions,
         handleSearchInstrument,
-        handleSearchByCustom,
         updateSearchInstrumnetOptions,
       } = useInstruments();
 
@@ -234,19 +230,18 @@ function getInstrumentsSearchRelated(
       item1[key] = {
         searchInstrumnetOptions,
         handleSearchInstrument: (val) => {
-          if (instrumentKeys[key] === 'instrumentsCsv') {
-            handleSearchByCustom(val, {
-              customInstruments: Object.values(instrumentsCsvData[key]) || [],
-              customFilterCondition: (keywords, pos) =>
-                new RegExp(`${keywords}`, 'ig').test(pos.id),
-            }).then((options) => {
+          handleSearchInstrument(val).then((options) => {
+            if (options.length) {
               instrumentOptionsReactiveData.data[key] = options;
-            });
-          } else {
-            handleSearchInstrument(val).then((options) => {
-              instrumentOptionsReactiveData.data[key] = options;
-            });
-          }
+            } else {
+              updateSearchInstrumnetOptions(
+                instrumentKeys[key],
+                formState[key],
+              ).then((options) => {
+                instrumentOptionsReactiveData.data[key] = options;
+              });
+            }
+          });
         },
         updateSearchInstrumnetOptions,
       };
@@ -391,10 +386,15 @@ function getKfTradeValueName(
 
 function instrumentsCsvCallback(
   instruments: KungfuApi.Instrument[],
+  errRows: {
+    row: number;
+    data: (string | number | boolean)[];
+  }[],
   targetKey: string,
 ) {
   const { instrumentsMap } = useGlobalStore();
   if (!instrumentsCsvData[targetKey]) instrumentsCsvData[targetKey] = {};
+  console.log(instruments);
   instruments.forEach((item) => {
     if (item.exchange_id && item.instrument_id) {
       const ukey = hashInstrumentUKey(item.instrument_id, item.exchange_id);
@@ -425,29 +425,33 @@ function instrumentsCsvCallback(
     Number(
       /\d/.exec(customerFormItemTips[targetKey]?.split(',')?.[1] || '0')?.[0],
     ) +
-    (sourceLength - resolvedLength);
+    (sourceLength - resolvedLength + errRows.length);
   customerFormItemTips[targetKey] = t('validate.resolved_tip', {
     success: `${resolvedLength}`,
     fail: `${failedLength}`,
     value: t('tradingConfig.instrument'),
   });
-  instrumentOptionsReactiveData.data[targetKey] = resolvedInstruments.map(
-    (item) => ({
-      value: buildInstrumentSelectOptionValue(item),
-      label: buildInstrumentSelectOptionLabel(item),
-    }),
+  formState[targetKey] = resolvedInstruments.map((item) =>
+    buildInstrumentSelectOptionValue(item),
   );
 }
 
 function handleClearInstrumentsCsv(targetKey: string) {
   formState[targetKey] = [];
-  instrumentOptionsReactiveData.data[targetKey] = [];
   customerFormItemTips[targetKey] = '';
 }
 
 function handleSelectCsv<T>(
   targetKey: string,
-  callback?: (data: T[], targetKey: string) => void,
+  headers?: string[],
+  callback?: (
+    data: T[],
+    errRows: {
+      row: number;
+      data: (string | number | boolean)[];
+    }[],
+    targetKey: string,
+  ) => void,
 ): void {
   dialog
     .showOpenDialog({
@@ -457,9 +461,15 @@ function handleSelectCsv<T>(
     .then((res) => {
       const { filePaths } = res;
       if (filePaths.length) {
-        readCSV<T>(filePaths[0]).then((data) => {
-          callback && callback(data, targetKey);
-        });
+        readCSV<T>(filePaths[0], headers)
+          .then(({ resRows, errRows }) => {
+            callback && callback(resRows, errRows, targetKey);
+          })
+          .catch((err) => {
+            if (err instanceof Error) {
+              console.error(err);
+            }
+          });
       }
     });
 }
@@ -949,7 +959,9 @@ defineExpose({
             item.disabled
           "
           mode="multiple"
+          :max-tag-count="5"
           show-search
+          allow-clear
           :filter-option="false"
           :options="instrumentOptionsReactiveData.data[item.key]"
           @search="instrumentsSearchRelated[item.key].handleSearchInstrument"
@@ -965,6 +977,7 @@ defineExpose({
           @click="
             handleSelectCsv<KungfuApi.Instrument>(
               item.key,
+              item.headers,
               instrumentsCsvCallback,
             )
           "
