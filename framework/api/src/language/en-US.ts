@@ -184,7 +184,7 @@ export default {
     stock: 'Stock',
     future: 'Future',
     bond: 'Bond',
-    stock_option: '股票期权',
+    stock_option: 'StockOption',
     fund: 'Fund',
     tech_stock: 'TechStock',
     index: 'Index',
