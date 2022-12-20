@@ -31,7 +31,7 @@ public:
                        const longfist::types::BasketOrder &basket_order);
 
   void insert_basket_order(int64_t trigger_time, uint32_t source, uint32_t dest,
-                       const longfist::types::BasketOrder &basket_order);
+                           const longfist::types::BasketOrder &basket_order);
 
   void update_basket_order(int64_t trigger_time, const longfist::types::Order &order);
 

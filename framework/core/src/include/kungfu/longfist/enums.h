@@ -205,6 +205,25 @@ enum class PriceType : int8_t {
 
 inline std::ostream &operator<<(std::ostream &os, PriceType t) { return os << int8_t(t); }
 
+enum class PriceLevel : int8_t {
+  Lastest, // 最新价
+  Sell5,
+  Sell4,
+  Sell3,
+  Sell2,
+  Sell1,
+  Buy1,
+  Buy2,
+  Buy3,
+  Buy4,
+  Buy5,
+  UpLimitPrice,  // 涨停价
+  lowLimitPrice, // 跌停价
+  UnKnown
+};
+
+inline std::ostream &operator<<(std::ostream &os, PriceLevel t) { return os << int8_t(t); }
+
 enum class VolumeCondition : int8_t { Any, Min, All };
 
 inline std::ostream &operator<<(std::ostream &os, VolumeCondition t) { return os << int8_t(t); }

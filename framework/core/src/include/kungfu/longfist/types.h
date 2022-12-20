@@ -212,7 +212,7 @@ KF_DEFINE_DATA_TYPE(                     //
     Basket, 100040, PK(id), PERPETUAL(), //
     (uint32_t, id),                      //
     (std::string, name),                 //
-    (BasketVolumeType, volume_type)      // 比例/数量
+    (BasketVolumeType, volume_type),     // 比例/数量
     (int64_t, total_volume)              // 总数量
 );
 
@@ -222,7 +222,7 @@ KF_DEFINE_PACK_TYPE(                                                            
     (kungfu::array<char, INSTRUMENT_ID_LEN>, instrument_id),                           // 合约ID
     (kungfu::array<char, EXCHANGE_ID_LEN>, exchange_id),                               // 交易所ID
     (InstrumentType, instrument_type), // 合约类型                                                // volume比例
-    (int64_t, volume)                  // 数量
+    (int64_t, volume),                 // 数量
     (double, rate)                     // 比例
 );
 
@@ -742,8 +742,11 @@ KF_DEFINE_PACK_TYPE(                                        //
     (int64_t, insert_time), // 下单时间
     (int64_t, update_time), // 更新时间
 
-    (Side, side),     // 买卖方向
-    (Offset, offset), // 开平方向
+    (Side, side),              // 买卖方向
+    (Offset, offset),          // 开平方向
+    (PriceType, price_type),   // 价格类型
+    (PriceLevel, price_level), // 价格级别
+    (double, price_offset),    // 价格偏移量
 
     (int64_t, volume),      // 成交量
     (int64_t, volume_left), // 剩余数量
