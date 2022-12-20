@@ -77,7 +77,7 @@ export const writeCSV = (
     csv
       .writeToPath(filePath, data, {
         headers: true,
-        transform: transform,
+        transform,
       })
       .on('finish', function () {
         resolve();
