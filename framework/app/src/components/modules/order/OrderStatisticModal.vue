@@ -14,11 +14,13 @@ const props = withDefaults(
   defineProps<{
     visible: boolean;
     orders: KungfuApi.OrderResolved[];
+    isUnfinishedOrder?: boolean;
     historyDate?: null | Dayjs;
   }>(),
   {
     visible: false,
     orders: () => [],
+    isUnfinishedOrder: false,
     historyDate: null,
   },
 );
@@ -183,7 +185,9 @@ const priceVolumeStats = computed(() => {
     :title="`${$t('orderConfig.entrust_statistical')} ${
       !!historyDate
         ? historyDate.format('YYYY-MM-DD')
-        : $t('orderConfig.statistical_desc')
+        : $t('orderConfig.statistical_desc', {
+            count: isUnfinishedOrder ? 2000 : 500,
+          })
     }`"
     :destroyOnClose="true"
     :footer="null"
