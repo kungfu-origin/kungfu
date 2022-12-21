@@ -115,6 +115,7 @@ declare namespace KungfuApi {
     type: KfConfigItemSupportedTypes;
     columns?: KfConfigItem[];
     errMsg?: string;
+    tip?: string;
     default?: KfConfigValue;
     required?: boolean;
     max?: number;
@@ -123,7 +124,7 @@ declare namespace KungfuApi {
     primary?: boolean;
     options?: KfSelectOption[];
     data?: KfSelectOption[];
-    tip?: string;
+    headers?: string[];
   }
 
   export interface KfExhibitConfigItem {
@@ -757,6 +758,7 @@ declare namespace KungfuApi {
       blockMessage: BlockMessage,
       tdLocation: KfLocation,
     ): bigint;
+    quit(): void;
     now(): bigint;
   }
 
