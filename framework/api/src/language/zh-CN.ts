@@ -96,6 +96,12 @@ export default {
     control_center: '控制中心',
   },
 
+  settingsFormConfig: {
+    add_csv: '添加 csv',
+    add_csv_desc: 'csv 表头为 instrument_id 和 exchange_id',
+    clear: '清除',
+  },
+
   tradingConfig: {
     unknown: '未知',
     default: '封装策略',
@@ -254,8 +260,6 @@ export default {
     no_empty: '下单量不可为空',
     total_order_amount: '总下单量',
     every_volume: '每次下单量',
-    add_csv: '添加 csv',
-    clear: '清除',
 
     fat_finger_buy_modal:
       '买入价格超出警戒线, 当前价格为 {price}, 警戒线为 {warningLine}, 当前乌龙指阈值为 {fatFinger}%',
@@ -300,7 +304,7 @@ export default {
     confirm: '确认',
 
     entrust_statistical: '委托统计',
-    statistical_desc: '实时(最新100条数据)',
+    statistical_desc: '实时(最新{count}条数据)',
     entrust_statistical_number: '委托统计数量',
     entrust_statistical_price: '委托价统计',
     average_withdrawal_ratio: '平均撤单比 (仅统计 部成部撤 和 全部撤单)',
@@ -426,7 +430,7 @@ export default {
     statistical: '成交统计',
     statistical_count: '统计成交数量',
     statistical_price: '成交价统计',
-    statistical_desc: '实时(最新100条数据)',
+    statistical_desc: '实时(最新500条数据)',
     average_trade_latency: '平均成交延迟(μs)',
     max_trade_latency: '最大成交延迟(μs)',
     min_trade_latency: '最小成交延迟(μs)',

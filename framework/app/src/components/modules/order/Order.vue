@@ -587,7 +587,8 @@ function testOrderSourceIsOnline(order: KungfuApi.OrderResolved) {
       v-if="statisticModalVisible"
       v-model:visible="statisticModalVisible"
       :orders="tableData"
-      :historyDate="historyDate"
+      :is-unfinished-order="unfinishedOrder"
+      :history-date="historyDate"
     ></StatisticModal>
   </div>
 </template>
