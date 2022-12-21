@@ -79,7 +79,7 @@ class TraderSim(wc.Trader):
 
     def insert_order_(self, event, order_input):
         volume_traded = 0
-
+        
         if self.match_mode == MatchMode.Custom:
             return self.ctx.insert_order(self.ctx, event)
         else:
@@ -89,6 +89,13 @@ class TraderSim(wc.Trader):
             order.insert_time = event.gen_time
             order.update_time = event.gen_time
             order.trading_day = kft.strfnow("%Y%m%d")
+            #增加repo不可以买入的限制
+            if  wc.utils.get_instrument_type(order_input.exchange_id, order_input.instrument_id)== lf.enums.InstrumentType.Repo:
+                if order.side==lf.enums.Side.Buy:
+                    order.status= lf.enums.OrderStatus.Error
+                    order.error_msg="repo can not buy"
+                    writer.write(event.gen_time, order)
+                    return False
             min_vol = (
                 100
                 if wc.utils.get_instrument_type(
