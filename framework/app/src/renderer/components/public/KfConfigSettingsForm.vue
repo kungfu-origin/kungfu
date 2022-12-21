@@ -953,7 +953,7 @@ defineExpose({
       </div>
       <div
         v-else-if="item.type === 'instrumentsCsv'"
-        class="kf-form-item__warp file instruments-csv__wrap"
+        class="kf-form-item__warp instruments-csv__wrap"
       >
         <a-select
           :value="formState[item.key]"
@@ -971,30 +971,38 @@ defineExpose({
           @select="handleInstrumentSelected($event, item.key)"
           @deselect="handleInstrumentDeselected($event, item.key)"
         ></a-select>
-        <a-button
-          size="small"
-          :disabled="
-            (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
-            item.disabled
-          "
-          @click="
-            handleSelectCsv<KungfuApi.Instrument>(
-              item.key,
-              item.headers,
-              instrumentsCsvCallback,
-            )
-          "
+        <div
+          class="select-csv-button__wrap"
+          :title="$t('settingsFormConfig.add_csv_desc')"
         >
-          {{ $t('tradingConfig.add_csv') }}
-        </a-button>
+          <a-button
+            size="small"
+            :disabled="
+              (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
+              item.disabled
+            "
+            @click="
+              handleSelectCsv<KungfuApi.Instrument>(
+                item.key,
+                item.headers,
+                instrumentsCsvCallback,
+              )
+            "
+          >
+            {{ $t('settingsFormConfig.add_csv') }}
+          </a-button>
+          <span class="select-csv-tip">
+            {{ $t('settingsFormConfig.add_csv_desc') }}
+          </span>
+        </div>
         <div
           v-if="customerFormItemTips[item.key]"
-          class="file-path"
+          class="csv-resolved-desc"
           :title="(customerFormItemTips[item.key] || '').toString()"
         >
           <span class="name">{{ customerFormItemTips[item.key] }}</span>
           <span class="clear" @click="handleClearInstrumentsCsv(item.key)">
-            {{ $t('tradingConfig.clear') }}
+            {{ $t('settingsFormConfig.clear') }}
           </span>
         </div>
       </div>
@@ -1101,11 +1109,6 @@ export default defineComponent({
           padding-right: 16px;
           box-sizing: border-box;
         }
-
-        .clear {
-          color: #faad14;
-          cursor: pointer;
-        }
       }
 
       button {
@@ -1114,9 +1117,36 @@ export default defineComponent({
     }
 
     &.instruments-csv__wrap {
-      button {
-        width: fit-content;
+      .select-csv-button__wrap {
         margin-top: 8px;
+
+        button {
+          width: fit-content;
+        }
+
+        .select-csv-tip {
+          display: block;
+          margin-top: 4px;
+          color: grey;
+          word-break: break-all;
+          user-select: text;
+        }
+      }
+
+      .csv-resolved-desc {
+        word-break: break-word;
+        margin-top: 8px;
+        box-sizing: border-box;
+
+        .name {
+          padding-right: 16px;
+          box-sizing: border-box;
+        }
+
+        .clear {
+          color: #faad14;
+          cursor: pointer;
+        }
       }
     }
   }

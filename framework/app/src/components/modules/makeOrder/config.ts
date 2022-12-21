@@ -29,6 +29,12 @@ export const getConfigSettings = (
           required: true,
         },
     {
+      key: 'instrumentsCsv',
+      name: t('tradingConfig.instrument'),
+      type: 'instrumentsCsv',
+      required: true,
+    },
+    {
       key: 'instrument',
       name: t('tradingConfig.instrument'),
       type: 'instrument',

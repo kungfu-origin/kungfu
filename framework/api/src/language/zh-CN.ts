@@ -96,6 +96,12 @@ export default {
     control_center: '控制中心',
   },
 
+  settingsFormConfig: {
+    add_csv: '添加 csv',
+    add_csv_desc: 'csv 表头为 instrument_id 和 exchange_id',
+    clear: '清除',
+  },
+
   tradingConfig: {
     unknown: '未知',
     default: '封装策略',
@@ -254,8 +260,6 @@ export default {
     no_empty: '下单量不可为空',
     total_order_amount: '总下单量',
     every_volume: '每次下单量',
-    add_csv: '添加 csv',
-    clear: '清除',
 
     fat_finger_buy_modal:
       '买入价格超出警戒线, 当前价格为 {price}, 警戒线为 {warningLine}, 当前乌龙指阈值为 {fatFinger}%',

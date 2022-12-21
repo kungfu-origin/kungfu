@@ -96,6 +96,12 @@ export default {
     control_center: 'Control',
   },
 
+  settingsFormConfig: {
+    add_csv: 'Add Csv',
+    add_csv_desc: "csv headers are 'instrument'_id and 'exchange_id'",
+    clear: 'Clear',
+  },
+
   tradingConfig: {
     unknown: 'Unknown',
     default: 'Default',
@@ -253,8 +259,6 @@ export default {
     no_empty: 'Order quantity cannot be empty',
     total_order_amount: 'Total Order Amount',
     every_volume: 'Every Volume',
-    add_csv: 'Add Csv',
-    clear: 'Clear',
 
     fat_finger_buy_modal:
       'The buying price exceeded the warning line, the current price is {price}, line for {warningLine}, fat finger is {fatFinger}%',
