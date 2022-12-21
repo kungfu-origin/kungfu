@@ -300,7 +300,7 @@ export default {
     confirm: '确认',
 
     entrust_statistical: '委托统计',
-    statistical_desc: '实时(最新100条数据)',
+    statistical_desc: '实时(最新{count}条数据)',
     entrust_statistical_number: '委托统计数量',
     entrust_statistical_price: '委托价统计',
     average_withdrawal_ratio: '平均撤单比 (仅统计 部成部撤 和 全部撤单)',
@@ -426,7 +426,7 @@ export default {
     statistical: '成交统计',
     statistical_count: '统计成交数量',
     statistical_price: '成交价统计',
-    statistical_desc: '实时(最新100条数据)',
+    statistical_desc: '实时(最新500条数据)',
     average_trade_latency: '平均成交延迟(μs)',
     max_trade_latency: '最大成交延迟(μs)',
     min_trade_latency: '最小成交延迟(μs)',
