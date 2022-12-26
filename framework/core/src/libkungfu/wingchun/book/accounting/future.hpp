@@ -97,7 +97,7 @@ public:
   }
 
   void apply_order_input(Book_ptr &book, const OrderInput &input) override {
-    auto offset = get_offset_for_merge_long_short_positions(book, input);
+    auto offset = get_offset(book, input);
     auto direction = get_direction(input.instrument_type, input.side, offset);
     auto &position = book->get_position(direction, input.exchange_id, input.instrument_id);
 
@@ -137,7 +137,7 @@ public:
     if (not is_final_status(order.status))
       return;
 
-    auto offset = get_offset_for_merge_long_short_positions(book, order);
+    auto offset = get_offset(book, order);
     auto direction = get_direction(order.instrument_type, order.side, offset);
     auto &position = book->get_position(direction, order.exchange_id, order.instrument_id);
     auto cm_mr =
@@ -169,7 +169,7 @@ public:
       book->trades.emplace(trade.trade_id, trade);
     }
 
-    auto offset = get_offset_for_merge_long_short_positions(book, trade);
+    auto offset = get_offset(book, trade);
     auto direction = get_direction(trade.instrument_type, trade.side, offset);
     auto &position = book->get_position(direction, trade.exchange_id, trade.instrument_id);
 
@@ -276,6 +276,7 @@ private:
   [[nodiscard]] bool need_to_merge_long_short_positions(Book_ptr &book, const TradingData &trading_data) const {
     if (not able_long_short_position_merge(trading_data.exchange_id))
       return false;
+
     auto &oppsite_position = book->get_oppsite_position_for(trading_data);
     if (oppsite_position.volume > 0)
       return true;
@@ -283,12 +284,27 @@ private:
   }
 
   template <typename TradingData>
-  [[nodiscard]] longfist::enums::Offset
-  get_offset_for_merge_long_short_positions(Book_ptr &book, const TradingData &trading_data) const {
+  [[nodiscard]] bool need_to_open_oppsite(Book_ptr &book, const TradingData &trading_data) const {
+    if (not able_long_short_position_merge(trading_data.exchange_id))
+      return false;
+
+    auto &position = book->get_position_for(trading_data);
+    if (position.volume <= 0 && trading_data.offset != Offset::Open)
+      return true;
+    return false;
+  }
+
+  template <typename TradingData>
+  [[nodiscard]] longfist::enums::Offset get_offset(Book_ptr &book, const TradingData &trading_data) const {
     auto offset = trading_data.offset;
     if (need_to_merge_long_short_positions(book, trading_data) && offset == Offset::Open) {
-      offset = Offset::Close;
+      return Offset::Close;
     }
+
+    if (need_to_open_oppsite(book, trading_data) && offset != Offset::Open) {
+      return Offset::Open;
+    }
+
     return offset;
   }
 
