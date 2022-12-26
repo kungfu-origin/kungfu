@@ -290,7 +290,7 @@ inline longfist::enums::InstrumentType get_instrument_type(const std::string &ex
     }
     if (startswith(instrument_id, "15") || startswith(instrument_id, "16") || startswith(instrument_id, "18")) {
       return longfist::enums::InstrumentType::Fund;
-    } else if (startswith(instrument_id, "13")) {
+    } else if (startswith(instrument_id, "131")) {
       return longfist::enums::InstrumentType::Repo;
     } else if (startswith(instrument_id, "1")) {
       return longfist::enums::InstrumentType::Bond;

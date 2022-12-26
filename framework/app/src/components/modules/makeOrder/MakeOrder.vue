@@ -455,7 +455,7 @@ async function confirmApartCloseToOpen(
 
   if (
     isShotable(instrumentResolved.value?.instrumentType) &&
-    offset === OffsetEnum.Close
+    offset !== OffsetEnum.Open
   ) {
     let direction: string = '',
       closable_volume: number | undefined = undefined;
