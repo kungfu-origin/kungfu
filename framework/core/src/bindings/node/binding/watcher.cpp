@@ -720,8 +720,12 @@ void Watcher::UpdateBook(const event_ptr &event, const Quote &quote) {
 void Watcher::UpdateBook(const event_ptr &event, const Position &position) {
   auto book = bookkeeper_.get_book(position.holder_uid);
   auto &book_position = book->get_position_for(position.direction, position);
-  state<Position> cache_state(position.holder_uid, event->dest(), event->gen_time(), book_position);
-  feed_state_data_bank(cache_state, data_bank_);
+  auto &book_oppsite_position = book->get_oppsite_position_for(position.direction, position);
+  state<Position> cache_state_position(position.holder_uid, event->dest(), event->gen_time(), book_position);
+  feed_state_data_bank(cache_state_position, data_bank_);
+  state<Position> cache_state_oppsite_position(book_oppsite_position.holder_uid, event->dest(), event->gen_time(),
+                                               book_oppsite_position);
+  feed_state_data_bank(cache_state_oppsite_position, data_bank_);
 }
 
 Watcher::BookListener::BookListener(Watcher &watcher) : watcher_(watcher) {}

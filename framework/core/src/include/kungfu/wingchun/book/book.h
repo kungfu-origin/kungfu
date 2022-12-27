@@ -84,9 +84,25 @@ struct Book {
     return get_position(direction, data.exchange_id, data.instrument_id);
   }
 
+  template <typename TradingData>
+  [[nodiscard]] longfist::types::Position &get_oppsite_position_for(longfist::enums::Direction direction,
+                                                                    const TradingData &data) {
+    return direction == longfist::enums::Direction::Long
+               ? get_position(longfist::enums::Direction::Short, data.exchange_id, data.instrument_id)
+               : get_position(longfist::enums::Direction::Long, data.exchange_id, data.instrument_id);
+  }
+
   template <typename TradingData> [[nodiscard]] longfist::types::Position &get_position_for(const TradingData &data) {
     auto direction = get_direction(data.instrument_type, data.side, data.offset);
     return get_position(direction, data.exchange_id, data.instrument_id);
+  }
+
+  template <typename TradingData>
+  [[nodiscard]] longfist::types::Position &get_oppsite_position_for(const TradingData &data) {
+    auto direction = get_direction(data.instrument_type, data.side, data.offset);
+    return direction == longfist::enums::Direction::Long
+               ? get_position(longfist::enums::Direction::Short, data.exchange_id, data.instrument_id)
+               : get_position(longfist::enums::Direction::Long, data.exchange_id, data.instrument_id);
   }
 
   void update(int64_t update_time);
