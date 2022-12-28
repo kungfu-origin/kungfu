@@ -219,15 +219,10 @@ void Bookkeeper::try_update_position(const Position &position) {
 }
 
 void Bookkeeper::try_sync_book_replica(uint32_t location_uid) {
-  if (books_replica_asset_guards_.find(location_uid) == books_replica_asset_guards_.end() ||
-      books_replica_position_guard_.find(location_uid) == books_replica_position_guard_.end() ||
-      books_replica_asset_margin_guards_.find(location_uid) == books_replica_asset_margin_guards_.end()) {
-    return;
-  }
-
   /// sync的Asset, AssetMargin, PositionEnd都收到后才开始同步TD和策略的信息, 并使用TD的新book替换旧book
-  if (books_replica_asset_guards_.at(location_uid) and books_replica_position_guard_.at(location_uid) and
-      books_replica_asset_margin_guards_.at(location_uid)) {
+  if (books_replica_asset_guards_.try_emplace(location_uid).first->second and
+      books_replica_position_guard_.try_emplace(location_uid).first->second and
+      books_replica_asset_margin_guards_.try_emplace(location_uid).first->second) {
     books_replica_asset_guards_.insert_or_assign(location_uid, false);
     books_replica_asset_margin_guards_.insert_or_assign(location_uid, false);
     books_replica_position_guard_.insert_or_assign(location_uid, false);
@@ -323,7 +318,6 @@ void Bookkeeper::try_sync_book_replica(uint32_t location_uid) {
       /// 先进行td_book的替换, 否则下面mirror_position还是只会拿到旧的数据
       books_.erase(location_uid);
       books_.insert_or_assign(location_uid, new_book);
-      books_replica_.erase(location_uid);
 
       /// 现在暂时只修改td的信息, 不要去修改策略的信息
       // 重置策略的book, 并把所有和其相关的td的position数据mirror一份过来
@@ -342,6 +336,7 @@ void Bookkeeper::try_sync_book_replica(uint32_t location_uid) {
         book_listener->on_position_sync_reset(*old_book, *new_book);
       }
     }
+    books_replica_.erase(location_uid); // delete replica every time
   }
 }
 
