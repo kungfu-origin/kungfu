@@ -225,7 +225,7 @@ void Bookkeeper::try_sync_book_replica(uint32_t location_uid) {
       not books_replica_asset_margin_guards_.try_emplace(location_uid).first->second) {
     return;
   }
-  
+
   books_replica_asset_guards_.insert_or_assign(location_uid, false);
   books_replica_asset_margin_guards_.insert_or_assign(location_uid, false);
   books_replica_position_guard_.insert_or_assign(location_uid, false);
