@@ -220,124 +220,127 @@ void Bookkeeper::try_update_position(const Position &position) {
 
 void Bookkeeper::try_sync_book_replica(uint32_t location_uid) {
   /// sync的Asset, AssetMargin, PositionEnd都收到后才开始同步TD和策略的信息, 并使用TD的新book替换旧book
-  if (books_replica_asset_guards_.try_emplace(location_uid).first->second and
-      books_replica_position_guard_.try_emplace(location_uid).first->second and
-      books_replica_asset_margin_guards_.try_emplace(location_uid).first->second) {
-    books_replica_asset_guards_.insert_or_assign(location_uid, false);
-    books_replica_asset_margin_guards_.insert_or_assign(location_uid, false);
-    books_replica_position_guard_.insert_or_assign(location_uid, false);
-    auto old_book = get_book(location_uid);
-    auto new_book = get_book_replica(location_uid);
-
-    bool position_changed = false;
-    bool asset_changed = false;
-    bool asset_margin_changed = false;
-
-    auto fun_asset_compare = [](const Asset &old_asset, const Asset &new_asset) {
-      bool changed = false;
-      changed |= old_asset.avail != new_asset.avail;   // 可用资金
-      changed |= old_asset.margin != new_asset.margin; // 保证金(期货)
-      return changed;
-    };
-    asset_changed |= fun_asset_compare(old_book->asset, new_book->asset);
-
-    auto fun_asset_margin_compare = [](const AssetMargin &old_asset_margin, const AssetMargin &new_asset_margin) {
-      bool changed = false;
-      changed |= old_asset_margin.total_asset != new_asset_margin.total_asset;   // 总资产
-      changed |= old_asset_margin.avail_margin != new_asset_margin.avail_margin; // 可用保证金
-      changed |= old_asset_margin.cash_margin != new_asset_margin.cash_margin;   // 融资占用保证金
-      changed |= old_asset_margin.short_margin != new_asset_margin.short_margin; // 融券占用保证金
-      changed |= old_asset_margin.margin != new_asset_margin.margin;             // 总占用保证金
-      changed |= old_asset_margin.cash_debt != new_asset_margin.cash_debt;       // 融资负债
-      changed |= old_asset_margin.short_cash != new_asset_margin.short_cash;     // 融券卖出金额
-      return changed;
-    };
-    asset_margin_changed |= fun_asset_margin_compare(old_book->asset_margin, new_book->asset_margin);
-
-    auto fun_position_compare = [](const PositionMap &source_map, Book_ptr &target_book) {
-      bool changed = false;
-      for (auto &source_pair : source_map) {
-        auto &source_position = source_pair.second;
-        auto &target_position = target_book->get_position_for(source_position.direction, source_position);
-        changed |= source_position.volume != target_position.volume;                     // 数量
-        changed |= source_position.yesterday_volume != target_position.yesterday_volume; // 昨仓数量
-      }
-      return changed;
-    };
-
-    /// 用new_book的position去检测old_book的position,new有old无会加上
-    position_changed |= fun_position_compare(new_book->long_positions, old_book);
-    position_changed |= fun_position_compare(new_book->short_positions, old_book);
-    /// 用old_book的position去检测new_book的position，old有new无会设置为0删掉
-    position_changed |= fun_position_compare(old_book->long_positions, new_book);
-    position_changed |= fun_position_compare(old_book->short_positions, new_book);
-
-    /// position_changed更新book也会修改asset信息, on_asset_sync_reset仅在asset改变而position不改变的情况下调用
-    if (asset_changed and not position_changed) {
-      Asset old_asset = {};
-      longfist::copy(old_asset, old_book->asset);       // old_asset拷贝一份用于回调返回
-      longfist::copy(old_book->asset, new_book->asset); // new_asset替换掉old_asset
-
-      /// 现在暂时只修改td的信息, 不要去修改策略的信息
-      //      for (auto &bk_pair : books_) {
-      //        auto &st_book = bk_pair.second;
-      //        if (st_book->asset.ledger_category == LedgerCategory::Strategy and
-      //            app_.has_channel(st_book->asset.holder_uid, location_uid)) {
-      //          /// 用新的asset替换原来策略的, 再修改holder_uid和ledger_category
-      //          copy_asset(st_book->asset, new_book->asset);
-      //        }
-      //      }
-      for (auto &book_listener : book_listeners_) {
-        book_listener->on_asset_sync_reset(old_asset, new_book->asset);
-      }
-    }
-
-    /// position_changed更新book也会修改asset信息,
-    /// on_asset_margin_sync_reset仅在asset_margin改变而position不改变的情况下调用
-    if (asset_margin_changed and not position_changed) {
-      AssetMargin old_asset_margin = {};
-      longfist::copy(old_asset_margin, old_book->asset_margin);       // old_asset_margin拷贝一份用于回调返回
-      longfist::copy(old_book->asset_margin, new_book->asset_margin); // new_asset_margin替换掉old_asset_margin
-
-      /// 现在暂时只修改td的信息, 不要去修改策略的信息
-      //      for (auto &bk_pair : books_) {
-      //        auto &st_book = bk_pair.second;
-      //        if (st_book->asset.ledger_category == LedgerCategory::Strategy and
-      //            app_.has_channel(st_book->asset.holder_uid, location_uid)) {
-      //          /// 用新的asset_margin替换原来策略的, 再修改holder_uid和ledger_category
-      //          copy_asset(st_book->asset_margin, new_book->asset_margin);
-      //        }
-      //      }
-      for (auto &book_listener : book_listeners_) {
-        book_listener->on_asset_margin_sync_reset(old_asset_margin, new_book->asset_margin);
-      }
-    }
-
-    /// position改变更新book，包括asset和position都更新并回调on_position_sync_reset
-    if (position_changed) {
-      /// 先进行td_book的替换, 否则下面mirror_position还是只会拿到旧的数据
-      books_.erase(location_uid);
-      books_.insert_or_assign(location_uid, new_book);
-
-      /// 现在暂时只修改td的信息, 不要去修改策略的信息
-      // 重置策略的book, 并把所有和其相关的td的position数据mirror一份过来
-      //      for (auto &bk_pair : books_) {
-      //        auto &st_book = bk_pair.second;
-      //        if (st_book->asset.ledger_category == LedgerCategory::Strategy and
-      //            app_.has_channel(location_uid, st_book->asset.holder_uid)) {
-      //          copy_asset(st_book->asset, new_book->asset);
-      //          copy_asset(st_book->asset_margin, new_book->asset_margin);
-      //          mirror_positions(app_.now(), st_book->asset.holder_uid);
-      //        }
-      //      }
-
-      /// 删除了watcher重新计算一遍的逻辑, 这里更新完了以后再调用回调, watcher那边获得的数据是更新完之后的
-      for (auto &book_listener : book_listeners_) {
-        book_listener->on_position_sync_reset(*old_book, *new_book);
-      }
-    }
-    books_replica_.erase(location_uid); // delete replica every time
+  if (not books_replica_asset_guards_.try_emplace(location_uid).first->second or
+      not books_replica_position_guard_.try_emplace(location_uid).first->second or
+      not books_replica_asset_margin_guards_.try_emplace(location_uid).first->second) {
+    return;
   }
+  
+  books_replica_asset_guards_.insert_or_assign(location_uid, false);
+  books_replica_asset_margin_guards_.insert_or_assign(location_uid, false);
+  books_replica_position_guard_.insert_or_assign(location_uid, false);
+  auto old_book = get_book(location_uid);
+  auto new_book = get_book_replica(location_uid);
+
+  bool position_changed = false;
+  bool asset_changed = false;
+  bool asset_margin_changed = false;
+
+  auto fun_asset_compare = [](const Asset &old_asset, const Asset &new_asset) {
+    bool changed = false;
+    changed |= old_asset.avail != new_asset.avail;   // 可用资金
+    changed |= old_asset.margin != new_asset.margin; // 保证金(期货)
+    return changed;
+  };
+  asset_changed |= fun_asset_compare(old_book->asset, new_book->asset);
+
+  auto fun_asset_margin_compare = [](const AssetMargin &old_asset_margin, const AssetMargin &new_asset_margin) {
+    bool changed = false;
+    changed |= old_asset_margin.total_asset != new_asset_margin.total_asset;   // 总资产
+    changed |= old_asset_margin.avail_margin != new_asset_margin.avail_margin; // 可用保证金
+    changed |= old_asset_margin.cash_margin != new_asset_margin.cash_margin;   // 融资占用保证金
+    changed |= old_asset_margin.short_margin != new_asset_margin.short_margin; // 融券占用保证金
+    changed |= old_asset_margin.margin != new_asset_margin.margin;             // 总占用保证金
+    changed |= old_asset_margin.cash_debt != new_asset_margin.cash_debt;       // 融资负债
+    changed |= old_asset_margin.short_cash != new_asset_margin.short_cash;     // 融券卖出金额
+    return changed;
+  };
+  asset_margin_changed |= fun_asset_margin_compare(old_book->asset_margin, new_book->asset_margin);
+
+  auto fun_position_compare = [](const PositionMap &source_map, Book_ptr &target_book) {
+    bool changed = false;
+    for (auto &source_pair : source_map) {
+      auto &source_position = source_pair.second;
+      auto &target_position = target_book->get_position_for(source_position.direction, source_position);
+      changed |= source_position.volume != target_position.volume;                     // 数量
+      changed |= source_position.yesterday_volume != target_position.yesterday_volume; // 昨仓数量
+    }
+    return changed;
+  };
+
+  /// 用new_book的position去检测old_book的position,new有old无会加上
+  position_changed |= fun_position_compare(new_book->long_positions, old_book);
+  position_changed |= fun_position_compare(new_book->short_positions, old_book);
+  /// 用old_book的position去检测new_book的position，old有new无会设置为0删掉
+  position_changed |= fun_position_compare(old_book->long_positions, new_book);
+  position_changed |= fun_position_compare(old_book->short_positions, new_book);
+
+  /// position_changed更新book也会修改asset信息, on_asset_sync_reset仅在asset改变而position不改变的情况下调用
+  if (asset_changed and not position_changed) {
+    Asset old_asset = {};
+    longfist::copy(old_asset, old_book->asset);       // old_asset拷贝一份用于回调返回
+    longfist::copy(old_book->asset, new_book->asset); // new_asset替换掉old_asset
+
+    /// 现在暂时只修改td的信息, 不要去修改策略的信息
+    //      for (auto &bk_pair : books_) {
+    //        auto &st_book = bk_pair.second;
+    //        if (st_book->asset.ledger_category == LedgerCategory::Strategy and
+    //            app_.has_channel(st_book->asset.holder_uid, location_uid)) {
+    //          /// 用新的asset替换原来策略的, 再修改holder_uid和ledger_category
+    //          copy_asset(st_book->asset, new_book->asset);
+    //        }
+    //      }
+    for (auto &book_listener : book_listeners_) {
+      book_listener->on_asset_sync_reset(old_asset, new_book->asset);
+    }
+  }
+
+  /// position_changed更新book也会修改asset信息,
+  /// on_asset_margin_sync_reset仅在asset_margin改变而position不改变的情况下调用
+  if (asset_margin_changed and not position_changed) {
+    AssetMargin old_asset_margin = {};
+    longfist::copy(old_asset_margin, old_book->asset_margin);       // old_asset_margin拷贝一份用于回调返回
+    longfist::copy(old_book->asset_margin, new_book->asset_margin); // new_asset_margin替换掉old_asset_margin
+
+    /// 现在暂时只修改td的信息, 不要去修改策略的信息
+    //      for (auto &bk_pair : books_) {
+    //        auto &st_book = bk_pair.second;
+    //        if (st_book->asset.ledger_category == LedgerCategory::Strategy and
+    //            app_.has_channel(st_book->asset.holder_uid, location_uid)) {
+    //          /// 用新的asset_margin替换原来策略的, 再修改holder_uid和ledger_category
+    //          copy_asset(st_book->asset_margin, new_book->asset_margin);
+    //        }
+    //      }
+    for (auto &book_listener : book_listeners_) {
+      book_listener->on_asset_margin_sync_reset(old_asset_margin, new_book->asset_margin);
+    }
+  }
+
+  /// position改变更新book，包括asset和position都更新并回调on_position_sync_reset
+  if (position_changed) {
+    /// 先进行td_book的替换, 否则下面mirror_position还是只会拿到旧的数据
+    books_.erase(location_uid);
+    books_.insert_or_assign(location_uid, new_book);
+
+    /// 现在暂时只修改td的信息, 不要去修改策略的信息
+    // 重置策略的book, 并把所有和其相关的td的position数据mirror一份过来
+    //      for (auto &bk_pair : books_) {
+    //        auto &st_book = bk_pair.second;
+    //        if (st_book->asset.ledger_category == LedgerCategory::Strategy and
+    //            app_.has_channel(location_uid, st_book->asset.holder_uid)) {
+    //          copy_asset(st_book->asset, new_book->asset);
+    //          copy_asset(st_book->asset_margin, new_book->asset_margin);
+    //          mirror_positions(app_.now(), st_book->asset.holder_uid);
+    //        }
+    //      }
+
+    /// 删除了watcher重新计算一遍的逻辑, 这里更新完了以后再调用回调, watcher那边获得的数据是更新完之后的
+    for (auto &book_listener : book_listeners_) {
+      book_listener->on_position_sync_reset(*old_book, *new_book);
+    }
+  }
+
+  books_replica_.erase(location_uid); // delete replica every time
 }
 
 void Bookkeeper::try_update_asset_replica(const longfist::types::Asset &asset) {
