@@ -13,6 +13,27 @@
   "kungfuCraft": {
     "productName": "Kungfu"
   },
+  "appConfig": {
+    "makeOrder": {
+      "priceTypeFilter": {
+        "Limit": true,
+        "Market": false,
+        "FakBest5": false,
+        "ForwardBest": false,
+        "ReverseBest": false,
+        "Fak": false,
+        "Fok": false,
+        "Unknown": false
+      },
+      "offsetFilter": {
+        "Open": true,
+        "Close": true,
+        "CloseToday": false,
+        "CloseYest": true
+      },
+      "ableHedgeFlag": false
+    }
+  },
   "scripts": {
     "build": "yarn kfs craft build",
     "package": "yarn kfs craft package",

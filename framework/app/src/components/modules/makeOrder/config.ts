@@ -7,7 +7,10 @@ import {
   SideEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
-import { isShotable } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import {
+  getAbleHedgeFlag,
+  isShotable,
+} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 const { t } = VueI18n.global;
 
 export const LABEL_COL = 6;
@@ -53,7 +56,7 @@ export const getConfigSettings = (
                 default: OffsetEnum.Open,
                 required: true,
               },
-          instrumentTypeEnum === InstrumentTypeEnum.future
+          instrumentTypeEnum === InstrumentTypeEnum.future && getAbleHedgeFlag()
             ? {
                 key: 'hedge_flag',
                 name: t('tradingConfig.hedge'),
