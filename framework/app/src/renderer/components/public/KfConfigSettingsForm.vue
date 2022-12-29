@@ -18,10 +18,7 @@ import {
   nextTick,
   defineComponent,
 } from 'vue';
-import {
-  PriceType,
-  Side,
-} from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
+import { Side } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import {
   getIdByKfLocation,
   transformSearchInstrumentResultToInstrument,
@@ -46,12 +43,15 @@ import dayjs, { Dayjs } from 'dayjs';
 import VueI18n, { useLanguage } from '@kungfu-trader/kungfu-js-api/language';
 import {
   InstrumentTypeEnum,
+  PriceTypeEnum,
   SideEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { readCSV } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import { useGlobalStore } from '../../pages/index/store/global';
 import { hashInstrumentUKey } from '@kungfu-trader/kungfu-js-api/kungfu';
 import { buildInstrumentSelectOptionValue } from '../../assets/methods/uiUtils';
+import { getPriceTypeConfig } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+
 const { t } = VueI18n.global;
 
 const props = withDefaults(
@@ -739,7 +739,9 @@ defineExpose({
         "
       >
         <a-select-option
-          v-for="key in Object.keys(PriceType).slice(0, 7)"
+          v-for="key in Object.keys(getPriceTypeConfig()).filter(
+            (enumValue) => +enumValue !== PriceTypeEnum.Unknown,
+          )"
           :key="key"
           :value="+key"
         >
