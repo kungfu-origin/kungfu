@@ -394,7 +394,7 @@ function instrumentsCsvCallback(
 ) {
   const { instrumentsMap } = useGlobalStore();
   if (!instrumentsCsvData[targetKey]) instrumentsCsvData[targetKey] = {};
-  console.log(instruments);
+
   instruments.forEach((item) => {
     if (item.exchange_id && item.instrument_id) {
       const ukey = hashInstrumentUKey(item.instrument_id, item.exchange_id);
