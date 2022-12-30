@@ -112,6 +112,7 @@ type InstrumentsSearchRelated = Record<
       type: 'instrument' | 'instruments' | 'instrumentsCsv',
       value: string | string[],
     ) => Promise<{ value: string; label: string }[]>;
+    handleSearchInstrumentBlur: () => void;
   }
 >;
 
@@ -231,19 +232,18 @@ function getInstrumentsSearchRelated(
         searchInstrumnetOptions,
         handleSearchInstrument: (val) => {
           handleSearchInstrument(val).then((options) => {
-            if (options.length) {
-              instrumentOptionsReactiveData.data[key] = options;
-            } else {
-              updateSearchInstrumnetOptions(
-                instrumentKeys[key],
-                formState[key],
-              ).then((options) => {
-                instrumentOptionsReactiveData.data[key] = options;
-              });
-            }
+            instrumentOptionsReactiveData.data[key] = options;
           });
         },
         updateSearchInstrumnetOptions,
+        handleSearchInstrumentBlur: () => {
+          updateSearchInstrumnetOptions(
+            instrumentKeys[key],
+            formState[key],
+          ).then((options) => {
+            instrumentOptionsReactiveData.data[key] = options;
+          });
+        },
       };
       return item1;
     },
@@ -859,6 +859,7 @@ defineExpose({
         :filter-option="false"
         :options="instrumentOptionsReactiveData.data[item.key]"
         @search="instrumentsSearchRelated[item.key].handleSearchInstrument"
+        @blur="instrumentsSearchRelated[item.key].handleSearchInstrumentBlur"
       ></a-select>
       <a-select
         v-else-if="item.type === 'instruments'"
@@ -875,6 +876,7 @@ defineExpose({
         @search="instrumentsSearchRelated[item.key].handleSearchInstrument"
         @select="handleInstrumentSelected($event, item.key)"
         @deselect="handleInstrumentDeselected($event, item.key)"
+        @blur="instrumentsSearchRelated[item.key].handleSearchInstrumentBlur"
       ></a-select>
 
       <a-select
@@ -972,6 +974,7 @@ defineExpose({
           @search="instrumentsSearchRelated[item.key].handleSearchInstrument"
           @select="handleInstrumentSelected($event, item.key)"
           @deselect="handleInstrumentDeselected($event, item.key)"
+          @blur="instrumentsSearchRelated[item.key].handleSearchInstrumentBlur"
         ></a-select>
         <div
           class="select-csv-button__wrap"
