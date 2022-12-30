@@ -5,34 +5,13 @@
     "name": "Kungfu Trader",
     "email": "info@kungfu.link"
   },
-  "version": "2.4.41-alpha.0",
+  "version": "2.4.41-alpha.1",
   "description": "Kungfu Trader Artifact",
   "license": "Apache-2.0",
   "private": true,
   "main": "dist/app/main.js",
   "kungfuCraft": {
     "productName": "Kungfu"
-  },
-  "appConfig": {
-    "makeOrder": {
-      "priceTypeFilter": {
-        "Limit": true,
-        "Market": false,
-        "FakBest5": false,
-        "ForwardBest": false,
-        "ReverseBest": false,
-        "Fak": false,
-        "Fok": false,
-        "Unknown": false
-      },
-      "offsetFilter": {
-        "Open": true,
-        "Close": true,
-        "CloseToday": false,
-        "CloseYest": true
-      },
-      "ableHedgeFlag": false
-    }
   },
   "scripts": {
     "build": "yarn kfs craft build",
@@ -43,11 +22,11 @@
     "cli": "yarn kfs craft cli"
   },
   "dependencies": {
-    "@kungfu-trader/kfx-broker-sim": "^2.4.41-alpha.0",
-    "@kungfu-trader/kfx-broker-xtp-demo": "^2.4.41-alpha.0",
-    "@kungfu-trader/kungfu-app": "^2.4.41-alpha.0",
-    "@kungfu-trader/kungfu-cli": "^2.4.41-alpha.0",
-    "@kungfu-trader/kungfu-core": "^2.4.41-alpha.0",
-    "@kungfu-trader/kungfu-sdk": "^2.4.41-alpha.0"
+    "@kungfu-trader/kfx-broker-sim": "^2.4.41-alpha.1",
+    "@kungfu-trader/kfx-broker-xtp-demo": "^2.4.41-alpha.1",
+    "@kungfu-trader/kungfu-app": "^2.4.41-alpha.1",
+    "@kungfu-trader/kungfu-cli": "^2.4.41-alpha.1",
+    "@kungfu-trader/kungfu-core": "^2.4.41-alpha.1",
+    "@kungfu-trader/kungfu-sdk": "^2.4.41-alpha.1"
   }
 }
