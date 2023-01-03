@@ -16,6 +16,17 @@ const coreDir = getCoreDir();
 const extensionDirs = getExtensionDirs(true);
 const root = findPackageRoot();
 console.log(`-- Package root ${root}`);
+const logoDir = path.join(root, 'logo');
+const logoPath = path.join(logoDir, 'logo-replace.png');
+const dialogLogoPath = path.join(logoDir, 'dialog-logo-replace.png');
+const icoLogoPath = path.join(logoDir, 'icon-replace.ico');
+const icnsLogoPath = path.join(logoDir, 'icon-replace.icns');
+const icoLogoPathResolved = fse.existsSync(icoLogoPath)
+  ? icoLogoPath
+  : `${appDir}/public/logo/icon.ico`;
+const icnsLogoPathResolved = fse.existsSync(icnsLogoPath)
+  ? icnsLogoPath
+  : `${appDir}/public/logo/icon.icns`;
 const languageDir = path.join(root, 'language');
 const languageFile = path.join(languageDir, 'locale.json');
 const languageCNMergeFile = path.join(languageDir, 'zh-CN-merge.json');
@@ -60,6 +71,22 @@ if (fse.existsSync(languageENMergeFile)) {
 
 if (fse.existsSync(defaultInstrumentsJson)) {
   console.log(`-- Found defaultInstruments json ${defaultInstrumentsJson}`);
+}
+
+if (fse.existsSync(logoPath)) {
+  console.log(`-- Found logo file ${logoPath}`);
+}
+
+if (fse.existsSync(dialogLogoPath)) {
+  console.log(`-- Found dialog logo file ${dialogLogoPath}`);
+}
+
+if (fse.existsSync(icnsLogoPath)) {
+  console.log(`-- Found icns logo file ${icnsLogoPath}`);
+}
+
+if (fse.existsSync(icoLogoPath)) {
+  console.log(`-- Found ico logo file ${icoLogoPath}`);
 }
 
 module.exports = {
@@ -148,6 +175,15 @@ module.exports = {
           },
         ]
       : []),
+    ...(fse.existsSync(logoPath)
+      ? [
+          {
+            from: logoDir,
+            to: 'app/dist/public/logo',
+            filter: ['*.png'],
+          },
+        ]
+      : []),
     ...extensions,
   ],
   asar: false,
@@ -167,12 +203,12 @@ module.exports = {
     ],
   },
   mac: {
-    icon: `${appDir}/public/logo/icon.icns`,
+    icon: icnsLogoPathResolved,
     type: 'distribution',
     target: ['dmg'],
   },
   win: {
-    icon: `${appDir}/public/logo/icon.ico`,
+    icon: icoLogoPathResolved,
     target: [
       {
         target: 'nsis',
@@ -181,7 +217,7 @@ module.exports = {
     ],
   },
   linux: {
-    icon: `${appDir}/public/logo/icon.icns`,
+    icon: icnsLogoPathResolved,
     target: ['rpm', 'appimage'],
     executableName: 'Kungfu.app',
   },
@@ -189,9 +225,9 @@ module.exports = {
     oneClick: false,
     allowElevation: true,
     allowToChangeInstallationDirectory: true,
-    installerIcon: `${appDir}/public/logo/icon.ico`,
-    uninstallerIcon: `${appDir}/public/logo/icon.ico`,
-    installerHeaderIcon: `${appDir}/public/logo/icon.ico`,
+    installerIcon: icoLogoPathResolved,
+    uninstallerIcon: icoLogoPathResolved,
+    installerHeaderIcon: icoLogoPathResolved,
     createDesktopShortcut: true,
     createStartMenuShortcut: true,
   },
