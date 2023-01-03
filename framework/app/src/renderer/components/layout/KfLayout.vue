@@ -6,8 +6,14 @@ import { useExtConfigsRelated } from '../../assets/methods/actionsUtils';
 import globalBus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 import KfGlobalSettingModal from '../public/KfGlobalSettingModal.vue';
 import { useLanguage } from '@kungfu-trader/kungfu-js-api/language';
+import {
+  getLogoPath,
+  isDefaultLogo,
+} from '@kungfu-trader/kungfu-js-api/config/brand';
 
-const logo = require('@kungfu-trader/kungfu-app/src/renderer/assets/svg/LOGO.svg');
+const logoPath = isDefaultLogo()
+  ? require('@kungfu-trader/kungfu-app/src/renderer/assets/svg/LOGO.svg')
+  : getLogoPath();
 
 const app = getCurrentInstance();
 const globalSettingModalVisible = ref<boolean>(false);
@@ -73,7 +79,7 @@ function handleToPage(pathname: string) {
     <a-layout>
       <a-layout-sider width="64px">
         <div class="kf-header-logo">
-          <img :src="logo" />
+          <img :src="logoPath" />
         </div>
         <a-menu
           v-model:selectedKeys="menuSelectedKeys"

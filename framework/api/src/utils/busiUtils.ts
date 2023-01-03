@@ -1516,17 +1516,18 @@ export const getOrderTradeFilterKey = (category: KfCategoryTypes): string => {
 export const getTradingDataSortKey = (
   typename: KungfuApi.TradingDataTypeName,
 ): string => {
-  if (typename === 'Order') {
-    return 'update_time';
-  } else if (typename === 'Trade') {
-    return 'trade_time';
-  } else if (typename === 'OrderInput') {
-    return 'insert_time';
-  } else if (typename === 'Position') {
-    return 'instrument_id';
+  switch (typename) {
+    case 'Order':
+      return 'insert_time';
+    case 'Trade':
+      return 'trade_time';
+    case 'OrderInput':
+      return 'insert_time';
+    case 'Position':
+      return 'instrument_id';
+    default:
+      return '';
   }
-
-  return '';
 };
 
 export const getLedgerCategory = (category: KfCategoryTypes): 0 | 1 => {

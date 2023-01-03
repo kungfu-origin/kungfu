@@ -43,6 +43,7 @@ import {
   booleanProcessEnv,
   isShotable,
   isT0,
+  getTradingDataSortKey,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { writeCSV } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import {
@@ -342,11 +343,16 @@ export const useDealExportHistoryTradingData = (): {
       if (!historyData) return;
 
       const { tradingData } = historyData;
-      const orders = tradingData.Order.sort('update_time');
-      const trades = tradingData.Trade.sort('trade_time');
-      const orderStat = tradingData.OrderStat.sort('insert_time');
-      const positions = tradingData.Position.sort('update_time');
-      const assets = tradingData.Asset.sort('update_time');
+      const orderSortKey = getTradingDataSortKey('Order');
+      const orders = tradingData.Order.sort(orderSortKey);
+      const tradeSortKey = getTradingDataSortKey('Trade');
+      const trades = tradingData.Trade.sort(tradeSortKey);
+      const orderStatSortKey = getTradingDataSortKey('OrderStat');
+      const orderStat = tradingData.OrderStat.sort(orderStatSortKey);
+      const positionSortKey = getTradingDataSortKey('Position');
+      const positions = tradingData.Position.sort(positionSortKey);
+      const assetSortKey = getTradingDataSortKey('Asset');
+      const assets = tradingData.Asset.sort(assetSortKey);
 
       const { filePaths } = await dialog.showOpenDialog({
         properties: ['openDirectory'],
