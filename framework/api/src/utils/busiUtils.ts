@@ -78,6 +78,7 @@ import {
 import minimist from 'minimist';
 import VueI18n, { useLanguage } from '../language';
 import { unlinkSync } from 'fs-extra';
+import { T0T1Config } from '../typings/global';
 const { t } = VueI18n.global;
 interface SourceAccountId {
   source: string;
@@ -1183,12 +1184,69 @@ export const isShotable = (instrumentType: InstrumentTypeEnum): boolean => {
     : false;
 };
 
+export const getPriceTypeConfig = (): Record<
+  PriceTypeEnum,
+  KungfuApi.KfTradeValueCommonData
+> => {
+  const rootPackageJson = readRootPackageJsonSync();
+  const priceTypeConfig =
+    rootPackageJson?.appConfig?.makeOrder?.priceTypeFilter ||
+    ({} as Record<string, boolean>);
+  const unsupportedPriceTypes = Object.keys(priceTypeConfig).filter((key) => {
+    if (priceTypeConfig[key] === false && PriceTypeEnum[key] !== undefined) {
+      return true;
+    }
+    return false;
+  });
+
+  return Object.keys(PriceTypeEnum)
+    .filter((key) => Number.isNaN(+key))
+    .filter((priceType) => !unsupportedPriceTypes.includes(priceType))
+    .map((priceType) => PriceTypeEnum[priceType])
+    .reduce((pre, enumValue: PriceTypeEnum) => {
+      return { ...pre, ...{ [enumValue]: PriceType[enumValue] } };
+    }, {});
+};
+
+export const getOffsetConfig = (): Record<
+  PriceTypeEnum,
+  KungfuApi.KfTradeValueCommonData
+> => {
+  const rootPackageJson = readRootPackageJsonSync();
+  const offsetConfig =
+    rootPackageJson?.appConfig?.makeOrder?.offsetFilter ||
+    ({} as Record<string, boolean>);
+  const unsupportedOffset = Object.keys(offsetConfig).filter((key) => {
+    if (offsetConfig[key] === false && OffsetEnum[key] !== undefined) {
+      return true;
+    }
+    return false;
+  });
+
+  return Object.keys(OffsetEnum)
+    .filter((key) => Number.isNaN(+key))
+    .filter((offset) => !unsupportedOffset.includes(offset))
+    .map((offset) => OffsetEnum[offset])
+    .reduce((pre, enumValue: OffsetEnum) => {
+      return { ...pre, ...{ [enumValue]: Offset[enumValue] } };
+    }, {});
+};
+
+export const getAbleHedgeFlag = (): boolean => {
+  const rootPackageJson = readRootPackageJsonSync();
+  const ableHedgeFlag = rootPackageJson?.appConfig?.makeOrder?.ableHedgeFlag;
+  const ableHedgeFlagResolved =
+    ableHedgeFlag == undefined ? true : ableHedgeFlag;
+  return ableHedgeFlagResolved;
+};
+
 export const getT0Config = (): {
   instrumentTypes: InstrumentTypeEnum[];
   exchangeIds: string[];
 } => {
   const rootPackageJson = readRootPackageJsonSync();
-  const T0Config = rootPackageJson?.appConfig?.T0T1?.T0 || {};
+  const T0Config =
+    rootPackageJson?.appConfig?.T0T1?.T0 || ({} as T0T1Config['T0']);
   const instrumentTypes = (
     Array.isArray(T0Config.instrumentTypes) ? T0Config.instrumentTypes : []
   ).map((item) => InstrumentTypeEnum[item]);
@@ -1458,17 +1516,18 @@ export const getOrderTradeFilterKey = (category: KfCategoryTypes): string => {
 export const getTradingDataSortKey = (
   typename: KungfuApi.TradingDataTypeName,
 ): string => {
-  if (typename === 'Order') {
-    return 'update_time';
-  } else if (typename === 'Trade') {
-    return 'trade_time';
-  } else if (typename === 'OrderInput') {
-    return 'insert_time';
-  } else if (typename === 'Position') {
-    return 'instrument_id';
+  switch (typename) {
+    case 'Order':
+      return 'insert_time';
+    case 'Trade':
+      return 'trade_time';
+    case 'OrderInput':
+      return 'insert_time';
+    case 'Position':
+      return 'instrument_id';
+    default:
+      return '';
   }
-
-  return '';
 };
 
 export const getLedgerCategory = (category: KfCategoryTypes): 0 | 1 => {
@@ -1705,7 +1764,7 @@ export const numberEnumRadioType: Record<
   string,
   Record<number, KungfuApi.KfTradeValueCommonData>
 > = {
-  offset: Offset,
+  offset: getOffsetConfig(),
   hedgeFlag: HedgeFlag,
   direction: Direction,
   volumeCondition: VolumeCondition,

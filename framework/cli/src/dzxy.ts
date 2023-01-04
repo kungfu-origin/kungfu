@@ -5,6 +5,7 @@ import { triggerStartStep } from '@kungfu-trader/kungfu-js-api/kungfu/tradingDat
 import {
   getOrderTradeFilterKey,
   getProcessIdByKfLocation,
+  getTradingDataSortKey,
   setTimerPromiseTask,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { dealAssetsByHolderUID } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
@@ -231,10 +232,14 @@ async function exportTradingData(date, output_folder) {
     'all',
   );
 
-  const orders = tradingData.Order.sort('update_time');
-  const trades = tradingData.Trade.sort('trade_time');
-  const orderStat = tradingData.OrderStat.sort('insert_time');
-  const positions = tradingData.Trade.list();
+  const orderSortKey = getTradingDataSortKey('Order');
+  const tradeSortKey = getTradingDataSortKey('Trade');
+  const orderStatSortKey = getTradingDataSortKey('OrderStat');
+  const positionSortKey = getTradingDataSortKey('Position');
+  const orders = tradingData.Order.sort(orderSortKey);
+  const trades = tradingData.Trade.sort(tradeSortKey);
+  const orderStat = tradingData.OrderStat.sort(orderStatSortKey);
+  const positions = tradingData.Position.sort(positionSortKey);
 
   const ordersFilename = path.join(output_folder, `orders-${date}}`);
   const tradesFilename = path.join(output_folder, `trades-${date}`);

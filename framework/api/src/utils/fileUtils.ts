@@ -4,6 +4,7 @@ import * as csv from 'fast-csv';
 import { FormatterRow, ParserOptionsArgs } from 'fast-csv';
 import findRoot from 'find-root';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
+import { RootConfigJSON } from '../typings/global';
 const { t } = VueI18n.global;
 
 //添加文件
@@ -198,7 +199,7 @@ export const findPackageRoot = () => {
   return findRoot(path.resolve(searchPath));
 };
 
-export const readRootPackageJsonSync = () => {
+export const readRootPackageJsonSync = (): RootConfigJSON => {
   const rootDir = findPackageRoot();
   const packageJsonPath = path.join(rootDir, 'package.json');
   if (fse.existsSync(packageJsonPath)) {

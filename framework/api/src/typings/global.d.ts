@@ -1,6 +1,7 @@
 import { StartOptions } from 'pm2';
 import { I18n } from 'vue-i18n';
 import { KfHookKeeper } from '../hooks';
+import { InstrumentTypeEnum, InstrumentTypes } from './enums';
 
 declare global {
   interface Window {
@@ -65,4 +66,30 @@ declare module globalThis {
 export interface Pm2StartOptions extends StartOptions {
   name: string;
   autorestart?: boolean;
+}
+
+export interface T0T1Config {
+  T0: {
+    instrumentTypes: InstrumentTypes[];
+    exchangeIds: string[];
+  };
+}
+
+export interface RootConfigJSON {
+  kungfuCraft?: {
+    appTitle?: string;
+    productName?: string;
+  };
+  boardFilter?: Record<string, boolean>;
+  appConfig?: {
+    showHelp?: boolean;
+
+    T0T1?: T0T1Config;
+
+    makeOrder?: {
+      priceTypeFilter?: Record<string, boolean>;
+      offsetFilter?: Record<string, boolean>;
+      ableHedgeFlag?: boolean;
+    };
+  };
 }

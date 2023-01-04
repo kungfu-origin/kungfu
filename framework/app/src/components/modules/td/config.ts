@@ -2,6 +2,7 @@ import { DealTradingTableHooks } from '@kungfu-trader/kungfu-js-api/hooks/dealTr
 import { LedgerCategoryEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import { DealTradingDataGetter } from '@kungfu-trader/kungfu-js-api/hooks/dealTradingDataHook';
+import { getTradingDataSortKey } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 const { t } = VueI18n.global;
 
 export const getColumns = (
@@ -124,6 +125,10 @@ export const getColumns = (
       },
     ]);
 
+const orderSortKey = getTradingDataSortKey('Order');
+const tradeSortKey = getTradingDataSortKey('Trade');
+const positionSortKey = getTradingDataSortKey('Position');
+
 export const categoryRegisterConfig: DealTradingDataGetter = {
   category: 'tdGroup',
   commonData: {
@@ -135,7 +140,7 @@ export const categoryRegisterConfig: DealTradingDataGetter = {
       const { children } = kfLocation;
       const tdList = (children || []) as KungfuApi.KfConfig[];
       const locationUids = tdList.map((item) => item.location_uid);
-      return orders.sort('update_time').filter((item) => {
+      return orders.sort(orderSortKey).filter((item) => {
         return locationUids.indexOf(item.source) !== -1;
       });
     },
@@ -145,7 +150,7 @@ export const categoryRegisterConfig: DealTradingDataGetter = {
       const { children } = kfLocation;
       const tdList = (children || []) as KungfuApi.KfConfig[];
       const locationUids = tdList.map((item) => item.location_uid);
-      return trades.sort('trade_time').filter((item) => {
+      return trades.sort(tradeSortKey).filter((item) => {
         return locationUids.indexOf(item.source) !== -1;
       });
     },
@@ -158,7 +163,7 @@ export const categoryRegisterConfig: DealTradingDataGetter = {
       return position
         .nofilter('volume', BigInt(0))
         .filter('ledger_category', LedgerCategoryEnum.td)
-        .sort('instrument_id')
+        .sort(positionSortKey)
         .reverse()
         .filter((item) => {
           return locationUids.indexOf(item.holder_uid) !== -1;

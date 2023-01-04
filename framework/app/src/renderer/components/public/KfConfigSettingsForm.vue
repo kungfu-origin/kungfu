@@ -18,10 +18,7 @@ import {
   nextTick,
   defineComponent,
 } from 'vue';
-import {
-  PriceType,
-  Side,
-} from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
+import { Side } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import {
   getIdByKfLocation,
   transformSearchInstrumentResultToInstrument,
@@ -46,12 +43,15 @@ import dayjs, { Dayjs } from 'dayjs';
 import VueI18n, { useLanguage } from '@kungfu-trader/kungfu-js-api/language';
 import {
   InstrumentTypeEnum,
+  PriceTypeEnum,
   SideEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { readCSV } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import { useGlobalStore } from '../../pages/index/store/global';
 import { hashInstrumentUKey } from '@kungfu-trader/kungfu-js-api/kungfu';
 import { buildInstrumentSelectOptionValue } from '../../assets/methods/uiUtils';
+import { getPriceTypeConfig } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+
 const { t } = VueI18n.global;
 
 const props = withDefaults(
@@ -112,6 +112,7 @@ type InstrumentsSearchRelated = Record<
       type: 'instrument' | 'instruments' | 'instrumentsCsv',
       value: string | string[],
     ) => Promise<{ value: string; label: string }[]>;
+    handleSearchInstrumentBlur: () => void;
   }
 >;
 
@@ -231,19 +232,18 @@ function getInstrumentsSearchRelated(
         searchInstrumnetOptions,
         handleSearchInstrument: (val) => {
           handleSearchInstrument(val).then((options) => {
-            if (options.length) {
-              instrumentOptionsReactiveData.data[key] = options;
-            } else {
-              updateSearchInstrumnetOptions(
-                instrumentKeys[key],
-                formState[key],
-              ).then((options) => {
-                instrumentOptionsReactiveData.data[key] = options;
-              });
-            }
+            instrumentOptionsReactiveData.data[key] = options;
           });
         },
         updateSearchInstrumnetOptions,
+        handleSearchInstrumentBlur: () => {
+          updateSearchInstrumnetOptions(
+            instrumentKeys[key],
+            formState[key],
+          ).then((options) => {
+            instrumentOptionsReactiveData.data[key] = options;
+          });
+        },
       };
       return item1;
     },
@@ -394,7 +394,7 @@ function instrumentsCsvCallback(
 ) {
   const { instrumentsMap } = useGlobalStore();
   if (!instrumentsCsvData[targetKey]) instrumentsCsvData[targetKey] = {};
-  console.log(instruments);
+
   instruments.forEach((item) => {
     if (item.exchange_id && item.instrument_id) {
       const ukey = hashInstrumentUKey(item.instrument_id, item.exchange_id);
@@ -739,7 +739,9 @@ defineExpose({
         "
       >
         <a-select-option
-          v-for="key in Object.keys(PriceType).slice(0, 7)"
+          v-for="key in Object.keys(getPriceTypeConfig()).filter(
+            (enumValue) => +enumValue !== PriceTypeEnum.Unknown,
+          )"
           :key="key"
           :value="+key"
         >
@@ -857,6 +859,7 @@ defineExpose({
         :filter-option="false"
         :options="instrumentOptionsReactiveData.data[item.key]"
         @search="instrumentsSearchRelated[item.key].handleSearchInstrument"
+        @blur="instrumentsSearchRelated[item.key].handleSearchInstrumentBlur"
       ></a-select>
       <a-select
         v-else-if="item.type === 'instruments'"
@@ -873,6 +876,7 @@ defineExpose({
         @search="instrumentsSearchRelated[item.key].handleSearchInstrument"
         @select="handleInstrumentSelected($event, item.key)"
         @deselect="handleInstrumentDeselected($event, item.key)"
+        @blur="instrumentsSearchRelated[item.key].handleSearchInstrumentBlur"
       ></a-select>
 
       <a-select
@@ -970,6 +974,7 @@ defineExpose({
           @search="instrumentsSearchRelated[item.key].handleSearchInstrument"
           @select="handleInstrumentSelected($event, item.key)"
           @deselect="handleInstrumentDeselected($event, item.key)"
+          @blur="instrumentsSearchRelated[item.key].handleSearchInstrumentBlur"
         ></a-select>
         <div
           class="select-csv-button__wrap"
