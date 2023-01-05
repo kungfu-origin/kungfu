@@ -649,11 +649,11 @@ KF_DEFINE_PACK_TYPE(                                                            
     (double, pre_close_price), // 昨收价(股票和债券)
 
     (double, settlement_price),     // 结算价(期货)
-    (double, pre_settlement_price), // 昨结算(期货)
+    (double, pre_settlement_price), // 昨结算(期货) ***
 
     (double, margin),       // 保证金(期货)
     (double, position_pnl), // 持仓盈亏(期货)
-    (double, close_pnl),    // 平仓盈亏(期货)
+    (double, close_pnl),    // 平仓盈亏(期货) ***
 
     (double, realized_pnl),  // 已实现盈亏
     (double, unrealized_pnl) // 未实现盈亏

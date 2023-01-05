@@ -3,6 +3,7 @@ import fse from 'fs-extra';
 import inquirer from 'inquirer';
 import colors from 'colors';
 import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
+import resolveExtConfigHook from '@kungfu-trader/kungfu-js-api/hooks/resolveExtConfigHook';
 import {
   getAvailCliDaemonList,
   getIdByKfLocation,
@@ -146,7 +147,7 @@ export const renderSelect = (configItem: KungfuApi.KfConfigItem) => {
 
 export const buildQuestionByKfConfigItem = (
   configItem: KungfuApi.KfConfigItem,
-  value: KungfuApi.KfConfigValue | undefined,
+  dafultValue: KungfuApi.KfConfigValue | undefined,
   isUpdate = false,
 ) => {
   const { key, type } = configItem;
@@ -169,14 +170,22 @@ export const buildQuestionByKfConfigItem = (
         return new Error('Required');
       }
 
+      if ((isUpdate && configItem.primary) || configItem.disabled) {
+        if (value !== dafultValue) {
+          return new Error("This value can't change");
+        }
+
+        return true;
+      }
+
       return true;
     },
 
     ...(targetType === 'path' ? { cwd: process.cwd().toString() } : {}),
   };
 
-  if (value !== undefined && value !== '' && value !== 0) {
-    questions.default = value;
+  if (dafultValue !== undefined && dafultValue !== '' && dafultValue !== 0) {
+    questions.default = dafultValue;
   }
 
   return questions;
@@ -353,11 +362,10 @@ export const dealKfConfigValue = async (
   kfConfig: KungfuApi.KfConfig,
   extConfigs: KungfuApi.KfExtConfigs,
 ) => {
-  const extConfig =
-    await globalThis.HookKeeper.getHooks().resolveExtConfig.trigger(
-      kfConfig,
-      extConfigs[kfConfig.category][kfConfig.group],
-    );
+  const extConfig = await (
+    globalThis.HookKeeper.getHooks()
+      .resolveExtConfig as typeof resolveExtConfigHook
+  ).trigger(kfConfig, extConfigs[kfConfig.category][kfConfig.group]);
 
   try {
     const settingsMap = extConfig?.settings.reduce((pre, item) => {

@@ -1,6 +1,7 @@
 import { LedgerCategoryEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import { DealTradingDataGetter } from '@kungfu-trader/kungfu-js-api/hooks/dealTradingDataHook';
+import { getTradingDataSortKey } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 const { t } = VueI18n.global;
 
 const buildSorter =
@@ -74,6 +75,9 @@ export const getColumns = (): KfTradingDataTableHeaderConfig[] => [
   },
 ];
 
+const orderSortKey = getTradingDataSortKey('Order');
+const tradeSortKey = getTradingDataSortKey('Trade');
+const positionSortKey = getTradingDataSortKey('Position');
 export const categoryRegisterConfig: DealTradingDataGetter = {
   category: 'globalPos',
   commonData: {
@@ -86,7 +90,7 @@ export const categoryRegisterConfig: DealTradingDataGetter = {
       return orders
         .filter('exchange_id', group)
         .filter('instrument_id', name)
-        .sort('update_time');
+        .sort(orderSortKey);
     },
   },
   trade: {
@@ -95,7 +99,7 @@ export const categoryRegisterConfig: DealTradingDataGetter = {
       return trades
         .filter('exchange_id', group)
         .filter('instrument_id', name)
-        .sort('trade_time');
+        .sort(tradeSortKey);
     },
   },
   position: {
@@ -106,7 +110,7 @@ export const categoryRegisterConfig: DealTradingDataGetter = {
         .filter('ledger_category', LedgerCategoryEnum.td)
         .filter('exchange_id', group)
         .filter('instrument_id', name)
-        .sort('instrument_id')
+        .sort(positionSortKey)
         .reverse();
     },
   },

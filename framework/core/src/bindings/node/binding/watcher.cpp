@@ -360,13 +360,14 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
                       InstanceMethod("issueBasketOrder", &Watcher::IssueBasketOrder),                   //
                       InstanceMethod("cancelOrder", &Watcher::CancelOrder),                             //
                       InstanceMethod("requestMarketData", &Watcher::RequestMarketData),                 //
+                      InstanceMethod("start", &Watcher::Start),                                         //
+                      InstanceMethod("sync", &Watcher::Sync),                                           //
+                      InstanceMethod("quit", &Watcher::Quit),   
                       InstanceAccessor("state", &Watcher::GetState, &Watcher::NoSet),                   //
                       InstanceAccessor("ledger", &Watcher::GetLedger, &Watcher::NoSet),                 //
                       InstanceAccessor("appStates", &Watcher::GetAppStates, &Watcher::NoSet),           //
                       InstanceAccessor("strategyStates", &Watcher::GetStrategyStates, &Watcher::NoSet), //
                       InstanceAccessor("tradingDay", &Watcher::GetTradingDay, &Watcher::NoSet),         //
-                      InstanceMethod("start", &Watcher::Start),
-                      InstanceMethod("sync", &Watcher::Sync),
                   });
 
   constructor = Napi::Persistent(func);
@@ -656,6 +657,8 @@ void Watcher::StartWorker() {
 
 void Watcher::CancelWorker() { uv_work_live_ = false; }
 
+void Watcher::Quit(const Napi::CallbackInfo &info) { uv_work_live_ = false; }
+
 void Watcher::AfterMasterDown() {
   reader_->disjoin(master_cmd_location_->uid);
   writers_.clear();
@@ -715,8 +718,12 @@ void Watcher::UpdateBook(const event_ptr &event, const Quote &quote) {
 void Watcher::UpdateBook(const event_ptr &event, const Position &position) {
   auto book = bookkeeper_.get_book(position.holder_uid);
   auto &book_position = book->get_position_for(position.direction, position);
-  state<Position> cache_state(position.holder_uid, event->dest(), event->gen_time(), book_position);
-  feed_state_data_bank(cache_state, data_bank_);
+  auto &book_oppsite_position = book->get_oppsite_position_for(position.direction, position);
+  state<Position> cache_state_position(position.holder_uid, event->dest(), event->gen_time(), book_position);
+  feed_state_data_bank(cache_state_position, data_bank_);
+  state<Position> cache_state_oppsite_position(book_oppsite_position.holder_uid, event->dest(), event->gen_time(),
+                                               book_oppsite_position);
+  feed_state_data_bank(cache_state_oppsite_position, data_bank_);
 }
 
 Watcher::BookListener::BookListener(Watcher &watcher) : watcher_(watcher) {}

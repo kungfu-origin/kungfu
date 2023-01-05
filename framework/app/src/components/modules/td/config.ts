@@ -2,11 +2,15 @@ import { DealTradingTableHooks } from '@kungfu-trader/kungfu-js-api/hooks/dealTr
 import { LedgerCategoryEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import { DealTradingDataGetter } from '@kungfu-trader/kungfu-js-api/hooks/dealTradingDataHook';
+import { getTradingDataSortKey } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 const { t } = VueI18n.global;
 
 export const getColumns = (
   kfLocation: KungfuApi.KfLocation,
   sorter: (
+    dataIndex: string,
+  ) => (a: KungfuApi.KfConfig, b: KungfuApi.KfConfig) => number,
+  marginSorter: (
     dataIndex: string,
   ) => (a: KungfuApi.KfConfig, b: KungfuApi.KfConfig) => number,
   isShowAssetMargin: boolean,
@@ -87,7 +91,7 @@ export const getColumns = (
               dataIndex: 'avail_margin',
               align: 'right',
               sorter: {
-                compare: sorter('avail_margin'),
+                compare: marginSorter('avail_margin'),
               },
               width: 110,
             },
@@ -96,7 +100,7 @@ export const getColumns = (
               dataIndex: 'cash_debt',
               align: 'right',
               sorter: {
-                compare: sorter('cash_debt'),
+                compare: marginSorter('cash_debt'),
               },
               width: 110,
             },
@@ -105,7 +109,7 @@ export const getColumns = (
               dataIndex: 'total_asset',
               align: 'right',
               sorter: {
-                compare: sorter('total_asset'),
+                compare: marginSorter('total_asset'),
               },
               width: 110,
             },
@@ -121,6 +125,10 @@ export const getColumns = (
       },
     ]);
 
+const orderSortKey = getTradingDataSortKey('Order');
+const tradeSortKey = getTradingDataSortKey('Trade');
+const positionSortKey = getTradingDataSortKey('Position');
+
 export const categoryRegisterConfig: DealTradingDataGetter = {
   category: 'tdGroup',
   commonData: {
@@ -132,7 +140,7 @@ export const categoryRegisterConfig: DealTradingDataGetter = {
       const { children } = kfLocation;
       const tdList = (children || []) as KungfuApi.KfConfig[];
       const locationUids = tdList.map((item) => item.location_uid);
-      return orders.sort('update_time').filter((item) => {
+      return orders.sort(orderSortKey).filter((item) => {
         return locationUids.indexOf(item.source) !== -1;
       });
     },
@@ -142,7 +150,7 @@ export const categoryRegisterConfig: DealTradingDataGetter = {
       const { children } = kfLocation;
       const tdList = (children || []) as KungfuApi.KfConfig[];
       const locationUids = tdList.map((item) => item.location_uid);
-      return trades.sort('trade_time').filter((item) => {
+      return trades.sort(tradeSortKey).filter((item) => {
         return locationUids.indexOf(item.source) !== -1;
       });
     },
@@ -155,7 +163,7 @@ export const categoryRegisterConfig: DealTradingDataGetter = {
       return position
         .nofilter('volume', BigInt(0))
         .filter('ledger_category', LedgerCategoryEnum.td)
-        .sort('instrument_id')
+        .sort(positionSortKey)
         .reverse()
         .filter((item) => {
           return locationUids.indexOf(item.holder_uid) !== -1;

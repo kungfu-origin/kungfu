@@ -34,6 +34,7 @@
 #define EXCHANGE_HK "HK"           // 港股: 4（香港交易所）
 #define EXCHANGE_HK_FUTURE "HKFUT" // 港股期货: 5（香港交易所）
 #define EXCHANGE_US "US"           // 美股: 29（纳斯达克交易所）
+#define EXCHANGE_US_FUTURE "USFUT" // 美股: 29（纳斯达克交易所）
 #define EXCHANGE_GLFX "GLFX"       // 全球外汇: 41
 #define EXCHANGE_IPE "IPE"         // LME\IPE: 45(LME（伦敦金属交易所）、ICE)
 #define EXCHANGE_CBOT "CBOT"       // ES-CBOT: 62
@@ -299,7 +300,7 @@ inline longfist::enums::InstrumentType get_instrument_type(const std::string &ex
     }
     if (startswith(instrument_id, "15") || startswith(instrument_id, "16") || startswith(instrument_id, "18")) {
       return longfist::enums::InstrumentType::Fund;
-    } else if (startswith(instrument_id, "13")) {
+    } else if (startswith(instrument_id, "131")) {
       return longfist::enums::InstrumentType::Repo;
     } else if (startswith(instrument_id, "1")) {
       return longfist::enums::InstrumentType::Bond;
@@ -319,6 +320,8 @@ inline longfist::enums::InstrumentType get_instrument_type(const std::string &ex
     return longfist::enums::InstrumentType::Future;
   } else if (string_equals(exchange_id, EXCHANGE_US)) {
     return longfist::enums::InstrumentType::Stock;
+  } else if (string_equals(exchange_id, EXCHANGE_US_FUTURE)) {
+    return longfist::enums::InstrumentType::Future;
   }
   SPDLOG_ERROR("invalid instrument type for exchange {} and instrument {}", exchange_id, instrument_id);
   return longfist::enums::InstrumentType::Unknown;

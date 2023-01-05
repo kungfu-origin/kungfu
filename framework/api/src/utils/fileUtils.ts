@@ -1,9 +1,10 @@
 import path from 'path';
 import fse from 'fs-extra';
 import * as csv from 'fast-csv';
-import { FormatterRow } from 'fast-csv';
+import { FormatterRow, ParserOptionsArgs } from 'fast-csv';
 import findRoot from 'find-root';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
+import { RootConfigJSON } from '../typings/global';
 const { t } = VueI18n.global;
 
 //添加文件
@@ -28,19 +29,38 @@ export const addFileSync = (
   }
 };
 
-export const readCSV = <T>(filepath: string) => {
+export const readCSV = <T>(
+  filepath: string,
+  headers: ParserOptionsArgs['headers'] = true,
+) => {
   filepath = path.normalize(filepath);
-  return new Promise<T[]>((resolve, reject) => {
-    const res: T[] = [];
+  return new Promise<{
+    resRows: T[];
+    errRows: Array<{ row: number; data: Array<string | number | boolean> }>;
+  }>((resolve, reject) => {
+    const resRows: T[] = [];
+    const errRows: Array<{
+      row: number;
+      data: Array<string | number | boolean>;
+    }> = [];
     csv
       .parseFile(filepath, {
-        headers: true,
+        headers: headers,
+        ignoreEmpty: true,
+        skipLines: headers === true ? 0 : 1,
+        strictColumnHandling: true,
       })
       .on('data', function (row) {
-        res.push(row);
+        resRows.push(row);
+      })
+      .on('data-invalid', function (data, row) {
+        errRows.push({
+          data,
+          row,
+        });
       })
       .on('end', function () {
-        resolve(res);
+        resolve({ resRows, errRows });
       })
       .on('error', (err) => {
         reject(err);
@@ -58,7 +78,7 @@ export const writeCSV = (
     csv
       .writeToPath(filePath, data, {
         headers: true,
-        transform: transform,
+        transform,
       })
       .on('finish', function () {
         resolve();
@@ -179,7 +199,7 @@ export const findPackageRoot = () => {
   return findRoot(path.resolve(searchPath));
 };
 
-export const readRootPackageJsonSync = () => {
+export const readRootPackageJsonSync = (): RootConfigJSON => {
   const rootDir = findPackageRoot();
   const packageJsonPath = path.join(rootDir, 'package.json');
   if (fse.existsSync(packageJsonPath)) {

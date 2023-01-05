@@ -15,7 +15,7 @@ using namespace kungfu::yijinjing::data;
 using namespace kungfu::yijinjing::cache;
 
 #define STORE_LIMIT 100
-#define STORE_INTERVAL_LIMIT 500
+#define STORE_INTERVAL_LIMIT 200
 
 namespace kungfu::yijinjing::cache {
 

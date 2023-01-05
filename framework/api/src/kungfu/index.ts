@@ -63,6 +63,19 @@ export const dealTradingDataItem = (
       ? item.instrument_type
       : InstrumentTypeEnum.unknown;
   const isInstrumnetShotable = isShotable(instrument_type);
+
+  if ('order_id' in item) {
+    itemResolved.order_id = item.order_id.toString();
+  }
+
+  if ('trade_id' in item) {
+    itemResolved.trade_id = item.trade_id.toString();
+  }
+
+  if ('instrument_id' in item) {
+    itemResolved.instrument_id = item.instrument_id.toString();
+  }
+
   if ('trade_time' in item && !isShowOrigin) {
     itemResolved.trade_time = dealKfTime(item.trade_time, true);
   }

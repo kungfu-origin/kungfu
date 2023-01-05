@@ -18,10 +18,7 @@ import {
   nextTick,
   defineComponent,
 } from 'vue';
-import {
-  PriceType,
-  Side,
-} from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
+import { Side } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import {
   getIdByKfLocation,
   transformSearchInstrumentResultToInstrument,
@@ -46,15 +43,15 @@ import dayjs, { Dayjs } from 'dayjs';
 import VueI18n, { useLanguage } from '@kungfu-trader/kungfu-js-api/language';
 import {
   InstrumentTypeEnum,
+  PriceTypeEnum,
   SideEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { readCSV } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import { useGlobalStore } from '../../pages/index/store/global';
 import { hashInstrumentUKey } from '@kungfu-trader/kungfu-js-api/kungfu';
-import {
-  buildInstrumentSelectOptionValue,
-  buildInstrumentSelectOptionLabel,
-} from '../../assets/methods/uiUtils';
+import { buildInstrumentSelectOptionValue } from '../../assets/methods/uiUtils';
+import { getPriceTypeConfig } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+
 const { t } = VueI18n.global;
 
 const props = withDefaults(
@@ -115,6 +112,7 @@ type InstrumentsSearchRelated = Record<
       type: 'instrument' | 'instruments' | 'instrumentsCsv',
       value: string | string[],
     ) => Promise<{ value: string; label: string }[]>;
+    handleSearchInstrumentBlur: () => void;
   }
 >;
 
@@ -221,7 +219,6 @@ function getInstrumentsSearchRelated(
       const {
         searchInstrumnetOptions,
         handleSearchInstrument,
-        handleSearchByCustom,
         updateSearchInstrumnetOptions,
       } = useInstruments();
 
@@ -234,21 +231,19 @@ function getInstrumentsSearchRelated(
       item1[key] = {
         searchInstrumnetOptions,
         handleSearchInstrument: (val) => {
-          if (instrumentKeys[key] === 'instrumentsCsv') {
-            handleSearchByCustom(val, {
-              customInstruments: Object.values(instrumentsCsvData[key]) || [],
-              customFilterCondition: (keywords, pos) =>
-                new RegExp(`${keywords}`, 'ig').test(pos.id),
-            }).then((options) => {
-              instrumentOptionsReactiveData.data[key] = options;
-            });
-          } else {
-            handleSearchInstrument(val).then((options) => {
-              instrumentOptionsReactiveData.data[key] = options;
-            });
-          }
+          handleSearchInstrument(val).then((options) => {
+            instrumentOptionsReactiveData.data[key] = options;
+          });
         },
         updateSearchInstrumnetOptions,
+        handleSearchInstrumentBlur: () => {
+          updateSearchInstrumnetOptions(
+            instrumentKeys[key],
+            formState[key],
+          ).then((options) => {
+            instrumentOptionsReactiveData.data[key] = options;
+          });
+        },
       };
       return item1;
     },
@@ -391,10 +386,15 @@ function getKfTradeValueName(
 
 function instrumentsCsvCallback(
   instruments: KungfuApi.Instrument[],
+  errRows: {
+    row: number;
+    data: (string | number | boolean)[];
+  }[],
   targetKey: string,
 ) {
   const { instrumentsMap } = useGlobalStore();
   if (!instrumentsCsvData[targetKey]) instrumentsCsvData[targetKey] = {};
+
   instruments.forEach((item) => {
     if (item.exchange_id && item.instrument_id) {
       const ukey = hashInstrumentUKey(item.instrument_id, item.exchange_id);
@@ -425,29 +425,33 @@ function instrumentsCsvCallback(
     Number(
       /\d/.exec(customerFormItemTips[targetKey]?.split(',')?.[1] || '0')?.[0],
     ) +
-    (sourceLength - resolvedLength);
+    (sourceLength - resolvedLength + errRows.length);
   customerFormItemTips[targetKey] = t('validate.resolved_tip', {
     success: `${resolvedLength}`,
     fail: `${failedLength}`,
     value: t('tradingConfig.instrument'),
   });
-  instrumentOptionsReactiveData.data[targetKey] = resolvedInstruments.map(
-    (item) => ({
-      value: buildInstrumentSelectOptionValue(item),
-      label: buildInstrumentSelectOptionLabel(item),
-    }),
+  formState[targetKey] = resolvedInstruments.map((item) =>
+    buildInstrumentSelectOptionValue(item),
   );
 }
 
 function handleClearInstrumentsCsv(targetKey: string) {
   formState[targetKey] = [];
-  instrumentOptionsReactiveData.data[targetKey] = [];
   customerFormItemTips[targetKey] = '';
 }
 
 function handleSelectCsv<T>(
   targetKey: string,
-  callback?: (data: T[], targetKey: string) => void,
+  headers?: string[],
+  callback?: (
+    data: T[],
+    errRows: {
+      row: number;
+      data: (string | number | boolean)[];
+    }[],
+    targetKey: string,
+  ) => void,
 ): void {
   dialog
     .showOpenDialog({
@@ -457,9 +461,15 @@ function handleSelectCsv<T>(
     .then((res) => {
       const { filePaths } = res;
       if (filePaths.length) {
-        readCSV<T>(filePaths[0]).then((data) => {
-          callback && callback(data, targetKey);
-        });
+        readCSV<T>(filePaths[0], headers)
+          .then(({ resRows, errRows }) => {
+            callback && callback(resRows, errRows, targetKey);
+          })
+          .catch((err) => {
+            if (err instanceof Error) {
+              console.error(err);
+            }
+          });
       }
     });
 }
@@ -673,6 +683,9 @@ defineExpose({
         v-model:value="formState[item.key]"
         :max="item.max ?? Infinity"
         :min="item.min ?? -Infinity"
+        :formatter="(val) => Math.floor(val)"
+        :parser="(val) => Math.floor(Number(val))"
+        :step="steps[item.key] || 1"
         :disabled="
           (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
           item.disabled
@@ -726,7 +739,9 @@ defineExpose({
         "
       >
         <a-select-option
-          v-for="key in Object.keys(PriceType).slice(0, 7)"
+          v-for="key in Object.keys(getPriceTypeConfig()).filter(
+            (enumValue) => +enumValue !== PriceTypeEnum.Unknown,
+          )"
           :key="key"
           :value="+key"
         >
@@ -844,6 +859,7 @@ defineExpose({
         :filter-option="false"
         :options="instrumentOptionsReactiveData.data[item.key]"
         @search="instrumentsSearchRelated[item.key].handleSearchInstrument"
+        @blur="instrumentsSearchRelated[item.key].handleSearchInstrumentBlur"
       ></a-select>
       <a-select
         v-else-if="item.type === 'instruments'"
@@ -860,6 +876,7 @@ defineExpose({
         @search="instrumentsSearchRelated[item.key].handleSearchInstrument"
         @select="handleInstrumentSelected($event, item.key)"
         @deselect="handleInstrumentDeselected($event, item.key)"
+        @blur="instrumentsSearchRelated[item.key].handleSearchInstrumentBlur"
       ></a-select>
 
       <a-select
@@ -940,7 +957,7 @@ defineExpose({
       </div>
       <div
         v-else-if="item.type === 'instrumentsCsv'"
-        class="kf-form-item__warp file instruments-csv__wrap"
+        class="kf-form-item__warp instruments-csv__wrap"
       >
         <a-select
           :value="formState[item.key]"
@@ -949,36 +966,48 @@ defineExpose({
             item.disabled
           "
           mode="multiple"
+          :max-tag-count="5"
           show-search
+          allow-clear
           :filter-option="false"
           :options="instrumentOptionsReactiveData.data[item.key]"
           @search="instrumentsSearchRelated[item.key].handleSearchInstrument"
           @select="handleInstrumentSelected($event, item.key)"
           @deselect="handleInstrumentDeselected($event, item.key)"
+          @blur="instrumentsSearchRelated[item.key].handleSearchInstrumentBlur"
         ></a-select>
-        <a-button
-          size="small"
-          :disabled="
-            (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
-            item.disabled
-          "
-          @click="
-            handleSelectCsv<KungfuApi.Instrument>(
-              item.key,
-              instrumentsCsvCallback,
-            )
-          "
+        <div
+          class="select-csv-button__wrap"
+          :title="$t('settingsFormConfig.add_csv_desc')"
         >
-          {{ $t('tradingConfig.add_csv') }}
-        </a-button>
+          <a-button
+            size="small"
+            :disabled="
+              (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
+              item.disabled
+            "
+            @click="
+              handleSelectCsv<KungfuApi.Instrument>(
+                item.key,
+                item.headers,
+                instrumentsCsvCallback,
+              )
+            "
+          >
+            {{ $t('settingsFormConfig.add_csv') }}
+          </a-button>
+          <span class="select-csv-tip">
+            {{ $t('settingsFormConfig.add_csv_desc') }}
+          </span>
+        </div>
         <div
           v-if="customerFormItemTips[item.key]"
-          class="file-path"
+          class="csv-resolved-desc"
           :title="(customerFormItemTips[item.key] || '').toString()"
         >
           <span class="name">{{ customerFormItemTips[item.key] }}</span>
           <span class="clear" @click="handleClearInstrumentsCsv(item.key)">
-            {{ $t('tradingConfig.clear') }}
+            {{ $t('settingsFormConfig.clear') }}
           </span>
         </div>
       </div>
@@ -1085,11 +1114,6 @@ export default defineComponent({
           padding-right: 16px;
           box-sizing: border-box;
         }
-
-        .clear {
-          color: #faad14;
-          cursor: pointer;
-        }
       }
 
       button {
@@ -1098,9 +1122,36 @@ export default defineComponent({
     }
 
     &.instruments-csv__wrap {
-      button {
-        width: fit-content;
+      .select-csv-button__wrap {
         margin-top: 8px;
+
+        button {
+          width: fit-content;
+        }
+
+        .select-csv-tip {
+          display: block;
+          margin-top: 4px;
+          color: grey;
+          word-break: break-all;
+          user-select: text;
+        }
+      }
+
+      .csv-resolved-desc {
+        word-break: break-word;
+        margin-top: 8px;
+        box-sizing: border-box;
+
+        .name {
+          padding-right: 16px;
+          box-sizing: border-box;
+        }
+
+        .clear {
+          color: #faad14;
+          cursor: pointer;
+        }
       }
     }
   }
