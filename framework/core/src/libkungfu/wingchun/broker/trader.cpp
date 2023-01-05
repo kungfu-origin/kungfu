@@ -36,7 +36,6 @@ void TraderVendor::on_start() {
   BrokerVendor::on_start();
 
   events_ | is(BlockMessage::tag) | $$(service_->insert_block_message(event));
-  events_ | is(OrderInput::tag) | $$(service_->handle_order_input(event));
   events_ | is(OrderAction::tag) | $$(service_->cancel_order(event));
   events_ | is(AssetRequest::tag) | $$(service_->req_account());
   events_ | is(Deregister::tag) | $$(service_->on_strategy_exit(event));
@@ -49,7 +48,6 @@ void TraderVendor::on_start() {
   events_ | filter([&](const event_ptr &event) {
     return event->msg_type() == BatchOrderBegin::tag or event->msg_type() == BatchOrderEnd::tag;
   }) | $$(service_->handle_batch_order_tag(event));
-  events_ | instanceof <journal::frame>() | $$(service_->on_custom_event(event));
 
   clean_orders();
 
