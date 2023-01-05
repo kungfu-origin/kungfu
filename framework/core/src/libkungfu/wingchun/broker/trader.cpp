@@ -20,6 +20,13 @@ TraderVendor::TraderVendor(locator_ptr locator, const std::string &group, const 
 
 void TraderVendor::set_service(Trader_ptr service) { service_ = std::move(service); }
 
+void TraderVendor::react() {
+  events_ | skip_until(events_ | is(RequestStart::tag)) | is(OrderInput::tag) | $$(service_->handle_order_input(event));
+  events_ | skip_until(events_ | is(RequestStart::tag)) |
+      instanceof <journal::frame>() | $$(service_->on_custom_event(event));
+  apprentice::react();
+}
+
 void TraderVendor::on_react() {
   events_ | is(ResetBookRequest::tag) |
       $([&](const event_ptr &event) { get_writer(location::PUBLIC)->mark(now(), ResetBookRequest::tag); });
