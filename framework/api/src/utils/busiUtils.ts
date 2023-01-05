@@ -905,7 +905,7 @@ export const getDaemonKfLocationByProcessId = (
   processId: string,
 ): KungfuApi.KfLocation | null => {
   if (processId.indexOf('daemon_') === 0) {
-    const arr = processId.split['_'];
+    const arr = processId.split('_');
     if (arr.length < 3) return null;
 
     return {
