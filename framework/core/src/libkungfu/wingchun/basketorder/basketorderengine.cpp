@@ -21,7 +21,9 @@ void BasketOrderEngine::on_start(const rx::connectable_observable<event_ptr> &ev
 
 void BasketOrderEngine::on_basket_order(int64_t trigger_time, uint32_t source, uint32_t dest,
                                         const longfist::types::BasketOrder &basket_order) {
+  SPDLOG_INFO("---111");
   make_basket_order_state(source, dest, trigger_time, basket_order);
+  SPDLOG_INFO("---2222");
 }
 
 void BasketOrderEngine::insert_basket_order(int64_t trigger_time, uint32_t source, uint32_t dest,
@@ -31,6 +33,11 @@ void BasketOrderEngine::insert_basket_order(int64_t trigger_time, uint32_t sourc
 }
 
 void BasketOrderEngine::update_basket_order(int64_t trigger_time, const longfist::types::Order &order) {
+
+  if (order.parent_id == (uint64_t)0) {
+    SPDLOG_DEBUG("not a basket order");
+    return;
+  }
 
   if (not has_basket_order_state(order.parent_id)) {
     throw wingchun_error(fmt::format("basket order is not exist {} {}", order.parent_id));
