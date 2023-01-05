@@ -21,9 +21,7 @@ void BasketOrderEngine::on_start(const rx::connectable_observable<event_ptr> &ev
 
 void BasketOrderEngine::on_basket_order(int64_t trigger_time, uint32_t source, uint32_t dest,
                                         const longfist::types::BasketOrder &basket_order) {
-  SPDLOG_INFO("---111");
   make_basket_order_state(source, dest, trigger_time, basket_order);
-  SPDLOG_INFO("---2222");
 }
 
 void BasketOrderEngine::insert_basket_order(int64_t trigger_time, uint32_t source, uint32_t dest,
