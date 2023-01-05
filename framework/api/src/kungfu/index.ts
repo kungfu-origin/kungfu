@@ -26,6 +26,7 @@ import {
   HistoryDateEnum,
   LedgerCategoryEnum,
   InstrumentTypeEnum,
+  BasketVolumeTypeEnum,
 } from '../typings/enums';
 import { ExchangeIds } from '../config/tradingConfig';
 
@@ -532,6 +533,85 @@ export const makeOrderByBlockMessage = (
         });
     }
   });
+};
+
+export const getBasketInstrumentVolume = (
+  volumeType: BasketVolumeTypeEnum,
+  volume: bigint,
+  rate: number,
+  totalVolume: bigint,
+) => {
+  if (volumeType === BasketVolumeTypeEnum.Quantity) {
+    return Number(volume);
+  } else if (volumeType === BasketVolumeTypeEnum.Proportion) {
+    return Math.floor((Number(totalVolume) * rate) / 100);
+  }
+
+  return 0;
+};
+
+export const makeOrderByBasketTrade = (
+  watcher: KungfuApi.Watcher | null,
+  basket: KungfuApi.Basket,
+  basketOrderInput: KungfuApi.BasketOrderInput,
+  basketInstruments: KungfuApi.BasketInstrument[],
+  kfLocation: KungfuApi.KfLocation,
+) => {
+  if (!watcher) {
+    return Promise.reject(new Error(`Watcher is NULL`));
+  }
+
+  if (!watcher.isLive()) {
+    return Promise.reject(new Error(`Watcher is not live`));
+  }
+
+  if (!watcher.isReadyToInteract(kfLocation)) {
+    const accountId = getIdByKfLocation(kfLocation);
+    return Promise.reject(new Error(`Td ${accountId} not ready`));
+  }
+
+  console.log(watcher, basket, basketInstruments, kfLocation);
+
+  const now = watcher.now();
+  const basketOrder: KungfuApi.BasketOrder = {
+    ...longfist.BasketOrder(),
+    insert_time: now,
+    volume: BigInt(basket.total_volume),
+    price_type: +basketOrderInput.price_type,
+    price_level: +basketOrderInput.price_level,
+    price_offset: +basketOrderInput.price_offset,
+  };
+
+  const parent_id = watcher.issueBasketOrder(basketOrder, kfLocation);
+
+  const makeOrderTasks = basketInstruments.map((baksetInstrument) => {
+    const volume = getBasketInstrumentVolume(
+      basket.volume_type,
+      baksetInstrument.volume,
+      baksetInstrument.rate,
+      basket.total_volume,
+    );
+
+    if (!volume) return Promise.resolve(0n);
+
+    const orderInput: KungfuApi.OrderInput = {
+      ...longfist.OrderInput(),
+      parent_id,
+      insert_time: now,
+      instrument_id: `${baksetInstrument.instrument_id}`,
+      exchange_id: `${baksetInstrument.exchange_id}`,
+      instrument_type: +baksetInstrument.instrument_type,
+      side: +basketOrderInput.side,
+      offset: +basketOrderInput.offset,
+      price_type: +basketOrderInput.price_type,
+      limit_price: 0,
+      frozen_price: 0,
+      volume: BigInt(volume),
+    };
+    return Promise.resolve(watcher.issueOrder(orderInput, kfLocation));
+  });
+
+  return Promise.all(makeOrderTasks);
 };
 
 export const hashInstrumentUKey = (

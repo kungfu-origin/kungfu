@@ -31,6 +31,7 @@ import {
   ShotableInstrumentTypes,
   T0InstrumentTypes,
   T0ExchangeIds,
+  PriceLevel,
 } from '../config/tradingConfig';
 import {
   KfCategoryEnum,
@@ -55,6 +56,7 @@ import {
   StrategyStateStatusTypes,
   StrategyStateStatusEnum,
   UnderweightEnum,
+  PriceLevelEnum,
 } from '../typings/enums';
 import {
   graceDeleteProcess,
@@ -1353,6 +1355,12 @@ export const dealPriceType = (
   return PriceType[+priceType as PriceTypeEnum];
 };
 
+export const dealPriceLevel = (
+  priceLevel: PriceLevelEnum | number,
+): KungfuApi.KfTradeValueCommonData => {
+  return PriceLevel[+priceLevel as PriceLevelEnum];
+};
+
 export const dealTimeCondition = (
   timeCondition: TimeConditionEnum | number,
 ): KungfuApi.KfTradeValueCommonData => {
@@ -1680,6 +1688,7 @@ export const dealTradingDataMethodsMap: Record<
   Position: dealLedgerTradingData,
   Quote: dealDefaultTradingData,
   Trade: dealOrderTradingData,
+  BasketOrder: dealDefaultTradingData,
 };
 
 export const dealTradingData = <T>(
@@ -1778,6 +1787,7 @@ export const numberEnumSelectType: Record<
 > = {
   side: Side,
   priceType: PriceType,
+  priceLevel: PriceLevel,
   instrumentType: InstrumentType,
   underweightType: UnderweightType,
 };
@@ -1805,6 +1815,7 @@ export const KfConfigValueArrayType = [
   'instruments',
   'instrumentsCsv',
   'table',
+  'csvTable',
 ];
 
 export const initFormStateByConfig = (

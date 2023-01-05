@@ -99,8 +99,6 @@ export const useGlobalStore = defineStore('global', {
           tag: 'update:tdGroup',
           tdGroups: this.tdGroupList,
         });
-        this.setCurrentGlobalKfLocation(null);
-        this.setDefaultCurrentGlobalKfLocation();
       });
     },
 

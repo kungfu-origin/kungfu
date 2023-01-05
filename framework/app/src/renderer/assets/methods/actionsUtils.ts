@@ -1165,6 +1165,41 @@ export const useDealInstruments = (): void => {
   };
 };
 
+export const useActiveInstruments = () => {
+  const { instrumentsMap } = useGlobalStore();
+
+  const getInstrumentByIds = (
+    instrumentId: string,
+    exchangeId: string,
+    forceConvert = false,
+  ) => {
+    const ukey = hashInstrumentUKey(instrumentId, exchangeId);
+    const instrumentResolved = instrumentsMap[ukey];
+
+    if (instrumentResolved) {
+      return instrumentResolved;
+    } else {
+      return forceConvert
+        ? {
+            instrumentId: instrumentId,
+            exchangeId: exchangeId,
+            instrumentType: window.watcher.getInstrumentType(
+              exchangeId,
+              instrumentId,
+            ),
+            ukey,
+            instrumentName: '',
+            id: `${instrumentId}_${''}_${exchangeId}`.toLowerCase(),
+          }
+        : null;
+    }
+  };
+
+  return {
+    getInstrumentByIds,
+  };
+};
+
 export const useProcessStatusDetailData = (): {
   processStatusData: Ref<Pm2ProcessStatusData>;
   processStatusDetailData: Ref<Pm2ProcessStatusDetailData>;
@@ -1291,6 +1326,7 @@ export const useCurrentGlobalKfLocation = (
       | KungfuApi.KfConfig
       | KungfuApi.KfExtraLocation,
   ): void;
+  resetCurrentGlobalKfLocation(): void;
   dealRowClassName(
     kfConfig:
       | KungfuApi.KfLocation
@@ -1318,6 +1354,11 @@ export const useCurrentGlobalKfLocation = (
       | KungfuApi.KfExtraLocation,
   ) => {
     useGlobalStore().setCurrentGlobalKfLocation(kfLocation);
+  };
+
+  const resetCurrentGlobalKfLocation = () => {
+    useGlobalStore().setCurrentGlobalKfLocation(null);
+    useGlobalStore().setDefaultCurrentGlobalKfLocation();
   };
 
   const dealRowClassName = (
@@ -1388,6 +1429,7 @@ export const useCurrentGlobalKfLocation = (
     currentCategoryData,
     currentUID,
     setCurrentGlobalKfLocation,
+    resetCurrentGlobalKfLocation,
     dealRowClassName,
     customRow,
     getCurrentGlobalKfLocationId,

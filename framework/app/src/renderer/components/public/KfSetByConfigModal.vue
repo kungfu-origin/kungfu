@@ -66,9 +66,13 @@ const formState = ref<Record<string, KungfuApi.KfConfigValue>>(
 );
 
 const titleResolved = computed(() => {
-  return `${props.payload.type === 'add' ? t('add') : t('set')} ${
-    props.payload.title
-  }`;
+  if (props.payload.type === 'add') {
+    return `${t('add')} ${props.payload.title}`;
+  } else if (props.payload.type === 'update') {
+    return `${t('set')} ${props.payload.title}`;
+  }
+
+  return `${props.payload.title}`;
 });
 
 watch(formState.value, (val) => {
@@ -151,23 +155,27 @@ function handleConfirm(): void {
 </script>
 <template>
   <a-modal
+    v-model:visible="modalVisible"
     :width="width"
     class="kf-set-by-config-modal"
-    v-model:visible="modalVisible"
     :title="titleResolved"
-    :destroyOnClose="true"
+    :destroy-on-close="true"
     @cancel="closeModal"
     @ok="handleConfirm"
   >
     <KfConfigSettingsForm
       ref="formRef"
       v-model:formState="formState"
-      :configSettings="configSettings"
-      :changeType="payload.type"
-      :isPrimaryDisabled="isPrimaryDisabled"
-      :passPrimaryKeySpecialWordsVerify="passPrimaryKeySpecialWordsVerify"
-      :primaryKeyAvoidRepeatCompareTarget="primaryKeyAvoidRepeatCompareTarget"
-      :primaryKeyAvoidRepeatCompareExtra="primaryKeyAvoidRepeatCompareExtra"
+      :config-settings="configSettings"
+      :change-type="payload.type"
+      :is-primary-disabled="isPrimaryDisabled"
+      :pass-primary-key-special-words-verify="passPrimaryKeySpecialWordsVerify"
+      :primary-key-avoid-repeat-compare-target="
+        primaryKeyAvoidRepeatCompareTarget
+      "
+      :primary-key-avoid-repeat-compare-extra="
+        primaryKeyAvoidRepeatCompareExtra
+      "
     ></KfConfigSettingsForm>
   </a-modal>
 </template>

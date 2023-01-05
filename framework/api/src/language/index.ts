@@ -1,5 +1,5 @@
 import '../config/homePathConfig';
-import { createI18n } from 'vue-i18n';
+import { createI18n, I18n } from 'vue-i18n';
 import zh_CN from './zh-CN';
 import en_US from './en-US';
 import path from 'path';
@@ -92,7 +92,7 @@ export const languageList = [
 const locale = settingLanguage || (extraLanguage ? 'extra' : langDefault); //默认显示的语言
 
 const i18n =
-  globalThis.i18n ??
+  globalThis.i18n as I18n ??
   createI18n({
     locale,
     messages,

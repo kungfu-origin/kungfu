@@ -2,13 +2,17 @@
 import { sum } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { Empty } from 'ant-design-vue';
 import { CaretUpOutlined, CaretDownOutlined } from '@ant-design/icons-vue';
+import { CheckboxChangeEvent } from 'ant-design-vue/lib/_util/EventInterface';
 import { filter } from 'rxjs';
 import {
   computed,
+  watch,
   getCurrentInstance,
   onBeforeMount,
   onMounted,
   ref,
+  shallowRef,
+  toRaw,
 } from 'vue';
 
 const props = withDefaults(
@@ -17,6 +21,7 @@ const props = withDefaults(
     columns: KfTradingDataTableHeaderConfig[];
     keyField?: string;
     itemSize?: number;
+    selectable?: boolean;
     customRowClass?: (row: KungfuApi.TradingDataItem) => string;
   }>(),
   {
@@ -24,6 +29,7 @@ const props = withDefaults(
     dataSource: () => [],
     keyField: 'id',
     itemSize: 26,
+    selectable: false,
     customRowClass: () => '',
   },
 );
@@ -59,6 +65,12 @@ const app = getCurrentInstance();
 const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
 const kfScrollerTableBodyRef = ref();
 const kfScrollerTableWidth = ref(0);
+const dataSouceMap = ref<Record<string, KungfuApi.TradingDataItem>>({});
+const allRowKeyFieldValues = shallowRef<Record<string, boolean>>({});
+const isSelectAll = ref(false);
+const selectAllIndeterminate = ref(false);
+const selectedRowKeyFieldValues = ref<Record<string, boolean>>({});
+const selectedRowsMap = ref<Record<string, KungfuApi.TradingDataItem>>({});
 let clickTimer: number | undefined;
 
 const headerWidth = computed(() => {
@@ -88,6 +100,19 @@ const headerWidth = computed(() => {
 });
 
 const tableCellHeight = computed(() => `${props.itemSize}px`);
+
+watch(
+  () => props.dataSource,
+  (newDataSource) => {
+    dataSouceMap.value = {};
+    allRowKeyFieldValues.value = {};
+    newDataSource.forEach((item) => {
+      const key = `${item[props.keyField]}`;
+      dataSouceMap.value[key] = item;
+      allRowKeyFieldValues.value[key] = true;
+    });
+  },
+);
 
 onMounted(() => {
   if (kfScrollerTableBodyRef.value) {
@@ -188,14 +213,77 @@ function handleSort(
     currentSorterOrder.value = 'ascend';
   }
 }
+
+function handleOnSelectRowChange(
+  event: CheckboxChangeEvent,
+  item: KungfuApi.TradingDataItem,
+) {
+  if (!props.selectable) return;
+
+  const isChecked = !!event.target.checked;
+  const key = item[props.keyField];
+
+  if (isChecked) {
+    selectedRowsMap.value[key] = item;
+  } else {
+    delete selectedRowsMap.value[key];
+  }
+}
+
+function handleOnSelectAllChange(event: CheckboxChangeEvent) {
+  if (!props.selectable) return;
+
+  const isChecked = !!event.target.checked;
+  selectedRowKeyFieldValues.value = isChecked
+    ? Object.assign({}, toRaw(allRowKeyFieldValues.value))
+    : {};
+  selectedRowsMap.value = isChecked ? dataSouceMap.value : {};
+  selectAllIndeterminate.value = false;
+}
+
+watch(
+  () => selectedRowKeyFieldValues.value,
+  (val) => {
+    if (!props.selectable) return;
+
+    const allRowLength = Object.keys(allRowKeyFieldValues.value).length;
+    if (!allRowLength) return;
+
+    const selectedRowLength = Object.values(val).filter((item) => item).length;
+
+    selectAllIndeterminate.value =
+      !!selectedRowLength && selectedRowLength < allRowLength;
+    isSelectAll.value = selectedRowLength === allRowLength;
+  },
+  {
+    deep: true,
+  },
+);
+
+defineExpose({
+  selectedRowsMap,
+  isSelectAll,
+});
 </script>
 <template>
   <div class="kf-table">
     <ul class="kf-table-header kf-table-row">
       <li
+        v-if="selectable"
+        class="kf-table-cell kf-table-select-cell"
+        style="width: 36px; flex-basis: 36px"
+        :title="$t('select_all')"
+      >
+        <a-checkbox
+          v-model:checked="isSelectAll"
+          :indeterminate="selectAllIndeterminate"
+          @change="handleOnSelectAllChange"
+        />
+      </li>
+      <li
         v-for="column in columns"
-        :class="['kf-table-cell', column.type]"
         :key="column.dataIndex"
+        :class="['kf-table-cell', column.type]"
         :title="column.name"
         :style="{
           'max-width': getHeaderWidth(column),
@@ -223,7 +311,7 @@ function handleSort(
         </span>
       </li>
     </ul>
-    <div class="kf-table-body" ref="kfScrollerTableBodyRef">
+    <div ref="kfScrollerTableBodyRef" class="kf-table-body">
       <RecycleScroller
         v-if="dataSourceResolved && dataSourceResolved.length"
         class="kf-table-scroller"
@@ -232,23 +320,38 @@ function handleSort(
         :key-field="keyField"
         :buffer="100"
       >
-        <template v-slot="{ item }: { item: any }">
+        <template #default="{ item }: { item: any }">
           <ul
             :class="['kf-table-row', customRowClass?.(item) || '']"
             @dblclick="handleDbClickRow($event, item)"
             @mousedown="handleMousedown($event, item)"
           >
             <li
+              v-if="selectable"
+              class="kf-table-cell kf-table-select-cell"
+              :style="{
+                width: '36px',
+                flexBasis: '36px',
+                height: tableCellHeight,
+                lineHeight: tableCellHeight,
+              }"
+            >
+              <a-checkbox
+                v-model:checked="selectedRowKeyFieldValues[item[keyField]]"
+                @change="handleOnSelectRowChange($event, item)"
+              ></a-checkbox>
+            </li>
+            <li
               v-for="column in columns"
-              :class="['kf-table-cell', column.type]"
               :key="`${column.dataIndex}_${item[keyField as keyof KungfuApi.TradingDataItem]}`"
+              :class="['kf-table-cell', column.type]"
               :style="{
                 'max-width': getHeaderWidth(column),
                 height: tableCellHeight,
                 lineHeight: tableCellHeight,
               }"
-              @click.stop="handleClickCell($event, item, column)"
               :title="item[column.dataIndex]"
+              @click.stop="handleClickCell($event, item, column)"
             >
               <slot :item="item" :column="column">
                 <span>
@@ -384,6 +487,14 @@ function handleSort(
     &.number {
       text-align: right;
     }
+  }
+
+  .kf-table-select-cell {
+    flex-grow: 0;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 </style>

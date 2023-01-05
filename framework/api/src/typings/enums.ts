@@ -58,6 +58,25 @@ export enum BasketVolumeTypeEnum {
 
 export type BasketVolumeTypes = keyof typeof BasketVolumeTypeEnum;
 
+export enum PriceLevelEnum {
+  Latest, // 最新价
+  Sell5,
+  Sell4,
+  Sell3,
+  Sell2,
+  Sell1,
+  Buy1,
+  Buy2,
+  Buy3,
+  Buy4,
+  Buy5,
+  UpLimitPrice, // 涨停价
+  LowLimitPrice, // 跌停价
+  Unknown,
+}
+
+export type PriceLevelTypes = keyof typeof PriceLevelEnum;
+
 export type StrategyExtTypes = 'trade' | 'default' | 'unknown';
 
 export enum HedgeFlagEnum {

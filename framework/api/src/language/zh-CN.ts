@@ -98,14 +98,12 @@ export default {
 
   settingsFormConfig: {
     add_csv: '添加 csv',
-    add_csv_desc: 'csv 表头为 instrument_id 和 exchange_id',
+    add_csv_desc: 'csv 表头为 {header}',
     clear: '清除',
   },
 
   tradingConfig: {
     unknown: '未知',
-    quantity: '按数量',
-    proportion: '按比例',
     default: '封装策略',
     order_task: '下单任务',
 
@@ -134,6 +132,20 @@ export default {
     close: '平',
     close_today: '平今',
     close_yesterday: '平昨',
+
+    latest: '最新价',
+    sell5: '卖五价',
+    sell4: '卖四价',
+    sell3: '卖三价',
+    sell2: '卖二价',
+    sell1: '卖一价',
+    buy1: '买一价',
+    buy2: '买二价',
+    buy3: '买三价',
+    buy4: '买四价',
+    buy5: '买五价',
+    up_limit_price: '涨停价',
+    low_limit_price: '跌停价',
 
     buy: '买',
     sell: '卖',
@@ -253,6 +265,8 @@ export default {
     price: '价格',
     protect_price: '保护价格',
     price_type: '方式',
+    price_level: '目标价格',
+    price_offset: '自定义价差',
     side: '买卖',
     offset: '开平',
     limit_price: '下单价格',
