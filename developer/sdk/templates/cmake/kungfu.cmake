@@ -3,9 +3,12 @@ macro(kungfu_setup MODULE_NAME)
 
   add_compile_definitions(KUNGFU_MODULE_NAME=${MODULE_NAME})
   add_compile_definitions(FMT_HEADER_ONLY)
-  
+  add_compile_definitions(SPDLOG_ACTIVE_LEVEL=0)
+  add_compile_definitions(SPDLOG_NO_NAME)
+  add_compile_definitions(SPDLOG_NO_ATOMIC_LEVELS)
+
   message("CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
-  
+
   if (${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
     set(CMAKE_CXX_FLAGS_RELEASE "-O")
   endif ()
