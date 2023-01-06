@@ -84,15 +84,6 @@ void Runner::post_start() {
     return; // safe guard for live mode, in that case we will run truly when prepare process is done.
   }
 
-  // events_ | is_own<Quote>(context_->get_broker_client()) |
-  //     $$(invoke(&Strategy::on_quote, event->data<Quote>(), get_location(event->source())));
-  // events_ | is_own<Entrust>(context_->get_broker_client()) |
-  //     $$(invoke(&Strategy::on_entrust, event->data<Entrust>(), get_location(event->source())));
-  // events_ | is_own<Transaction>(context_->get_broker_client()) |
-  //     $$(invoke(&Strategy::on_transaction, event->data<Transaction>(), get_location(event->source())));
-
-  // events_ | is(Order::tag) | $$(invoke(&Strategy::on_order, event->data<Order>(), get_location(event->source())));
-  // events_ | is(Trade::tag) | $$(invoke(&Strategy::on_trade, event->data<Trade>(), get_location(event->source())));
   events_ | is(HistoryOrder::tag) |
       $$(invoke(&Strategy::on_history_order, event->data<HistoryOrder>(), get_location(event->source())));
   events_ | is(HistoryTrade::tag) |
