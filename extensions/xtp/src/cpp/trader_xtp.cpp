@@ -84,6 +84,7 @@ bool TraderXTP::insert_order(const event_ptr &event) {
   Order &order = writer->open_data<Order>(event->gen_time());
   order_from_input(input, order);
   strncpy(order.trading_day, trading_day_.c_str(), DATE_LEN);
+  order.external_id = xtp_order_id;
   order.insert_time = nano;
   order.update_time = nano;
 
