@@ -180,7 +180,7 @@ module.exports = {
           {
             from: logoDir,
             to: 'app/dist/public/logo',
-            filter: ['*.png'],
+            filter: ['*.png', '*.ico', '*.icns'],
           },
         ]
       : []),

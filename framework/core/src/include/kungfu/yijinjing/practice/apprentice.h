@@ -64,7 +64,7 @@ public:
 protected:
   cache::bank state_bank_;
 
-  void react() final;
+  void react() override;
 
   void on_active() override;
 
