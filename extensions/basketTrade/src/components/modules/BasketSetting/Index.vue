@@ -89,6 +89,7 @@ import {
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import {
+  buildBasketMapKeyAndLocation,
   dealBasketsToMap,
   getAllBaskets,
   setAllBaskets,
@@ -118,7 +119,7 @@ const { t } = VueI18n.global;
 );
 
 const { dashboardBodyHeight, handleBodySizeChange } = useDashboardBodySize();
-const { dealBasketRowClassName, setCurrentGlobalBasket } =
+const { currentGlobalBasket, dealBasketRowClassName, setCurrentGlobalBasket } =
   useCurrentGlobalBasket();
 const { getBasketMarkedValue } = useBasketMarkedValue();
 
@@ -138,21 +139,36 @@ const setBasketConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
   config: {} as KungfuApi.KfExtConfig,
 });
 
+const setDefaultGlobalBasket = () => {
+  if (basketsResolved.value.length) {
+    if (!currentGlobalBasket.value) {
+      setCurrentGlobalBasket(basketsResolved.value[0]);
+    } else {
+      const curBasketKey = buildBasketMapKeyAndLocation(
+        currentGlobalBasket.value,
+      ).key;
+      if (!(curBasketKey in basketsResolvedMap.value)) {
+        setCurrentGlobalBasket(basketsResolved.value[0]);
+      }
+    }
+  }
+};
+
 onMounted(() => {
   handleGetAllBaskets().then(() => {
     basketDataLoaded.value = true;
-
-    if (basketsResolved.value.length) {
-      setCurrentGlobalBasket(basketsResolved.value[0]);
-    }
   });
 });
 
 function handleGetAllBaskets() {
-  return getAllBaskets().then((baskets) => {
-    basketsResolvedMap.value = dealBasketsToMap(baskets);
-    useBasketTradeStore().setBasketsMap(basketsResolvedMap.value);
-  });
+  return getAllBaskets()
+    .then((baskets) => {
+      basketsResolvedMap.value = dealBasketsToMap(baskets);
+      useBasketTradeStore().setBasketsMap(basketsResolvedMap.value);
+    })
+    .then(() => {
+      setDefaultGlobalBasket();
+    });
 }
 
 function handleSetAllBaskets(baskets: KungfuApi.Basket[]) {

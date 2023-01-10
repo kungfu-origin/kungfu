@@ -106,7 +106,13 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, getCurrentInstance, onBeforeUnmount } from 'vue';
+import {
+  ref,
+  onMounted,
+  watch,
+  getCurrentInstance,
+  onBeforeUnmount,
+} from 'vue';
 
 import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
 // import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboardItem.vue';
@@ -117,6 +123,7 @@ import {
   dealSide,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
+  buildBasketOrderMapKeyAndLocation,
   dealBasketOrdersToMap,
   useCurrentGlobalBasket,
   useMakeBasketOrderFormModal,
@@ -168,30 +175,48 @@ const basketOrders = ref<KungfuApi.BasketOrderResolved[]>([]);
 
 const columns = getColumns();
 
+const setDefaultGlobalBasketOrder = () => {
+  if (basketOrders.value.length) {
+    if (!currentGlobalBasketOrder.value) {
+      setCurrentGlobalBasketOrder(basketOrders.value[0]);
+    } else {
+      const curBasketOrderKey = buildBasketOrderMapKeyAndLocation(
+        currentGlobalBasketOrder.value,
+      ).key;
+
+      if (!(curBasketOrderKey in basketOrdersMap.value)) {
+        setCurrentGlobalBasketOrder(basketOrders.value[0]);
+      }
+    }
+  }
+};
+
+const getBasketOrders = (watcher: KungfuApi.Watcher) => {
+  if (!currentGlobalBasket.value) {
+    basketOrdersMap.value = {};
+    basketOrders.value = [];
+    return;
+  }
+
+  const basketOrderListFiltered = watcher.ledger.BasketOrder.filter(
+    'parent_id',
+    BigInt(currentGlobalBasket.value.id),
+  ).sort('insert_time');
+
+  basketOrdersMap.value = dealBasketOrdersToMap(basketOrderListFiltered);
+
+  basketOrders.value = Object.values(basketOrdersMap.value);
+
+  setDefaultGlobalBasketOrder();
+};
+
 onMounted(() => {
   const subscribtion = app?.proxy?.$tradingDataSubject.subscribe(
     (watcher: KungfuApi.Watcher) => {
-      if (!currentGlobalBasket.value) {
-        basketOrdersMap.value = {};
-        return;
-      }
-
       const basketOrderList = watcher.ledger.BasketOrder.sort('insert_time');
-      const basketOrderListFiltered = watcher.ledger.BasketOrder.filter(
-        'parent_id',
-        BigInt(currentGlobalBasket.value.id),
-      ).sort('insert_time');
+      updateBasketOrdersMap(dealBasketOrdersToMap(basketOrderList));
 
-      basketOrdersMap.value = dealBasketOrdersToMap(basketOrderList);
-      updateBasketOrdersMap(basketOrdersMap.value);
-
-      basketOrders.value = Object.values(
-        dealBasketOrdersToMap(basketOrderListFiltered),
-      );
-
-      if (!currentGlobalBasketOrder.value && basketOrders.value.length) {
-        setCurrentGlobalBasketOrder(basketOrders.value[0]);
-      }
+      getBasketOrders(watcher);
     },
   );
 
@@ -199,6 +224,15 @@ onMounted(() => {
     subscribtion?.unsubscribe();
   });
 });
+
+watch(
+  () => currentGlobalBasket.value,
+  (newBasket) => {
+    if (!newBasket) return;
+
+    getBasketOrders(window.watcher);
+  },
+);
 
 function handleClickRow(data: {
   event: MouseEvent;
