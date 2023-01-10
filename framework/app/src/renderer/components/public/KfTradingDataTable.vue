@@ -2,7 +2,6 @@
 import { sum } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { Empty } from 'ant-design-vue';
 import { CaretUpOutlined, CaretDownOutlined } from '@ant-design/icons-vue';
-import { CheckboxChangeEvent } from 'ant-design-vue/lib/_util/EventInterface';
 import { filter } from 'rxjs';
 import {
   computed,
@@ -15,6 +14,16 @@ import {
   toRaw,
 } from 'vue';
 
+export interface API {
+  selectedRowsMap: Record<string, KungfuApi.TradingDataItem>;
+  isSelectAll: boolean;
+  handleSelectRow: (
+    isChecked: boolean,
+    item: KungfuApi.TradingDataItem,
+  ) => void;
+  handleSelectAll: (isChecked: boolean) => void;
+}
+
 const props = withDefaults(
   defineProps<{
     dataSource: KungfuApi.TradingDataItem[];
@@ -22,6 +31,7 @@ const props = withDefaults(
     keyField?: string;
     itemSize?: number;
     selectable?: boolean;
+    selection?: KfTradingDataTableSelection; // 仅在 selectable 为 true 的时候生效
     customRowClass?: (row: KungfuApi.TradingDataItem) => string;
   }>(),
   {
@@ -30,6 +40,7 @@ const props = withDefaults(
     keyField: 'id',
     itemSize: 26,
     selectable: false,
+    selection: () => ({}),
     customRowClass: () => '',
   },
 );
@@ -66,7 +77,8 @@ const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
 const kfScrollerTableBodyRef = ref();
 const kfScrollerTableWidth = ref(0);
 const dataSouceMap = ref<Record<string, KungfuApi.TradingDataItem>>({});
-const allRowKeyFieldValues = shallowRef<Record<string, boolean>>({});
+const allRowKeyFieldTrue = shallowRef<Record<string, boolean>>({});
+const allRowKeyFieldFalse = shallowRef<Record<string, boolean>>({});
 const isSelectAll = ref(false);
 const selectAllIndeterminate = ref(false);
 const selectedRowKeyFieldValues = ref<Record<string, boolean>>({});
@@ -105,13 +117,28 @@ watch(
   () => props.dataSource,
   (newDataSource) => {
     dataSouceMap.value = {};
-    allRowKeyFieldValues.value = {};
+    allRowKeyFieldTrue.value = {};
+    allRowKeyFieldFalse.value = {};
+
+    const tempSelectedValues = {};
+    const tempSelectedRows = {};
+
     newDataSource.forEach((item) => {
       const key = `${item[props.keyField]}`;
       dataSouceMap.value[key] = item;
-      allRowKeyFieldValues.value[key] = true;
+      allRowKeyFieldTrue.value[key] = true;
+      allRowKeyFieldFalse.value[key] = false;
+
+      if (key in selectedRowKeyFieldValues.value) {
+        tempSelectedValues[key] = selectedRowKeyFieldValues.value[key];
+        tempSelectedRows[key] = selectedRowsMap.value[key];
+      }
     });
+
+    selectedRowKeyFieldValues.value = tempSelectedValues;
+    selectedRowsMap.value = tempSelectedRows;
   },
+  { immediate: true },
 );
 
 onMounted(() => {
@@ -214,14 +241,12 @@ function handleSort(
   }
 }
 
-function handleOnSelectRowChange(
-  event: CheckboxChangeEvent,
-  item: KungfuApi.TradingDataItem,
-) {
+function handleSelectRow(isChecked: boolean, item: KungfuApi.TradingDataItem) {
   if (!props.selectable) return;
 
-  const isChecked = !!event.target.checked;
   const key = item[props.keyField];
+
+  selectedRowKeyFieldValues[key] = isChecked;
 
   if (isChecked) {
     selectedRowsMap.value[key] = item;
@@ -230,13 +255,13 @@ function handleOnSelectRowChange(
   }
 }
 
-function handleOnSelectAllChange(event: CheckboxChangeEvent) {
+function handleSelectAll(isChecked: boolean) {
   if (!props.selectable) return;
 
-  const isChecked = !!event.target.checked;
-  selectedRowKeyFieldValues.value = isChecked
-    ? Object.assign({}, toRaw(allRowKeyFieldValues.value))
-    : {};
+  const allSelected = Object.assign({}, toRaw(allRowKeyFieldTrue.value));
+  const allUnSelected = Object.assign({}, toRaw(allRowKeyFieldFalse.value));
+
+  selectedRowKeyFieldValues.value = isChecked ? allSelected : allUnSelected;
   selectedRowsMap.value = isChecked ? dataSouceMap.value : {};
   selectAllIndeterminate.value = false;
 }
@@ -246,7 +271,7 @@ watch(
   (val) => {
     if (!props.selectable) return;
 
-    const allRowLength = Object.keys(allRowKeyFieldValues.value).length;
+    const allRowLength = Object.keys(allRowKeyFieldTrue.value).length;
     if (!allRowLength) return;
 
     const selectedRowLength = Object.values(val).filter((item) => item).length;
@@ -263,6 +288,8 @@ watch(
 defineExpose({
   selectedRowsMap,
   isSelectAll,
+  handleSelectRow,
+  handleSelectAll,
 });
 </script>
 <template>
@@ -277,7 +304,7 @@ defineExpose({
         <a-checkbox
           v-model:checked="isSelectAll"
           :indeterminate="selectAllIndeterminate"
-          @change="handleOnSelectAllChange"
+          @change="handleSelectAll(!!$event.target.checked)"
         />
       </li>
       <li
@@ -338,7 +365,8 @@ defineExpose({
             >
               <a-checkbox
                 v-model:checked="selectedRowKeyFieldValues[item[keyField]]"
-                @change="handleOnSelectRowChange($event, item)"
+                :disabled="selection[item[keyField]]?.disabled ?? false"
+                @change="handleSelectRow(!!$event.target.checked, item)"
               ></a-checkbox>
             </li>
             <li

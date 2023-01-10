@@ -36,6 +36,7 @@ import {
 } from 'vue';
 import { getColumns } from './config';
 import {
+  dealKfTime,
   dealOrder,
   getKungfuHistoryData,
   kfCancelAllOrders,
@@ -55,14 +56,24 @@ import {
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import StatisticModal from './OrderStatisticModal.vue';
 import { messagePrompt } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
-import { useCurrentGlobalBasket } from '../../../utils/basketTradeUtils';
+import {
+  useCurrentGlobalBasket,
+  useMakeBasketOrderFormModal,
+  useMakeOrCancelBasketOrder,
+} from '../../../utils/basketTradeUtils';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
+import { BASKET_CATEGORYS } from '../../../config';
+import {
+  getChaseBasketOrderConfigSettings,
+  getReplenishBasketOrderConfigSettings,
+} from '../../../config/makeBasketOrderFormConfig';
 
 const { t } = VueI18n.global;
 const { success, error } = messagePrompt();
 const app = getCurrentInstance();
 const { handleBodySizeChange } = useDashboardBodySize();
 
+const dataTableRef = ref();
 const { processStatusData } = useProcessStatusDetailData();
 const orders = ref<KungfuApi.OrderResolved[]>([]);
 const { searchKeyword, tableData } =
@@ -80,17 +91,24 @@ const historyDataLoading = ref<boolean>();
 const { currentGlobalKfLocation, currentCategoryData } =
   useCurrentGlobalKfLocation(window.watcher);
 
-const { currentGlobalBasket, currentBasketData } = useCurrentGlobalBasket();
+const {
+  currentGlobalBasket,
+  currentGlobalBasketOrder,
+  currentBasketOrderData,
+} = useCurrentGlobalBasket();
+
+const { handleShowMakeBasketOrderModal } = useMakeBasketOrderFormModal();
+const { chaseBasketOrder, replenishBasketOrder } = useMakeOrCancelBasketOrder();
 
 const { handleDownload } = useDownloadHistoryTradingData();
 const adjustOrderMaskVisible = ref(false);
 const statisticModalVisible = ref<boolean>(false);
 
 const columns = computed(() => {
-  if (currentGlobalKfLocation.value === null) {
+  if (!currentGlobalBasketOrder.value) {
     return getColumns(
       {
-        category: 'td',
+        category: BASKET_CATEGORYS.ORDER,
         group: '*',
         name: '*',
         mode: 'live',
@@ -99,7 +117,10 @@ const columns = computed(() => {
     );
   }
 
-  return getColumns(currentGlobalKfLocation.value, !!historyDate.value);
+  return getColumns(
+    currentGlobalBasketOrder.value.basket_order_location,
+    !!historyDate.value,
+  );
 });
 
 onMounted(() => {
@@ -110,7 +131,7 @@ onMounted(() => {
           return;
         }
 
-        if (currentGlobalKfLocation.value === null) {
+        if (!currentGlobalBasketOrder.value) {
           return;
         }
 
@@ -121,7 +142,7 @@ onMounted(() => {
         const ordersResolved =
           globalThis.HookKeeper.getHooks().dealTradingData.trigger(
             window.watcher,
-            currentGlobalKfLocation.value,
+            currentGlobalBasketOrder.value?.basket_order_location,
             watcher.ledger.Order,
             'order',
           ) as KungfuApi.Order[];
@@ -164,7 +185,7 @@ watch(historyDate, async (newDate) => {
     return;
   }
 
-  if (currentGlobalKfLocation.value === null) {
+  if (!currentGlobalBasketOrder.value) {
     return;
   }
 
@@ -176,7 +197,7 @@ watch(historyDate, async (newDate) => {
         newDate.format(),
         HistoryDateEnum.naturalDate,
         'Order',
-        currentGlobalKfLocation.value as KungfuApi.KfLocation,
+        currentGlobalBasketOrder.value?.basket_order_location,
       ),
     )
     .then((historyData) => {
@@ -187,7 +208,7 @@ watch(historyDate, async (newDate) => {
       const orderResolved =
         globalThis.HookKeeper.getHooks().dealTradingData.trigger(
           window.watcher,
-          currentGlobalKfLocation.value,
+          currentGlobalBasketOrder.value?.basket_order_location,
           tradingData.Order,
           'order',
         ) as KungfuApi.Order[];
@@ -213,7 +234,7 @@ function isFinishedOrderStatus(orderStatus: OrderStatusEnum): boolean {
 }
 
 function handleCancelOrder(order: KungfuApi.OrderResolved): void {
-  if (!currentGlobalKfLocation.value || !window.watcher) {
+  if (!currentGlobalBasketOrder.value || !window.watcher) {
     error();
     return;
   }
@@ -232,11 +253,13 @@ function handleCancelOrder(order: KungfuApi.OrderResolved): void {
 }
 
 function handleCancelAllOrders(): void {
-  if (!currentGlobalKfLocation.value || !window.watcher) {
+  if (!currentGlobalBasketOrder.value || !window.watcher) {
     error();
     return;
   }
-  const name = getIdByKfLocation(currentGlobalKfLocation.value);
+  const name = getIdByKfLocation(
+    currentGlobalBasketOrder.value.basket_order_location,
+  );
 
   confirmModal(
     t('orderConfig.confirm_cancel_all'),
@@ -244,7 +267,7 @@ function handleCancelAllOrders(): void {
       'orderConfig.cancel_all',
     )}`,
   ).then((flag) => {
-    if (!flag || !currentGlobalKfLocation.value || !window.watcher) {
+    if (!flag || !currentGlobalBasketOrder.value || !window.watcher) {
       return;
     }
 
@@ -264,14 +287,14 @@ function filterUnfinishedOrders(orders: KungfuApi.Order[]): KungfuApi.Order[] {
 }
 
 function getTargetCancelOrders(): KungfuApi.Order[] {
-  if (!currentGlobalKfLocation.value || !window.watcher) {
+  if (!currentGlobalBasketOrder.value || !window.watcher) {
     return [];
   }
 
   return filterUnfinishedOrders(
     globalThis.HookKeeper.getHooks().dealTradingData.trigger(
       window.watcher,
-      currentGlobalKfLocation.value,
+      currentGlobalBasketOrder.value.basket_order_location,
       window.watcher.ledger.Order,
       'order',
     ) as KungfuApi.Order[],
@@ -321,7 +344,7 @@ function handleAdjustOrder(data: {
     }
   }
 
-  if (!currentGlobalKfLocation.value || !window.watcher) {
+  if (!currentGlobalBasketOrder.value || !window.watcher) {
     return;
   }
 
@@ -351,7 +374,7 @@ function handleAdjustOrder(data: {
 }
 
 function handleClickAdjustOrderMask(): void {
-  const kfLocation = currentGlobalKfLocation.value;
+  const kfLocation = currentGlobalBasketOrder.value?.basket_order_location;
   if (!kfLocation) {
     error(t('location_error'));
     adjustOrderMaskVisible.value = false;
@@ -423,24 +446,104 @@ function testOrderSourceIsOnline(order: KungfuApi.OrderResolved) {
 
   return true;
 }
+
+function handleChaseBasketOrder(
+  basketOrder: KungfuApi.BasketOrderResolved,
+  formState,
+) {
+  if (!currentGlobalBasket.value) return Promise.reject();
+
+  return chaseBasketOrder(
+    window.watcher,
+    currentGlobalBasket.value,
+    {
+      ...basketOrder,
+      price_level: formState.priceLevel,
+      price_offset: formState.priceOffset,
+    },
+    formState.basketOrderPriceType,
+  );
+}
+
+function handleReplenishBasketOrder(
+  basketOrder: KungfuApi.BasketOrderResolved,
+  formState,
+) {
+  if (!currentGlobalBasket.value) return Promise.reject();
+
+  if (!dataTableRef.value) return Promise.reject();
+
+  const orders = Object.values(
+    dataTableRef.value.selectedRowsMap,
+  ) as unknown as KungfuApi.OrderResolved[];
+
+  return replenishBasketOrder(
+    window.watcher,
+    currentGlobalBasket.value,
+    {
+      ...basketOrder,
+      price_level: formState.priceLevel,
+      price_offset: formState.priceOffset,
+    },
+    formState.basketOrderPriceType,
+    orders,
+  );
+}
 </script>
 <template>
   <div class="kf-orders__warp kf-translateZ">
     <KfDashboard @board-size-change="handleBodySizeChange">
       <template #title>
-        <span v-if="currentGlobalBasket">
+        <span v-if="currentGlobalBasketOrder">
           <a-tag
-            v-if="currentGlobalBasket"
-            :color="currentBasketData?.color || 'default'"
+            v-if="currentGlobalBasketOrder"
+            :color="currentBasketOrderData?.color || 'default'"
           >
-            {{ currentBasketData?.name }}
+            {{ currentBasketOrderData?.name }}
           </a-tag>
-          <span v-if="currentGlobalBasket" class="name">
-            {{ currentGlobalBasket?.name }}
+          <span v-if="currentGlobalBasketOrder" class="name">
+            {{ dealKfTime(currentGlobalBasketOrder?.insert_time as bigint) }}
           </span>
         </span>
       </template>
       <template #header>
+        <KfDashboardItem>
+          <a-button
+            size="small"
+            @click="
+              currentGlobalBasketOrder &&
+                handleShowMakeBasketOrderModal(
+                  `${$t('BasketTrade.chase_order')} ${
+                    currentGlobalBasket?.name
+                  }`,
+                  getChaseBasketOrderConfigSettings(),
+                  handleChaseBasketOrder.bind(null, currentGlobalBasketOrder!),
+                )
+            "
+          >
+            {{ $t('BasketTrade.chase_order') }}
+          </a-button>
+        </KfDashboardItem>
+        <KfDashboardItem>
+          <a-button
+            size="small"
+            @click="
+              currentGlobalBasketOrder &&
+                handleShowMakeBasketOrderModal(
+                  `${$t('BasketTrade.chase_order')} ${
+                    currentGlobalBasket?.name
+                  }`,
+                  getReplenishBasketOrderConfigSettings(),
+                  handleReplenishBasketOrder.bind(
+                    null,
+                    currentGlobalBasketOrder!,
+                  ),
+                )
+            "
+          >
+            {{ $t('BasketTrade.replenish_order') }}
+          </a-button>
+        </KfDashboardItem>
         <KfDashboardItem>
           <a-checkbox v-model:checked="unfinishedOrder" size="small">
             {{ $t('orderConfig.checkbox_text') }}
@@ -526,6 +629,7 @@ function testOrderSourceIsOnline(order: KungfuApi.OrderResolved) {
           ></a-input-number>
         </div>
         <KfTradingDataTable
+          ref="dataTableRef"
           :columns="columns"
           :data-source="tableData"
           key-field="uid_key"

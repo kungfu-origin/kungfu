@@ -1,4 +1,3 @@
-import { useBasketTradeStore } from './../../../store';
 import { BasketVolumeTypeEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { DealTradingDataGetter } from '@kungfu-trader/kungfu-js-api/hooks/dealTradingDataHook';
 import {
@@ -10,7 +9,7 @@ import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 const { t } = VueI18n.global;
 
 export const getColumns = buildConfigGetterWrapByComputed(
-  () =>
+  (getBasketMarkedValue: (basket: KungfuApi.BasketResolved) => number) =>
     [
       {
         title: t('BasketTrade.basket_name'),
@@ -39,10 +38,12 @@ export const getColumns = buildConfigGetterWrapByComputed(
         dataIndex: 'marked_value',
         width: 60,
         sorter: {
-          compare: buildTableColumnSorter<KungfuApi.BasketResolved>(
-            'num',
-            'marked_value',
-          ),
+          compare: (
+            a: KungfuApi.BasketResolved,
+            b: KungfuApi.BasketResolved,
+          ) => {
+            return getBasketMarkedValue(a) - getBasketMarkedValue(b);
+          },
         },
       },
       {
@@ -111,12 +112,11 @@ export const setBasketFormSettings: KungfuApi.KfConfigItem[] = [
   },
 ];
 
-const { getBasketOrdersByBasketLocation } = useBasketTradeStore();
-
 export const basketTradingDataGetter: DealTradingDataGetter = {
   category: BASKET_CATEGORYS.SETTING,
   commonData: {
     name: t('BasketTrade.basket'),
+    color: 'blue',
   },
   order: {
     getter: (
@@ -124,19 +124,20 @@ export const basketTradingDataGetter: DealTradingDataGetter = {
       orders: KungfuApi.DataTable<KungfuApi.Order>,
       kfLocation: KungfuApi.KfLocation,
     ) => {
-      const basketOrders = getBasketOrdersByBasketLocation(kfLocation);
-      const basketOrderIds = Object.keys(basketOrders).join('_');
+      // const basketOrders = getBasketOrdersByBasketLocation(kfLocation);
+      // const basketOrderIds = Object.keys(basketOrders).join('_');
 
-      if (basketOrderIds.length) {
-        return orders
-          .nofilter('parent_id', '')
-          .sort('update_time')
-          .filter((order) => {
-            return new RegExp(`.*${order.parent_id}.*`, 'ig').test(
-              basketOrderIds,
-            );
-          });
-      }
+      // if (basketOrderIds.length) {
+      //   return orders
+      //     .nofilter('parent_id', '')
+      //     .sort('update_time')
+      //     .filter((order) => {
+      //       return new RegExp(`.*${order.parent_id}.*`, 'ig').test(
+      //         basketOrderIds,
+      //       );
+      //     });
+      // }
+      kfLocation;
 
       return orders.sort('update_time');
     },

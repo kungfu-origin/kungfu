@@ -82,7 +82,7 @@ const tradingDataSubscription = tradingDataSubject.subscribe(
 
 store.setKfConfigList();
 store.setKfExtConfigs();
-store.setSubscribedInstruments();
+store.setSubscribedInstrumentsByLocal();
 store.setRiskSettingList();
 store.setKfGlobalSetting();
 

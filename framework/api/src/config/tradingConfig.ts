@@ -317,6 +317,12 @@ export const UnfinishedOrderStatus = [
   OrderStatusEnum.PartialFilledActive,
 ];
 
+export const NotTradeAllOrderStatus = [
+  OrderStatusEnum.Cancelled,
+  OrderStatusEnum.Error,
+  OrderStatusEnum.PartialFilledNotActive,
+];
+
 export const WellFinishedOrderStatus = [
   OrderStatusEnum.Cancelled,
   OrderStatusEnum.Filled,

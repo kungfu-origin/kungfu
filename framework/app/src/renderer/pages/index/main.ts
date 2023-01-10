@@ -34,6 +34,7 @@ import {
   TimePicker,
   Divider,
   Dropdown,
+  Progress,
 } from 'ant-design-vue';
 
 import {
@@ -105,6 +106,7 @@ app
   .use(Statistic)
   .use(Divider)
   .use(Dropdown)
+  .use(Progress)
   .use(VueVirtualScroller);
 
 app.config.globalProperties.$antLocalesMap = {

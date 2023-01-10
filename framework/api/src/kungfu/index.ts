@@ -26,7 +26,6 @@ import {
   HistoryDateEnum,
   LedgerCategoryEnum,
   InstrumentTypeEnum,
-  BasketVolumeTypeEnum,
 } from '../typings/enums';
 import { ExchangeIds } from '../config/tradingConfig';
 
@@ -535,26 +534,54 @@ export const makeOrderByBlockMessage = (
   });
 };
 
-export const getBasketInstrumentVolume = (
-  volumeType: BasketVolumeTypeEnum,
-  volume: bigint,
-  rate: number,
-  totalVolume: bigint,
+export const makeOrderByBasketInstruments = (
+  watcher: KungfuApi.Watcher | null,
+  parentId: bigint,
+  basketOrderInput: KungfuApi.BasketOrderInput,
+  basketInstruments: KungfuApi.BasketInstrumentForOrder[],
+  kfLocation: KungfuApi.KfLocation,
 ) => {
-  if (volumeType === BasketVolumeTypeEnum.Quantity) {
-    return Number(volume);
-  } else if (volumeType === BasketVolumeTypeEnum.Proportion) {
-    return Math.floor((Number(totalVolume) * rate) / 100);
+  if (!watcher) {
+    return Promise.reject(new Error(`Watcher is NULL`));
   }
 
-  return 0;
+  if (!watcher.isLive()) {
+    return Promise.reject(new Error(`Watcher is not live`));
+  }
+
+  if (!watcher.isReadyToInteract(kfLocation)) {
+    const accountId = getIdByKfLocation(kfLocation);
+    return Promise.reject(new Error(`Td ${accountId} not ready`));
+  }
+
+  const makeOrderTasks = basketInstruments.map((baksetInstrument) => {
+    const now = watcher.now();
+
+    const orderInput: KungfuApi.OrderInput = {
+      ...longfist.OrderInput(),
+      parent_id: parentId,
+      insert_time: now,
+      instrument_id: `${baksetInstrument.instrument_id}`,
+      exchange_id: `${baksetInstrument.exchange_id}`,
+      instrument_type: +baksetInstrument.instrument_type,
+      side: +basketOrderInput.side,
+      offset: +basketOrderInput.offset,
+      price_type: +basketOrderInput.price_type,
+      limit_price: +baksetInstrument.priceResolved || 0,
+      frozen_price: +baksetInstrument.priceResolved || 0,
+      volume: BigInt(baksetInstrument.volumeResolved),
+    };
+    return Promise.resolve(watcher.issueOrder(orderInput, kfLocation));
+  });
+
+  return Promise.all(makeOrderTasks);
 };
 
 export const makeOrderByBasketTrade = (
   watcher: KungfuApi.Watcher | null,
   basket: KungfuApi.Basket,
   basketOrderInput: KungfuApi.BasketOrderInput,
-  basketInstruments: KungfuApi.BasketInstrument[],
+  basketInstruments: KungfuApi.BasketInstrumentForOrder[],
   kfLocation: KungfuApi.KfLocation,
 ) => {
   if (!watcher) {
@@ -572,9 +599,12 @@ export const makeOrderByBasketTrade = (
 
   console.log(watcher, basket, basketInstruments, kfLocation);
 
+  if (!basketInstruments.length) return Promise.resolve();
+
   const now = watcher.now();
   const basketOrder: KungfuApi.BasketOrder = {
     ...longfist.BasketOrder(),
+    parent_id: BigInt(basket.id),
     insert_time: now,
     volume: BigInt(basket.total_volume),
     price_type: +basketOrderInput.price_type,
@@ -584,34 +614,13 @@ export const makeOrderByBasketTrade = (
 
   const parent_id = watcher.issueBasketOrder(basketOrder, kfLocation);
 
-  const makeOrderTasks = basketInstruments.map((baksetInstrument) => {
-    const volume = getBasketInstrumentVolume(
-      basket.volume_type,
-      baksetInstrument.volume,
-      baksetInstrument.rate,
-      basket.total_volume,
-    );
-
-    if (!volume) return Promise.resolve(0n);
-
-    const orderInput: KungfuApi.OrderInput = {
-      ...longfist.OrderInput(),
-      parent_id,
-      insert_time: now,
-      instrument_id: `${baksetInstrument.instrument_id}`,
-      exchange_id: `${baksetInstrument.exchange_id}`,
-      instrument_type: +baksetInstrument.instrument_type,
-      side: +basketOrderInput.side,
-      offset: +basketOrderInput.offset,
-      price_type: +basketOrderInput.price_type,
-      limit_price: 0,
-      frozen_price: 0,
-      volume: BigInt(volume),
-    };
-    return Promise.resolve(watcher.issueOrder(orderInput, kfLocation));
-  });
-
-  return Promise.all(makeOrderTasks);
+  return makeOrderByBasketInstruments(
+    watcher,
+    parent_id,
+    basketOrderInput,
+    basketInstruments,
+    kfLocation,
+  );
 };
 
 export const hashInstrumentUKey = (

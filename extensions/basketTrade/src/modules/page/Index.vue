@@ -25,7 +25,7 @@ import {
 } from '../../utils';
 import { defaultBasketTradeBoardsMap } from '../../config';
 import { componentsMap } from '../../config/componentsConfig';
-import { useMakeBasketOrder } from '../../utils/basketTradeUtils';
+import { useMakeBasketOrderFormModal } from '../../utils/basketTradeUtils';
 
 const app = getCurrentInstance();
 const { success } = messagePrompt();
@@ -35,7 +35,7 @@ const {
   showMakeOrderModal,
   makeBasketOrderConfigPayload,
   handleConfirmMakeBasketOrder,
-} = useMakeBasketOrder();
+} = useMakeBasketOrderFormModal();
 
 if (app) {
   registerComponents(app.appContext.app, componentsMap);

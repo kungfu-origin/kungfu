@@ -1,4 +1,5 @@
 import { App, Component, computed } from 'vue';
+import { messagePrompt } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 
 export const basketTradeBoardsMapStorageKey = 'basketTradeBoardsMap';
 
@@ -58,5 +59,25 @@ export const buildConfigGetterWrapByComputed = <
   return (...args: Parameters<T>) =>
     computed(() => {
       return defaultColumnsGetter(...args) as ReturnType<T>;
+    });
+};
+
+export const promiseMessageWrapper = <T>(
+  promise: Promise<T>,
+  options?: { successText?: string; errorTextByError?: boolean },
+) => {
+  return promise
+    .then(() => {
+      messagePrompt().success(
+        options?.successText ? options?.successText : undefined,
+      );
+    })
+    .catch((err) => {
+      if (err instanceof Error) {
+        err.message && console.error(err);
+        messagePrompt().error(
+          options?.errorTextByError ? err.message : undefined,
+        );
+      }
     });
 };

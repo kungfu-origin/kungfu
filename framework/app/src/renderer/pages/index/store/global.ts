@@ -46,7 +46,8 @@ interface GlobalState {
   assets: Record<string, KungfuApi.Asset>;
   instruments: KungfuApi.InstrumentResolved[];
   instrumentsMap: Record<string, KungfuApi.InstrumentResolved>;
-  subscribedInstruments: KungfuApi.InstrumentResolved[];
+  subscribedInstrumentsByLocal: KungfuApi.InstrumentResolved[];
+  curSubscribedInstruments: Record<string, boolean>;
 
   riskSettings: KungfuApi.RiskSetting[];
 
@@ -81,7 +82,8 @@ export const useGlobalStore = defineStore('global', {
       assets: {},
       instruments: [],
       instrumentsMap: {},
-      subscribedInstruments: [],
+      subscribedInstrumentsByLocal: [],
+      curSubscribedInstruments: {},
 
       riskSettings: [],
 
@@ -102,10 +104,14 @@ export const useGlobalStore = defineStore('global', {
       });
     },
 
-    setSubscribedInstruments() {
+    setSubscribedInstrumentsByLocal() {
       getSubscribedInstruments().then((instruments) => {
-        this.subscribedInstruments = toRaw(instruments);
+        this.subscribedInstrumentsByLocal = toRaw(instruments);
       });
+    },
+
+    setCurSubscribedInstruments(newInstrumentsMap: Record<string, boolean>) {
+      Object.assign(this.curSubscribedInstruments, newInstrumentsMap);
     },
 
     setInstruments(instruments: KungfuApi.InstrumentResolved[]) {

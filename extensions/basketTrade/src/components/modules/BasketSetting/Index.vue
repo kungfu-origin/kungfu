@@ -27,8 +27,14 @@
         size="small"
         :pagination="false"
         :scroll="{ y: dashboardBodyHeight - 4 }"
-        :row-class-name="(record) => dealRowClassName(record.basket_location)"
-        :custom-row="(record) => customRow(record.basket_location)"
+        :row-class-name="dealBasketRowClassName"
+        :custom-row="
+          (record) => ({
+            onClick: () => {
+              setCurrentGlobalBasket(record);
+            },
+          })
+        "
         :default-expand-all-rows="true"
         :empty-text="$t('empty_text')"
       >
@@ -41,8 +47,8 @@
             record: KungfuApi.BasketResolved,
           }"
         >
-          <template v-if="column.dataIndex === 'name'">
-            {{ record['name'] }}
+          <template v-if="column.dataIndex === 'marked_value'">
+            {{ dealKfPrice(getBasketMarkedValue(record)) }}
           </template>
           <template v-else-if="column.dataIndex === 'actions'">
             <div class="kf-actions__warp">
@@ -81,12 +87,12 @@ import {
   messagePrompt,
   useDashboardBodySize,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
-import { useCurrentGlobalKfLocation } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import {
   dealBasketsToMap,
   getAllBaskets,
   setAllBaskets,
+  useBasketMarkedValue,
   useCurrentGlobalBasket,
 } from '../../../utils/basketTradeUtils';
 import {
@@ -97,6 +103,7 @@ import {
 import { BASKET_CATEGORYS } from '../../../config';
 import { DealTradingDataHooks } from '@kungfu-trader/kungfu-js-api/hooks/dealTradingDataHook';
 import { useBasketTradeStore } from '../../../store';
+import { dealKfPrice } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 const { t } = VueI18n.global;
 
 (
@@ -111,15 +118,12 @@ const { t } = VueI18n.global;
 );
 
 const { dashboardBodyHeight, handleBodySizeChange } = useDashboardBodySize();
-const {
-  dealRowClassName,
-  customRow,
-  // currentGlobalKfLocation
-} = useCurrentGlobalKfLocation(window.watcher);
-const { setCurrentGlobalBasket } = useCurrentGlobalBasket();
+const { dealBasketRowClassName, setCurrentGlobalBasket } =
+  useCurrentGlobalBasket();
+const { getBasketMarkedValue } = useBasketMarkedValue();
 
 const basketDataLoaded = ref(false);
-const columns = getColumns();
+const columns = getColumns(getBasketMarkedValue);
 
 const basketsResolvedMap = ref<Record<string, KungfuApi.BasketResolved>>({});
 const basketsResolved = computed(() => Object.values(basketsResolvedMap.value));

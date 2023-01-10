@@ -41,7 +41,6 @@ export const getMakeBasketOrderConfigSettings =
       key: 'priceLevel',
       name: t('tradingConfig.price_level'),
       default: PriceLevelEnum.Latest,
-      required: true,
     },
     {
       type: 'float',
@@ -49,19 +48,39 @@ export const getMakeBasketOrderConfigSettings =
       name: t('tradingConfig.price_offset'),
       min: 0,
       default: 0,
-      required: true,
     },
   ];
+
+export enum BasketOrderPriceTypeEnum {
+  CUSTOM = 'CUSTOM',
+  ORDER = 'ORDER',
+}
 
 export const getChaseBasketOrderConfigSettings =
   (): KungfuApi.KfConfigItem[] => [
     {
+      type: 'select',
+      key: 'basketOrderPriceType',
+      name: t('BasketTrade.price_type'),
+      options: [
+        {
+          label: t('BasketTrade.custom_price'),
+          value: BasketOrderPriceTypeEnum.CUSTOM,
+        },
+        {
+          label: t('BasketTrade.order_price'),
+          value: BasketOrderPriceTypeEnum.ORDER,
+        },
+      ],
+      tip: t('BasketTrade.chase_order_tip'),
+      required: true,
+    },
+    {
       type: 'priceLevel',
       key: 'priceLevel',
       name: t('tradingConfig.price_level'),
-      tip: t('BasketTrade.chase_order_tip'),
+      tip: t('BasketTrade.price_level_tip'),
       default: PriceLevelEnum.Latest,
-      required: true,
     },
     {
       type: 'float',
@@ -70,19 +89,34 @@ export const getChaseBasketOrderConfigSettings =
       tip: t('BasketTrade.price_offset_tip'),
       min: 0,
       default: 0,
-      required: true,
     },
   ];
 
 export const getReplenishBasketOrderConfigSettings =
   (): KungfuApi.KfConfigItem[] => [
     {
+      type: 'select',
+      key: 'basketOrderPriceType',
+      name: t('BasketTrade.price_type'),
+      options: [
+        {
+          label: t('BasketTrade.custom_price'),
+          value: BasketOrderPriceTypeEnum.CUSTOM,
+        },
+        {
+          label: t('BasketTrade.order_price'),
+          value: BasketOrderPriceTypeEnum.ORDER,
+        },
+      ],
+      tip: t('BasketTrade.replenish_order_tip'),
+      required: true,
+    },
+    {
       type: 'priceLevel',
       key: 'priceLevel',
       name: t('tradingConfig.price_level'),
-      tip: t('BasketTrade.replenish_order_tip'),
+      tip: t('BasketTrade.price_level_tip'),
       default: PriceLevelEnum.Latest,
-      required: true,
     },
     {
       type: 'float',
@@ -91,6 +125,5 @@ export const getReplenishBasketOrderConfigSettings =
       tip: t('BasketTrade.price_offset_tip'),
       min: 0,
       default: 0,
-      required: true,
     },
   ];

@@ -33,13 +33,13 @@ export const getColumns = buildConfigGetterWrapByComputed(
         ),
       },
       {
-        type: 'number',
+        type: 'string',
         name: t('BasketTrade.price'),
-        dataIndex: 'price_resolved',
+        dataIndex: 'price_level',
         width: 80,
         sorter: buildTableColumnSorter<KungfuApi.BasketOrderResolved>(
-          'num',
-          'price_resolved',
+          'str',
+          'price_level',
         ),
       },
       {
@@ -65,7 +65,7 @@ export const getColumns = buildConfigGetterWrapByComputed(
       {
         name: t('BasketTrade.actions'),
         dataIndex: 'actions',
-        width: 80,
+        width: 140,
       },
     ] as KfTradingDataTableHeaderConfig[],
 );
@@ -98,10 +98,11 @@ export const BasketOrderStatus: Record<
 
 const { getBasketOrderByOrderLocation } = useBasketTradeStore();
 
-export const basketTradingDataGetter: DealTradingDataGetter = {
+export const basketOrderTradingDataGetter: DealTradingDataGetter = {
   category: BASKET_CATEGORYS.ORDER,
   commonData: {
     name: t('BasketTrade.basket_order'),
+    color: 'green',
   },
   order: {
     getter: (
@@ -114,8 +115,8 @@ export const basketTradingDataGetter: DealTradingDataGetter = {
       if (basketOrder) {
         return orders
           .nofilter('parent_id', '')
-          .sort('update_time')
-          .filter((order) => order.parent_id === basketOrder.order_id);
+          .filter('parent_id', basketOrder.order_id)
+          .sort('update_time');
       }
 
       return orders.sort('update_time');

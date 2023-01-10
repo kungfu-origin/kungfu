@@ -23,6 +23,33 @@
           />
         </KfDashboardItem> -->
         <KfDashboardItem>
+          <a-checkbox
+            v-model:checked="isWithoutSuspensionInstrument"
+            @change="handleFilterChange"
+            size="small"
+          >
+            {{ $t('BasketTrade.without_suspension') }}
+          </a-checkbox>
+        </KfDashboardItem>
+        <KfDashboardItem>
+          <a-checkbox
+            v-model:checked="isWithoutUpLimitInstrument"
+            size="small"
+            @change="handleFilterChange"
+          >
+            {{ $t('BasketTrade.without_up_limit') }}
+          </a-checkbox>
+        </KfDashboardItem>
+        <KfDashboardItem>
+          <a-checkbox
+            v-model:checked="isWithoutLowLimitInstrument"
+            size="small"
+            @change="handleFilterChange"
+          >
+            {{ $t('BasketTrade.without_low_limit') }}
+          </a-checkbox>
+        </KfDashboardItem>
+        <KfDashboardItem>
           <a-button size="small" @click="handleOpenSetBasketInstrumentModal">
             <template #icon>
               <SettingOutlined />
@@ -35,8 +62,9 @@
             type="primary"
             @click="
               handleShowMakeBasketOrderModal(
-                $t('BasketTrade.place_order'),
+                `${$t('BasketTrade.place_order')} ${currentGlobalBasket?.name}`,
                 getMakeBasketOrderConfigSettings(),
+                handlePlaceBasketOrder,
               )
             "
           >
@@ -51,9 +79,10 @@
         :data-source="basketInstrumentsResolved"
         key-field="id"
         :selectable="true"
+        :seletion="dataSelection"
       >
         <template
-          #bodyCell="{
+          #default="{
             item,
             column,
           }: {
@@ -88,7 +117,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, toRaw } from 'vue';
+import { ref, computed, onMounted, toRaw, watch } from 'vue';
 
 import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboardItem.vue';
@@ -98,7 +127,6 @@ import { SettingOutlined, DeleteOutlined } from '@ant-design/icons-vue';
 
 import {
   buildInstrumentSelectOptionValue,
-  messagePrompt,
   useDashboardBodySize,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import {
@@ -106,9 +134,14 @@ import {
   getAllBasketInstruments,
   setAllBasketInstruments,
   useCurrentGlobalBasket,
-  useMakeBasketOrder,
+  useMakeBasketOrderFormModal,
+  useSubscribeBasketInstruments,
+  useMakeOrCancelBasketOrder,
 } from '../../../utils/basketTradeUtils';
-import { useActiveInstruments } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
+import {
+  useActiveInstruments,
+  useQuote,
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import { getColumns, getSetBasketInstrumentFormSettings } from './config';
 import { BASKET_CATEGORYS } from '../../../config';
 import { getMakeBasketOrderConfigSettings } from '../../../config/makeBasketOrderFormConfig';
@@ -117,20 +150,26 @@ import {
   transformSearchInstrumentResultToInstrument,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { BasketVolumeTypeEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
-import { makeOrderByBasketTrade } from '@kungfu-trader/kungfu-js-api/kungfu';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
+import { promiseMessageWrapper } from '../../../utils';
 const { t } = VueI18n.global;
 
 const { handleBodySizeChange } = useDashboardBodySize();
 const { currentGlobalBasket, currentBasketData } = useCurrentGlobalBasket();
 const { getInstrumentByIds } = useActiveInstruments();
-const { handleShowMakeBasketOrderModal } = useMakeBasketOrder({
-  handleConfirmModal: handlePlaceBasketOrder,
-});
+const { handleShowMakeBasketOrderModal } = useMakeBasketOrderFormModal();
+const { makeBasketOrder } = useMakeOrCancelBasketOrder();
+useSubscribeBasketInstruments();
+const { isInstrumentUpLimit, isInstrumentLowLimit, isInstrumentSuspension } =
+  useQuote();
 
 const dataTableRef = ref();
+const dataSelection = ref<KfTradingDataTableSelection>({});
 const basketInstrumentDataLoaded = ref(false);
 const columns = getColumns(currentGlobalBasket);
+const isWithoutSuspensionInstrument = ref(false);
+const isWithoutUpLimitInstrument = ref(false);
+const isWithoutLowLimitInstrument = ref(false);
 
 const basketInstrumentsResolvedMap = ref<
   Record<string, Record<string, KungfuApi.BasketInstrumentResolved>>
@@ -151,38 +190,58 @@ const setBasketInstrumentConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
 });
 
 onMounted(() => {
-  handleGetAllBasketInstruments().then(() => {
-    basketInstrumentDataLoaded.value = true;
-  });
+  handleGetAllBasketInstruments()
+    .then(() => {
+      basketInstrumentDataLoaded.value = true;
+
+      dataTableRef.value && dataTableRef.value.handleSelectAll(true);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 });
 
+watch(
+  () => currentGlobalBasket.value,
+  (newGlobalBasket) => {
+    if (!newGlobalBasket) return;
+    handleGetAllBasketInstruments()
+      .then(() => {
+        basketInstrumentDataLoaded.value = true;
+
+        dataTableRef.value && dataTableRef.value.handleSelectAll(true);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  },
+);
+
 function handleGetAllBasketInstruments() {
+  if (!currentGlobalBasket.value) return Promise.resolve();
+
   return getAllBasketInstruments().then((basketInstruments) => {
-    basketInstrumentsResolvedMap.value =
-      dealBasketInstrumentsToMap(basketInstruments);
+    if (!currentGlobalBasket.value) return;
+
+    basketInstrumentsResolvedMap.value = dealBasketInstrumentsToMap(
+      currentGlobalBasket.value,
+      basketInstruments,
+    );
   });
 }
 
 function handleSetAllBasketInstruments(
   basketInstruments: KungfuApi.BasketInstrument[],
 ) {
-  return setAllBasketInstruments(basketInstruments)
-    .then((res) => {
-      if (res) {
-        return handleGetAllBasketInstruments();
-      } else {
-        return Promise.reject();
-      }
-    })
-    .then(() => {
-      messagePrompt().success();
-    })
-    .catch((err) => {
-      if (err instanceof Error) {
-        err.message && console.error(err);
-      }
-      messagePrompt().error();
-    });
+  const promise = setAllBasketInstruments(basketInstruments).then((res) => {
+    if (res) {
+      return handleGetAllBasketInstruments();
+    } else {
+      return Promise.reject();
+    }
+  });
+
+  promiseMessageWrapper(promise, { errorTextByError: true });
 }
 
 function handlePlaceBasketOrder(formState) {
@@ -190,12 +249,14 @@ function handlePlaceBasketOrder(formState) {
 
   const accountLocation = getKfLocationByProcessId(`td_${formState.accountId}`);
   if (!accountLocation) return;
-  console.log(dataTableRef.value);
+
+  if (!dataTableRef.value) return;
+
   const selectBasketInstruments = Object.values(
     dataTableRef.value.selectedRowsMap,
-  ) as KungfuApi.BasketInstrumentResolved[];
+  ) as unknown as KungfuApi.BasketInstrumentResolved[];
 
-  const basketOrder: KungfuApi.BasketOrderInput = {
+  const basketOrderInput: KungfuApi.BasketOrderInput = {
     side: +formState.side,
     offset: +formState.offset,
     price_type: +formState.priceType,
@@ -204,17 +265,13 @@ function handlePlaceBasketOrder(formState) {
     volume: BigInt(currentGlobalBasket.value.total_volume),
   };
 
-  makeOrderByBasketTrade(
+  makeBasketOrder(
     window.watcher,
     currentGlobalBasket.value,
-    basketOrder,
+    basketOrderInput,
     selectBasketInstruments,
     accountLocation,
-  ).then((orderIds) => {
-    if (orderIds.length === selectBasketInstruments.length) {
-      messagePrompt().success();
-    }
-  });
+  );
 }
 
 function handleOpenSetBasketInstrumentModal() {
@@ -288,8 +345,10 @@ function handleConfirmAddUpdateBasketInstrument(
     return resolvedBasketInstruments;
   }, [] as KungfuApi.BasketInstrument[]);
 
-  const newBasketInstrumentsMap =
-    dealBasketInstrumentsToMap(newBasketInstruments);
+  const newBasketInstrumentsMap = dealBasketInstrumentsToMap(
+    currentGlobalBasket.value,
+    newBasketInstruments,
+  );
 
   const allBasketInstruments = Object.assign(
     toRaw(basketInstrumentsResolvedMap.value),
@@ -322,6 +381,47 @@ function handleRemoveBasketInstrument(
       .map((map) => Object.values(map))
       .flat(1),
   );
+}
+
+function handleFilterChange() {
+  const suspensionBasketInstrumentKeys: string[] = [];
+  const upLimitBasketInstrumentKeys: string[] = [];
+  const lowLimitBasketInstrumentKeys: string[] = [];
+
+  basketInstrumentsResolved.value.forEach((basketInstrument) => {
+    if (isInstrumentSuspension(basketInstrument)) {
+      suspensionBasketInstrumentKeys.push(basketInstrument.id);
+    }
+    if (isInstrumentUpLimit(basketInstrument)) {
+      upLimitBasketInstrumentKeys.push(basketInstrument.id);
+    }
+    if (isInstrumentLowLimit(basketInstrument)) {
+      lowLimitBasketInstrumentKeys.push(basketInstrument.id);
+    }
+  });
+
+  const basketInstrumentsToDisabled = Array.from(
+    new Set([
+      ...suspensionBasketInstrumentKeys,
+      ...upLimitBasketInstrumentKeys,
+      ...lowLimitBasketInstrumentKeys,
+    ]),
+  );
+
+  dataSelection.value = basketInstrumentsToDisabled.reduce((selection, key) => {
+    selection[key] = {
+      disabled: true,
+    };
+
+    currentGlobalBasket.value &&
+      dataTableRef.value &&
+      dataTableRef.value.handleSelectRow(
+        false,
+        basketInstrumentsResolvedMap.value[currentGlobalBasket.value?.id][key],
+      );
+
+    return selection;
+  }, {} as KfTradingDataTableSelection);
 }
 </script>
 

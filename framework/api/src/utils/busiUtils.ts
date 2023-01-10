@@ -1688,6 +1688,8 @@ export const dealTradingDataMethodsMap: Record<
   Position: dealLedgerTradingData,
   Quote: dealDefaultTradingData,
   Trade: dealOrderTradingData,
+  Basket: dealDefaultTradingData,
+  BasketInstrument: dealDefaultTradingData,
   BasketOrder: dealDefaultTradingData,
 };
 

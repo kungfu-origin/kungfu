@@ -3,18 +3,13 @@ import { defineStore } from 'pinia';
 
 interface BasketStoreState {
   basketsMap: Record<string, KungfuApi.BasketResolved>;
-  basketOrdersMapByBasket: Record<
-    string,
-    Record<string, KungfuApi.BasketOrderResolved>
-  >;
-  basketOrdersMapByOrderId: Record<string, KungfuApi.BasketOrderResolved>;
+  basketOrdersMapByLocationId: Record<string, KungfuApi.BasketOrderResolved>;
 }
 
 export const useBasketTradeStore = defineStore('basketTrade', {
   state: (): BasketStoreState => ({
     basketsMap: {},
-    basketOrdersMapByBasket: {},
-    basketOrdersMapByOrderId: {},
+    basketOrdersMapByLocationId: {},
   }),
   actions: {
     setBasketsMap(basketsMap: Record<string, KungfuApi.BasketResolved>) {
@@ -32,43 +27,16 @@ export const useBasketTradeStore = defineStore('basketTrade', {
     },
 
     updateBasketOrdersMap(
-      curBasketOrdersMap: Record<
-        string,
-        Record<string, KungfuApi.BasketOrderResolved>
-      >,
+      curBasketOrdersMap: Record<string, KungfuApi.BasketOrderResolved>,
     ) {
-      Object.keys(curBasketOrdersMap).forEach((basketId) => {
-        if (basketId in this.basketOrdersMapByBasket) {
-          Object.assign(
-            this.basketOrdersMapByBasket[basketId],
-            curBasketOrdersMap[basketId],
-          );
-        } else {
-          this.basketOrdersMapByBasket[basketId] = curBasketOrdersMap[basketId];
-        }
-
-        Object.assign(
-          this.basketOrdersMapByOrderId,
-          curBasketOrdersMap[basketId],
-        );
-      });
-    },
-
-    getBasketOrdersByBasketLocation(basketLocation: KungfuApi.KfExtraLocation) {
-      const basket = this.getBasketByLocation(basketLocation);
-      if (!basket) return {};
-
-      const curOrdersMap = this.basketOrdersMapByBasket[basket.id];
-      if (!curOrdersMap) return {};
-
-      return curOrdersMap;
+      Object.assign(this.basketOrdersMapByLocationId, curBasketOrdersMap);
     },
 
     getBasketOrderByOrderLocation(
       basketOrderLocation: KungfuApi.KfExtraLocation,
     ): KungfuApi.BasketOrderResolved | null {
       const basketOrderId = getProcessIdByKfLocation(basketOrderLocation);
-      return this.basketOrdersMapByOrderId[basketOrderId];
+      return this.basketOrdersMapByLocationId[basketOrderId];
     },
   },
 });

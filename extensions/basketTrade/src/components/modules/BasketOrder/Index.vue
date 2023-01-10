@@ -17,7 +17,7 @@
       <div ref="tableRef" class="kf-table__warp">
         <KfTradingDataTable
           :columns="columns"
-          :data-source="Object.values(basketOrdersMap)"
+          :data-source="basketOrders"
           key-field="order_id"
           :custom-row-class="dealRowClassNameResolved"
           @click-cell="handleClickRow"
@@ -36,16 +36,60 @@
                 {{ dealSide(item.side).name }}
               </span>
             </template>
-            <template v-else-if="column.dataIndex === 'price_resolved'">
-              {{ dealKfPrice(item.price_resolved) }}
+            <template v-else-if="column.dataIndex === 'insert_time'">
+              {{ dealKfTime(item.insert_time) }}
+            </template>
+            <template v-else-if="column.dataIndex === 'price_level'">
+              {{ dealPriceLevel(item.price_level).name }}
             </template>
             <template v-else-if="column.dataIndex === 'progress'">
-              <a-progress :precent="item.progress" size="small" />
+              <a-progress :percent="item.progress" size="small" />
             </template>
             <template v-else-if="column.dataIndex === 'status_uname'">
               <span :class="`color-${item.status_color}`">
                 {{ item.status_uname }}
               </span>
+            </template>
+            <template v-else-if="column.dataIndex === 'actions'">
+              <div class="kf-actions__warp">
+                <a-button
+                  type="link"
+                  size="small"
+                  @click="
+                    handleShowMakeBasketOrderModal(
+                      `${$t('BasketTrade.chase_order')} ${
+                        currentGlobalBasket?.name
+                      }`,
+                      getChaseBasketOrderConfigSettings(),
+                      handleChaseBasketOrder.bind(null, item!),
+                    )
+                  "
+                >
+                  {{ $t('BasketTrade.chase_order') }}
+                </a-button>
+                <a-button
+                  type="link"
+                  size="small"
+                  @click="
+                    handleShowMakeBasketOrderModal(
+                      `${$t('BasketTrade.chase_order')} ${
+                        currentGlobalBasket?.name
+                      }`,
+                      getReplenishBasketOrderConfigSettings(),
+                      handleReplenishBasketOrder.bind(null, item!),
+                    )
+                  "
+                >
+                  {{ $t('BasketTrade.replenish_order') }}
+                </a-button>
+                <a-button
+                  type="link"
+                  size="small"
+                  @click="handleCancelBasketOrder(item)"
+                >
+                  {{ $t('BasketTrade.cancel_order') }}
+                </a-button>
+              </div>
             </template>
           </template>
         </KfTradingDataTable>
@@ -62,41 +106,97 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, getCurrentInstance } from 'vue';
+import { ref, onMounted, getCurrentInstance, onBeforeUnmount } from 'vue';
 
 import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
 // import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboardItem.vue';
 import KfTradingDataTable from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfTradingDataTable.vue';
 
 import {
-  dealKfPrice,
+  dealPriceLevel,
   dealSide,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
   dealBasketOrdersToMap,
   useCurrentGlobalBasket,
+  useMakeBasketOrderFormModal,
+  useMakeOrCancelBasketOrder,
 } from '../../../utils/basketTradeUtils';
-import { useDashboardBodySize } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
-import { useCurrentGlobalKfLocation } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
-import { getColumns } from './config';
+import {
+  useDashboardBodySize,
+  confirmModal,
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
+import { BASKET_CATEGORYS } from '../../../config';
+import { getColumns, basketOrderTradingDataGetter } from './config';
+import { DealTradingDataHooks } from '@kungfu-trader/kungfu-js-api/hooks/dealTradingDataHook';
+import { dealKfTime } from '@kungfu-trader/kungfu-js-api/kungfu';
+import {
+  getChaseBasketOrderConfigSettings,
+  getReplenishBasketOrderConfigSettings,
+} from '../../../config/makeBasketOrderFormConfig';
+import VueI18n from '@kungfu-trader/kungfu-js-api/language';
+import { useBasketTradeStore } from '../../../store';
+const { t } = VueI18n.global;
+
+(
+  globalThis.HookKeeper.getHooks().dealTradingData as DealTradingDataHooks
+).register(
+  {
+    category: BASKET_CATEGORYS.ORDER,
+    group: '*',
+    name: '*',
+  } as KungfuApi.KfExtraLocation,
+  basketOrderTradingDataGetter,
+);
 
 const app = getCurrentInstance();
-
-const { dealRowClassName, customRow } = useCurrentGlobalKfLocation(
-  window.watcher,
-);
-const { currentGlobalBasket, currentBasketData } = useCurrentGlobalBasket();
+const { updateBasketOrdersMap } = useBasketTradeStore();
+const {
+  currentGlobalBasket,
+  currentGlobalBasketOrder,
+  currentBasketData,
+  dealBasketOrderRowClassName,
+  setCurrentGlobalBasketOrder,
+} = useCurrentGlobalBasket();
 const { handleBodySizeChange } = useDashboardBodySize();
+const { handleShowMakeBasketOrderModal } = useMakeBasketOrderFormModal();
+const { chaseBasketOrder, replenishBasketOrder, cancalBasketOrder } =
+  useMakeOrCancelBasketOrder();
 
 const basketOrdersMap = ref<Record<string, KungfuApi.BasketOrderResolved>>({});
+const basketOrders = ref<KungfuApi.BasketOrderResolved[]>([]);
 
 const columns = getColumns();
 
 onMounted(() => {
-  app?.proxy?.$tradingDataSubject.subscribe((watcher: KungfuApi.Watcher) => {
-    basketOrdersMap.value = dealBasketOrdersToMap(
-      watcher.ledger.BasketOrder.list(),
-    );
+  const subscribtion = app?.proxy?.$tradingDataSubject.subscribe(
+    (watcher: KungfuApi.Watcher) => {
+      if (!currentGlobalBasket.value) {
+        basketOrdersMap.value = {};
+        return;
+      }
+
+      const basketOrderList = watcher.ledger.BasketOrder.sort('insert_time');
+      const basketOrderListFiltered = watcher.ledger.BasketOrder.filter(
+        'parent_id',
+        BigInt(currentGlobalBasket.value.id),
+      ).sort('insert_time');
+
+      basketOrdersMap.value = dealBasketOrdersToMap(basketOrderList);
+      updateBasketOrdersMap(basketOrdersMap.value);
+
+      basketOrders.value = Object.values(
+        dealBasketOrdersToMap(basketOrderListFiltered),
+      );
+
+      if (!currentGlobalBasketOrder.value && basketOrders.value.length) {
+        setCurrentGlobalBasketOrder(basketOrders.value[0]);
+      }
+    },
+  );
+
+  onBeforeUnmount(() => {
+    subscribtion?.unsubscribe();
   });
 });
 
@@ -105,11 +205,65 @@ function handleClickRow(data: {
   row: KungfuApi.BasketOrderResolved;
   column: KfTradingDataTableHeaderConfig;
 }) {
-  customRow(data.row.basket_order_location).onClick();
+  setCurrentGlobalBasketOrder(data.row);
 }
 
 function dealRowClassNameResolved(record: KungfuApi.BasketOrderResolved) {
-  return dealRowClassName(record.basket_order_location);
+  return dealBasketOrderRowClassName(record);
+}
+
+function handleChaseBasketOrder(
+  basketOrder: KungfuApi.BasketOrderResolved,
+  formState,
+) {
+  if (!currentGlobalBasket.value) return Promise.reject();
+
+  return chaseBasketOrder(
+    window.watcher,
+    currentGlobalBasket.value,
+    {
+      ...basketOrder,
+      price_level: formState.priceLevel,
+      price_offset: formState.priceOffset,
+    },
+    formState.basketOrderPriceType,
+  );
+}
+
+function handleReplenishBasketOrder(
+  basketOrder: KungfuApi.BasketOrderResolved,
+  formState,
+) {
+  if (!currentGlobalBasket.value) return Promise.reject();
+
+  return replenishBasketOrder(
+    window.watcher,
+    currentGlobalBasket.value,
+    {
+      ...basketOrder,
+      price_level: formState.priceLevel,
+      price_offset: formState.priceOffset,
+    },
+    formState.basketOrderPriceType,
+  );
+}
+
+function handleCancelBasketOrder(basketOrder: KungfuApi.BasketOrderResolved) {
+  if (!currentGlobalBasket.value || !currentGlobalBasketOrder.value)
+    return Promise.reject();
+
+  return confirmModal(
+    t('orderConfig.confirm_cancel_all'),
+    `${t('orderConfig.confirm')} ${t('BasketTrade.basket_order')} ${
+      currentGlobalBasketOrder.value.insert_time
+    } ${t('orderConfig.cancel_all')}`,
+  ).then((flag) => {
+    if (!flag || !currentGlobalBasketOrder.value || !window.watcher) {
+      return;
+    }
+
+    return cancalBasketOrder(window.watcher, basketOrder);
+  });
 }
 </script>
 

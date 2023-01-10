@@ -518,7 +518,7 @@ declare namespace KungfuApi {
 
   export interface BasketOrder {
     order_id: bigint; //订单ID
-    parent_id: number; //母单号
+    parent_id: bigint; //母单号
     insert_time: bigint; //订单写入时间
     update_time: bigint; //订单更新时间
     side: SideEnum;
@@ -533,7 +533,7 @@ declare namespace KungfuApi {
 
   export interface BasketOrderResolved extends BasketOrder {
     basket_order_location: KfExtraLocation;
-    price_resolved: number;
+    primary_time_resolved: string;
     status_uname: string;
     status_color: AntInKungfuColorTypes;
     progress: number;
@@ -634,6 +634,7 @@ declare namespace KungfuApi {
     ask_price: number[]; //申卖价
     bid_volume: bigint[]; //申买量
     ask_volume: bigint[]; //申卖量
+    trading_phase_code: string; //标的状态
   }
 
   export interface Trade {
@@ -685,6 +686,8 @@ declare namespace KungfuApi {
     Position: DataTable<Position>;
     Quote: DataTable<Quote>;
     Trade: DataTable<Trade>;
+    Basket: DataTable<Basket>;
+    BasketInstrument: DataTable<BasketInstrument>;
     BasketOrder: DataTable<BasketOrder>;
   }
 
@@ -749,7 +752,6 @@ declare namespace KungfuApi {
     basket_location: KfExtraLocation;
     location_id: string;
     volume_type_resolved: string;
-    marked_value: number;
   }
 
   export interface BasketInstrument {
@@ -761,10 +763,15 @@ declare namespace KungfuApi {
     rate: number; // 比例
   }
 
-  export interface BasketInstrumentResolved extends BasketInstrument {
-    id: string;
-    instrumentType: InstrumentTypeEnum;
-    instrumentName: string;
+  export interface BasketInstrumentResolved
+    extends BasketInstrument,
+      InstrumentResolved {
+    basketInstrumentId: string;
+    volumeResolved: number;
+  }
+
+  export interface BasketInstrumentForOrder extends BasketInstrumentResolved {
+    priceResolved: number;
   }
 
   export interface RiskSetting {
