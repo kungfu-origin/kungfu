@@ -55,7 +55,7 @@
                 <a-button
                   type="link"
                   size="small"
-                  @click="
+                  @click.stop="
                     handleShowMakeBasketOrderModal(
                       `${$t('BasketTrade.chase_order')} ${
                         currentGlobalBasket?.name
@@ -70,7 +70,7 @@
                 <a-button
                   type="link"
                   size="small"
-                  @click="
+                  @click.stop="
                     handleShowMakeBasketOrderModal(
                       `${$t('BasketTrade.chase_order')} ${
                         currentGlobalBasket?.name
@@ -85,7 +85,7 @@
                 <a-button
                   type="link"
                   size="small"
-                  @click="handleCancelBasketOrder(item)"
+                  @click.stop="handleCancelBasketOrder(item)"
                 >
                   {{ $t('BasketTrade.cancel_order') }}
                 </a-button>

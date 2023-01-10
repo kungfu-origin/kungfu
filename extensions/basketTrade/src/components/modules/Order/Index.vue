@@ -510,7 +510,7 @@ function handleReplenishBasketOrder(
         <KfDashboardItem>
           <a-button
             size="small"
-            @click="
+            @click.stop="
               currentGlobalBasketOrder &&
                 handleShowMakeBasketOrderModal(
                   `${$t('BasketTrade.chase_order')} ${
@@ -527,7 +527,7 @@ function handleReplenishBasketOrder(
         <KfDashboardItem>
           <a-button
             size="small"
-            @click="
+            @click.stop="
               currentGlobalBasketOrder &&
                 handleShowMakeBasketOrderModal(
                   `${$t('BasketTrade.chase_order')} ${
