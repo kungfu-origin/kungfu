@@ -27,7 +27,7 @@ import {
   getProcessIdByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
-  handleSwitchProcessStatus,
+  handleSwitchProcessStatusGenerator,
   useAddUpdateRemoveKfConfig,
   useAllKfConfigData,
   useExtConfigsRelated,
@@ -40,6 +40,7 @@ const { t } = VueI18n.global;
 const { success, error } = messagePrompt();
 
 const { dashboardBodyHeight, handleBodySizeChange } = useDashboardBodySize();
+const handleSwitchProcessStatus = handleSwitchProcessStatusGenerator();
 
 const setSourceModalVisible = ref<boolean>(false);
 const setMdModalVisible = ref<boolean>(false);
