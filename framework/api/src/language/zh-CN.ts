@@ -91,7 +91,7 @@ export default {
   PosGlobal: '持仓汇总',
   Pos: '持仓',
 
-  please_wait: "请稍后",
+  please_wait: '请稍后',
 
   baseConfig: {
     main_panel: '主面板',
