@@ -20,6 +20,7 @@ export default defineComponent({});
 
   .ant-input-search-button {
     height: 28px;
+    width: 28px;
   }
 }
 </style>

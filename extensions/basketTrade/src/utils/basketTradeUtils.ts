@@ -1,9 +1,13 @@
-import { computed, ref, watch, getCurrentInstance, onMounted } from 'vue';
-import { storeToRefs } from 'pinia';
 import {
-  useCurrentGlobalKfLocation,
-  useSubscibeInstrumentAtEntry,
-} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
+  computed,
+  ref,
+  getCurrentInstance,
+  onMounted,
+  onBeforeUnmount,
+} from 'vue';
+import { storeToRefs } from 'pinia';
+import { useSubscibeInstrumentAtEntry } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
+import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
 import { dealKfTime } from '@kungfu-trader/kungfu-js-api/kungfu';
 import { BasketOrderPriceTypeEnum } from './../config/makeBasketOrderFormConfig';
 import { BasketOrderStatus } from '../components/modules/BasketOrder/config';
@@ -128,6 +132,7 @@ export const dealBasketInstrumentsToMap = (
       const resolvedCurBasketInstrument: KungfuApi.BasketInstrumentResolved = {
         ...curBasketInstrument,
         ...instrumentResolved,
+        basketInstrumentName: `${instrument_id} ${instrumentResolved.instrumentName}`,
         basketInstrumentId: `${instrument_id}_${exchange_id}_${new Date().getTime()}`,
         volumeResolved: getBasketInstrumentVolume(
           basket.volume_type,
@@ -200,29 +205,9 @@ export const dealBasketOrdersToMap = (
 };
 
 export const useCurrentGlobalBasket = () => {
-  const { currentGlobalKfLocation, setCurrentGlobalKfLocation } =
-    useCurrentGlobalKfLocation(window.watcher);
-  const { getBasketByLocation, getBasketOrderByOrderLocation } =
-    useBasketTradeStore();
-
-  const currentGlobalBasket = ref<KungfuApi.BasketResolved>();
-  const currentGlobalBasketOrder = ref<KungfuApi.BasketOrderResolved>();
-
-  watch(
-    () => currentGlobalKfLocation.value,
-    (newLocation) => {
-      if (!newLocation) return;
-
-      if (newLocation.category === BASKET_CATEGORYS.SETTING) {
-        const basket = getBasketByLocation(newLocation);
-        basket && (currentGlobalBasket.value = basket);
-      }
-
-      if (newLocation.category === BASKET_CATEGORYS.ORDER) {
-        const basketOrder = getBasketOrderByOrderLocation(newLocation);
-        basketOrder && (currentGlobalBasketOrder.value = basketOrder);
-      }
-    },
+  const { setCurrentGlobalKfLocation } = useGlobalStore();
+  const { currentGlobalBasket, currentGlobalBasketOrder } = storeToRefs(
+    useBasketTradeStore(),
   );
 
   const currentBasketData = computed(() => {
@@ -267,22 +252,18 @@ export const useCurrentGlobalBasket = () => {
     return '';
   };
 
-  const setCurrentGlobalBasket = (basket: KungfuApi.BasketResolved) => {
-    setCurrentGlobalKfLocation(basket.basket_location);
+  const setCurrentGlobalBasket = (basket: KungfuApi.BasketResolved | null) => {
+    setCurrentGlobalKfLocation(basket ? basket.basket_location : null);
+    useBasketTradeStore().setCurrentGlobalBasket(basket);
   };
 
   const setCurrentGlobalBasketOrder = (
-    basketOrder: KungfuApi.BasketOrderResolved,
+    basketOrder: KungfuApi.BasketOrderResolved | null,
   ) => {
-    setCurrentGlobalKfLocation(basketOrder.basket_order_location);
-  };
-
-  const isCurrentGlobalLocationTargetCategory = (
-    targetCategory: keyof typeof BASKET_CATEGORYS,
-  ) => {
-    if (!currentGlobalKfLocation.value) return false;
-
-    return currentGlobalKfLocation.value.category === targetCategory;
+    setCurrentGlobalKfLocation(
+      basketOrder ? basketOrder.basket_order_location : null,
+    );
+    useBasketTradeStore().setCurrentGlobalBasketOrder(basketOrder);
   };
 
   return {
@@ -294,7 +275,6 @@ export const useCurrentGlobalBasket = () => {
     dealBasketOrderRowClassName,
     setCurrentGlobalBasket,
     setCurrentGlobalBasketOrder,
-    isCurrentGlobalLocationTargetCategory,
   };
 };
 
@@ -324,8 +304,6 @@ export const useSubscribeBasketInstruments = () => {
 
 export const useBasketMarkedValue = () => {
   const app = getCurrentInstance();
-  const { getQuoteByInstrument } = useQuote();
-  const { getInstrumentByIds } = useActiveInstruments();
   const { basketOrdersMapByLocationId } = storeToRefs(useBasketTradeStore());
 
   const basketOrderMarkedValueMap = ref<Record<string, number>>({});
@@ -335,42 +313,50 @@ export const useBasketMarkedValue = () => {
       .filter((basketOrder) => BigInt(basket.id) === basketOrder.parent_id)
       .reduce((markedValue, basketOrder) => {
         const { key } = buildBasketOrderMapKeyAndLocation(basketOrder);
-        markedValue += basketOrderMarkedValueMap[key] || 0;
+        markedValue += basketOrderMarkedValueMap.value[key] || 0;
         return markedValue;
       }, 0);
   };
 
   onMounted(() => {
-    app?.proxy?.$tradingDataSubject.subscribe((watcher: KungfuApi.Watcher) => {
-      Object.keys(basketOrdersMapByLocationId.value).forEach((key) => {
-        const curBasketOrder = basketOrdersMapByLocationId.value[key];
+    const subscibtion = app?.proxy?.$tradingDataSubject.subscribe(
+      (watcher: KungfuApi.Watcher) => {
+        Object.keys(basketOrdersMapByLocationId.value).forEach((key) => {
+          const curBasketOrder = basketOrdersMapByLocationId.value[key];
 
-        const orders = watcher.ledger.Order.filter(
-          'parent_id',
-          curBasketOrder.order_id,
-        )
-          .nofilter('parent_id', 0n)
-          .list();
-        basketOrderMarkedValueMap.value[key] = orders.reduce(
-          (markedValue, order) => {
-            const instrument = getInstrumentByIds(
-              order.instrument_id,
-              order.exchange_id,
-            );
-            if (!instrument) return markedValue;
+          const orders = watcher.ledger.Order.filter(
+            'parent_id',
+            curBasketOrder.order_id,
+          )
+            .nofilter('parent_id', 0n)
+            .list();
 
-            const quote = getQuoteByInstrument(instrument);
-            if (!quote) return markedValue;
+          basketOrderMarkedValueMap.value[key] = orders.reduce(
+            (markedValue, order) => {
+              const ukey = hashInstrumentUKey(
+                order.instrument_id,
+                order.exchange_id,
+              );
+              const quote = watcher.ledger.Quote[
+                ukey
+              ] as KungfuApi.Quote | null;
 
-            const { last_price } = quote;
-            markedValue +=
-              Number(order.volume - order.volume_left) * last_price;
+              if (!quote) return markedValue;
 
-            return markedValue;
-          },
-          0,
-        );
-      });
+              const { last_price } = quote;
+              markedValue +=
+                Number(order.volume - order.volume_left) * last_price;
+
+              return markedValue;
+            },
+            0,
+          );
+        });
+      },
+    );
+
+    onBeforeUnmount(() => {
+      subscibtion?.unsubscribe();
     });
   });
 
@@ -437,18 +423,20 @@ export const useMakeBasketOrderFormModal = () => {
   };
 
   onMounted(() => {
-    if (app?.proxy) {
-      app.proxy.$globalBus.subscribe((data) => {
-        if (data.tag === openModalTag) {
-          makeBasketOrderConfigPayload.value = data.payload;
-          showMakeOrderModal.value = true;
-        }
+    const subscribtion = app?.proxy?.$globalBus.subscribe((data) => {
+      if (data.tag === openModalTag) {
+        makeBasketOrderConfigPayload.value = data.payload;
+        showMakeOrderModal.value = true;
+      }
 
-        if (data.tag === confirmModalTag) {
-          handleConfirmModalCallback(data.formState);
-        }
-      });
-    }
+      if (data.tag === confirmModalTag) {
+        handleConfirmModalCallback(data.formState);
+      }
+    });
+
+    onBeforeUnmount(() => {
+      subscribtion?.unsubscribe();
+    });
   });
 
   return {
@@ -581,6 +569,12 @@ export const useMakeOrCancelBasketOrder = () => {
       basketOrderInput.price_offset,
     );
 
+    if (!basketInstrumentsResolved.length)
+      return promiseMessageWrapper(
+        Promise.reject(t('BasketTrade.no_selected_instruments')),
+        { errorTextByError: true },
+      );
+
     const makeBasketOrderPromise = makeOrderByBasketTrade(
       watcher,
       basket,
@@ -595,7 +589,7 @@ export const useMakeOrCancelBasketOrder = () => {
       return Promise.reject();
     });
 
-    promiseMessageWrapper(makeBasketOrderPromise, {
+    return promiseMessageWrapper(makeBasketOrderPromise, {
       errorTextByError: true,
     });
   };

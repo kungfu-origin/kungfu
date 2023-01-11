@@ -84,11 +84,12 @@
         "price_type": "价格类型",
         "custom_price": "自定义价",
         "order_price": "下单价",
+        "last_price": "最新价",
         "chase_order_tip": "追单会先将所有未完成的订单撤单, 再以选择价格下单",
         "replenish_order_tip": "以选择价格补单",
         "price_level_tip": "仅在价格类型选择自定义时生效",
         "price_offset_tip": "仅在价格类型选择自定义时生效, 会在目标价格的基础上计算.\n正数表示更激进, 负数表示更保守; 买入时, 正数表示更高价格买(+正), 负数表示更低价格买(+负); 卖出时, 正数表示更低价格卖(-正), 负数表示更高价格卖(-负)",
-        "no_selected_instruments": "未选择篮子标的",
+        "no_selected_instruments": "未选择下单篮子标的",
         "no_pending_orders": "无未结束的委托单",
         "basket_order_no_failed_orders": "该篮子单无未成交的子委托单",
         "no_selected_failed_orders": "未选择失败的委托单"
@@ -131,13 +132,18 @@
         "price_type": "Price Type",
         "custom_price": "Custom Price",
         "order_price": "Order Price",
+        "last_price": "Last Price",
         "partial_filled_not_active": "Partial Filled Not Active",
         "partial_filled_active": "Partial Filled Active",
         "filled": "Filled",
         "progress": "Progress",
         "chase_order_tip": "Chesh order will cancel the orders that not filled first, and then place order by selected price",
         "replenish_order_tip": "Replenish order by selected price",
-        "price_offset_tip": "Only take effect by custom target price, specific reference twap algorithm"
+        "price_offset_tip": "Only take effect by custom target price, specific reference twap algorithm",
+        "no_selected_instruments": "Not seleced anyone basket instrument",
+        "no_pending_orders": "Not have unfinished order",
+        "basket_order_no_failed_orders": "This basket order is not have unfinished son order",
+        "no_selected_failed_orders": "Not selected anyone failed order"
       }
     }
   }

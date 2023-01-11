@@ -2,16 +2,30 @@ import { getProcessIdByKfLocation } from '@kungfu-trader/kungfu-js-api/utils/bus
 import { defineStore } from 'pinia';
 
 interface BasketStoreState {
+  currentGlobalBasket: KungfuApi.BasketResolved | null;
+  currentGlobalBasketOrder: KungfuApi.BasketOrderResolved | null;
   basketsMap: Record<string, KungfuApi.BasketResolved>;
   basketOrdersMapByLocationId: Record<string, KungfuApi.BasketOrderResolved>;
 }
 
 export const useBasketTradeStore = defineStore('basketTrade', {
   state: (): BasketStoreState => ({
+    currentGlobalBasket: null,
+    currentGlobalBasketOrder: null,
     basketsMap: {},
     basketOrdersMapByLocationId: {},
   }),
   actions: {
+    setCurrentGlobalBasket(basket: KungfuApi.BasketResolved | null) {
+      this.currentGlobalBasket = basket;
+    },
+
+    setCurrentGlobalBasketOrder(
+      basketOrder: KungfuApi.BasketOrderResolved | null,
+    ) {
+      this.currentGlobalBasketOrder = basketOrder;
+    },
+
     setBasketsMap(basketsMap: Record<string, KungfuApi.BasketResolved>) {
       this.basketsMap = basketsMap;
     },

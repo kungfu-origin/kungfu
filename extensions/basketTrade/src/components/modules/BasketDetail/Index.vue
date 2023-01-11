@@ -90,7 +90,12 @@
             column: KfTradingDataTableHeaderConfig,
           }"
         >
-          <template v-if="column.dataIndex === 'rate'">
+          <template v-if="column.dataIndex === 'last_price'">
+            <KfBlinkNum
+              :num="dealKfPrice(getQuoteByInstrument(item)?.last_price)"
+            ></KfBlinkNum>
+          </template>
+          <template v-else-if="column.dataIndex === 'rate'">
             {{ `${item['rate']}%` }}
           </template>
           <template v-else-if="column.dataIndex === 'actions'">
@@ -117,7 +122,14 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, toRaw, watch } from 'vue';
+import {
+  ref,
+  computed,
+  onMounted,
+  toRaw,
+  watch,
+  getCurrentInstance,
+} from 'vue';
 
 import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboardItem.vue';
@@ -146,6 +158,7 @@ import { getColumns, getSetBasketInstrumentFormSettings } from './config';
 import { BASKET_CATEGORYS } from '../../../config';
 import { getMakeBasketOrderConfigSettings } from '../../../config/makeBasketOrderFormConfig';
 import {
+  dealKfPrice,
   getKfLocationByProcessId,
   transformSearchInstrumentResultToInstrument,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
@@ -154,22 +167,40 @@ import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import { promiseMessageWrapper } from '../../../utils';
 const { t } = VueI18n.global;
 
+const app = getCurrentInstance();
 const { handleBodySizeChange } = useDashboardBodySize();
 const { currentGlobalBasket, currentBasketData } = useCurrentGlobalBasket();
 const { getInstrumentByIds } = useActiveInstruments();
 const { handleShowMakeBasketOrderModal } = useMakeBasketOrderFormModal();
 const { makeBasketOrder } = useMakeOrCancelBasketOrder();
 useSubscribeBasketInstruments();
-const { isInstrumentUpLimit, isInstrumentLowLimit, isInstrumentSuspension } =
-  useQuote();
+const {
+  getQuoteByInstrument,
+  isInstrumentUpLimit,
+  isInstrumentLowLimit,
+  isInstrumentSuspension,
+} = useQuote();
 
 const dataTableRef = ref();
 const dataSelection = ref<KfTradingDataTableSelection>({});
 const basketInstrumentDataLoaded = ref(false);
-const columns = getColumns(currentGlobalBasket);
 const isWithoutSuspensionInstrument = ref(false);
 const isWithoutUpLimitInstrument = ref(false);
 const isWithoutLowLimitInstrument = ref(false);
+
+const basketInstrumentLastPriceSorter = (
+  a: KungfuApi.BasketInstrumentResolved,
+  b: KungfuApi.BasketInstrumentResolved,
+) => {
+  return (
+    (getQuoteByInstrument(a)?.last_price ?? 0) -
+    (getQuoteByInstrument(b)?.last_price ?? 0)
+  );
+};
+const columns = getColumns(
+  currentGlobalBasket,
+  basketInstrumentLastPriceSorter,
+);
 
 const basketInstrumentsResolvedMap = ref<
   Record<string, Record<string, KungfuApi.BasketInstrumentResolved>>
@@ -193,7 +224,6 @@ onMounted(() => {
   handleGetAllBasketInstruments()
     .then(() => {
       basketInstrumentDataLoaded.value = true;
-
       dataTableRef.value && dataTableRef.value.handleSelectAll(true);
     })
     .catch((err) => {
@@ -253,7 +283,7 @@ function handlePlaceBasketOrder(formState) {
   if (!dataTableRef.value) return;
 
   const selectBasketInstruments = Object.values(
-    dataTableRef.value.selectedRowsMap,
+    dataTableRef.value.selectedRowsMap || {},
   ) as unknown as KungfuApi.BasketInstrumentResolved[];
 
   const basketOrderInput: KungfuApi.BasketOrderInput = {
@@ -271,7 +301,11 @@ function handlePlaceBasketOrder(formState) {
     basketOrderInput,
     selectBasketInstruments,
     accountLocation,
-  );
+  ).then(() => {
+    app?.proxy?.$globalBus.next({
+      tag: 'update:makeBasketOrder',
+    });
+  });
 }
 
 function handleOpenSetBasketInstrumentModal() {

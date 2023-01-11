@@ -175,7 +175,7 @@ onMounted(() => {
   }
 });
 
-watch(currentGlobalKfLocation, () => {
+watch(currentGlobalBasketOrder, () => {
   historyDate.value = undefined;
   orders.value = [];
 });
@@ -524,7 +524,7 @@ function handleReplenishBasketOrder(
             {{ $t('BasketTrade.chase_order') }}
           </a-button>
         </KfDashboardItem>
-        <KfDashboardItem>
+        <KfDashboardItem style="margin-right: 16px">
           <a-button
             size="small"
             @click.stop="

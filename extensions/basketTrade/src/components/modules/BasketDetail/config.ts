@@ -8,16 +8,22 @@ import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 const { t } = VueI18n.global;
 
 export const getColumns = buildConfigGetterWrapByComputed(
-  (basket: Ref<KungfuApi.BasketResolved | undefined>) =>
+  (
+    basket: Ref<KungfuApi.BasketResolved | null>,
+    basketInstrumentLastPriceSorter: (
+      a: KungfuApi.BasketInstrumentResolved,
+      b: KungfuApi.BasketInstrumentResolved,
+    ) => number,
+  ) =>
     [
       {
         type: 'string',
         name: t('BasketTrade.instrument_id'),
-        dataIndex: 'instrument_id',
-        flex: 1.2,
+        dataIndex: 'basketInstrumentName',
+        flex: 1.5,
         sorter: buildTableColumnSorter<KungfuApi.BasketInstrumentResolved>(
           'str',
-          'instrument_id',
+          'basketInstrumentName',
         ),
       },
       {
@@ -31,14 +37,11 @@ export const getColumns = buildConfigGetterWrapByComputed(
         ),
       },
       {
-        type: 'string',
-        name: t('BasketTrade.instrument_name'),
-        dataIndex: 'instrumentName',
-        flex: 1.2,
-        sorter: buildTableColumnSorter<KungfuApi.BasketInstrumentResolved>(
-          'str',
-          'instrumentName',
-        ),
+        type: 'number',
+        name: t('BasketTrade.last_price'),
+        dataIndex: 'last_price',
+        flex: 1,
+        sorter: basketInstrumentLastPriceSorter,
       },
       basket.value?.volume_type === BasketVolumeTypeEnum.Quantity
         ? {
@@ -64,7 +67,7 @@ export const getColumns = buildConfigGetterWrapByComputed(
       {
         name: t('tdConfig.actions'),
         dataIndex: 'actions',
-        width: 60,
+        width: 80,
       },
     ] as KfTradingDataTableHeaderConfig[],
 );

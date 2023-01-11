@@ -173,20 +173,31 @@ const { chaseBasketOrder, replenishBasketOrder, cancalBasketOrder } =
 const basketOrdersMap = ref<Record<string, KungfuApi.BasketOrderResolved>>({});
 const basketOrders = ref<KungfuApi.BasketOrderResolved[]>([]);
 
+const hasMakeNewBasketOrder = ref(false);
+
 const columns = getColumns();
 
 const setDefaultGlobalBasketOrder = () => {
-  if (basketOrders.value.length) {
-    if (!currentGlobalBasketOrder.value) {
+  if (!currentGlobalBasketOrder.value) {
+    if (basketOrders.value.length) {
       setCurrentGlobalBasketOrder(basketOrders.value[0]);
-    } else {
-      const curBasketOrderKey = buildBasketOrderMapKeyAndLocation(
-        currentGlobalBasketOrder.value,
-      ).key;
+    }
+  } else {
+    if (hasMakeNewBasketOrder.value) {
+      setCurrentGlobalBasketOrder(
+        basketOrders.value.length ? basketOrders.value[0] : null,
+      );
+      hasMakeNewBasketOrder.value = false;
+    }
 
-      if (!(curBasketOrderKey in basketOrdersMap.value)) {
-        setCurrentGlobalBasketOrder(basketOrders.value[0]);
-      }
+    const curBasketOrderKey = buildBasketOrderMapKeyAndLocation(
+      currentGlobalBasketOrder.value,
+    ).key;
+
+    if (!(curBasketOrderKey in basketOrdersMap.value)) {
+      setCurrentGlobalBasketOrder(
+        basketOrders.value.length ? basketOrders.value[0] : null,
+      );
     }
   }
 };
@@ -211,7 +222,7 @@ const getBasketOrders = (watcher: KungfuApi.Watcher) => {
 };
 
 onMounted(() => {
-  const subscribtion = app?.proxy?.$tradingDataSubject.subscribe(
+  const tradingDataSubscribtion = app?.proxy?.$tradingDataSubject.subscribe(
     (watcher: KungfuApi.Watcher) => {
       const basketOrderList = watcher.ledger.BasketOrder.sort('insert_time');
       updateBasketOrdersMap(dealBasketOrdersToMap(basketOrderList));
@@ -220,8 +231,15 @@ onMounted(() => {
     },
   );
 
+  const globalBusSubscribtion = app?.proxy?.$globalBus.subscribe((data) => {
+    if (data.tag === 'update:makeBasketOrder') {
+      hasMakeNewBasketOrder.value = true;
+    }
+  });
+
   onBeforeUnmount(() => {
-    subscribtion?.unsubscribe();
+    tradingDataSubscribtion?.unsubscribe();
+    globalBusSubscribtion?.unsubscribe();
   });
 });
 

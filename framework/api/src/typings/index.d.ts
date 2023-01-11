@@ -766,6 +766,7 @@ declare namespace KungfuApi {
   export interface BasketInstrumentResolved
     extends BasketInstrument,
       InstrumentResolved {
+    basketInstrumentName: string;
     basketInstrumentId: string;
     volumeResolved: number;
   }

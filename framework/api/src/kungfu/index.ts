@@ -554,6 +554,8 @@ export const makeOrderByBasketInstruments = (
     return Promise.reject(new Error(`Td ${accountId} not ready`));
   }
 
+  console.log(parentId, basketOrderInput, basketInstruments, kfLocation);
+
   const makeOrderTasks = basketInstruments.map((baksetInstrument) => {
     const now = watcher.now();
 
@@ -596,8 +598,6 @@ export const makeOrderByBasketTrade = (
     const accountId = getIdByKfLocation(kfLocation);
     return Promise.reject(new Error(`Td ${accountId} not ready`));
   }
-
-  console.log(watcher, basket, basketInstruments, kfLocation);
 
   if (!basketInstruments.length) return Promise.resolve();
 

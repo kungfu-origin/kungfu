@@ -48,7 +48,9 @@
           }"
         >
           <template v-if="column.dataIndex === 'marked_value'">
-            {{ dealKfPrice(getBasketMarkedValue(record)) }}
+            <KfBlinkNum
+              :num="dealAssetPrice(getBasketMarkedValue(record))"
+            ></KfBlinkNum>
           </template>
           <template v-else-if="column.dataIndex === 'actions'">
             <div class="kf-actions__warp">
@@ -81,6 +83,7 @@ import { ref, computed, onMounted, toRaw } from 'vue';
 import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboardItem.vue';
 import KfSetByConfigModal from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfSetByConfigModal.vue';
+import KfBlinkNum from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfBlinkNum.vue';
 import { SettingOutlined, DeleteOutlined } from '@ant-design/icons-vue';
 
 import {
@@ -104,7 +107,7 @@ import {
 import { BASKET_CATEGORYS } from '../../../config';
 import { DealTradingDataHooks } from '@kungfu-trader/kungfu-js-api/hooks/dealTradingDataHook';
 import { useBasketTradeStore } from '../../../store';
-import { dealKfPrice } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import { dealAssetPrice } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 const { t } = VueI18n.global;
 
 (
@@ -140,16 +143,18 @@ const setBasketConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
 });
 
 const setDefaultGlobalBasket = () => {
-  if (basketsResolved.value.length) {
-    if (!currentGlobalBasket.value) {
+  if (!currentGlobalBasket.value) {
+    if (basketsResolved.value.length) {
       setCurrentGlobalBasket(basketsResolved.value[0]);
-    } else {
-      const curBasketKey = buildBasketMapKeyAndLocation(
-        currentGlobalBasket.value,
-      ).key;
-      if (!(curBasketKey in basketsResolvedMap.value)) {
-        setCurrentGlobalBasket(basketsResolved.value[0]);
-      }
+    }
+  } else {
+    const curBasketKey = buildBasketMapKeyAndLocation(
+      currentGlobalBasket.value,
+    ).key;
+    if (!(curBasketKey in basketsResolvedMap.value)) {
+      setCurrentGlobalBasket(
+        basketsResolved.value.length ? basketsResolved.value[0] : null,
+      );
     }
   }
 };
