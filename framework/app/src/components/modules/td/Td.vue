@@ -23,7 +23,7 @@ import {
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import {
   useAddUpdateRemoveKfConfig,
-  handleSwitchProcessStatus,
+  handleSwitchProcessStatusGenerator,
   useSwitchAllConfig,
   useProcessStatusDetailData,
   useExtConfigsRelated,
@@ -54,6 +54,7 @@ import { storeToRefs } from 'pinia';
 
 const { t } = VueI18n.global;
 const { success, error } = messagePrompt();
+const handleSwitchProcessStatus = handleSwitchProcessStatusGenerator();
 const { dashboardBodyHeight, handleBodySizeChange } = useDashboardBodySize();
 const { globalSetting } = storeToRefs(useGlobalStore());
 const isShowAssetMargin = computed(() => {
