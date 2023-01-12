@@ -51,7 +51,7 @@ import { Router } from 'vue-router';
 
 export const mergeExtLanguages = async () => {
   const languages = await getKfExtensionLanguage();
-  console.log(languages);
+  console.log("Kungfu extension's languages:", languages);
 
   Object.keys(languages).forEach((langName) => {
     if (langName in VueI18n.global.messages) {

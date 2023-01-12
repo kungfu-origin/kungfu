@@ -74,7 +74,7 @@ export const promiseMessageWrapper = <T>(
     })
     .catch((err) => {
       if (err instanceof Error) {
-        err.message && console.error(err);
+        options?.errorTextByError && err.message && console.error(err);
         messagePrompt().error(
           options?.errorTextByError ? err.message : undefined,
         );

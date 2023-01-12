@@ -80,6 +80,7 @@ export const getSetBasketInstrumentFormSettings =
           key: 'basketInstruments',
           name: t('BasketTrade.basket_instrument'),
           type: 'csvTable',
+          searchable: true,
           headers: ['instrument_id', 'exchange_id', 'volume', 'rate'],
           default: [],
           columns: [

@@ -53,7 +53,10 @@ import {
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { readCSV } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import { hashInstrumentUKey } from '@kungfu-trader/kungfu-js-api/kungfu';
-import { buildInstrumentSelectOptionValue } from '../../assets/methods/uiUtils';
+import {
+  buildInstrumentSelectOptionValue,
+  useWritableTableSearchKeyword,
+} from '../../assets/methods/uiUtils';
 import { getPriceTypeConfig } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 
 const { t } = VueI18n.global;
@@ -120,6 +123,14 @@ type InstrumentsSearchRelated = Record<
   }
 >;
 
+type TablesSearchRelated = Record<
+  string,
+  {
+    searchKeyword: Ref<string>;
+    tableData: Ref<Record<string, KungfuApi.KfConfigValue>[]>;
+  }
+>;
+
 const app = getCurrentInstance();
 const formRef = ref();
 
@@ -136,12 +147,16 @@ const instrumentKeys = ref<
 const instrumentsCsvData = reactive<
   Record<string, Record<string, KungfuApi.InstrumentResolved>>
 >({});
+const tableKeys = ref<Record<string, KungfuApi.KfConfigItem>>(
+  filterTableKeysFromConfigSettings(props.configSettings),
+);
 
 watch(
   () => props.configSettings,
   (newVal) => {
     primaryKeys.value = getPrimaryKeys(newVal);
     instrumentKeys.value = filterInstrumentKeysFromConfigSettings(newVal);
+    tableKeys.value = filterTableKeysFromConfigSettings(newVal);
 
     const rowFormState = toRaw(props.formState);
     Object.keys(rowFormState).forEach(
@@ -157,6 +172,14 @@ watch(
   () => instrumentKeys.value,
   (newVal) => {
     instrumentsSearchRelated = getInstrumentsSearchRelated(newVal);
+  },
+);
+
+let tablesSearchRelated = getTablesSearchRelated(tableKeys.value);
+watch(
+  () => tableKeys.value,
+  (newVal) => {
+    tablesSearchRelated = getTablesSearchRelated(newVal);
   },
 );
 
@@ -255,6 +278,21 @@ function getInstrumentsSearchRelated(
   );
 }
 
+function getTablesSearchRelated(
+  tableKeys: Record<string, KungfuApi.KfConfigItem>,
+): TablesSearchRelated {
+  return Object.keys(tableKeys).reduce((tablesSearchRelated, key) => {
+    const { searchKeyword, tableData } = useWritableTableSearchKeyword<
+      Record<string, KungfuApi.KfConfigItem>
+    >(formState[key], tableKeys[key].headers || []);
+    tablesSearchRelated[key] = {
+      searchKeyword,
+      tableData,
+    };
+    return tablesSearchRelated;
+  }, {} as TablesSearchRelated);
+}
+
 function getValidatorType(
   type: string,
 ): 'number' | 'string' | 'array' | 'boolean' {
@@ -286,6 +324,17 @@ function filterInstrumentKeysFromConfigSettings(
         | 'instrumentsCsv';
       return data;
     }, {} as Record<string, 'instrument' | 'instruments' | 'instrumentsCsv'>);
+}
+
+function filterTableKeysFromConfigSettings(
+  configSettings: KungfuApi.KfConfigItem[],
+) {
+  return configSettings
+    .filter((item) => item.type === 'table' || item.type === 'csvTable')
+    .reduce((data, setting) => {
+      data[setting.key.toString()] = setting;
+      return data;
+    }, {} as Record<string, KungfuApi.KfConfigItem>);
 }
 
 function isNumberInputType(type: string): boolean {
@@ -1139,19 +1188,30 @@ defineExpose({
           </span>
         </div>
 
-        <a-button
-          :disabled="
-            (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
-            item.disabled
-          "
-        >
-          <template #icon>
-            <PlusOutlined @click.stop="handleAddItemIntoTableRows(item)" />
-          </template>
-        </a-button>
+        <div class="table-in-config-setting-form-head">
+          <a-input-search
+            v-if="!!item.searchable"
+            v-model:value="tablesSearchRelated[item.key].searchKeyword"
+            class="table-in-config-setting-search"
+            :placeholder="$t('globalSettingConfig.varieties')"
+          />
+          <a-button
+            :disabled="
+              (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
+              item.disabled
+            "
+          >
+            <template #icon>
+              <PlusOutlined @click.stop="handleAddItemIntoTableRows(item)" />
+            </template>
+          </a-button>
+        </div>
+
         <div
           class="table-in-config-setting-row"
-          v-for="(_item, index) in formState[item.key]"
+          v-for="(_item, index) in !!item.searchable
+            ? tablesSearchRelated[item.key].tableData
+            : formState[item.key]"
           :key="`${index}_${formState[item.key].length}`"
         >
           <a-button
@@ -1245,6 +1305,14 @@ export default defineComponent({
   }
 
   .table-in-config-setting-form {
+    .table-in-config-setting-head {
+      display: flex;
+
+      .table-in-config-setting-search {
+        margin-right: 16px;
+      }
+    }
+
     .table-in-config-setting-row {
       margin-top: 10px;
 

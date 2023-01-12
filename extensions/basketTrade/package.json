@@ -54,6 +54,8 @@
         "place_order": "下单",
         "chase_order": "追单",
         "replenish_order": "补单",
+        "wait_to_confirm": "{type}待确认",
+        "cancel": "取消",
         "cancel_order": "撤单",
         "actions": "操作",
         "basket_name": "篮子名称",
@@ -84,8 +86,8 @@
         "last_price": "最新价",
         "chase_order_tip": "追单会先将所有未完成的订单撤单, 再以选择价格下单",
         "replenish_order_tip": "以选择价格补单",
-        "price_level_tip": "仅在价格类型选择自定义时生效",
-        "price_offset_tip": "仅在价格类型选择自定义时生效, 会在目标价格的基础上计算.\n正数表示更激进, 负数表示更保守; 买入时, 正数表示更高价格买(+正), 负数表示更低价格买(+负); 卖出时, 正数表示更低价格卖(-正), 负数表示更高价格卖(-负)",
+        "price_level_tip": "仅在 方式 选择自定义时生效",
+        "price_offset_tip": "{prefix}会在目标价格的基础上计算.\n正数表示更激进, 负数表示更保守; 买入时, 正数表示更高价格买(+正), 负数表示更低价格买(+负); 卖出时, 正数表示更低价格卖(-正), 负数表示更高价格卖(-负)",
         "no_selected_instruments": "未选择下单篮子标的",
         "no_pending_orders": "无未结束的委托单",
         "basket_order_no_failed_orders": "该篮子单无未成交的子委托单",
@@ -94,7 +96,8 @@
         "continue_make_order": "继续下单",
         "cancel_make_order": "取消下单",
         "abnormal_quote_tip1": "当前以下标的行情异常: ",
-        "abnormal_quote_tip2": "继续下单 则只下单以下标的: "
+        "abnormal_quote_tip2": "点击 '继续下单' 则只下单以下标的: ",
+        "abnormal_quote_tip3": "点击 '继续下单' 则按照下单价下单"
       },
       "en-US": {
         "BasketTrade": "Basket Trade",
@@ -108,6 +111,8 @@
         "place_order": "Place Order",
         "chase_order": "Chase Order",
         "replenish_order": "Replenish Order",
+        "wait_to_confirm": "{type} wait confirm",
+        "cancel": "Cancel",
         "cancel_order": "Cancel Order",
         "actions": "Actions",
         "basket_name": "Basket Name",

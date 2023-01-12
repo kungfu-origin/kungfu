@@ -108,7 +108,7 @@ import { BASKET_CATEGORYS } from '../../../config';
 import { DealTradingDataHooks } from '@kungfu-trader/kungfu-js-api/hooks/dealTradingDataHook';
 import { useBasketTradeStore } from '../../../store';
 import { dealAssetPrice } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import { BasketVolumeTypeEnum } from '@kungfu-trader/kungfu-js-api/src/typings/enums';
+import { BasketVolumeTypeEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 const { t } = VueI18n.global;
 
 (

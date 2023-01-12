@@ -11,7 +11,6 @@ import { storeToRefs } from 'pinia';
 import { useSubscibeInstrumentAtEntry } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
 import { dealKfTime } from '@kungfu-trader/kungfu-js-api/kungfu';
-import { BasketOrderPriceTypeEnum } from './../config/makeBasketOrderFormConfig';
 import { BasketOrderStatus } from '../components/modules/BasketOrder/config';
 import { BasketVolumeType } from '../components/modules/BasketSetting/config';
 import { BASKET_CATEGORYS } from '../config';
@@ -541,35 +540,33 @@ export const useMakeOrCancelBasketOrder = () => {
     priceLevel: PriceLevelEnum,
     side: SideEnum,
     priceOffset: number,
+    basketVolume: number,
     ordersMap?: Record<string, KungfuApi.Order>,
   ): KungfuApi.BasketInstrumentForOrder[] => {
     const basketInstrumentsResolved: KungfuApi.BasketInstrumentForOrder[] =
       basketInstruments.map((basketInstrument) => {
-        if (ordersMap) {
-          return {
-            ...basketInstrument,
-            priceResolved:
-              ordersMap[
-                buildOrdersMapKey(
-                  basketInstrument.instrumentId,
-                  basketInstrument.exchangeId,
-                )
-              ].limit_price,
-          };
-        } else {
-          const instrumentQuote = getQuoteByInstrument(basketInstrument);
-          return {
-            ...basketInstrument,
-            priceResolved: instrumentQuote
-              ? getBasketInstrumentOrderPrice(
-                  priceLevel,
-                  side,
-                  priceOffset,
-                  instrumentQuote,
-                )
-              : 0,
-          };
-        }
+        const instrumentQuote = getQuoteByInstrument(basketInstrument);
+        const orderPrice = ordersMap
+          ? ordersMap[
+              buildOrdersMapKey(
+                basketInstrument.instrumentId,
+                basketInstrument.exchangeId,
+              )
+            ].limit_price
+          : 0;
+        return {
+          ...basketInstrument,
+          volumeResolved: basketInstrument.volumeResolved * basketVolume,
+          priceResolved: instrumentQuote
+            ? getBasketInstrumentOrderPrice(
+                priceLevel,
+                side,
+                priceOffset,
+                instrumentQuote,
+              )
+            : orderPrice,
+          isNoQuote: !!instrumentQuote,
+        };
       });
 
     return basketInstrumentsResolved;
@@ -577,12 +574,20 @@ export const useMakeOrCancelBasketOrder = () => {
 
   const checkBasketInstrumentsQuoteForOrder = (
     basketInstrumentsForOrder: KungfuApi.BasketInstrumentForOrder[],
+    limitPrice?: number,
   ) => {
     const normalBasketInstruments: KungfuApi.BasketInstrumentForOrder[] = [];
     const abnormalBasketInstruments: KungfuApi.BasketInstrumentForOrder[] = [];
     basketInstrumentsForOrder.forEach((basketInstrumentForOrder) => {
-      if (basketInstrumentForOrder.priceResolved === 0) {
-        abnormalBasketInstruments.push(basketInstrumentForOrder);
+      if (basketInstrumentForOrder.isNoQuote) {
+        abnormalBasketInstruments.push(
+          limitPrice
+            ? {
+                ...basketInstrumentForOrder,
+                priceResolved: limitPrice,
+              }
+            : basketInstrumentForOrder,
+        );
       } else {
         normalBasketInstruments.push(basketInstrumentForOrder);
       }
@@ -595,6 +600,7 @@ export const useMakeOrCancelBasketOrder = () => {
   };
 
   const getConfirmMakeBasketOrderByCheckQuote = (
+    type: 'make' | 'chase' | 'replenish',
     normalBasketInstruments: KungfuApi.BasketInstrumentForOrder[],
     abnormalBasketInstruments: KungfuApi.BasketInstrumentForOrder[],
   ) => {
@@ -616,7 +622,12 @@ export const useMakeOrCancelBasketOrder = () => {
         ),
       ),
     );
-    const normalTextVNode = h('div', {}, t('BasketTrade.abnormal_quote_tip2'));
+    const continueTextVNode = h(
+      'div',
+      {},
+      t('BasketTrade.abnormal_quote_tip2'),
+    );
+    const normalTextVNode = h('div', {}, t('BasketTrade.abnormal_quote_tip3'));
     const normalVNode = h(
       'div',
       { class: 'color-green' },
@@ -631,8 +642,9 @@ export const useMakeOrCancelBasketOrder = () => {
     const context = h('div', {}, [
       abnormalTextVNode,
       abnormalVNode,
-      normalTextVNode,
-      normalVNode,
+      ...(type === 'make'
+        ? [normalTextVNode, normalVNode]
+        : [continueTextVNode]),
     ]);
 
     return confirmModal(
@@ -649,12 +661,14 @@ export const useMakeOrCancelBasketOrder = () => {
     basketOrderInput: KungfuApi.BasketOrderInput,
     basketInstruments: KungfuApi.BasketInstrumentResolved[],
     accountLocation: KungfuApi.KfLocation,
+    basketVolume: number,
   ) => {
     const basketInstrumentsForOrder = dealBasketInstrumentsToForOrder(
       basketInstruments,
       basketOrderInput.price_level,
       basketOrderInput.side,
       basketOrderInput.price_offset,
+      basketVolume,
     );
 
     if (!basketInstrumentsForOrder.length)
@@ -667,14 +681,17 @@ export const useMakeOrCancelBasketOrder = () => {
       basketInstrumentsForOrder,
     );
 
-    return getConfirmMakeBasketOrderByCheckQuote(normal, abnormal).then(
+    return getConfirmMakeBasketOrderByCheckQuote('make', normal, abnormal).then(
       (flag) => {
         if (flag) {
           const makeBasketOrderPromise = makeOrderByBasketTrade(
             watcher,
-            basket,
+            {
+              ...basket,
+              total_volume: basket.total_volume * BigInt(basketVolume),
+            },
             basketOrderInput,
-            basketInstrumentsForOrder,
+            normal,
             accountLocation,
           ).then((orderIds) => {
             if (orderIds.length === basketInstruments.length) {
@@ -754,7 +771,6 @@ export const useMakeOrCancelBasketOrder = () => {
     orders: KungfuApi.Order[],
     basket: KungfuApi.BasketResolved,
     basketOrder: KungfuApi.BasketOrderResolved,
-    isOrderPrice: boolean,
   ): KungfuApi.BasketInstrumentForOrder[] => {
     return orders.map((order) => {
       const ukey = hashInstrumentUKey(order.instrument_id, order.exchange_id);
@@ -776,26 +792,20 @@ export const useMakeOrCancelBasketOrder = () => {
         volumeResolved: Number(order.volume_left),
       };
 
-      if (isOrderPrice) {
-        return {
-          ...curBasketInstrument,
-          priceResolved: order.limit_price,
-        };
-      } else {
-        const instrumentQuote = getQuoteByInstrument(curBasketInstrument);
+      const instrumentQuote = getQuoteByInstrument(curBasketInstrument);
 
-        return {
-          ...curBasketInstrument,
-          priceResolved: instrumentQuote
-            ? getBasketInstrumentOrderPrice(
-                basketOrder.price_level,
-                basketOrder.side,
-                basketOrder.price_offset,
-                instrumentQuote,
-              )
-            : 0,
-        };
-      }
+      return {
+        ...curBasketInstrument,
+        priceResolved: instrumentQuote
+          ? getBasketInstrumentOrderPrice(
+              basketOrder.price_level,
+              basketOrder.side,
+              basketOrder.price_offset,
+              instrumentQuote,
+            )
+          : order.limit_price,
+        isNoQuote: !!instrumentQuote,
+      };
     });
   };
 
@@ -803,14 +813,23 @@ export const useMakeOrCancelBasketOrder = () => {
     watcher: KungfuApi.Watcher,
     basket: KungfuApi.BasketResolved,
     basketOrder: KungfuApi.BasketOrderResolved,
-    basketOrderPriceType: BasketOrderPriceTypeEnum,
+    orders?: KungfuApi.OrderResolved[],
   ) => {
-    const resolvedOrdersMap = getBasketOrderTargetStatusOrdersMap(
-      watcher,
-      basketOrder,
-      UnfinishedOrderStatus,
-    );
-    const ordersResolved = Object.values(resolvedOrdersMap);
+    let ordersResolved: KungfuApi.Order[] = [];
+
+    if (orders) {
+      ordersResolved = orders.filter((order) =>
+        UnfinishedOrderStatus.includes(order.status),
+      );
+    } else {
+      const resolvedOrdersMap = getBasketOrderTargetStatusOrdersMap(
+        watcher,
+        basketOrder,
+        UnfinishedOrderStatus,
+      );
+
+      ordersResolved = Object.values(resolvedOrdersMap);
+    }
 
     if (!ordersResolved.length)
       return promiseMessageWrapper(
@@ -822,7 +841,6 @@ export const useMakeOrCancelBasketOrder = () => {
       ordersResolved,
       basket,
       basketOrder,
-      basketOrderPriceType === BasketOrderPriceTypeEnum.ORDER,
     );
 
     if (!basketInstrumentsForOrder.length)
@@ -832,43 +850,44 @@ export const useMakeOrCancelBasketOrder = () => {
       basketInstrumentsForOrder,
     );
 
-    return getConfirmMakeBasketOrderByCheckQuote(normal, abnormal).then(
-      (flag) => {
-        if (flag) {
-          const chaseBasketOrderPromise = kfCancelAllOrders(
+    return getConfirmMakeBasketOrderByCheckQuote(
+      'chase',
+      normal,
+      abnormal,
+    ).then((flag) => {
+      if (flag) {
+        const chaseBasketOrderPromise = kfCancelAllOrders(
+          watcher,
+          ordersResolved,
+        ).then((canceledOrderIds) => {
+          if (canceledOrderIds.length !== ordersResolved.length) {
+            return Promise.reject();
+          }
+
+          const tdLocation = watcher.getLocation(ordersResolved[0].source);
+
+          return makeOrderByBasketInstruments(
             watcher,
-            ordersResolved,
-          ).then((canceledOrderIds) => {
-            if (canceledOrderIds.length !== ordersResolved.length) {
-              return Promise.reject();
-            }
+            basketOrder.order_id,
+            basketOrder,
+            basketInstrumentsForOrder,
+            tdLocation,
+          );
+        });
 
-            const tdLocation = watcher.getLocation(ordersResolved[0].source);
+        return promiseMessageWrapper(chaseBasketOrderPromise, {
+          errorTextByError: true,
+        });
+      }
 
-            return makeOrderByBasketInstruments(
-              watcher,
-              basketOrder.order_id,
-              basketOrder,
-              normal,
-              tdLocation,
-            );
-          });
-
-          return promiseMessageWrapper(chaseBasketOrderPromise, {
-            errorTextByError: true,
-          });
-        }
-
-        return Promise.resolve();
-      },
-    );
+      return Promise.resolve();
+    });
   };
 
   const replenishBasketOrder = (
     watcher: KungfuApi.Watcher,
     basket: KungfuApi.BasketResolved,
     basketOrder: KungfuApi.BasketOrderResolved,
-    basketOrderPriceType: BasketOrderPriceTypeEnum,
     orders?: KungfuApi.OrderResolved[],
   ) => {
     let ordersResolved: KungfuApi.Order[] = [];
@@ -903,34 +922,35 @@ export const useMakeOrCancelBasketOrder = () => {
       ordersResolved,
       basket,
       basketOrder,
-      basketOrderPriceType === BasketOrderPriceTypeEnum.ORDER,
     );
 
     const { normal, abnormal } = checkBasketInstrumentsQuoteForOrder(
       basketInstrumentsForOrder,
     );
 
-    return getConfirmMakeBasketOrderByCheckQuote(normal, abnormal).then(
-      (flag) => {
-        if (flag) {
-          const tdLocation = watcher.getLocation(ordersResolved[0].source);
+    return getConfirmMakeBasketOrderByCheckQuote(
+      'replenish',
+      normal,
+      abnormal,
+    ).then((flag) => {
+      if (flag) {
+        const tdLocation = watcher.getLocation(ordersResolved[0].source);
 
-          const replenishBasketOrderPromise = makeOrderByBasketInstruments(
-            watcher,
-            basketOrder.order_id,
-            basketOrder,
-            normal,
-            tdLocation,
-          );
+        const replenishBasketOrderPromise = makeOrderByBasketInstruments(
+          watcher,
+          basketOrder.order_id,
+          basketOrder,
+          basketInstrumentsForOrder,
+          tdLocation,
+        );
 
-          return promiseMessageWrapper(replenishBasketOrderPromise, {
-            errorTextByError: true,
-          });
-        }
+        return promiseMessageWrapper(replenishBasketOrderPromise, {
+          errorTextByError: true,
+        });
+      }
 
-        return Promise.resolve();
-      },
-    );
+      return Promise.resolve();
+    });
   };
 
   return {
@@ -938,5 +958,6 @@ export const useMakeOrCancelBasketOrder = () => {
     cancalBasketOrder,
     chaseBasketOrder,
     replenishBasketOrder,
+    getBasketOrderTargetStatusOrdersMap,
   };
 };

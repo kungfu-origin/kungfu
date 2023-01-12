@@ -24,15 +24,6 @@
         </KfDashboardItem> -->
         <KfDashboardItem>
           <a-checkbox
-            v-model:checked="isWithoutSuspensionInstrument"
-            @change="handleFilterChange"
-            size="small"
-          >
-            {{ $t('BasketTrade.without_suspension') }}
-          </a-checkbox>
-        </KfDashboardItem>
-        <KfDashboardItem>
-          <a-checkbox
             v-model:checked="isWithoutUpLimitInstrument"
             size="small"
             @change="handleFilterChange"
@@ -198,17 +189,12 @@ const { mdExtTypeMap } = useExtConfigsRelated();
 const { appStates, processStatusData } = useProcessStatusDetailData();
 const { subscribeAllInstrumentByAppStates } = useInstruments();
 useSubscribeBasketInstruments();
-const {
-  getQuoteByInstrument,
-  isInstrumentUpLimit,
-  isInstrumentLowLimit,
-  isInstrumentSuspension,
-} = useQuote();
+const { getQuoteByInstrument, isInstrumentUpLimit, isInstrumentLowLimit } =
+  useQuote();
 
 const dataTableRef = ref();
 const dataSelection = ref<KfTradingDataTableSelection>({});
 const basketInstrumentDataLoaded = ref(false);
-const isWithoutSuspensionInstrument = ref(false);
 const isWithoutUpLimitInstrument = ref(false);
 const isWithoutLowLimitInstrument = ref(false);
 
@@ -251,7 +237,7 @@ onMounted(() => {
       dataTableRef.value && dataTableRef.value.handleSelectAll(true);
     })
     .catch((err) => {
-      console.log(err);
+      console.error(err);
     });
 });
 
@@ -266,7 +252,7 @@ watch(
         dataTableRef.value && dataTableRef.value.handleSelectAll(true);
       })
       .catch((err) => {
-        console.log(err);
+        console.error(err);
       });
   },
 );
@@ -340,6 +326,7 @@ function handlePlaceBasketOrder(formState) {
     basketOrderInput,
     selectBasketInstruments,
     accountLocation,
+    +formState.basketVolume,
   ).then(() => {
     app?.proxy?.$globalBus.next({
       tag: 'update:makeBasketOrder',
@@ -366,6 +353,7 @@ function handleOpenSetBasketInstrumentModal() {
     basketInstruments: toRaw(basketInstrumentsResolved.value).map((item) => {
       return {
         ...item,
+        volume: Number(item.volume),
         instrument: buildInstrumentSelectOptionValue(
           getInstrumentByIds(
             item.instrument_id,
@@ -462,13 +450,16 @@ function handleFilterChange() {
   const lowLimitBasketInstrumentKeys: string[] = [];
 
   basketInstrumentsResolved.value.forEach((basketInstrument) => {
-    if (isInstrumentSuspension(basketInstrument)) {
-      suspensionBasketInstrumentKeys.push(basketInstrument.id);
-    }
-    if (isInstrumentUpLimit(basketInstrument)) {
+    if (
+      isWithoutUpLimitInstrument.value &&
+      isInstrumentUpLimit(basketInstrument)
+    ) {
       upLimitBasketInstrumentKeys.push(basketInstrument.id);
     }
-    if (isInstrumentLowLimit(basketInstrument)) {
+    if (
+      isWithoutUpLimitInstrument.value &&
+      isInstrumentLowLimit(basketInstrument)
+    ) {
       lowLimitBasketInstrumentKeys.push(basketInstrument.id);
     }
   });
@@ -490,7 +481,7 @@ function handleFilterChange() {
       dataTableRef.value &&
       dataTableRef.value.handleSelectRow(
         false,
-        basketInstrumentsResolvedMap.value[currentGlobalBasket.value?.id][key],
+        basketInstrumentsResolvedMap.value[currentGlobalBasket.value.id][key],
       );
 
     return selection;
