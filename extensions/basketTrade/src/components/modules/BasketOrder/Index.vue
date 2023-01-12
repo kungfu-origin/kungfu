@@ -55,40 +55,6 @@
                 <a-button
                   type="link"
                   size="small"
-                  @click.stop="
-                    handleShowMakeBasketOrderModal(
-                      `${$t('BasketTrade.chase_order')} ${
-                        currentGlobalBasket?.name
-                      }`,
-                      getChaseBasketOrderConfigSettings(),
-                      (formState) => {
-                        handleChaseBasketOrder(item!, formState);
-                      },
-                    )
-                  "
-                >
-                  {{ $t('BasketTrade.chase_order') }}
-                </a-button>
-                <a-button
-                  type="link"
-                  size="small"
-                  @click.stop="
-                    handleShowMakeBasketOrderModal(
-                      `${$t('BasketTrade.replenish_order')} ${
-                        currentGlobalBasket?.name
-                      }`,
-                      getReplenishBasketOrderConfigSettings(),
-                      (formState) => {
-                        handleReplenishBasketOrder(item!, formState);
-                      },
-                    )
-                  "
-                >
-                  {{ $t('BasketTrade.replenish_order') }}
-                </a-button>
-                <a-button
-                  type="link"
-                  size="small"
                   class="color-red"
                   @click.stop="handleCancelBasketOrder(item)"
                 >
@@ -131,7 +97,6 @@ import {
   buildBasketOrderMapKeyAndLocation,
   dealBasketOrdersToMap,
   useCurrentGlobalBasket,
-  useMakeBasketOrderFormModal,
   useMakeOrCancelBasketOrder,
 } from '../../../utils/basketTradeUtils';
 import {
@@ -142,10 +107,6 @@ import { BASKET_CATEGORYS } from '../../../config';
 import { getColumns, basketOrderTradingDataGetter } from './config';
 import { DealTradingDataHooks } from '@kungfu-trader/kungfu-js-api/hooks/dealTradingDataHook';
 import { dealKfTime } from '@kungfu-trader/kungfu-js-api/kungfu';
-import {
-  getChaseBasketOrderConfigSettings,
-  getReplenishBasketOrderConfigSettings,
-} from '../../../config/makeBasketOrderFormConfig';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import { useBasketTradeStore } from '../../../store';
 const { t } = VueI18n.global;
@@ -171,9 +132,7 @@ const {
   setCurrentGlobalBasketOrder,
 } = useCurrentGlobalBasket();
 const { handleBodySizeChange } = useDashboardBodySize();
-const { handleShowMakeBasketOrderModal } = useMakeBasketOrderFormModal();
-const { chaseBasketOrder, replenishBasketOrder, cancalBasketOrder } =
-  useMakeOrCancelBasketOrder();
+const { cancalBasketOrder } = useMakeOrCancelBasketOrder();
 
 const basketOrdersMap = ref<Record<string, KungfuApi.BasketOrderResolved>>({});
 const basketOrders = ref<KungfuApi.BasketOrderResolved[]>([]);
@@ -269,51 +228,15 @@ function dealRowClassNameResolved(record: KungfuApi.BasketOrderResolved) {
   return dealBasketOrderRowClassName(record);
 }
 
-function handleChaseBasketOrder(
-  basketOrder: KungfuApi.BasketOrderResolved,
-  formState,
-) {
-  if (!currentGlobalBasket.value) return Promise.reject();
-
-  return chaseBasketOrder(
-    window.watcher,
-    currentGlobalBasket.value,
-    {
-      ...basketOrder,
-      price_level: formState.priceLevel,
-      price_offset: formState.priceOffset,
-    },
-    formState.basketOrderPriceType,
-  );
-}
-
-function handleReplenishBasketOrder(
-  basketOrder: KungfuApi.BasketOrderResolved,
-  formState,
-) {
-  if (!currentGlobalBasket.value) return Promise.reject();
-
-  return replenishBasketOrder(
-    window.watcher,
-    currentGlobalBasket.value,
-    {
-      ...basketOrder,
-      price_level: formState.priceLevel,
-      price_offset: formState.priceOffset,
-    },
-    formState.basketOrderPriceType,
-  );
-}
-
 function handleCancelBasketOrder(basketOrder: KungfuApi.BasketOrderResolved) {
   if (!currentGlobalBasket.value || !currentGlobalBasketOrder.value)
     return Promise.reject();
 
   return confirmModal(
     t('orderConfig.confirm_cancel_all'),
-    `${t('orderConfig.confirm')} ${t('BasketTrade.basket_order')} ${
-      currentGlobalBasketOrder.value.insert_time
-    } ${t('orderConfig.cancel_all')}`,
+    `${t('orderConfig.confirm')} ${t('BasketTrade.basket_order')} ${dealKfTime(
+      currentGlobalBasketOrder.value.insert_time,
+    )} ${t('orderConfig.cancel_all')}`,
   ).then((flag) => {
     if (!flag || !currentGlobalBasketOrder.value || !window.watcher) {
       return;
