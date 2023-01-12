@@ -92,7 +92,7 @@ export const languageList = [
 const locale = settingLanguage || (extraLanguage ? 'extra' : langDefault); //默认显示的语言
 
 const i18n =
-  globalThis.i18n as I18n ??
+  (globalThis.i18n as I18n) ??
   createI18n({
     locale,
     messages,
