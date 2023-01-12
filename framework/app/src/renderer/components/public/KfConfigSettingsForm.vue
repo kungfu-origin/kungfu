@@ -1314,7 +1314,7 @@ export default defineComponent({
     }
 
     .table-in-config-setting-row {
-      margin-top: 10px;
+      margin-top: 8px;
 
       > .ant-btn {
         float: right;
