@@ -100,6 +100,13 @@
           </template>
           <template v-else-if="column.dataIndex === 'actions'">
             <div class="kf-actions__warp">
+              <a-button
+                type="link"
+                size="small"
+                @click.stop="handleSubscribeBasketInstrument(item)"
+              >
+                {{ $t('BasketTrade.subscribe') }}
+              </a-button>
               <DeleteOutlined
                 style="font-size: 12px"
                 @click.stop="handleRemoveBasketInstrument(item)"
@@ -134,6 +141,7 @@ import {
 import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboardItem.vue';
 import KfTradingDataTable from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfTradingDataTable.vue';
+import KfBlinkNum from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfBlinkNum.vue';
 import KfSetByConfigModal from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfSetByConfigModal.vue';
 import { SettingOutlined, DeleteOutlined } from '@ant-design/icons-vue';
 
@@ -152,6 +160,9 @@ import {
 } from '../../../utils/basketTradeUtils';
 import {
   useActiveInstruments,
+  useExtConfigsRelated,
+  useInstruments,
+  useProcessStatusDetailData,
   useQuote,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import { getColumns, getSetBasketInstrumentFormSettings } from './config';
@@ -173,6 +184,9 @@ const { currentGlobalBasket, currentBasketData } = useCurrentGlobalBasket();
 const { getInstrumentByIds } = useActiveInstruments();
 const { handleShowMakeBasketOrderModal } = useMakeBasketOrderFormModal();
 const { makeBasketOrder } = useMakeOrCancelBasketOrder();
+const { mdExtTypeMap } = useExtConfigsRelated();
+const { appStates, processStatusData } = useProcessStatusDetailData();
+const { subscribeAllInstrumentByAppStates } = useInstruments();
 useSubscribeBasketInstruments();
 const {
   getQuoteByInstrument,
@@ -272,6 +286,21 @@ function handleSetAllBasketInstruments(
   });
 
   promiseMessageWrapper(promise, { errorTextByError: true });
+}
+
+function handleSubscribeBasketInstrument(
+  basketInstrument: KungfuApi.BasketInstrumentResolved,
+) {
+  const subscribePromise = subscribeAllInstrumentByAppStates(
+    processStatusData.value,
+    appStates.value,
+    mdExtTypeMap.value,
+    [basketInstrument],
+  );
+
+  promiseMessageWrapper(subscribePromise, {
+    errorTextByError: true,
+  });
 }
 
 function handlePlaceBasketOrder(formState) {

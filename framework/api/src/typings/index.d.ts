@@ -768,11 +768,11 @@ declare namespace KungfuApi {
       InstrumentResolved {
     basketInstrumentName: string;
     basketInstrumentId: string;
-    volumeResolved: number;
+    volumeResolved: number; // 最终下单量
   }
 
   export interface BasketInstrumentForOrder extends BasketInstrumentResolved {
-    priceResolved: number;
+    priceResolved: number; // 最终下单价
   }
 
   export interface RiskSetting {

@@ -48,7 +48,7 @@ export const getColumns = buildConfigGetterWrapByComputed(
             type: 'number',
             name: t('BasketTrade.volume'),
             dataIndex: 'volume',
-            flex: 1.2,
+            flex: 1,
             sorter: buildTableColumnSorter<KungfuApi.BasketInstrumentResolved>(
               'num',
               'volume',
@@ -58,7 +58,7 @@ export const getColumns = buildConfigGetterWrapByComputed(
             type: 'number',
             name: t('BasketTrade.rate'),
             dataIndex: 'rate',
-            flex: 1.2,
+            flex: 1,
             sorter: buildTableColumnSorter<KungfuApi.BasketInstrumentResolved>(
               'num',
               'rate',
@@ -67,7 +67,7 @@ export const getColumns = buildConfigGetterWrapByComputed(
       {
         name: t('tdConfig.actions'),
         dataIndex: 'actions',
-        width: 80,
+        width: 100,
       },
     ] as KfTradingDataTableHeaderConfig[],
 );

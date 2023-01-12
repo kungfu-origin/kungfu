@@ -69,6 +69,7 @@
         "instrument_name": "标的名称",
         "volume": "交易量",
         "rate": "交易量占比",
+        "subscribe": "订阅",
         "without_suspension": "剔除停牌",
         "without_up_limit": "剔除涨停",
         "without_low_limit": "剔除跌停",
@@ -92,7 +93,12 @@
         "no_selected_instruments": "未选择下单篮子标的",
         "no_pending_orders": "无未结束的委托单",
         "basket_order_no_failed_orders": "该篮子单无未成交的子委托单",
-        "no_selected_failed_orders": "未选择失败的委托单"
+        "no_selected_failed_orders": "未选择失败的委托单",
+        "abnormal_quote": "行情异常",
+        "continue_make_order": "继续下单",
+        "cancel_make_order": "取消下单",
+        "abnormal_quote_tip1": "当前以下标的行情异常: ",
+        "abnormal_quote_tip2": "继续下单 则只下单以下标的: "
       },
       "en-US": {
         "BasketTrade": "Basket Trade",
@@ -121,6 +127,7 @@
         "instrument_name": "Instrument Name",
         "volume": "Trading Volume",
         "rate": "Percentage Of Trading Volume",
+        "subscribe": "Subscribe",
         "without_suspension": "Without suspension",
         "without_up_limit": "Without up limit",
         "without_low_limit": "Without low limit",
