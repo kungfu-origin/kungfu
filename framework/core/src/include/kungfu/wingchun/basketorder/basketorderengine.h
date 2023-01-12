@@ -29,13 +29,13 @@ public:
 
   void restore(const yijinjing::cache::bank &state_bank);
 
-  void on_basket_order(int64_t trigger_time, uint32_t source, uint32_t dest,
-                       const longfist::types::BasketOrder &basket_order);
+  void on_basket_order(int64_t trigger_time, const longfist::types::BasketOrder &basket_order);
 
-  void insert_basket_order(int64_t trigger_time, uint32_t source, uint32_t dest,
-                           const longfist::types::BasketOrder &basket_order);
+  void insert_basket_order(int64_t trigger_time, const longfist::types::BasketOrder &basket_order);
 
   void update_basket_order(int64_t trigger_time, const longfist::types::Order &order);
+
+  bool try_update_basket_order(int64_t trigger_time, const longfist::types::Order &order);
 
   bool has_basket_order_state(uint64_t basket_order_id);
 
@@ -49,8 +49,7 @@ private:
   BasketInstrumentMap basket_instruments_{};
   BasketOrderStateMap basket_order_states_ = {};
 
-  BasketOrderState_ptr make_basket_order_state(uint32_t source, uint32_t dest, int64_t update_time,
-                                               const longfist::types::BasketOrder &basket_order);
+  BasketOrderState_ptr make_basket_order_state(int64_t update_time, const longfist::types::BasketOrder &basket_order);
 };
 
 } // namespace kungfu::wingchun::basketorder

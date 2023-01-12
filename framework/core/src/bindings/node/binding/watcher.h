@@ -266,7 +266,7 @@ private:
   template <typename TradingData>
   std::enable_if_t<std::is_same_v<TradingData, longfist::types::BasketOrder>> UpdateBook(uint32_t source, uint32_t dest,
                                                                                          const TradingData &data) {
-    basketorder_engine_.insert_basket_order(now(), source, dest, data);
+    basketorder_engine_.insert_basket_order(now(), data);
     state<kungfu::longfist::types::BasketOrder> cache_state_basket_order(source, dest, now(), data);
     trading_bank_ << cache_state_basket_order;
   }
@@ -315,7 +315,7 @@ private:
   }
 
   template <typename Instruction, typename IdPtrType = uint64_t Instruction::*>
-  Napi::Value InteractWithTD(const Napi::CallbackInfo &info, IdPtrType id_ptr) {
+  Napi::Value InteractWithTD(const Napi::CallbackInfo &info, const Napi::Object &instruction_object, IdPtrType id_ptr) {
     try {
       using namespace kungfu::rx;
       using namespace kungfu::longfist::types;
@@ -330,7 +330,6 @@ private:
       auto trigger_time = time::now_in_nano();
       auto account_writer = get_writer(account_location->uid);
       auto master_cmd_writer = get_writer(get_master_commands_uid());
-      auto instruction_object = info[0].ToObject();
       Instruction instruction = {};
       serialize::JsGet{}(instruction_object, instruction);
 

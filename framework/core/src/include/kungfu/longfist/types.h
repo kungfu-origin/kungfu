@@ -751,7 +751,10 @@ KF_DEFINE_PACK_TYPE(                                        //
     (int64_t, volume),      // 成交量
     (int64_t, volume_left), // 剩余数量
 
-    (BasketOrderStatus, status) // 订单状态
+    (BasketOrderStatus, status), // 订单状态
+
+    (uint32_t, source), // 下单方
+    (uint32_t, dest)    //
 );
 
 KF_DEFINE_PACK_TYPE(                                                       //

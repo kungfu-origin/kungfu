@@ -270,6 +270,10 @@ def export_logs(ctx, src_dir, dst_dir):
             name = match.group(3)
             mode = match.group(4)
             date = match.group(6)
+            
+            if group == 'node' and name == 'renderer-app':
+                continue
+
             archive_path = os.path.join(
                 dst_dir, date, category, group, name, "log", mode
             )

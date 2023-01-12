@@ -154,16 +154,16 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
 
   for (const auto &item : config_store->profile_.get_all(Location{})) {
     auto saved_location = location::make_shared(item, get_locator());
+    add_location(now(), saved_location);
     if (saved_location->category == longfist::enums::category::SYSTEM) {
       if (saved_location->group != "node") {
         continue;
       }
     }
-    // add_location(now(), saved_location);
     RestoreState(saved_location, today, INT64_MAX, sync_schema);
+    shift(saved_location) >> state_bank_;
   }
   RestoreState(ledger_home_location_, today, INT64_MAX, sync_schema);
-
   shift(ledger_home_location_) >> state_bank_; // Load positions to restore bookkeeper
 }
 
@@ -284,22 +284,33 @@ Napi::Value Watcher::IsReadyToInteract(const Napi::CallbackInfo &info) {
 
 Napi::Value Watcher::IssueBlockMessage(const Napi::CallbackInfo &info) {
   SPDLOG_INFO("issue block message manually");
-  return InteractWithTD<BlockMessage>(info, &BlockMessage::block_id);
+  return InteractWithTD<BlockMessage>(info, info[0].ToObject(), &BlockMessage::block_id);
 }
 
 Napi::Value Watcher::IssueOrder(const Napi::CallbackInfo &info) {
   SPDLOG_INFO("issue order manually");
-  return InteractWithTD<OrderInput>(info, &OrderInput::order_id);
+  return InteractWithTD<OrderInput>(info, info[0].ToObject(), &OrderInput::order_id);
 }
 
 Napi::Value Watcher::IssueBasketOrder(const Napi::CallbackInfo &info) {
   SPDLOG_INFO("issue basket order manually");
-  return InteractWithTD<BasketOrder>(info, &BasketOrder::order_id);
+
+  auto account_location = ExtractLocation(info, 1, get_locator());
+  auto basket_order_info = info[0].ToObject();
+  basket_order_info.Set("dest", Napi::Number::New(info.Env(), account_location->uid));
+  if (info.Length() == 2) {
+    basket_order_info.Set("source", Napi::Number::New(info.Env(), get_home_uid()));
+  } else {
+    auto strategy_location = ExtractLocation(info, 2, get_locator());
+    basket_order_info.Set("source", Napi::Number::New(info.Env(), strategy_location->uid));
+  }
+
+  return InteractWithTD<BasketOrder>(info, info[0].ToObject(), &BasketOrder::order_id);
 }
 
 Napi::Value Watcher::CancelOrder(const Napi::CallbackInfo &info) {
   SPDLOG_INFO("cancel order manually");
-  return InteractWithTD<OrderAction>(info, &OrderAction::order_action_id);
+  return InteractWithTD<OrderAction>(info, info[0].ToObject(), &OrderAction::order_action_id);
 }
 
 Napi::Value Watcher::RequestMarketData(const Napi::CallbackInfo &info) {
