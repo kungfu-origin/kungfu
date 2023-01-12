@@ -40,7 +40,7 @@ TraderXTP::~TraderXTP() {
 void TraderXTP::on_start() {
   TDConfiguration config = nlohmann::json::parse(get_config());
   if (config.client_id < 1 or config.client_id > 99) {
-    throw wingchun_error("client_id must between 1 and 99");
+    SPDLOG_ERROR("client_id must between 1 and 99");
   }
   std::string runtime_folder = get_runtime_folder();
   SPDLOG_INFO("Connecting XTP account {} with tcp://{}:{}", config.account_id, config.td_ip, config.td_port);

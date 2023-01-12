@@ -14,9 +14,26 @@ namespace kungfu::wingchun::basketorder {
 BasketOrderEngine::BasketOrderEngine(apprentice &app) : app_(app) {}
 
 void BasketOrderEngine::on_start(const rx::connectable_observable<event_ptr> &events) {
-  events | is(Order::tag) | $$(update_basket_order(event->trigger_time(), event->data<Order>()));
+  restore(app_.get_state_bank());
+
   events | is(BasketOrder::tag) |
       $$(on_basket_order(event->trigger_time(), event->source(), event->dest(), event->data<BasketOrder>()));
+  events | is(Order::tag) | $$(update_basket_order(event->trigger_time(), event->data<Order>()));
+}
+
+void BasketOrderEngine::restore(const cache::bank &state_bank) {
+  for (auto &pair : state_bank[boost::hana::type_c<BasketOrder>]) {
+    auto basketorder_state = pair.second;
+    SPDLOG_INFO("restore basketorder order_id {} source {}, dest {}", basketorder_state.data.order_id, app_.get_location_uname(basketorder_state.source), app_.get_location_uname(basketorder_state.dest));
+    on_basket_order(basketorder_state.update_time, basketorder_state.source, basketorder_state.dest,
+                    basketorder_state.data);
+  }
+
+  for (auto &pair : state_bank[boost::hana::type_c<Order>]) {
+    auto order_state = pair.second;
+    SPDLOG_INFO("restore order order_id {} order_parent_id {}", order_state.data.order_id, order_state.data.parent_id);
+    update_basket_order(order_state.update_time, order_state.data);
+  }
 }
 
 void BasketOrderEngine::on_basket_order(int64_t trigger_time, uint32_t source, uint32_t dest,
@@ -38,9 +55,11 @@ void BasketOrderEngine::update_basket_order(int64_t trigger_time, const longfist
   }
 
   if (not has_basket_order_state(order.parent_id)) {
-    throw wingchun_error(fmt::format("basket order is not exist {} {}", order.parent_id));
+    SPDLOG_ERROR(fmt::format("basket order is not exist {} {}", order.parent_id));
     return;
   }
+
+  SPDLOG_INFO("order.parent_id {}", order.parent_id);
 
   auto basket_order_state = get_basket_order_state(order.parent_id);
   basket_order_state->update(order);

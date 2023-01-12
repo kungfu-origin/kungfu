@@ -27,6 +27,8 @@ public:
 
   void on_start(const rx::connectable_observable<event_ptr> &events);
 
+  void restore(const yijinjing::cache::bank &state_bank);
+
   void on_basket_order(int64_t trigger_time, uint32_t source, uint32_t dest,
                        const longfist::types::BasketOrder &basket_order);
 
