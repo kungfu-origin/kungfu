@@ -79,19 +79,19 @@ export const BasketOrderStatus: Record<
     color: 'default',
   },
   [BasketOrderStatusEnum.Pending]: {
-    name: t('BasketTrade.pending'),
+    name: t('tradingConfig.pending'),
     color: 'default',
   },
   [BasketOrderStatusEnum.PartialFilledNotActive]: {
-    name: t('BasketTrade.partial_filled_not_active'),
-    color: 'default',
-  },
-  [BasketOrderStatusEnum.PartialFilledActive]: {
-    name: t('BasketTrade.partial_filled_active'),
+    name: t('tradingConfig.partial_filled_not_active'),
     color: 'green',
   },
+  [BasketOrderStatusEnum.PartialFilledActive]: {
+    name: t('tradingConfig.partial_filled_active'),
+    color: 'default',
+  },
   [BasketOrderStatusEnum.Filled]: {
-    name: t('BasketTrade.filled'),
+    name: t('tradingConfig.filled'),
     color: 'green',
   },
 };

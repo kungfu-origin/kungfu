@@ -378,6 +378,7 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
 
 void Watcher::on_react() {
   SPDLOG_INFO("watcher on react");
+
   // for receive history data
   auto before_start_events = events_ | take_until(events_ | is(RequestStart::tag));
   before_start_events | is_subscribed(subscribed_instruments_) | $$(feed_state_data(event, data_bank_));

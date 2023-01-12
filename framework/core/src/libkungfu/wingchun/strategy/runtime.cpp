@@ -44,13 +44,13 @@ void RuntimeContext::add_account(const std::string &source, const std::string &a
   uint32_t hashed_account = hash_account(source, account);
 
   if (td_locations_.find(hashed_account) != td_locations_.end()) {
-    throw wingchun_error(fmt::format("duplicated account {}_{}", source, account));
+    SPDLOG_ERROR(fmt::format("duplicated account {}_{}", source, account));
   }
 
   auto home = app_.get_io_device()->get_home();
   auto account_location = location::make_shared(mode::LIVE, category::TD, source, account, home->locator);
   if (home->mode == mode::LIVE and not app_.has_location(account_location->uid)) {
-    throw wingchun_error(fmt::format("invalid account {}_{}", source, account));
+    SPDLOG_ERROR(fmt::format("invalid account {}_{}", source, account));
   }
 
   td_locations_.emplace(hashed_account, account_location);
@@ -218,7 +218,7 @@ uint32_t RuntimeContext::lookup_account_location_id(const std::string &account) 
 uint32_t RuntimeContext::get_td_location_uid(const std::string &source, const std::string &account) const {
   uint32_t hashed_account = hash_account(source, account);
   if (td_locations_.find(hashed_account) == td_locations_.end()) {
-    throw wingchun_error(fmt::format("invalid account {}_{}", source, account));
+    SPDLOG_ERROR(fmt::format("invalid account {}_{}", source, account));
   }
 
   return td_locations_.at(hashed_account)->uid;
@@ -229,7 +229,7 @@ const location_ptr &RuntimeContext::find_md_location(const std::string &source) 
     auto home = app_.get_home();
     auto md_location = location::make_shared(mode::LIVE, category::MD, source, source, home->locator);
     if (not app_.has_location(md_location->uid)) {
-      throw wingchun_error(fmt::format("invalid md {}", source));
+      SPDLOG_ERROR(fmt::format("invalid md {}", source));
     }
     market_data_.emplace(source, md_location);
   }
