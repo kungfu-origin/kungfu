@@ -50,6 +50,16 @@
           </a-checkbox>
         </KfDashboardItem>
         <KfDashboardItem>
+          <a-button
+            size="small"
+            @click.stop="
+              handleSubscribeBasketInstruments(basketInstrumentsResolved)
+            "
+          >
+            {{ $t('BasketTrade.subscribe') }}
+          </a-button>
+        </KfDashboardItem>
+        <KfDashboardItem>
           <a-button size="small" @click="handleOpenSetBasketInstrumentModal">
             <template #icon>
               <SettingOutlined />
@@ -103,7 +113,7 @@
               <a-button
                 type="link"
                 size="small"
-                @click.stop="handleSubscribeBasketInstrument(item)"
+                @click.stop="handleSubscribeBasketInstruments([item])"
               >
                 {{ $t('BasketTrade.subscribe') }}
               </a-button>
@@ -288,14 +298,14 @@ function handleSetAllBasketInstruments(
   promiseMessageWrapper(promise, { errorTextByError: true });
 }
 
-function handleSubscribeBasketInstrument(
-  basketInstrument: KungfuApi.BasketInstrumentResolved,
+function handleSubscribeBasketInstruments(
+  basketInstruments: KungfuApi.BasketInstrumentResolved[],
 ) {
   const subscribePromise = subscribeAllInstrumentByAppStates(
     processStatusData.value,
     appStates.value,
     mdExtTypeMap.value,
-    [basketInstrument],
+    basketInstruments,
   );
 
   promiseMessageWrapper(subscribePromise, {

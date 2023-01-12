@@ -46,6 +46,7 @@ export const getMakeBasketOrderConfigSettings =
       type: 'float',
       key: 'priceOffset',
       name: t('tradingConfig.price_offset'),
+      tip: t('BasketTrade.price_offset_tip'),
       min: 0,
       default: 0,
     },

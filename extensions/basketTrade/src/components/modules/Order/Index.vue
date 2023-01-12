@@ -517,7 +517,12 @@ function handleReplenishBasketOrder(
                     currentGlobalBasket?.name
                   }`,
                   getChaseBasketOrderConfigSettings(),
-                  handleChaseBasketOrder.bind(null, currentGlobalBasketOrder!),
+                  (formState) => {
+                    handleChaseBasketOrder(
+                      currentGlobalBasketOrder!,
+                      formState,
+                    );
+                  },
                 )
             "
           >
@@ -534,10 +539,12 @@ function handleReplenishBasketOrder(
                     currentGlobalBasket?.name
                   }`,
                   getReplenishBasketOrderConfigSettings(),
-                  handleReplenishBasketOrder.bind(
-                    null,
-                    currentGlobalBasketOrder!,
-                  ),
+                  (formState) => {
+                    handleReplenishBasketOrder(
+                      currentGlobalBasketOrder!,
+                      formState,
+                    );
+                  },
                 )
             "
           >

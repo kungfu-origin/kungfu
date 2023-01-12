@@ -61,7 +61,9 @@
                         currentGlobalBasket?.name
                       }`,
                       getChaseBasketOrderConfigSettings(),
-                      handleChaseBasketOrder.bind(null, item!),
+                      (formState) => {
+                        handleChaseBasketOrder(item!, formState);
+                      },
                     )
                   "
                 >
@@ -72,11 +74,13 @@
                   size="small"
                   @click.stop="
                     handleShowMakeBasketOrderModal(
-                      `${$t('BasketTrade.chase_order')} ${
+                      `${$t('BasketTrade.replenish_order')} ${
                         currentGlobalBasket?.name
                       }`,
                       getReplenishBasketOrderConfigSettings(),
-                      handleReplenishBasketOrder.bind(null, item!),
+                      (formState) => {
+                        handleReplenishBasketOrder(item!, formState);
+                      },
                     )
                   "
                 >
@@ -85,6 +89,7 @@
                 <a-button
                   type="link"
                   size="small"
+                  class="color-red"
                   @click.stop="handleCancelBasketOrder(item)"
                 >
                   {{ $t('BasketTrade.cancel_order') }}

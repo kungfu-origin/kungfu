@@ -1,6 +1,7 @@
 import {
   h,
   ref,
+  Ref,
   computed,
   getCurrentInstance,
   onMounted,
@@ -370,6 +371,7 @@ export const useBasketMarkedValue = () => {
 export const useMakeBasketOrderFormModal = () => {
   const openModalTag = 'open:MakeBasketOrderModal';
   const confirmModalTag = 'confirm:MakeBasketOrderModal';
+  const formStateChangeTag = 'input:currentConfigModal';
 
   const app = getCurrentInstance();
   const showMakeOrderModal = ref(false);
@@ -378,14 +380,19 @@ export const useMakeBasketOrderFormModal = () => {
     title: t('BasketTrade.place_order'),
     config: {} as KungfuApi.KfExtConfig,
   });
-  let handleConfirmModalCallback: AnyFunction = () => {
-    console.warn('Confirm modal callback undefined');
-  };
+  let handleConfirmModalCallback: ((formState) => void) | undefined;
+  let handleFormStateChangeCallback:
+    | ((formState, payload: Ref<KungfuApi.SetKfConfigPayload>) => void)
+    | undefined;
 
   const handleShowMakeBasketOrderModal = (
     title: string,
     settings: KungfuApi.KfConfigItem[],
-    handleConfirmModal,
+    handleConfirmModal: (formState) => void | undefined,
+    handleFormStateChange?: (
+      formState,
+      payload: Ref<KungfuApi.SetKfConfigPayload>,
+    ) => void,
   ) => {
     makeBasketOrderConfigPayload.value.type = 'custom';
     makeBasketOrderConfigPayload.value.title = title;
@@ -402,6 +409,7 @@ export const useMakeBasketOrderFormModal = () => {
     makeBasketOrderConfigPayload.value.initValue = undefined;
 
     handleConfirmModalCallback = handleConfirmModal;
+    handleFormStateChangeCallback = handleFormStateChange;
 
     triggerShowMakeOrderModal(makeBasketOrderConfigPayload.value);
   };
@@ -432,7 +440,17 @@ export const useMakeBasketOrderFormModal = () => {
       }
 
       if (data.tag === confirmModalTag) {
-        handleConfirmModalCallback(data.formState);
+        handleConfirmModalCallback?.(data.formState);
+      }
+
+      if (
+        data.tag === formStateChangeTag &&
+        data.category === BASKET_CATEGORYS.ORDER
+      ) {
+        handleFormStateChangeCallback?.(
+          data.formState,
+          makeBasketOrderConfigPayload,
+        );
       }
     });
 
@@ -557,7 +575,7 @@ export const useMakeOrCancelBasketOrder = () => {
     return basketInstrumentsResolved;
   };
 
-  const checkBasketInstrumentsForOrderPrice = (
+  const checkBasketInstrumentsQuoteForOrder = (
     basketInstrumentsForOrder: KungfuApi.BasketInstrumentForOrder[],
   ) => {
     const normalBasketInstruments: KungfuApi.BasketInstrumentForOrder[] = [];
@@ -645,7 +663,7 @@ export const useMakeOrCancelBasketOrder = () => {
         { errorTextByError: true },
       );
 
-    const { normal, abnormal } = checkBasketInstrumentsForOrderPrice(
+    const { normal, abnormal } = checkBasketInstrumentsQuoteForOrder(
       basketInstrumentsForOrder,
     );
 
@@ -800,38 +818,50 @@ export const useMakeOrCancelBasketOrder = () => {
         { errorTextByError: true },
       );
 
-    const chaseBasketOrderPromise = kfCancelAllOrders(
-      watcher,
+    const basketInstrumentsForOrder = getBasketInstrumentsForOrder(
       ordersResolved,
-    ).then((canceledOrderIds) => {
-      if (canceledOrderIds.length !== ordersResolved.length) {
-        return Promise.reject();
-      }
+      basket,
+      basketOrder,
+      basketOrderPriceType === BasketOrderPriceTypeEnum.ORDER,
+    );
 
-      const basketInstrumentsForOrder = getBasketInstrumentsForOrder(
-        ordersResolved,
-        basket,
-        basketOrder,
-        basketOrderPriceType === BasketOrderPriceTypeEnum.ORDER,
-      );
+    if (!basketInstrumentsForOrder.length)
+      return Promise.reject(new Error(t('BasketTrade.no_pending_orders')));
 
-      if (!basketInstrumentsForOrder.length)
-        return Promise.reject(new Error(t('BasketTrade.no_pending_orders')));
+    const { normal, abnormal } = checkBasketInstrumentsQuoteForOrder(
+      basketInstrumentsForOrder,
+    );
 
-      const tdLocation = watcher.getLocation(ordersResolved[0].source);
+    return getConfirmMakeBasketOrderByCheckQuote(normal, abnormal).then(
+      (flag) => {
+        if (flag) {
+          const chaseBasketOrderPromise = kfCancelAllOrders(
+            watcher,
+            ordersResolved,
+          ).then((canceledOrderIds) => {
+            if (canceledOrderIds.length !== ordersResolved.length) {
+              return Promise.reject();
+            }
 
-      return makeOrderByBasketInstruments(
-        watcher,
-        basketOrder.order_id,
-        basketOrder,
-        basketInstrumentsForOrder,
-        tdLocation,
-      );
-    });
+            const tdLocation = watcher.getLocation(ordersResolved[0].source);
 
-    return promiseMessageWrapper(chaseBasketOrderPromise, {
-      errorTextByError: true,
-    });
+            return makeOrderByBasketInstruments(
+              watcher,
+              basketOrder.order_id,
+              basketOrder,
+              normal,
+              tdLocation,
+            );
+          });
+
+          return promiseMessageWrapper(chaseBasketOrderPromise, {
+            errorTextByError: true,
+          });
+        }
+
+        return Promise.resolve();
+      },
+    );
   };
 
   const replenishBasketOrder = (
@@ -876,19 +906,31 @@ export const useMakeOrCancelBasketOrder = () => {
       basketOrderPriceType === BasketOrderPriceTypeEnum.ORDER,
     );
 
-    const tdLocation = watcher.getLocation(ordersResolved[0].source);
-
-    const replenishBasketOrderPromise = makeOrderByBasketInstruments(
-      watcher,
-      basketOrder.order_id,
-      basketOrder,
+    const { normal, abnormal } = checkBasketInstrumentsQuoteForOrder(
       basketInstrumentsForOrder,
-      tdLocation,
     );
 
-    return promiseMessageWrapper(replenishBasketOrderPromise, {
-      errorTextByError: true,
-    });
+    return getConfirmMakeBasketOrderByCheckQuote(normal, abnormal).then(
+      (flag) => {
+        if (flag) {
+          const tdLocation = watcher.getLocation(ordersResolved[0].source);
+
+          const replenishBasketOrderPromise = makeOrderByBasketInstruments(
+            watcher,
+            basketOrder.order_id,
+            basketOrder,
+            normal,
+            tdLocation,
+          );
+
+          return promiseMessageWrapper(replenishBasketOrderPromise, {
+            errorTextByError: true,
+          });
+        }
+
+        return Promise.resolve();
+      },
+    );
   };
 
   return {
