@@ -65,7 +65,6 @@
         "by_quantity": "按数量",
         "by_proportion": "按比例",
         "need_only_basket_name_tip": "篮子名称需要全局唯一",
-        "total_volume_tip": "标的总量只在类型为 '按比例' 时填写",
         "basket_instrument": "篮子标的",
         "instrument_id": "标的",
         "exchange_id": "交易所",
@@ -149,7 +148,14 @@
         "no_selected_instruments": "Not seleced anyone basket instrument",
         "no_pending_orders": "Not selected unfinished order",
         "basket_order_no_failed_orders": "Not selected unfinished son order",
-        "no_selected_failed_orders": "Not selected anyone failed order"
+        "no_selected_failed_orders": "Not selected anyone failed order",
+        "abnormal_quote": "行情异常",
+        "continue_make_order": "继续下单",
+        "cancel_make_order": "取消下单",
+        "abnormal_quote_tip1": "当前以下标的行情异常: ",
+        "abnormal_quote_tip2": "点击 '继续下单' 则只下单以下标的: ",
+        "abnormal_quote_tip3": "点击 '继续下单' 则按照下单价下单",
+        "abnormal_quote_tip4": "无可下单标的"
       }
     }
   }
