@@ -137,6 +137,7 @@ import {
   toRaw,
   watch,
   getCurrentInstance,
+  nextTick,
 } from 'vue';
 
 import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
@@ -267,7 +268,9 @@ function handleGetAllBasketInstruments() {
       currentGlobalBasket.value,
       basketInstruments,
     );
-    dataTableRef.value && dataTableRef.value.handleSelectAll(true);
+    nextTick(() => {
+      dataTableRef.value && dataTableRef.value.handleSelectAll(true);
+    });
   });
 }
 

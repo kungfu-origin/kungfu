@@ -673,7 +673,7 @@ export const useMakeOrCancelBasketOrder = () => {
 
     if (!basketInstrumentsForOrder.length)
       return promiseMessageWrapper(
-        Promise.reject(t('BasketTrade.no_selected_instruments')),
+        Promise.reject(new Error(t('BasketTrade.no_selected_instruments'))),
         { errorTextByError: true },
       );
 
@@ -731,8 +731,11 @@ export const useMakeOrCancelBasketOrder = () => {
         'order',
       ) as KungfuApi.Order[]
     ).reduce((map, item) => {
+      const key = buildOrdersMapKey(item.instrument_id, item.exchange_id);
+      if (key in map) return map;
+
       if (targetStatus.includes(item.status)) {
-        map[buildOrdersMapKey(item.instrument_id, item.exchange_id)] = item;
+        map[key] = item;
       }
       return map;
     }, {} as Record<string, KungfuApi.Order>);
@@ -751,7 +754,9 @@ export const useMakeOrCancelBasketOrder = () => {
 
     if (!ordersResolved.length)
       return promiseMessageWrapper(
-        Promise.reject(t('BasketTrade.basket_order_no_failed_orders')),
+        Promise.reject(
+          new Error(t('BasketTrade.basket_order_no_failed_orders')),
+        ),
         { errorTextByError: true },
       );
 
@@ -836,7 +841,9 @@ export const useMakeOrCancelBasketOrder = () => {
 
     if (!ordersResolved.length)
       return promiseMessageWrapper(
-        Promise.reject(t('BasketTrade.basket_order_no_failed_orders')),
+        Promise.reject(
+          new Error(t('BasketTrade.basket_order_no_failed_orders')),
+        ),
         { errorTextByError: true },
       );
 

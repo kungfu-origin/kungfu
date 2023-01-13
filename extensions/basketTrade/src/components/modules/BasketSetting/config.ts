@@ -112,7 +112,6 @@ export const getBasketFormSettings = (volumeType: BasketVolumeTypeEnum) =>
             required: true,
             min: 1,
             default: 1,
-            tip: t('BasketTrade.total_volume_tip'),
           },
         ]
       : []),
