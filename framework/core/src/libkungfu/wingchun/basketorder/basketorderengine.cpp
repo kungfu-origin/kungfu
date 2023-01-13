@@ -47,7 +47,7 @@ void BasketOrderEngine::update_basket_order(int64_t trigger_time, const longfist
     return;
   }
 
-  auto &basket_order_state = get_basket_order_state(order.parent_id);
+  auto basket_order_state = get_basket_order_state(order.parent_id);
   auto dest = basket_order_state->get_state().dest;
   app_.get_writer(dest)->write(app_.now(), basket_order_state->get_state().data);
 }
@@ -63,7 +63,7 @@ bool BasketOrderEngine::try_update_basket_order(int64_t trigger_time, const long
     return false;
   }
 
-  auto &basket_order_state = get_basket_order_state(order.parent_id);
+  auto basket_order_state = get_basket_order_state(order.parent_id);
   basket_order_state->update(order);
 }
 
