@@ -43,12 +43,16 @@
               {{ dealPriceLevel(item.price_level).name }}
             </template>
             <template v-else-if="column.dataIndex === 'progress'">
-              <a-progress :percent="item.progress" size="small">
-                <template #format>
+              <a-progress
+                :percent="item.progress"
+                size="small"
+                :title="`${item.volume - item.volume_left}/${item.volume}`"
+              >
+                <!-- <template #format>
                   <span>
                     {{ `${item.volume - item.volume_left}/${item.volume}` }}
                   </span>
-                </template>
+                </template> -->
               </a-progress>
             </template>
             <template v-else-if="column.dataIndex === 'status_uname'">

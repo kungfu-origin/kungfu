@@ -46,7 +46,7 @@ export const getColumns = buildConfigGetterWrapByComputed(
         type: 'string',
         name: t('BasketTrade.status'),
         dataIndex: 'status_uname',
-        width: 100,
+        width: 80,
         sorter: buildTableColumnSorter<KungfuApi.BasketOrderResolved>(
           'str',
           'status_uname',
@@ -56,7 +56,7 @@ export const getColumns = buildConfigGetterWrapByComputed(
         type: 'string',
         name: t('BasketTrade.progress'),
         dataIndex: 'progress',
-        width: 200,
+        width: 220,
         sorter: buildTableColumnSorter<KungfuApi.BasketOrderResolved>(
           'num',
           'progress',

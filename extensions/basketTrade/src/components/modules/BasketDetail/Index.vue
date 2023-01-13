@@ -372,8 +372,8 @@ function handleOpenSetBasketInstrumentModal() {
   setBasketInstrumentConfigPayload.value.config = {
     type: [],
     name: t('BasketTrade.basket_instrument'),
-    category: BASKET_CATEGORYS.SETTING,
-    key: BASKET_CATEGORYS.SETTING,
+    category: BASKET_CATEGORYS.INSTRUMENT,
+    key: BASKET_CATEGORYS.INSTRUMENT,
     extPath: '',
     settings: getSetBasketInstrumentFormSettings(
       currentGlobalBasket.value.volume_type,

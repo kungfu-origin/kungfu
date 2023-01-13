@@ -1,5 +1,6 @@
 export const BASKET_CATEGORYS = {
   SETTING: 'basketSetting',
+  INSTRUMENT: 'basketInstrument',
   ORDER: 'basketOrder',
 };
 

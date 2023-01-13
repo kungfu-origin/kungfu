@@ -806,7 +806,7 @@ export const useMakeOrCancelBasketOrder = () => {
               instrumentQuote,
             )
           : order.limit_price,
-        isNoQuote: !!instrumentQuote,
+        isNoQuote: !instrumentQuote,
       };
     });
   };

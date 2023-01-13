@@ -246,7 +246,7 @@ function handleSelectRow(isChecked: boolean, item: KungfuApi.TradingDataItem) {
 
   const key = item[props.keyField];
 
-  selectedRowKeyFieldValues[key] = isChecked;
+  selectedRowKeyFieldValues.value[key] = isChecked;
 
   if (isChecked) {
     selectedRowsMap.value[key] = dataSouceMap.value[key];
