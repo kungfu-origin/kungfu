@@ -565,7 +565,7 @@ export const useMakeOrCancelBasketOrder = () => {
                 instrumentQuote,
               )
             : orderPrice,
-          isNoQuote: !!instrumentQuote,
+          isNoQuote: !instrumentQuote,
         };
       });
 
@@ -574,20 +574,12 @@ export const useMakeOrCancelBasketOrder = () => {
 
   const checkBasketInstrumentsQuoteForOrder = (
     basketInstrumentsForOrder: KungfuApi.BasketInstrumentForOrder[],
-    limitPrice?: number,
   ) => {
     const normalBasketInstruments: KungfuApi.BasketInstrumentForOrder[] = [];
     const abnormalBasketInstruments: KungfuApi.BasketInstrumentForOrder[] = [];
     basketInstrumentsForOrder.forEach((basketInstrumentForOrder) => {
       if (basketInstrumentForOrder.isNoQuote) {
-        abnormalBasketInstruments.push(
-          limitPrice
-            ? {
-                ...basketInstrumentForOrder,
-                priceResolved: limitPrice,
-              }
-            : basketInstrumentForOrder,
-        );
+        abnormalBasketInstruments.push(basketInstrumentForOrder);
       } else {
         normalBasketInstruments.push(basketInstrumentForOrder);
       }
@@ -625,9 +617,15 @@ export const useMakeOrCancelBasketOrder = () => {
     const continueTextVNode = h(
       'div',
       {},
-      t('BasketTrade.abnormal_quote_tip2'),
+      t('BasketTrade.abnormal_quote_tip3'),
     );
-    const normalTextVNode = h('div', {}, t('BasketTrade.abnormal_quote_tip3'));
+    const normalTextVNode = h(
+      'div',
+      {},
+      normalBasketInstruments?.length
+        ? t('BasketTrade.abnormal_quote_tip2')
+        : t('BasketTrade.abnormal_quote_tip4'),
+    );
     const normalVNode = h(
       'div',
       { class: 'color-green' },
@@ -648,9 +646,11 @@ export const useMakeOrCancelBasketOrder = () => {
     ]);
 
     return confirmModal(
-      t('BasksetTrade.abnormal_quote'),
+      t('BasketTrade.abnormal_quote'),
       context,
-      t('BasketTrade.continue_make_order'),
+      normalBasketInstruments?.length
+        ? t('BasketTrade.continue_make_order')
+        : undefined,
       t('BasketTrade.cancel_make_order'),
     );
   };
@@ -684,6 +684,8 @@ export const useMakeOrCancelBasketOrder = () => {
     return getConfirmMakeBasketOrderByCheckQuote('make', normal, abnormal).then(
       (flag) => {
         if (flag) {
+          if (!normal.length) return Promise.resolve();
+
           const makeBasketOrderPromise = makeOrderByBasketTrade(
             watcher,
             {
@@ -694,7 +696,7 @@ export const useMakeOrCancelBasketOrder = () => {
             normal,
             accountLocation,
           ).then((orderIds) => {
-            if (orderIds.length === basketInstruments.length) {
+            if (orderIds && orderIds.length === basketInstruments.length) {
               return Promise.resolve();
             }
 
@@ -754,7 +756,7 @@ export const useMakeOrCancelBasketOrder = () => {
 
     const cancalOrdersPromise = kfCancelAllOrders(watcher, ordersResolved).then(
       (canceledOrders) => {
-        if (canceledOrders.length === ordersResolved.length) {
+        if (canceledOrders && canceledOrders.length === ordersResolved.length) {
           return Promise.resolve();
         }
 
@@ -860,7 +862,10 @@ export const useMakeOrCancelBasketOrder = () => {
           watcher,
           ordersResolved,
         ).then((canceledOrderIds) => {
-          if (canceledOrderIds.length !== ordersResolved.length) {
+          if (
+            canceledOrderIds &&
+            canceledOrderIds.length !== ordersResolved.length
+          ) {
             return Promise.reject();
           }
 

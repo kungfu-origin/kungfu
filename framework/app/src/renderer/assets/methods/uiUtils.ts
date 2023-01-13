@@ -235,29 +235,32 @@ export const useWritableTableSearchKeyword = <T>(
   keys: string[],
 ): {
   searchKeyword: Ref<string>;
-  tableData: Ref<T[]>;
+  tableData: Ref<{ data: T; index: number }[]>;
 } => {
   const searchKeyword = ref<string>('');
-  const tableData = ref<T[]>([]) as Ref<T[]>;
+  const tableData = ref<{ data: T; index: number }[]>([]) as Ref<
+    { data: T; index: number }[]
+  >;
 
   watch(
     () => ({ keyword: searchKeyword.value, list: targetList.value }),
     (newValue) => {
       const { keyword, list } = newValue;
       tableData.value = list
-        .filter((item: T) => {
+        .map((item, index) => ({ data: toRaw(item), index }))
+        .filter((item: { data: T; index: number }) => {
           const combinedValue = keys
             .map(
               (key: string) =>
                 (
-                  ((item as Record<string, unknown>)[key] as string | number) ||
-                  ''
+                  ((item.data as Record<string, unknown>)[key] as
+                    | string
+                    | number) || ''
                 ).toString() || '',
             )
             .join('_');
           return new RegExp(keyword, 'ig').test(combinedValue);
-        })
-        .map((item) => toRaw(item));
+        });
     },
     {
       deep: true,

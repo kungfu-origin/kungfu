@@ -84,6 +84,8 @@
         "custom_price": "自定义价",
         "order_price": "下单价",
         "last_price": "最新价",
+        "basket_volume": "下单倍数",
+        "basket_volume_tip": "下单时会在设置的交易量基础上乘以下单倍数",
         "chase_order_tip": "追单会先将所有未完成的订单撤单, 再以选择价格下单",
         "replenish_order_tip": "以选择价格补单",
         "price_level_tip": "仅在 方式 选择自定义时生效",
@@ -97,7 +99,8 @@
         "cancel_make_order": "取消下单",
         "abnormal_quote_tip1": "当前以下标的行情异常: ",
         "abnormal_quote_tip2": "点击 '继续下单' 则只下单以下标的: ",
-        "abnormal_quote_tip3": "点击 '继续下单' 则按照下单价下单"
+        "abnormal_quote_tip3": "点击 '继续下单' 则按照下单价下单",
+        "abnormal_quote_tip4": "无可下单标的"
       },
       "en-US": {
         "BasketTrade": "Basket Trade",

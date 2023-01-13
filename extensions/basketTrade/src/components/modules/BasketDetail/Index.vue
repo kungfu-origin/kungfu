@@ -151,6 +151,7 @@ import {
   useDashboardBodySize,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import {
+  buildBasketMapKeyAndLocation,
   dealBasketInstrumentsToMap,
   getAllBasketInstruments,
   setAllBasketInstruments,
@@ -158,6 +159,7 @@ import {
   useMakeBasketOrderFormModal,
   useSubscribeBasketInstruments,
   useMakeOrCancelBasketOrder,
+  setAllBaskets,
 } from '../../../utils/basketTradeUtils';
 import {
   useActiveInstruments,
@@ -177,6 +179,7 @@ import {
 import { BasketVolumeTypeEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import { promiseMessageWrapper } from '../../../utils';
+import { useBasketTradeStore } from '../../../store';
 const { t } = VueI18n.global;
 
 const app = getCurrentInstance();
@@ -275,13 +278,15 @@ function handleSetAllBasketInstruments(
 ) {
   const promise = setAllBasketInstruments(basketInstruments).then((res) => {
     if (res) {
-      return handleGetAllBasketInstruments();
+      return handleGetAllBasketInstruments().then(() => {
+        return updateBasketTotalVolume(basketInstruments);
+      });
     } else {
       return Promise.reject();
     }
   });
 
-  promiseMessageWrapper(promise, { errorTextByError: true });
+  return promiseMessageWrapper(promise, { errorTextByError: true });
 }
 
 function handleSubscribeBasketInstruments(
@@ -332,6 +337,32 @@ function handlePlaceBasketOrder(formState) {
       tag: 'update:makeBasketOrder',
     });
   });
+}
+
+function updateBasketTotalVolume(
+  basketInstruments: KungfuApi.BasketInstrument[],
+) {
+  if (!currentGlobalBasket.value) return Promise.resolve();
+
+  if (currentGlobalBasket.value.volume_type === BasketVolumeTypeEnum.Quantity) {
+    const { basketsMap } = useBasketTradeStore();
+    basketsMap[
+      buildBasketMapKeyAndLocation(currentGlobalBasket.value).key
+    ].total_volume = basketInstruments.reduce(
+      (totalVolume, cur) => totalVolume + cur.volume,
+      0n,
+    );
+
+    return setAllBaskets(Object.values(basketsMap)).then((res) => {
+      if (res) {
+        return Promise.resolve();
+      } else {
+        return Promise.reject();
+      }
+    });
+  }
+
+  return Promise.resolve();
 }
 
 function handleOpenSetBasketInstrumentModal() {
@@ -434,7 +465,7 @@ function handleRemoveBasketInstrument(
   );
 
   delete allBasketInstruments[currentGlobalBasket.value.id][
-    targetBasketInstrument.id
+    targetBasketInstrument.basketInstrumentId
   ];
 
   return handleSetAllBasketInstruments(
@@ -454,13 +485,13 @@ function handleFilterChange() {
       isWithoutUpLimitInstrument.value &&
       isInstrumentUpLimit(basketInstrument)
     ) {
-      upLimitBasketInstrumentKeys.push(basketInstrument.id);
+      upLimitBasketInstrumentKeys.push(basketInstrument.basketInstrumentId);
     }
     if (
       isWithoutUpLimitInstrument.value &&
       isInstrumentLowLimit(basketInstrument)
     ) {
-      lowLimitBasketInstrumentKeys.push(basketInstrument.id);
+      lowLimitBasketInstrumentKeys.push(basketInstrument.basketInstrumentId);
     }
   });
 

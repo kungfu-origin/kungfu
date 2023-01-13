@@ -237,6 +237,11 @@ function handleFormStateChange(formState) {
   setBasketConfigPayload.value.config.settings = getBasketFormSettings(
     +formState.volume_type,
   );
+
+  app?.proxy?.$globalBus.next({
+    tag: 'update:currentConfigModalConfigSettings',
+    configSettings: getBasketFormSettings(+formState.volume_type),
+  });
 }
 
 function handleConfirmAddUpdateBasket(

@@ -127,7 +127,9 @@ type TablesSearchRelated = Record<
   string,
   {
     searchKeyword: Ref<string>;
-    tableData: Ref<Record<string, KungfuApi.KfConfigValue>[]>;
+    tableData: Ref<
+      { data: Record<string, KungfuApi.KfConfigValue>; index: number }[]
+    >;
   }
 >;
 
@@ -212,7 +214,7 @@ watch(formState, (newVal) => {
   app && app.emit('update:formState', newVal);
 });
 
-if ('instrument' in formState) {
+if ('instrument' in formState && 'side' in formState) {
   watch(
     () => formState.instrument,
     (newInstrument: string) => {
@@ -1206,38 +1208,86 @@ defineExpose({
             </template>
           </a-button>
         </div>
-
-        <div
-          class="table-in-config-setting-row"
-          v-for="(_item, index) in !!item.searchable
-            ? tablesSearchRelated[item.key].tableData
-            : formState[item.key]"
-          :key="`${index}_${formState[item.key].length}`"
-        >
-          <a-button
-            size="small"
-            :disabled="
-              (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
-              item.disabled
-            "
+        <template v-if="!!item?.searchable">
+          <div
+            v-for="(_item, index) in tablesSearchRelated[item.key].tableData
+              .value"
+            :key="`${index}_${
+              tablesSearchRelated[item.key].tableData.value.length
+            }`"
+            class="table-in-config-setting-row"
           >
-            <template #icon>
-              <DeleteOutlined
-                @click="handleRemoveItemIntoTableRows(item, index)"
-              />
-            </template>
-          </a-button>
-          <KfConfigSettingsForm
-            v-model:formState="formState[item.key][index]"
-            :configSettings="item.columns || []"
-            :changeType="changeType"
-            :rules="rules"
-            layout="inline"
-          ></KfConfigSettingsForm>
-          <a-divider
-            v-if="index !== formState[item.key].length - 1"
-          ></a-divider>
-        </div>
+            <a-button
+              size="small"
+              :disabled="
+                (changeType === 'update' &&
+                  item.primary &&
+                  !isPrimaryDisabled) ||
+                item.disabled
+              "
+            >
+              <template #icon>
+                <DeleteOutlined
+                  @click="
+                    handleRemoveItemIntoTableRows(
+                      item,
+                      tablesSearchRelated[item.key].tableData.value[index]
+                        .index,
+                    )
+                  "
+                />
+              </template>
+            </a-button>
+            <KfConfigSettingsForm
+              v-model:formState="
+                tablesSearchRelated[item.key].tableData.value[index].data
+              "
+              :configSettings="item.columns || []"
+              :changeType="changeType"
+              :rules="rules"
+              layout="inline"
+            ></KfConfigSettingsForm>
+            <a-divider
+              v-if="
+                index !==
+                tablesSearchRelated[item.key].tableData.value.length - 1
+              "
+            ></a-divider>
+          </div>
+        </template>
+        <template v-else>
+          <div
+            class="table-in-config-setting-row"
+            v-for="(_item, index) in formState[item.key]"
+            :key="`${index}_${formState[item.key].length}`"
+          >
+            <a-button
+              size="small"
+              :disabled="
+                (changeType === 'update' &&
+                  item.primary &&
+                  !isPrimaryDisabled) ||
+                item.disabled
+              "
+            >
+              <template #icon>
+                <DeleteOutlined
+                  @click="handleRemoveItemIntoTableRows(item, index)"
+                />
+              </template>
+            </a-button>
+            <KfConfigSettingsForm
+              v-model:formState="formState[item.key][index]"
+              :configSettings="item.columns || []"
+              :changeType="changeType"
+              :rules="rules"
+              layout="inline"
+            ></KfConfigSettingsForm>
+            <a-divider
+              v-if="index !== formState[item.key].length - 1"
+            ></a-divider>
+          </div>
+        </template>
       </div>
     </a-form-item>
   </a-form>
