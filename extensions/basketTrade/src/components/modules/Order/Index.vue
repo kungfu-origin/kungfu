@@ -511,8 +511,8 @@ function handleChaseBasketOrder(
 
   if (!dataTableRef.value) return;
 
-  const orders = Object.values(
-    dataTableRef.value.selectedRowsMap,
+  const orders = Object.values(dataTableRef.value.selectedRowsMap).filter(
+    (order) => !!order,
   ) as unknown as KungfuApi.OrderResolved[];
 
   return chaseBasketOrder(
@@ -524,7 +524,9 @@ function handleChaseBasketOrder(
       price_offset: formState.priceOffset,
     },
     orders,
-  );
+  ).then(() => {
+    dataTableRef.value?.handleSelectAll(false);
+  });
 }
 
 function handleReplenishBasketOrder(
@@ -535,8 +537,8 @@ function handleReplenishBasketOrder(
 
   if (!dataTableRef.value) return Promise.reject();
 
-  const orders = Object.values(
-    dataTableRef.value.selectedRowsMap,
+  const orders = Object.values(dataTableRef.value.selectedRowsMap).filter(
+    (order) => !!order,
   ) as unknown as KungfuApi.OrderResolved[];
 
   return replenishBasketOrder(
@@ -548,7 +550,9 @@ function handleReplenishBasketOrder(
       price_offset: formState.priceOffset,
     },
     orders,
-  );
+  ).then(() => {
+    dataTableRef.value?.handleSelectAll(false);
+  });
 }
 </script>
 <template>

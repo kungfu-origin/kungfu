@@ -670,7 +670,7 @@ export const useMakeOrCancelBasketOrder = () => {
       basketOrderInput.price_offset,
       basketVolume,
     );
-    console.log(basketInstrumentsForOrder);
+
     if (!basketInstrumentsForOrder.length)
       return promiseMessageWrapper(
         Promise.reject(new Error(t('BasketTrade.no_selected_instruments'))),
