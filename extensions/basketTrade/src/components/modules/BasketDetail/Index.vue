@@ -237,7 +237,6 @@ onMounted(() => {
   handleGetAllBasketInstruments()
     .then(() => {
       basketInstrumentDataLoaded.value = true;
-      dataTableRef.value && dataTableRef.value.handleSelectAll(true);
     })
     .catch((err) => {
       console.error(err);
@@ -251,8 +250,6 @@ watch(
     handleGetAllBasketInstruments()
       .then(() => {
         basketInstrumentDataLoaded.value = true;
-
-        dataTableRef.value && dataTableRef.value.handleSelectAll(true);
       })
       .catch((err) => {
         console.error(err);
@@ -270,6 +267,7 @@ function handleGetAllBasketInstruments() {
       currentGlobalBasket.value,
       basketInstruments,
     );
+    dataTableRef.value && dataTableRef.value.handleSelectAll(true);
   });
 }
 
