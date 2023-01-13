@@ -65,6 +65,7 @@ bool BasketOrderEngine::try_update_basket_order(int64_t trigger_time, const long
 
   auto basket_order_state = get_basket_order_state(order.parent_id);
   basket_order_state->update(order);
+  return true;
 }
 
 bool BasketOrderEngine::has_basket_order_state(uint64_t basket_order_id) {

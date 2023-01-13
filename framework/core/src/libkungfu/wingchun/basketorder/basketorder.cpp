@@ -20,13 +20,13 @@ void BasketOrderState::update(const longfist::types::Order &order) {
   auto is_all_order_end_val = is_all_order_end();
   auto is_all_order_filled_val = is_all_order_filled();
   // after supplementing order, the total volume may be changed, bigger than the original volume
-  auto total_volume = std::max(basket_order.volume, get_total_volume());
-  auto total_volume_left = get_total_volume_left();
+  basket_order.volume = std::max(basket_order.volume, get_total_volume());
+  basket_order.volume_left = get_total_volume_left();
   if (is_all_order_end_val and is_all_order_filled_val) {
     basket_order.status = BasketOrderStatus::Filled;
   } else if (is_all_order_end_val) {
     basket_order.status = BasketOrderStatus::PartialFilledNotActive;
-  } else if (basket_order.volume_left < total_volume) {
+  } else if (basket_order.volume_left < basket_order.volume) {
     basket_order.status = BasketOrderStatus::PartialFilledActive;
   } else {
     basket_order.status = BasketOrderStatus::Pending;
