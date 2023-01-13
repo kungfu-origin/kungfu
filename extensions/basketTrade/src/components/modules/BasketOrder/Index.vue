@@ -65,7 +65,7 @@
                 <a-button
                   type="link"
                   size="small"
-                  class="color-red"
+                  danger
                   @click.stop="handleCancelBasketOrder(item)"
                 >
                   {{ $t('BasketTrade.cancel_order') }}

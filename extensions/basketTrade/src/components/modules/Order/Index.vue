@@ -186,6 +186,7 @@ onMounted(() => {
 watch(currentGlobalBasketOrder, () => {
   historyDate.value = undefined;
   orders.value = [];
+  waittingToSelect.value = '';
 });
 
 watch(historyDate, async (newDate) => {
@@ -567,9 +568,8 @@ function handleReplenishBasketOrder(
         </span>
       </template>
       <template #header>
-        <KfDashboardItem>
+        <KfDashboardItem v-if="waittingToSelect !== 'replenish'">
           <a-button
-            v-if="waittingToSelect !== 'replenish'"
             :type="waittingToSelect === 'chase' ? 'primary' : 'default'"
             size="small"
             @click.stop="handleChaseOrReplenishClick('chase')"
@@ -583,9 +583,13 @@ function handleReplenishBasketOrder(
             }}
           </a-button>
         </KfDashboardItem>
-        <KfDashboardItem style="margin-right: 16px">
+        <KfDashboardItem
+          v-if="waittingToSelect !== 'chase'"
+          :style="{
+            marginRight: waittingToSelect === 'replenish' ? '0' : '16px',
+          }"
+        >
           <a-button
-            v-if="waittingToSelect !== 'chase'"
             :type="waittingToSelect === 'replenish' ? 'primary' : 'default'"
             size="small"
             @click.stop="handleChaseOrReplenishClick('replenish')"
@@ -599,12 +603,8 @@ function handleReplenishBasketOrder(
             }}
           </a-button>
         </KfDashboardItem>
-        <KfDashboardItem style="margin-right: 16px">
-          <a-button
-            v-if="waittingToSelect"
-            size="small"
-            @click.stop="waittingToSelect = ''"
-          >
+        <KfDashboardItem v-if="waittingToSelect" style="margin-right: 16px">
+          <a-button size="small" @click.stop="waittingToSelect = ''">
             {{ $t('BasketTrade.cancel') }}
           </a-button>
         </KfDashboardItem>
