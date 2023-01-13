@@ -76,41 +76,47 @@ export const BasketVolumeType: Record<
   [BasketVolumeTypeEnum.Proportion]: { name: t('BasketTrade.by_proportion') },
 };
 
-export const setBasketFormSettings: KungfuApi.KfConfigItem[] = [
-  {
-    key: 'name',
-    name: t('BasketTrade.basket_name'),
-    type: 'str',
-    primary: true,
-    required: true,
-    tip: t('BasketTrade.need_only_basket_name'),
-  },
-  {
-    key: 'volume_type',
-    name: t('BasketTrade.volume_type'),
-    type: 'select',
-    options: [
-      {
-        label: BasketVolumeType[BasketVolumeTypeEnum.Proportion].name,
-        value: `${BasketVolumeTypeEnum.Proportion}`,
-      },
-      {
-        label: BasketVolumeType[BasketVolumeTypeEnum.Quantity].name,
-        value: `${BasketVolumeTypeEnum.Quantity}`,
-      },
-    ],
-    default: `${BasketVolumeTypeEnum.Quantity}`,
-    required: true,
-  },
-  {
-    key: 'total_volume',
-    name: t('BasketTrade.total_volume'),
-    type: 'int',
-    required: true,
-    min: 1,
-    default: 1,
-  },
-];
+export const getBasketFormSettings = (volumeType: BasketVolumeTypeEnum) =>
+  [
+    {
+      key: 'name',
+      name: t('BasketTrade.basket_name'),
+      type: 'str',
+      primary: true,
+      required: true,
+      tip: t('BasketTrade.need_only_basket_name_tip'),
+    },
+    {
+      key: 'volume_type',
+      name: t('BasketTrade.volume_type'),
+      type: 'select',
+      options: [
+        {
+          label: BasketVolumeType[BasketVolumeTypeEnum.Quantity].name,
+          value: `${BasketVolumeTypeEnum.Quantity}`,
+        },
+        {
+          label: BasketVolumeType[BasketVolumeTypeEnum.Proportion].name,
+          value: `${BasketVolumeTypeEnum.Proportion}`,
+        },
+      ],
+      default: `${BasketVolumeTypeEnum.Quantity}`,
+      required: true,
+    },
+    ...(volumeType === BasketVolumeTypeEnum.Proportion
+      ? [
+          {
+            key: 'total_volume',
+            name: t('BasketTrade.total_volume'),
+            type: 'int',
+            required: true,
+            min: 1,
+            default: 1,
+            tip: t('BasketTrade.total_volume_tip'),
+          },
+        ]
+      : []),
+  ] as KungfuApi.KfConfigItem[];
 
 export const basketTradingDataGetter: DealTradingDataGetter = {
   category: BASKET_CATEGORYS.SETTING,

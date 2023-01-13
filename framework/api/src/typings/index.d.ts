@@ -130,6 +130,7 @@ declare namespace KungfuApi {
     options?: KfSelectOption[];
     data?: KfSelectOption[];
     headers?: string[];
+    searchable?: boolean;
   }
 
   export interface KfExhibitConfigItem {
@@ -772,6 +773,7 @@ declare namespace KungfuApi {
   }
 
   export interface BasketInstrumentForOrder extends BasketInstrumentResolved {
+    isNoQuote: boolean;
     priceResolved: number; // 最终下单价
   }
 

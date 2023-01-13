@@ -40,47 +40,37 @@ export const getMakeBasketOrderConfigSettings =
       type: 'priceLevel',
       key: 'priceLevel',
       name: t('tradingConfig.price_level'),
+      tip: t('BasketTrade.price_level_tip'),
       default: PriceLevelEnum.Latest,
     },
     {
       type: 'float',
       key: 'priceOffset',
       name: t('tradingConfig.price_offset'),
+      tip: t('BasketTrade.price_offset_tip', {
+        prefix: t('BasketTrade.price_level_tip') + ', ',
+      }),
       min: 0,
       default: 0,
     },
+    {
+      type: 'int',
+      key: 'basketVolume',
+      name: t('BasketTrade.basket_volume'),
+      tip: t('BasketTrade.basket_volume_tip'),
+      min: 1,
+      default: 1,
+    },
   ];
-
-export enum BasketOrderPriceTypeEnum {
-  CUSTOM = 'CUSTOM',
-  ORDER = 'ORDER',
-}
 
 export const getChaseBasketOrderConfigSettings =
   (): KungfuApi.KfConfigItem[] => [
     {
-      type: 'select',
-      key: 'basketOrderPriceType',
-      name: t('BasketTrade.price_type'),
-      options: [
-        {
-          label: t('BasketTrade.custom_price'),
-          value: BasketOrderPriceTypeEnum.CUSTOM,
-        },
-        {
-          label: t('BasketTrade.order_price'),
-          value: BasketOrderPriceTypeEnum.ORDER,
-        },
-      ],
-      tip: t('BasketTrade.chase_order_tip'),
-      required: true,
-    },
-    {
       type: 'priceLevel',
       key: 'priceLevel',
       name: t('tradingConfig.price_level'),
-      tip: t('BasketTrade.price_level_tip'),
       default: PriceLevelEnum.Latest,
+      required: true,
     },
     {
       type: 'float',
@@ -95,28 +85,11 @@ export const getChaseBasketOrderConfigSettings =
 export const getReplenishBasketOrderConfigSettings =
   (): KungfuApi.KfConfigItem[] => [
     {
-      type: 'select',
-      key: 'basketOrderPriceType',
-      name: t('BasketTrade.price_type'),
-      options: [
-        {
-          label: t('BasketTrade.custom_price'),
-          value: BasketOrderPriceTypeEnum.CUSTOM,
-        },
-        {
-          label: t('BasketTrade.order_price'),
-          value: BasketOrderPriceTypeEnum.ORDER,
-        },
-      ],
-      tip: t('BasketTrade.replenish_order_tip'),
-      required: true,
-    },
-    {
       type: 'priceLevel',
       key: 'priceLevel',
       name: t('tradingConfig.price_level'),
-      tip: t('BasketTrade.price_level_tip'),
       default: PriceLevelEnum.Latest,
+      required: true,
     },
     {
       type: 'float',

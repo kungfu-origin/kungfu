@@ -44,7 +44,10 @@ import {
   makeOrderByOrderInput,
 } from '@kungfu-trader/kungfu-js-api/kungfu';
 import type { Dayjs } from 'dayjs';
-import { UnfinishedOrderStatus } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
+import {
+  NotTradeAllOrderStatus,
+  UnfinishedOrderStatus,
+} from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import {
   HistoryDateEnum,
   OrderStatusEnum,
@@ -74,6 +77,7 @@ const app = getCurrentInstance();
 const { handleBodySizeChange } = useDashboardBodySize();
 
 const dataTableRef = ref();
+const waittingToSelect = ref<'chase' | 'replenish' | ''>();
 const { processStatusData } = useProcessStatusDetailData();
 const orders = ref<KungfuApi.OrderResolved[]>([]);
 const { searchKeyword, tableData } =
@@ -98,7 +102,11 @@ const {
 } = useCurrentGlobalBasket();
 
 const { handleShowMakeBasketOrderModal } = useMakeBasketOrderFormModal();
-const { chaseBasketOrder, replenishBasketOrder } = useMakeOrCancelBasketOrder();
+const {
+  chaseBasketOrder,
+  replenishBasketOrder,
+  getBasketOrderTargetStatusOrdersMap,
+} = useMakeOrCancelBasketOrder();
 
 const { handleDownload } = useDownloadHistoryTradingData();
 const adjustOrderMaskVisible = ref(false);
@@ -447,11 +455,64 @@ function testOrderSourceIsOnline(order: KungfuApi.OrderResolved) {
   return true;
 }
 
+function selectRows(orders: KungfuApi.Order[]) {
+  orders.forEach((order) => {
+    if (!dataTableRef.value) return;
+
+    dataTableRef.value.handleSelectRow(true, order);
+  });
+}
+
+function handleChaseOrReplenishClick(type: 'chase' | 'replenish') {
+  if (!currentGlobalBasket.value || !currentGlobalBasketOrder.value) return;
+
+  if (!waittingToSelect.value) {
+    waittingToSelect.value = type;
+
+    const orders = Object.values(
+      getBasketOrderTargetStatusOrdersMap(
+        window.watcher,
+        currentGlobalBasketOrder.value,
+        type === 'chase' ? UnfinishedOrderStatus : NotTradeAllOrderStatus,
+      ),
+    );
+    return selectRows(orders);
+  }
+
+  if (type === 'chase') {
+    handleShowMakeBasketOrderModal(
+      `${t('BasketTrade.chase_order')} ${currentGlobalBasket.value.name}`,
+      getChaseBasketOrderConfigSettings(),
+      (formState) => {
+        currentGlobalBasketOrder.value &&
+          handleChaseBasketOrder(currentGlobalBasketOrder.value, formState);
+      },
+    );
+  } else if (type === 'replenish') {
+    handleShowMakeBasketOrderModal(
+      `${t('BasketTrade.replenish_order')} ${currentGlobalBasket.value.name}`,
+      getReplenishBasketOrderConfigSettings(),
+      (formState) => {
+        currentGlobalBasketOrder.value &&
+          handleReplenishBasketOrder(currentGlobalBasketOrder.value, formState);
+      },
+    );
+  }
+
+  waittingToSelect.value = '';
+}
+
 function handleChaseBasketOrder(
   basketOrder: KungfuApi.BasketOrderResolved,
   formState,
 ) {
-  if (!currentGlobalBasket.value) return Promise.reject();
+  if (!currentGlobalBasket.value) return;
+
+  if (!dataTableRef.value) return;
+
+  const orders = Object.values(
+    dataTableRef.value.selectedRowsMap,
+  ) as unknown as KungfuApi.OrderResolved[];
 
   return chaseBasketOrder(
     window.watcher,
@@ -461,7 +522,7 @@ function handleChaseBasketOrder(
       price_level: formState.priceLevel,
       price_offset: formState.priceOffset,
     },
-    formState.basketOrderPriceType,
+    orders,
   );
 }
 
@@ -485,7 +546,6 @@ function handleReplenishBasketOrder(
       price_level: formState.priceLevel,
       price_offset: formState.priceOffset,
     },
-    formState.basketOrderPriceType,
     orders,
   );
 }
@@ -509,39 +569,43 @@ function handleReplenishBasketOrder(
       <template #header>
         <KfDashboardItem>
           <a-button
+            v-if="waittingToSelect !== 'replenish'"
+            :type="waittingToSelect === 'chase' ? 'primary' : 'default'"
             size="small"
-            @click.stop="
-              currentGlobalBasketOrder &&
-                handleShowMakeBasketOrderModal(
-                  `${$t('BasketTrade.chase_order')} ${
-                    currentGlobalBasket?.name
-                  }`,
-                  getChaseBasketOrderConfigSettings(),
-                  handleChaseBasketOrder.bind(null, currentGlobalBasketOrder!),
-                )
-            "
+            @click.stop="handleChaseOrReplenishClick('chase')"
           >
-            {{ $t('BasketTrade.chase_order') }}
+            {{
+              waittingToSelect === 'chase'
+                ? $t('BasketTrade.wait_to_confirm', {
+                    type: $t('BasketTrade.chase_order'),
+                  })
+                : $t('BasketTrade.chase_order')
+            }}
           </a-button>
         </KfDashboardItem>
         <KfDashboardItem style="margin-right: 16px">
           <a-button
+            v-if="waittingToSelect !== 'chase'"
+            :type="waittingToSelect === 'replenish' ? 'primary' : 'default'"
             size="small"
-            @click.stop="
-              currentGlobalBasketOrder &&
-                handleShowMakeBasketOrderModal(
-                  `${$t('BasketTrade.chase_order')} ${
-                    currentGlobalBasket?.name
-                  }`,
-                  getReplenishBasketOrderConfigSettings(),
-                  handleReplenishBasketOrder.bind(
-                    null,
-                    currentGlobalBasketOrder!,
-                  ),
-                )
-            "
+            @click.stop="handleChaseOrReplenishClick('replenish')"
           >
-            {{ $t('BasketTrade.replenish_order') }}
+            {{
+              waittingToSelect === 'replenish'
+                ? $t('BasketTrade.wait_to_confirm', {
+                    type: $t('BasketTrade.replenish_order'),
+                  })
+                : $t('BasketTrade.replenish_order')
+            }}
+          </a-button>
+        </KfDashboardItem>
+        <KfDashboardItem style="margin-right: 16px">
+          <a-button
+            v-if="waittingToSelect"
+            size="small"
+            @click.stop="waittingToSelect = ''"
+          >
+            {{ $t('BasketTrade.cancel') }}
           </a-button>
         </KfDashboardItem>
         <KfDashboardItem>

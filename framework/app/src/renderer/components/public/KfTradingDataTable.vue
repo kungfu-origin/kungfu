@@ -249,7 +249,7 @@ function handleSelectRow(isChecked: boolean, item: KungfuApi.TradingDataItem) {
   selectedRowKeyFieldValues[key] = isChecked;
 
   if (isChecked) {
-    selectedRowsMap.value[key] = item;
+    selectedRowsMap.value[key] = dataSouceMap.value[key];
   } else {
     delete selectedRowsMap.value[key];
   }

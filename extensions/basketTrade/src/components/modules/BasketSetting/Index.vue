@@ -78,7 +78,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, toRaw } from 'vue';
+import { ref, computed, onMounted, toRaw, getCurrentInstance } from 'vue';
 
 import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboardItem.vue';
@@ -101,13 +101,14 @@ import {
 } from '../../../utils/basketTradeUtils';
 import {
   getColumns,
-  setBasketFormSettings,
+  getBasketFormSettings,
   basketTradingDataGetter,
 } from './config';
 import { BASKET_CATEGORYS } from '../../../config';
 import { DealTradingDataHooks } from '@kungfu-trader/kungfu-js-api/hooks/dealTradingDataHook';
 import { useBasketTradeStore } from '../../../store';
 import { dealAssetPrice } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import { BasketVolumeTypeEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 const { t } = VueI18n.global;
 
 (
@@ -121,6 +122,7 @@ const { t } = VueI18n.global;
   basketTradingDataGetter,
 );
 
+const app = getCurrentInstance();
 const { dashboardBodyHeight, handleBodySizeChange } = useDashboardBodySize();
 const { currentGlobalBasket, dealBasketRowClassName, setCurrentGlobalBasket } =
   useCurrentGlobalBasket();
@@ -162,6 +164,15 @@ const setDefaultGlobalBasket = () => {
 onMounted(() => {
   handleGetAllBaskets().then(() => {
     basketDataLoaded.value = true;
+  });
+
+  app?.proxy?.$globalBus.subscribe((data) => {
+    if (
+      data.tag === 'input:currentConfigModal' &&
+      data.category === BASKET_CATEGORYS.SETTING
+    ) {
+      handleFormStateChange(data.formState);
+    }
   });
 });
 
@@ -207,7 +218,7 @@ function handleOpenSetBasketModal(
     category: BASKET_CATEGORYS.SETTING,
     key: BASKET_CATEGORYS.SETTING,
     extPath: '',
-    settings: setBasketFormSettings,
+    settings: getBasketFormSettings(BasketVolumeTypeEnum.Quantity),
   };
 
   setBasketConfigPayload.value.initValue =
@@ -222,6 +233,12 @@ function handleOpenSetBasketModal(
   addBasketModalVisble.value = true;
 }
 
+function handleFormStateChange(formState) {
+  setBasketConfigPayload.value.config.settings = getBasketFormSettings(
+    +formState.volume_type,
+  );
+}
+
 function handleConfirmAddUpdateBasket(
   formState: Record<string, KungfuApi.KfConfigValue>,
 ) {
@@ -229,7 +246,10 @@ function handleConfirmAddUpdateBasket(
     id: new Date().getTime(),
     name: formState.name,
     volume_type: +formState.volume_type,
-    total_volume: BigInt(formState.total_volume),
+    total_volume:
+      BasketVolumeTypeEnum.Quantity === +formState.volume_type
+        ? 0n
+        : BigInt(formState.total_volume),
   };
 
   const newBasketMap = dealBasketsToMap([newBasket]);
