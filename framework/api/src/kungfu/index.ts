@@ -612,11 +612,8 @@ export const makeOrderByBasketTrade = (
     price_offset: +basketOrderInput.price_offset,
   };
 
-  console.log(basketOrder)
-
   const parent_id = watcher.issueBasketOrder(basketOrder, kfLocation);
 
-  console.log(parent_id)
   return makeOrderByBasketInstruments(
     watcher,
     parent_id,

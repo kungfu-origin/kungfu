@@ -29,6 +29,7 @@ export const registerComponents = (
   componentsMap: { [componentsName: string]: Component },
 ) => {
   Object.keys(componentsMap).forEach((componentsName) => {
+    if (componentsName in app._context.components) return;
     app.component(componentsName, componentsMap[componentsName]);
   });
 };

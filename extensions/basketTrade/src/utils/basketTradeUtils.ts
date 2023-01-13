@@ -696,6 +696,7 @@ export const useMakeOrCancelBasketOrder = () => {
             normal,
             accountLocation,
           ).then((orderIds) => {
+            console.log(orderIds);
             if (orderIds && orderIds.length === basketInstruments.length) {
               return Promise.resolve();
             }
