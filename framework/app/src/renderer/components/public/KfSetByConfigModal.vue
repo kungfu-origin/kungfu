@@ -152,6 +152,11 @@ function handleConfirm(): void {
       console.error(err);
     });
 }
+
+function handleCancel(): void{
+  app && app.emit('close');
+  closeModal()
+}
 </script>
 <template>
   <a-modal
@@ -160,7 +165,7 @@ function handleConfirm(): void {
     class="kf-set-by-config-modal"
     :title="titleResolved"
     :destroy-on-close="true"
-    @cancel="closeModal"
+    @cancel="handleCancel"
     @ok="handleConfirm"
   >
     <KfConfigSettingsForm

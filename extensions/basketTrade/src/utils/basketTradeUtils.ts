@@ -32,6 +32,7 @@ import { getProcessIdByKfLocation } from '@kungfu-trader/kungfu-js-api/utils/bus
 import {
   UnfinishedOrderStatus,
   NotTradeAllOrderStatus,
+  ExchangeIds,
 } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import {
   useActiveInstruments,
@@ -134,7 +135,7 @@ export const dealBasketInstrumentsToMap = (
       const resolvedCurBasketInstrument: KungfuApi.BasketInstrumentResolved = {
         ...curBasketInstrument,
         ...instrumentResolved,
-        basketInstrumentName: `${instrument_id} ${instrumentResolved.instrumentName}`,
+        basketInstrumentName: `${instrument_id} ${ExchangeIds[exchange_id].name} ${instrumentResolved.instrumentName}`,
         basketInstrumentId: `${instrument_id}_${exchange_id}_${new Date().getTime()}`,
         volumeResolved: getBasketInstrumentVolume(
           basket.volume_type,
@@ -183,9 +184,7 @@ export const dealBasketOrdersToMap = (
     tradedVolume: bigint,
     totalVolume: bigint,
   ) => {
-    return Number(
-      ((Number(tradedVolume) / Number(totalVolume)) * 100).toFixed(2),
-    );
+    return Math.floor((Number(tradedVolume) / Number(totalVolume)) * 100);
   };
 
   return basketOrders.reduce((basketOrdersMap, curBasketOrder) => {
@@ -373,6 +372,7 @@ export const useMakeBasketOrderFormModal = () => {
   const formStateChangeTag = 'input:currentConfigModal';
 
   const app = getCurrentInstance();
+  const currentKey = ref(0);
   const showMakeOrderModal = ref(false);
   const makeBasketOrderConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
     type: 'custom',
@@ -393,6 +393,8 @@ export const useMakeBasketOrderFormModal = () => {
       payload: Ref<KungfuApi.SetKfConfigPayload>,
     ) => void,
   ) => {
+    currentKey.value = new Date().getTime();
+
     makeBasketOrderConfigPayload.value.type = 'custom';
     makeBasketOrderConfigPayload.value.title = title;
 
@@ -417,15 +419,29 @@ export const useMakeBasketOrderFormModal = () => {
     if (app?.proxy) {
       app.proxy.$globalBus.next({
         tag: openModalTag,
+        key: currentKey.value,
         payload,
       });
     }
+  };
+
+  const handleCloseModal = () => {
+    currentKey.value = 0;
+    showMakeOrderModal.value = false;
+    makeBasketOrderConfigPayload.value = {
+      type: 'custom',
+      title: t('BasketTrade.place_order'),
+      config: {} as KungfuApi.KfExtConfig,
+    };
+    handleConfirmModalCallback = undefined;
+    handleFormStateChangeCallback = undefined;
   };
 
   const handleConfirmMakeBasketOrder = (formState) => {
     if (app?.proxy) {
       app.proxy.$globalBus.next({
         tag: confirmModalTag,
+        key: currentKey.value,
         formState,
       });
     }
@@ -434,11 +450,16 @@ export const useMakeBasketOrderFormModal = () => {
   onMounted(() => {
     const subscribtion = app?.proxy?.$globalBus.subscribe((data) => {
       if (data.tag === openModalTag) {
+        currentKey.value = data.key;
         makeBasketOrderConfigPayload.value = data.payload;
         showMakeOrderModal.value = true;
       }
 
-      if (data.tag === confirmModalTag) {
+      if (
+        data.tag === confirmModalTag &&
+        currentKey.value &&
+        currentKey.value === data.key
+      ) {
         handleConfirmModalCallback?.(data.formState);
       }
 
@@ -460,6 +481,7 @@ export const useMakeBasketOrderFormModal = () => {
 
   return {
     showMakeOrderModal,
+    handleCloseModal,
     makeBasketOrderConfigPayload,
     handleShowMakeBasketOrderModal,
     handleConfirmMakeBasketOrder,
@@ -696,7 +718,6 @@ export const useMakeOrCancelBasketOrder = () => {
             normal,
             accountLocation,
           ).then((orderIds) => {
-            console.log(orderIds);
             if (orderIds && orderIds.length === basketInstruments.length) {
               return Promise.resolve();
             }
@@ -721,7 +742,8 @@ export const useMakeOrCancelBasketOrder = () => {
   const getBasketOrderTargetStatusOrdersMap = (
     watcher: KungfuApi.Watcher,
     basketOrder: KungfuApi.BasketOrderResolved,
-    targetStatus: OrderStatusEnum[],
+    mapKeyBuilter: (order: KungfuApi.Order) => string,
+    targetStatus?: OrderStatusEnum[],
   ) => {
     return (
       globalThis.HookKeeper.getHooks().dealTradingData.trigger(
@@ -731,24 +753,36 @@ export const useMakeOrCancelBasketOrder = () => {
         'order',
       ) as KungfuApi.Order[]
     ).reduce((map, item) => {
-      const key = buildOrdersMapKey(item.instrument_id, item.exchange_id);
+      const key = mapKeyBuilter(item);
       if (key in map) return map;
 
-      if (targetStatus.includes(item.status)) {
+      if (!targetStatus || targetStatus.includes(item.status)) {
         map[key] = item;
       }
       return map;
     }, {} as Record<string, KungfuApi.Order>);
   };
 
+  const getBasketOrderUnfinishedOrdersMap = (
+    watcher: KungfuApi.Watcher,
+    basketOrder: KungfuApi.BasketOrderResolved,
+  ) => {
+    return getBasketOrderTargetStatusOrdersMap(
+      watcher,
+      basketOrder,
+      (order: KungfuApi.Order) =>
+        buildOrdersMapKey(order.instrument_id, order.exchange_id),
+      UnfinishedOrderStatus,
+    );
+  };
+
   const cancalBasketOrder = (
     watcher: KungfuApi.Watcher,
     basketOrder: KungfuApi.BasketOrderResolved,
   ) => {
-    const resolvedOrdersMap = getBasketOrderTargetStatusOrdersMap(
+    const resolvedOrdersMap = getBasketOrderUnfinishedOrdersMap(
       watcher,
       basketOrder,
-      UnfinishedOrderStatus,
     );
     const ordersResolved = Object.values(resolvedOrdersMap);
 
@@ -830,10 +864,9 @@ export const useMakeOrCancelBasketOrder = () => {
         UnfinishedOrderStatus.includes(order.status),
       );
     } else {
-      const resolvedOrdersMap = getBasketOrderTargetStatusOrdersMap(
+      const resolvedOrdersMap = getBasketOrderUnfinishedOrdersMap(
         watcher,
         basketOrder,
-        UnfinishedOrderStatus,
       );
 
       ordersResolved = Object.values(resolvedOrdersMap);
@@ -897,6 +930,47 @@ export const useMakeOrCancelBasketOrder = () => {
     });
   };
 
+  const getBasketOrderNotTradeAllOrdersMap = (
+    watcher: KungfuApi.Watcher,
+    basketOrder: KungfuApi.BasketOrderResolved,
+  ) => {
+    const notTradeAllOrdersMap = getBasketOrderTargetStatusOrdersMap(
+      watcher,
+      basketOrder,
+      (order: KungfuApi.Order) =>
+        buildOrdersMapKey(order.instrument_id, order.exchange_id),
+      NotTradeAllOrderStatus,
+    );
+    const notTradeAllKeys = Object.keys(notTradeAllOrdersMap);
+    if (notTradeAllKeys.length) {
+      const finishedOrdersMap = getBasketOrderTargetStatusOrdersMap(
+        watcher,
+        basketOrder,
+        (order: KungfuApi.Order) =>
+          buildOrdersMapKey(order.instrument_id, order.exchange_id),
+        [OrderStatusEnum.Filled],
+      );
+      return notTradeAllKeys.reduce((ordersMap, key) => {
+        if (key in finishedOrdersMap) {
+          const volumeLeft =
+            notTradeAllOrdersMap[key].volume -
+            notTradeAllOrdersMap[key].volume_left;
+          const tradedVolume =
+            finishedOrdersMap[key].volume - finishedOrdersMap[key].volume_left;
+          if (volumeLeft === tradedVolume) {
+            return ordersMap;
+          }
+        }
+
+        ordersMap[key] = notTradeAllOrdersMap[key];
+
+        return ordersMap;
+      }, {} as Record<string, KungfuApi.Order>);
+    }
+
+    return notTradeAllOrdersMap;
+  };
+
   const replenishBasketOrder = (
     watcher: KungfuApi.Watcher,
     basket: KungfuApi.BasketResolved,
@@ -910,10 +984,9 @@ export const useMakeOrCancelBasketOrder = () => {
         NotTradeAllOrderStatus.includes(order.status),
       );
     } else {
-      const resolvedOrdersMap = getBasketOrderTargetStatusOrdersMap(
+      const resolvedOrdersMap = getBasketOrderNotTradeAllOrdersMap(
         watcher,
         basketOrder,
-        NotTradeAllOrderStatus,
       );
 
       ordersResolved = Object.values(resolvedOrdersMap);
@@ -971,6 +1044,7 @@ export const useMakeOrCancelBasketOrder = () => {
     cancalBasketOrder,
     chaseBasketOrder,
     replenishBasketOrder,
-    getBasketOrderTargetStatusOrdersMap,
+    getBasketOrderUnfinishedOrdersMap,
+    getBasketOrderNotTradeAllOrdersMap,
   };
 };

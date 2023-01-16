@@ -16,7 +16,7 @@ export const getColumns = buildConfigGetterWrapByComputed(
         type: 'string',
         name: t('BasketTrade.insert_time'),
         dataIndex: 'insert_time',
-        width: 120,
+        width: 100,
         sorter: buildTableColumnSorter<KungfuApi.BasketOrderResolved>(
           'str',
           'insert_time',
@@ -36,17 +36,27 @@ export const getColumns = buildConfigGetterWrapByComputed(
         type: 'string',
         name: t('BasketTrade.price'),
         dataIndex: 'price_level',
-        width: 80,
+        width: 60,
         sorter: buildTableColumnSorter<KungfuApi.BasketOrderResolved>(
           'str',
           'price_level',
         ),
       },
       {
+        type: 'number',
+        name: t('tradingConfig.price_offset'),
+        dataIndex: 'price_offset',
+        width: 60,
+        sorter: buildTableColumnSorter<KungfuApi.BasketOrderResolved>(
+          'num',
+          'price_offset',
+        ),
+      },
+      {
         type: 'string',
         name: t('BasketTrade.status'),
         dataIndex: 'status_uname',
-        width: 80,
+        width: 70,
         sorter: buildTableColumnSorter<KungfuApi.BasketOrderResolved>(
           'str',
           'status_uname',
@@ -54,9 +64,23 @@ export const getColumns = buildConfigGetterWrapByComputed(
       },
       {
         type: 'string',
+        name: `${t('orderConfig.clinch')}/${t('orderConfig.all')}`,
+        dataIndex: 'volume_condition',
+        width: 110,
+        sorter: (
+          a: KungfuApi.BasketOrderResolved,
+          b: KungfuApi.BasketOrderResolved,
+        ) => {
+          return Number(
+            Number(a.volume - a.volume_left) - Number(b.volume - b.volume_left),
+          );
+        },
+      },
+      {
+        type: 'string',
         name: t('BasketTrade.progress'),
         dataIndex: 'progress',
-        width: 220,
+        width: 200,
         sorter: buildTableColumnSorter<KungfuApi.BasketOrderResolved>(
           'num',
           'progress',

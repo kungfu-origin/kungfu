@@ -47,13 +47,12 @@
                 :percent="item.progress"
                 size="small"
                 :title="`${item.volume - item.volume_left}/${item.volume}`"
-              >
-                <!-- <template #format>
-                  <span>
-                    {{ `${item.volume - item.volume_left}/${item.volume}` }}
-                  </span>
-                </template> -->
-              </a-progress>
+              />
+            </template>
+            <template v-else-if="column.dataIndex === 'volume_condition'">
+              <span>
+                {{ `${item.volume - item.volume_left}/${item.volume}` }}
+              </span>
             </template>
             <template v-else-if="column.dataIndex === 'status_uname'">
               <span :class="`color-${item.status_color}`">
@@ -76,13 +75,6 @@
         </KfTradingDataTable>
       </div>
     </KfDashboard>
-    <!-- <StatisticModal
-      v-if="statisticModalVisible"
-      v-model:visible="statisticModalVisible"
-      :orders="tableData"
-      :is-unfinished-order="unfinishedOrder"
-      :history-date="historyDate"
-    ></StatisticModal> -->
   </div>
 </template>
 
@@ -96,7 +88,6 @@ import {
 } from 'vue';
 
 import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
-// import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboardItem.vue';
 import KfTradingDataTable from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfTradingDataTable.vue';
 
 import {

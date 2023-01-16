@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import path from 'path';
 import { dialog } from '@electron/remote';
 import {
   DeleteOutlined,
@@ -51,11 +52,15 @@ import {
   PriceTypeEnum,
   SideEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
-import { readCSV } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
+import {
+  readCSV,
+  writeCSV,
+} from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import { hashInstrumentUKey } from '@kungfu-trader/kungfu-js-api/kungfu';
 import {
   buildInstrumentSelectOptionValue,
   useWritableTableSearchKeyword,
+  messagePrompt,
 } from '../../assets/methods/uiUtils';
 import { getPriceTypeConfig } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 
@@ -284,9 +289,11 @@ function getTablesSearchRelated(
   tableKeys: Record<string, KungfuApi.KfConfigItem>,
 ): TablesSearchRelated {
   return Object.keys(tableKeys).reduce((tablesSearchRelated, key) => {
+    const targetList = ref(formState[key]);
+    const keys = tableKeys[key].search?.keys || tableKeys[key].headers || [];
     const { searchKeyword, tableData } = useWritableTableSearchKeyword<
       Record<string, KungfuApi.KfConfigItem>
-    >(formState[key], tableKeys[key].headers || []);
+    >(targetList, keys);
     tablesSearchRelated[key] = {
       searchKeyword,
       tableData,
@@ -565,6 +572,33 @@ function handleSelectCsv<T>(
           });
       }
     });
+}
+
+function handleDownloadCsvTemplate(
+  templates: KungfuApi.KfConfigItemTemplate[],
+) {
+  if (templates && Array.isArray(templates)) {
+    dialog
+      .showOpenDialog({
+        title: t('settingsFormConfig.csv_template'),
+        properties: ['createDirectory', 'openDirectory'],
+      })
+      .then(({ filePaths }) => {
+        if (filePaths && filePaths.length) {
+          Promise.all(
+            templates.map((template) => {
+              const filePath = path.join(
+                filePaths[0],
+                template.name || t('settingsFormConfig.csv_template') + '.csv',
+              );
+              return writeCSV(filePath, template.data || []);
+            }),
+          ).then(() => {
+            messagePrompt().success();
+          });
+        }
+      });
+  }
 }
 
 function handleSelectFile(targetKey: string): void {
@@ -1089,22 +1123,39 @@ defineExpose({
           @blur="instrumentsSearchRelated[item.key].handleSearchInstrumentBlur"
         ></a-select>
         <div class="select-csv-button__wrap">
-          <a-button
-            size="small"
-            :disabled="
-              (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
-              item.disabled
-            "
-            @click="
-              handleSelectCsv<KungfuApi.Instrument>(
-                item.key,
-                item.headers,
-                instrumentsCsvCallback,
-              )
-            "
-          >
-            {{ $t('settingsFormConfig.add_csv') }}
-          </a-button>
+          <div class="select-csv-buttons">
+            <a-button
+              size="small"
+              :disabled="
+                (changeType === 'update' &&
+                  item.primary &&
+                  !isPrimaryDisabled) ||
+                item.disabled
+              "
+              @click="
+                handleSelectCsv<KungfuApi.Instrument>(
+                  item.key,
+                  item.headers,
+                  instrumentsCsvCallback,
+                )
+              "
+            >
+              {{ $t('settingsFormConfig.add_csv') }}
+            </a-button>
+            <a-button
+              v-if="!!item.template"
+              size="small"
+              :disabled="
+                (changeType === 'update' &&
+                  item.primary &&
+                  !isPrimaryDisabled) ||
+                item.disabled
+              "
+              @click="handleDownloadCsvTemplate(item.template || [])"
+            >
+              {{ $t('settingsFormConfig.csv_template') }}
+            </a-button>
+          </div>
           <span v-if="item.headers" class="select-csv-tip">
             {{
               $t('settingsFormConfig.add_csv_desc', {
@@ -1165,23 +1216,38 @@ defineExpose({
         class="table-in-config-setting-form"
       >
         <div v-if="item.type === 'csvTable'" class="select-csv-button__wrap">
-          <a-button
-            size="small"
-            :disabled="
-              (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
-              item.disabled
-            "
-            @click="
-              handleSelectCsv<Record<string, KungfuApi.KfConfigValue>>(
-                item.key,
-                item.headers,
-                csvTableCallback(item.columns || []),
-              )
-            "
-          >
-            {{ $t('settingsFormConfig.add_csv') }}
-          </a-button>
-          <span v-if="item.headers" class="select-csv-tip">
+          <div class="select-csv-buttons">
+            <a-button
+              :disabled="
+                (changeType === 'update' &&
+                  item.primary &&
+                  !isPrimaryDisabled) ||
+                item.disabled
+              "
+              @click="
+                handleSelectCsv<Record<string, KungfuApi.KfConfigValue>>(
+                  item.key,
+                  item.headers,
+                  csvTableCallback(item.columns || []),
+                )
+              "
+            >
+              {{ $t('settingsFormConfig.add_csv') }}
+            </a-button>
+            <a-button
+              v-if="!!item.template"
+              :disabled="
+                (changeType === 'update' &&
+                  item.primary &&
+                  !isPrimaryDisabled) ||
+                item.disabled
+              "
+              @click="handleDownloadCsvTemplate(item.template || [])"
+            >
+              {{ $t('settingsFormConfig.csv_template') }}
+            </a-button>
+          </div>
+          <span v-if="!!item.headers" class="select-csv-tip">
             {{
               $t('settingsFormConfig.add_csv_desc', {
                 header: item.headers.join(', '),
@@ -1192,8 +1258,8 @@ defineExpose({
 
         <div class="table-in-config-setting-form-head">
           <a-input-search
-            v-if="!!item.searchable"
-            v-model:value="tablesSearchRelated[item.key].searchKeyword"
+            v-if="!!item.tableSearch"
+            v-model:value="tablesSearchRelated[item.key].searchKeyword.value"
             class="table-in-config-setting-search"
             :placeholder="$t('globalSettingConfig.varieties')"
           />
@@ -1341,8 +1407,13 @@ export default defineComponent({
   .select-csv-button__wrap {
     margin-top: 8px;
 
-    button {
-      width: fit-content;
+    .select-csv-buttons {
+      display: flex;
+
+      button {
+        margin-right: 8px;
+        width: fit-content;
+      }
     }
 
     .select-csv-tip {
@@ -1355,11 +1426,17 @@ export default defineComponent({
   }
 
   .table-in-config-setting-form {
-    .table-in-config-setting-head {
+    .table-in-config-setting-form-head {
       display: flex;
+      margin-bottom: 12px;
 
       .table-in-config-setting-search {
+        width: 200px;
         margin-right: 16px;
+
+        .ant-input {
+          height: 32px;
+        }
       }
     }
 
@@ -1376,7 +1453,7 @@ export default defineComponent({
 
         &.ant-form-inline {
           .ant-row.ant-form-item {
-            margin-bottom: 8px;
+            margin-bottom: 0;
 
             .ant-select {
               min-width: 120px;

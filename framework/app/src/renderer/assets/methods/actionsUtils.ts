@@ -22,6 +22,7 @@ import {
   SideEnum,
   StrategyExtTypes,
   OrderInputKeyEnum,
+  LedgerCategoryEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
   getKfCategoryData,
@@ -1688,23 +1689,72 @@ export const playSound = (type: 'ding' | 'warn' = 'ding'): void => {
   }
 };
 
-export const useCurrentPositionList = (
-  app: ComponentInternalInstance | null,
-) => {
+export const useCurrentPositionList = () => {
+  const app = getCurrentInstance();
+  type PosStat = Record<string, KungfuApi.Position>;
+
   const { currentGlobalKfLocation } = useCurrentGlobalKfLocation(
     window.watcher,
   );
   const currentPositionList = ref<KungfuApi.PositionResolved[]>([]);
+  const allPositionMap = ref<PosStat>({});
+
+  function buildPrositionMapKey(
+    exchangeId: string,
+    instrumentId: string,
+    direction: DirectionEnum,
+  ) {
+    return `${exchangeId}_${instrumentId}_${direction}`;
+  }
+
+  function buildGlobalPositions(positions: KungfuApi.Position[]): PosStat {
+    return positions.reduce((posStat, pos) => {
+      const id = buildPrositionMapKey(
+        pos.exchange_id,
+        pos.instrument_id,
+        pos.direction,
+      );
+      if (!posStat[id]) {
+        posStat[id] = pos;
+      } else {
+        const prePosStat = posStat[id];
+        const { avg_open_price, volume, yesterday_volume, unrealized_pnl } =
+          prePosStat;
+        posStat[id] = {
+          ...prePosStat,
+          uid_key: pos.uid_key,
+          yesterday_volume: yesterday_volume + pos.yesterday_volume,
+          volume: volume + pos.volume,
+
+          avg_open_price:
+            (avg_open_price * Number(volume) +
+              pos.avg_open_price * Number(pos.volume)) /
+            (Number(pos.volume) + Number(pos.volume)),
+          unrealized_pnl: unrealized_pnl + pos.unrealized_pnl,
+        };
+      }
+      return posStat;
+    }, {} as PosStat);
+  }
 
   onMounted(() => {
     if (app?.proxy) {
       const subscription = app.proxy.$tradingDataSubject.subscribe(
         (watcher: KungfuApi.Watcher) => {
+          const allPositions = watcher.ledger.Position.nofilter(
+            'volume',
+            BigInt(0),
+          )
+            .filter('ledger_category', LedgerCategoryEnum.td)
+            .list();
+
+          allPositionMap.value = toRaw(buildGlobalPositions(allPositions));
+
           if (currentGlobalKfLocation.value === null) {
             return;
           }
 
-          const positions =
+          const currentPositions =
             globalThis.HookKeeper.getHooks().dealTradingData.trigger(
               window.watcher,
               currentGlobalKfLocation.value,
@@ -1713,7 +1763,9 @@ export const useCurrentPositionList = (
             ) as KungfuApi.Position[];
 
           currentPositionList.value = toRaw(
-            positions.reverse().map((item) => dealPosition(watcher, item)),
+            currentPositions
+              .reverse()
+              .map((item) => dealPosition(watcher, item)),
           );
         },
       );
@@ -1725,6 +1777,8 @@ export const useCurrentPositionList = (
   });
 
   return {
+    allPositionMap,
+    buildPrositionMapKey,
     currentPositionList,
   };
 };
@@ -1736,7 +1790,7 @@ export const useMakeOrderInfo = (
   const { currentGlobalKfLocation } = useCurrentGlobalKfLocation(
     window.watcher,
   );
-  const { currentPositionList } = useCurrentPositionList(app);
+  const { currentPositionList } = useCurrentPositionList();
 
   const { getAssetsByKfConfig } = useAssets();
 

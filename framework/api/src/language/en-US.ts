@@ -98,7 +98,8 @@ export default {
 
   settingsFormConfig: {
     add_csv: 'Add Csv',
-    add_csv_desc: "csv headers are 'instrument'_id and 'exchange_id'",
+    csv_template: 'Csv Template',
+    add_csv_desc: 'csv headers are {header}',
     clear: 'Clear',
   },
 

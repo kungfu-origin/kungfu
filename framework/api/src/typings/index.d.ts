@@ -38,6 +38,7 @@ declare namespace KungfuApi {
     BasketOrderStatusEnum,
   } from './enums';
   import { Dayjs } from 'dayjs';
+  import { Row } from 'fast-csv';
 
   export type AntInKungfuColorTypes =
     | 'default'
@@ -114,6 +115,15 @@ declare namespace KungfuApi {
     label: string | number;
   }
 
+  export interface KfConfigItemTemplate {
+    name: string;
+    data: Array<Row>;
+  }
+
+  export interface KfConfigItemSearch {
+    keys?: Array<string>;
+  }
+
   export interface KfConfigItem {
     key: string;
     name: string;
@@ -130,7 +140,8 @@ declare namespace KungfuApi {
     options?: KfSelectOption[];
     data?: KfSelectOption[];
     headers?: string[];
-    searchable?: boolean;
+    template?: KfConfigItemTemplate[];
+    search?: KfConfigItemSearch;
   }
 
   export interface KfExhibitConfigItem {

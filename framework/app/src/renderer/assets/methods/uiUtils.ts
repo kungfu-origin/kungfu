@@ -246,24 +246,26 @@ export const useWritableTableSearchKeyword = <T>(
     () => ({ keyword: searchKeyword.value, list: targetList.value }),
     (newValue) => {
       const { keyword, list } = newValue;
-      tableData.value = list
-        .map((item, index) => ({ data: toRaw(item), index }))
-        .filter((item: { data: T; index: number }) => {
-          const combinedValue = keys
-            .map(
-              (key: string) =>
-                (
-                  ((item.data as Record<string, unknown>)[key] as
-                    | string
-                    | number) || ''
-                ).toString() || '',
-            )
-            .join('_');
-          return new RegExp(keyword, 'ig').test(combinedValue);
-        });
+      tableData.value =
+        list
+          ?.map((item, index) => ({ data: toRaw(item), index }))
+          .filter((item: { data: T; index: number }) => {
+            const combinedValue = keys
+              .map(
+                (key: string) =>
+                  (
+                    ((item.data as Record<string, unknown>)[key] as
+                      | string
+                      | number) || ''
+                  ).toString() || '',
+              )
+              .join('_');
+            return new RegExp(keyword, 'ig').test(combinedValue);
+          }) || [];
     },
     {
       deep: true,
+      immediate: true,
     },
   );
 

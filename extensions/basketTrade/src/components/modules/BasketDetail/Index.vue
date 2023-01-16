@@ -99,6 +99,27 @@
           <template v-else-if="column.dataIndex === 'rate'">
             {{ `${item['rate']}%` }}
           </template>
+          <template v-else-if="column.dataIndex === 'position_volume'">
+            {{ getBasketInstrumentPositionData(item, 'volume') }}
+          </template>
+          <template v-else-if="column.dataIndex === 'avg_open_price'">
+            {{
+              dealKfNumber(
+                getBasketInstrumentPositionData(item, 'avg_open_price'),
+              )
+            }}
+          </template>
+          <template v-else-if="column.dataIndex === 'unrealized_pnl'">
+            <KfBlinkNum
+              mode="compare-zero"
+              :num="
+                dealAssetPrice(
+                  getBasketInstrumentPositionData(item, 'unrealized_pnl'),
+                )
+              "
+            ></KfBlinkNum>
+          </template>
+
           <template v-else-if="column.dataIndex === 'actions'">
             <div class="kf-actions__warp">
               <a-button
@@ -164,6 +185,7 @@ import {
 } from '../../../utils/basketTradeUtils';
 import {
   useActiveInstruments,
+  useCurrentPositionList,
   useExtConfigsRelated,
   useInstruments,
   useProcessStatusDetailData,
@@ -173,7 +195,9 @@ import { getColumns, getSetBasketInstrumentFormSettings } from './config';
 import { BASKET_CATEGORYS } from '../../../config';
 import { getMakeBasketOrderConfigSettings } from '../../../config/makeBasketOrderFormConfig';
 import {
+  dealKfNumber,
   dealKfPrice,
+  dealAssetPrice,
   getKfLocationByProcessId,
   transformSearchInstrumentResultToInstrument,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
@@ -195,6 +219,7 @@ const { subscribeAllInstrumentByAppStates } = useInstruments();
 useSubscribeBasketInstruments();
 const { getQuoteByInstrument, isInstrumentUpLimit, isInstrumentLowLimit } =
   useQuote();
+const { buildPrositionMapKey, allPositionMap } = useCurrentPositionList();
 
 const dataTableRef = ref();
 const dataSelection = ref<KfTradingDataTableSelection>({});
@@ -202,19 +227,50 @@ const basketInstrumentDataLoaded = ref(false);
 const isWithoutUpLimitInstrument = ref(false);
 const isWithoutLowLimitInstrument = ref(false);
 
-const basketInstrumentLastPriceSorter = (
-  a: KungfuApi.BasketInstrumentResolved,
-  b: KungfuApi.BasketInstrumentResolved,
+const basketInstrumentSorter = (
+  getter: (bi: KungfuApi.BasketInstrumentResolved) => number,
 ) => {
   return (
-    (getQuoteByInstrument(a)?.last_price ?? 0) -
-    (getQuoteByInstrument(b)?.last_price ?? 0)
+    a: KungfuApi.BasketInstrumentResolved,
+    b: KungfuApi.BasketInstrumentResolved,
+  ) => {
+    return (getter(a) ?? 0) - (getter(b) ?? 0);
+  };
+};
+
+const getBasketInstrumentPositionData = (
+  basketInstrument: KungfuApi.BasketInstrumentResolved,
+  key: string,
+) => {
+  return (
+    allPositionMap.value[
+      buildPrositionMapKey(
+        basketInstrument.exchangeId,
+        basketInstrument.instrumentId,
+        0,
+      )
+    ]?.[key] ?? '--'
   );
 };
-const columns = getColumns(
-  currentGlobalBasket,
-  basketInstrumentLastPriceSorter,
-);
+
+const columns = getColumns(currentGlobalBasket, {
+  last_price: basketInstrumentSorter(
+    (bi: KungfuApi.BasketInstrumentResolved) =>
+      getQuoteByInstrument(bi)?.last_price ?? 0,
+  ),
+  volume: basketInstrumentSorter(
+    (bi: KungfuApi.BasketInstrumentResolved) =>
+      getBasketInstrumentPositionData(bi, 'volume') ?? 0,
+  ),
+  avg_open_price: basketInstrumentSorter(
+    (bi: KungfuApi.BasketInstrumentResolved) =>
+      getBasketInstrumentPositionData(bi, 'avg_open_price') ?? 0,
+  ),
+  unrealized_pnl: basketInstrumentSorter(
+    (bi: KungfuApi.BasketInstrumentResolved) =>
+      getBasketInstrumentPositionData(bi, 'unrealized_pnl') ?? 0,
+  ),
+});
 
 const basketInstrumentsResolvedMap = ref<
   Record<string, Record<string, KungfuApi.BasketInstrumentResolved>>

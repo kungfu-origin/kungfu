@@ -98,6 +98,7 @@ export default {
 
   settingsFormConfig: {
     add_csv: '添加 csv',
+    csv_template: 'csv 模板',
     add_csv_desc: 'csv 表头为 {header}',
     clear: '清除',
   },
@@ -266,7 +267,7 @@ export default {
     protect_price: '保护价格',
     price_type: '方式',
     price_level: '目标价格',
-    price_offset: '自定义价差',
+    price_offset: '价格偏移',
     side: '买卖',
     offset: '开平',
     limit_price: '下单价格',

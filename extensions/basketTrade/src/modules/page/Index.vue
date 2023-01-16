@@ -6,6 +6,7 @@
     v-if="showMakeOrderModal"
     v-model:visible="showMakeOrderModal"
     :payload="makeBasketOrderConfigPayload"
+    @close="handleCloseModal"
     @confirm="({ formState }) => handleConfirmMakeBasketOrder(formState)"
   ></KfSetByConfigModal>
 </template>
@@ -33,6 +34,7 @@ const boardsMap: KfLayout.BoardsMap =
   getBasketTradeBoardsMap() || defaultBasketTradeBoardsMap;
 const {
   showMakeOrderModal,
+  handleCloseModal,
   makeBasketOrderConfigPayload,
   handleConfirmMakeBasketOrder,
 } = useMakeBasketOrderFormModal();

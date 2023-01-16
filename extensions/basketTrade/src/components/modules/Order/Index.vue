@@ -44,10 +44,7 @@ import {
   makeOrderByOrderInput,
 } from '@kungfu-trader/kungfu-js-api/kungfu';
 import type { Dayjs } from 'dayjs';
-import {
-  NotTradeAllOrderStatus,
-  UnfinishedOrderStatus,
-} from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
+import { UnfinishedOrderStatus } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import {
   HistoryDateEnum,
   OrderStatusEnum,
@@ -105,7 +102,8 @@ const { handleShowMakeBasketOrderModal } = useMakeBasketOrderFormModal();
 const {
   chaseBasketOrder,
   replenishBasketOrder,
-  getBasketOrderTargetStatusOrdersMap,
+  getBasketOrderUnfinishedOrdersMap,
+  getBasketOrderNotTradeAllOrdersMap,
 } = useMakeOrCancelBasketOrder();
 
 const { handleDownload } = useDownloadHistoryTradingData();
@@ -471,11 +469,15 @@ function handleChaseOrReplenishClick(type: 'chase' | 'replenish') {
     waittingToSelect.value = type;
 
     const orders = Object.values(
-      getBasketOrderTargetStatusOrdersMap(
-        window.watcher,
-        currentGlobalBasketOrder.value,
-        type === 'chase' ? UnfinishedOrderStatus : NotTradeAllOrderStatus,
-      ),
+      type === 'chase'
+        ? getBasketOrderUnfinishedOrdersMap(
+            window.watcher,
+            currentGlobalBasketOrder.value,
+          )
+        : getBasketOrderNotTradeAllOrdersMap(
+            window.watcher,
+            currentGlobalBasketOrder.value,
+          ),
     );
     return selectRows(orders);
   }
@@ -554,6 +556,11 @@ function handleReplenishBasketOrder(
     dataTableRef.value?.handleSelectAll(false);
   });
 }
+
+function handleCancelToMakeOrder() {
+  waittingToSelect.value = '';
+  dataTableRef.value?.handleSelectAll(false);
+}
 </script>
 <template>
   <div class="kf-orders__warp kf-translateZ">
@@ -608,7 +615,7 @@ function handleReplenishBasketOrder(
           </a-button>
         </KfDashboardItem>
         <KfDashboardItem v-if="waittingToSelect" style="margin-right: 16px">
-          <a-button size="small" @click.stop="waittingToSelect = ''">
+          <a-button size="small" @click.stop="handleCancelToMakeOrder">
             {{ $t('BasketTrade.cancel') }}
           </a-button>
         </KfDashboardItem>
