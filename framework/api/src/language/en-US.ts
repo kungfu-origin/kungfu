@@ -256,6 +256,7 @@ export default {
     price_type: 'Price Type',
     side: 'Side',
     offset: 'Offset',
+    direction: 'Direction',
     limit_price: 'LimitPrice',
     algorithm: 'Algorithm',
 

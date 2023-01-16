@@ -28,7 +28,10 @@ import {
   PriceLevelEnum,
   SideEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
-import { getProcessIdByKfLocation } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import {
+  getProcessIdByKfLocation,
+  resolveDirectionBySideAndOffset,
+} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
   UnfinishedOrderStatus,
   NotTradeAllOrderStatus,
@@ -827,6 +830,7 @@ export const useMakeOrCancelBasketOrder = () => {
         instrumentName: '',
         id: ukey,
         ukey,
+        direction: resolveDirectionBySideAndOffset(order.side, order.offset),
         volume: order.volume_left,
         rate: 0,
         basketInstrumentId: '',
@@ -952,9 +956,7 @@ export const useMakeOrCancelBasketOrder = () => {
       );
       return notTradeAllKeys.reduce((ordersMap, key) => {
         if (key in finishedOrdersMap) {
-          const volumeLeft =
-            notTradeAllOrdersMap[key].volume -
-            notTradeAllOrdersMap[key].volume_left;
+          const volumeLeft = notTradeAllOrdersMap[key].volume_left;
           const tradedVolume =
             finishedOrdersMap[key].volume - finishedOrdersMap[key].volume_left;
           if (volumeLeft === tradedVolume) {

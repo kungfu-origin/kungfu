@@ -1,5 +1,6 @@
 import { BasketVolumeTypeEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { DealTradingDataGetter } from '@kungfu-trader/kungfu-js-api/hooks/dealTradingDataHook';
+import { getTradingDataSortKey } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
   buildConfigGetterWrapByComputed,
   buildTableColumnSorter,
@@ -117,6 +118,9 @@ export const getBasketFormSettings = (volumeType: BasketVolumeTypeEnum) =>
       : []),
   ] as KungfuApi.KfConfigItem[];
 
+const orderSortKey = getTradingDataSortKey('Order');
+const tradeSortKey = getTradingDataSortKey('Trade');
+const positionSortKey = getTradingDataSortKey('Position');
 export const basketTradingDataGetter: DealTradingDataGetter = {
   category: BASKET_CATEGORYS.SETTING,
   commonData: {
@@ -144,7 +148,7 @@ export const basketTradingDataGetter: DealTradingDataGetter = {
       // }
       kfLocation;
 
-      return orders.sort('update_time');
+      return orders.sort(orderSortKey);
     },
   },
   trade: {
@@ -154,7 +158,7 @@ export const basketTradingDataGetter: DealTradingDataGetter = {
       kfLocation: KungfuApi.KfLocation,
     ) => {
       kfLocation;
-      return trades.list();
+      return trades.sort(tradeSortKey);
     },
   },
   position: {
@@ -164,7 +168,7 @@ export const basketTradingDataGetter: DealTradingDataGetter = {
       kfLocation: KungfuApi.KfLocation,
     ) => {
       kfLocation;
-      return positions.list();
+      return positions.sort(positionSortKey);
     },
   },
 };

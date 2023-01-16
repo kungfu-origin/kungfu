@@ -24,6 +24,8 @@ const props = withDefaults(
     visible: boolean;
     payload: KungfuApi.SetKfConfigPayload;
     width?: number;
+    labelCol?: number;
+    wrapperCol?: number;
     isPrimaryDisabled?: boolean;
     passPrimaryKeySpecialWordsVerify?: boolean;
     primaryKeyAvoidRepeatCompareExtra?: string;
@@ -33,6 +35,8 @@ const props = withDefaults(
     visible: false,
     payload: () => ({} as KungfuApi.SetKfConfigPayload),
     width: 520,
+    labelCol: 6,
+    wrapperCol: 14,
     isPrimaryDisabled: false,
     passPrimaryKeySpecialWordsVerify: false,
     primaryKeyAvoidRepeatCompareTarget: () => [],
@@ -173,6 +177,8 @@ function handleCancel(): void{
       v-model:formState="formState"
       :config-settings="configSettings"
       :change-type="payload.type"
+      :label-col="labelCol"
+      :wrapper-col="wrapperCol"
       :is-primary-disabled="isPrimaryDisabled"
       :pass-primary-key-special-words-verify="passPrimaryKeySpecialWordsVerify"
       :primary-key-avoid-repeat-compare-target="

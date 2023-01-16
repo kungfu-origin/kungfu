@@ -5,6 +5,7 @@ import {
 import { useBasketTradeStore } from './../../../store';
 import { DealTradingDataGetter } from '@kungfu-trader/kungfu-js-api/hooks/dealTradingDataHook';
 import { BasketOrderStatusEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
+import { getTradingDataSortKey } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { BASKET_CATEGORYS } from '../../../config';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 const { t } = VueI18n.global;
@@ -122,6 +123,9 @@ export const BasketOrderStatus: Record<
 
 const { getBasketOrderByOrderLocation } = useBasketTradeStore();
 
+const orderSortKey = getTradingDataSortKey('Order');
+const tradeSortKey = getTradingDataSortKey('Trade');
+const positionSortKey = getTradingDataSortKey('Position');
 export const basketOrderTradingDataGetter: DealTradingDataGetter = {
   category: BASKET_CATEGORYS.ORDER,
   commonData: {
@@ -140,10 +144,10 @@ export const basketOrderTradingDataGetter: DealTradingDataGetter = {
         return orders
           .nofilter('parent_id', '')
           .filter('parent_id', basketOrder.order_id)
-          .sort('update_time');
+          .sort(orderSortKey);
       }
 
-      return orders.sort('update_time');
+      return orders.sort(orderSortKey);
     },
   },
   trade: {
@@ -153,7 +157,7 @@ export const basketOrderTradingDataGetter: DealTradingDataGetter = {
       kfLocation: KungfuApi.KfLocation,
     ) => {
       kfLocation;
-      return trades.list();
+      return trades.sort(tradeSortKey);
     },
   },
   position: {
@@ -163,7 +167,7 @@ export const basketOrderTradingDataGetter: DealTradingDataGetter = {
       kfLocation: KungfuApi.KfLocation,
     ) => {
       kfLocation;
-      return positions.list();
+      return positions.sort(positionSortKey);
     },
   },
 };

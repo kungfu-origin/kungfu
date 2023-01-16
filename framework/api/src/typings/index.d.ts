@@ -115,6 +115,11 @@ declare namespace KungfuApi {
     label: string | number;
   }
 
+  export interface KfConfigItemHeader {
+    title: string;
+    description: string;
+  }
+
   export interface KfConfigItemTemplate {
     name: string;
     data: Array<Row>;
@@ -139,7 +144,7 @@ declare namespace KungfuApi {
     primary?: boolean;
     options?: KfSelectOption[];
     data?: KfSelectOption[];
-    headers?: string[];
+    headers?: KfConfigItemHeader[];
     template?: KfConfigItemTemplate[];
     search?: KfConfigItemSearch;
   }
@@ -521,7 +526,6 @@ declare namespace KungfuApi {
 
   export interface BasketOrderInput {
     side: SideEnum;
-    offset: OffsetEnum;
     price_type: PriceTypeEnum;
     price_level: PriceLevelEnum;
     price_offset: number;
@@ -534,7 +538,6 @@ declare namespace KungfuApi {
     insert_time: bigint; //订单写入时间
     update_time: bigint; //订单更新时间
     side: SideEnum;
-    offset: OffsetEnum;
     price_type: PriceTypeEnum;
     price_level: PriceLevelEnum;
     price_offset: number;
@@ -771,6 +774,7 @@ declare namespace KungfuApi {
     instrument_id: string;
     exchange_id: string;
     instrument_type: InstrumentTypeEnum;
+    direction: DirectionEnum;
     volume: bigint; // 数量
     rate: number; // 比例
   }

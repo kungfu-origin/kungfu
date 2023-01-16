@@ -21,6 +21,7 @@ import {
   kfLogger,
   resolveAccountId,
   resolveClientId,
+  resolveOffsetBySideAndDirection,
 } from '../utils/busiUtils';
 import {
   HistoryDateEnum,
@@ -556,22 +557,25 @@ export const makeOrderByBasketInstruments = (
 
   console.log(parentId, basketOrderInput, basketInstruments, kfLocation);
 
-  const makeOrderTasks = basketInstruments.map((baksetInstrument) => {
+  const makeOrderTasks = basketInstruments.map((basketInstrument) => {
     const now = watcher.now();
 
     const orderInput: KungfuApi.OrderInput = {
       ...longfist.OrderInput(),
       parent_id: parentId,
       insert_time: now,
-      instrument_id: `${baksetInstrument.instrument_id}`,
-      exchange_id: `${baksetInstrument.exchange_id}`,
-      instrument_type: +baksetInstrument.instrument_type,
+      instrument_id: `${basketInstrument.instrument_id}`,
+      exchange_id: `${basketInstrument.exchange_id}`,
+      instrument_type: +basketInstrument.instrument_type,
       side: +basketOrderInput.side,
-      offset: +basketOrderInput.offset,
+      offset: resolveOffsetBySideAndDirection(
+        +basketOrderInput.side,
+        +basketInstrument.direction,
+      ),
       price_type: +basketOrderInput.price_type,
-      limit_price: +baksetInstrument.priceResolved || 0,
-      frozen_price: +baksetInstrument.priceResolved || 0,
-      volume: BigInt(baksetInstrument.volumeResolved),
+      limit_price: +basketInstrument.priceResolved || 0,
+      frozen_price: +basketInstrument.priceResolved || 0,
+      volume: BigInt(basketInstrument.volumeResolved),
     };
     return Promise.resolve(watcher.issueOrder(orderInput, kfLocation));
   });
