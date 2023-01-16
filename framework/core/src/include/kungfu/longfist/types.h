@@ -222,6 +222,7 @@ KF_DEFINE_PACK_TYPE(                                                            
     (kungfu::array<char, INSTRUMENT_ID_LEN>, instrument_id),                           // 合约ID
     (kungfu::array<char, EXCHANGE_ID_LEN>, exchange_id),                               // 交易所ID
     (InstrumentType, instrument_type), // 合约类型                                                // volume比例
+    (Direction, direction),            // 方向
     (int64_t, volume),                 // 数量
     (double, rate)                     // 比例
 );
