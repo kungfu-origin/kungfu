@@ -1258,10 +1258,10 @@ defineExpose({
 
         <div class="table-in-config-setting-form-head">
           <a-input-search
-            v-if="!!item.tableSearch"
+            v-if="!!item.search"
             v-model:value="tablesSearchRelated[item.key].searchKeyword.value"
             class="table-in-config-setting-search"
-            :placeholder="$t('globalSettingConfig.varieties')"
+            :placeholder="$t('settingsFormConfig.keyword')"
           />
           <a-button
             :disabled="
@@ -1274,7 +1274,7 @@ defineExpose({
             </template>
           </a-button>
         </div>
-        <template v-if="!!item?.searchable">
+        <template v-if="!!item.search">
           <div
             v-for="(_item, index) in tablesSearchRelated[item.key].tableData
               .value"

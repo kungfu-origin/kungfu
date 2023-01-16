@@ -97,6 +97,7 @@ export default {
   },
 
   settingsFormConfig: {
+    keyword: 'Keyword',
     add_csv: 'Add Csv',
     csv_template: 'Csv Template',
     add_csv_desc: 'csv headers are {header}',
