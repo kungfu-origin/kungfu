@@ -268,7 +268,7 @@ export default {
     protect_price: '保护价格',
     price_type: '方式',
     price_level: '目标价格',
-    price_offset: '价格偏移',
+    price_offset: '偏移',
     side: '买卖',
     offset: '开平',
     direction: '多空',
