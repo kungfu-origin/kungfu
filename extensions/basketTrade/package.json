@@ -69,7 +69,7 @@
         "instrument_id": "标的",
         "instrument_id_header_desc": "标的代码, 字符串",
         "exchange_id": "交易所",
-        "exchange_id_header_desc": "交易所 ID, 字符串",
+        "exchange_id_header_desc": "交易所 ID, 字符串, 可填 SSE(上交所), SZE(深交所), BSE(北交所), SHFE(上期所), DCE(大商所), CZCE(郑商所), CFFEX(中金所), INE(能源中心)",
         "direction_header_desc": "多空类型, 可填 0(多) 或 1(空)",
         "instrument_name": "标的名称",
         "volume": "交易量",
