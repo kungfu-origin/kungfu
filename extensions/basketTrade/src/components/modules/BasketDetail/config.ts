@@ -126,6 +126,7 @@ export const getSetBasketInstrumentFormSettings =
           },
           headers: ['instrument_id', 'exchange_id', 'volume', 'rate'],
           default: [],
+          noDivider: true,
           columns: [
             {
               key: 'instrument',

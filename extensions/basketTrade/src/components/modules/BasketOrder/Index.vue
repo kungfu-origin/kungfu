@@ -61,14 +61,12 @@
             </template>
             <template v-else-if="column.dataIndex === 'actions'">
               <div class="kf-actions__warp">
-                <a-button
-                  type="link"
-                  size="small"
-                  danger
+                <div
+                  class="color-red"
                   @click.stop="handleCancelBasketOrder(item)"
                 >
                   {{ $t('BasketTrade.cancel_order') }}
-                </a-button>
+                </div>
               </div>
             </template>
           </template>

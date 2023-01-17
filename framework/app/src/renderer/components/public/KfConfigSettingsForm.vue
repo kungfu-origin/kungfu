@@ -1310,13 +1310,29 @@ defineExpose({
               "
               :configSettings="item.columns || []"
               :changeType="changeType"
-              :rules="rules"
+              :primaryKeyAvoidRepeatCompareExtra="
+                primaryKeyAvoidRepeatCompareExtra
+              "
+              :primaryKeyAvoidRepeatCompareTarget="
+                primaryKeyAvoidRepeatCompareTarget
+              "
               layout="inline"
+              :labelAlign="labelAlign"
+              :labelWrap="labelWrap"
+              :labelCol="labelCol"
+              :wrapperCol="wrapperCol"
+              :rules="rules"
+              :steps="steps"
+              :passPrimaryKeySpecialWordsVerify="
+                passPrimaryKeySpecialWordsVerify
+              "
+              :isPrimaryDisabled="isPrimaryDisabled"
             ></KfConfigSettingsForm>
             <a-divider
               v-if="
                 index !==
-                tablesSearchRelated[item.key].tableData.value.length - 1
+                  tablesSearchRelated[item.key].tableData.value.length - 1 &&
+                !item.noDivider
               "
             ></a-divider>
           </div>
@@ -1346,11 +1362,26 @@ defineExpose({
               v-model:formState="formState[item.key][index]"
               :configSettings="item.columns || []"
               :changeType="changeType"
-              :rules="rules"
+              :primaryKeyAvoidRepeatCompareExtra="
+                primaryKeyAvoidRepeatCompareExtra
+              "
+              :primaryKeyAvoidRepeatCompareTarget="
+                primaryKeyAvoidRepeatCompareTarget
+              "
               layout="inline"
+              :labelAlign="labelAlign"
+              :labelWrap="labelWrap"
+              :labelCol="labelCol"
+              :wrapperCol="wrapperCol"
+              :rules="rules"
+              :steps="steps"
+              :passPrimaryKeySpecialWordsVerify="
+                passPrimaryKeySpecialWordsVerify
+              "
+              :isPrimaryDisabled="isPrimaryDisabled"
             ></KfConfigSettingsForm>
             <a-divider
-              v-if="index !== formState[item.key].length - 1"
+              v-if="index !== formState[item.key].length - 1 && !item.noDivider"
             ></a-divider>
           </div>
         </template>
@@ -1400,13 +1431,15 @@ export default defineComponent({
           color: #faad14;
           cursor: pointer;
         }
+
+        .select-csv-button__wrap {
+          margin-top: 8px;
+        }
       }
     }
   }
 
   .select-csv-button__wrap {
-    margin-top: 8px;
-
     .select-csv-buttons {
       display: flex;
 
