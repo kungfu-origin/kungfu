@@ -98,7 +98,7 @@ export default {
 
   settingsFormConfig: {
     keyword: '关键词',
-    add_csv: '添加 csv',
+    add_csv: '导入 csv',
     csv_template: '下载 csv 模板',
     add_csv_desc: 'csv 表头为 {header}',
     clear: '清除',
