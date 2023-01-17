@@ -109,7 +109,7 @@
           </template>
           <template v-else-if="column.dataIndex === 'avg_open_price'">
             {{
-              dealKfNumber(
+              dealKfPrice(
                 getBasketInstrumentPositionData(item, 'avg_open_price'),
               )
             }}
@@ -202,7 +202,6 @@ import { getColumns, getSetBasketInstrumentFormSettings } from './config';
 import { BASKET_CATEGORYS } from '../../../config';
 import { getMakeBasketOrderConfigSettings } from '../../../config/makeBasketOrderFormConfig';
 import {
-  dealKfNumber,
   dealKfPrice,
   dealAssetPrice,
   dealDirection,

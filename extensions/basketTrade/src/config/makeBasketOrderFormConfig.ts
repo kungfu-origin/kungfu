@@ -1,6 +1,5 @@
 import {
   SideEnum,
-  OffsetEnum,
   PriceTypeEnum,
   PriceLevelEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
@@ -20,13 +19,6 @@ export const getMakeBasketOrderConfigSettings =
       key: 'side',
       name: t('tradingConfig.side'),
       default: SideEnum.Buy,
-      required: true,
-    },
-    {
-      type: 'offset',
-      key: 'offset',
-      name: t('tradingConfig.offset'),
-      default: OffsetEnum.Open,
       required: true,
     },
     {
