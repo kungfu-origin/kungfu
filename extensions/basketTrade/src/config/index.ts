@@ -1,8 +1,15 @@
+import { BasketOrderStatusEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
+
 export const BASKET_CATEGORYS = {
   SETTING: 'basketSetting',
   INSTRUMENT: 'basketInstrument',
   ORDER: 'basketOrder',
 };
+
+export const UnfinishedBasketOrderStatus = [
+  BasketOrderStatusEnum.PartialFilledActive,
+  BasketOrderStatusEnum.Pending,
+];
 
 export const defaultBasketTradeBoardsMap: KfLayout.BoardsMap = {
   '0': {

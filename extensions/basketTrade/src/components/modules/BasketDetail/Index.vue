@@ -23,11 +23,7 @@
           />
         </KfDashboardItem> -->
         <KfDashboardItem>
-          <a-checkbox
-            v-model:checked="isWithoutUpLimitInstrument"
-            size="small"
-            @change="handleFilterChange"
-          >
+          <a-checkbox v-model:checked="isWithoutUpLimitInstrument" size="small">
             {{ $t('BasketTrade.without_up_limit') }}
           </a-checkbox>
         </KfDashboardItem>
@@ -35,7 +31,6 @@
           <a-checkbox
             v-model:checked="isWithoutLowLimitInstrument"
             size="small"
-            @change="handleFilterChange"
           >
             {{ $t('BasketTrade.without_low_limit') }}
           </a-checkbox>
@@ -164,6 +159,7 @@ import {
   onMounted,
   toRaw,
   watch,
+  watchEffect,
   getCurrentInstance,
   nextTick,
 } from 'vue';
@@ -323,6 +319,50 @@ watch(
       });
   },
 );
+
+watchEffect(() => {
+  const suspensionBasketInstrumentKeys: string[] = [];
+  const upLimitBasketInstrumentKeys: string[] = [];
+  const lowLimitBasketInstrumentKeys: string[] = [];
+
+  basketInstrumentsResolved.value.forEach((basketInstrument) => {
+    if (
+      isWithoutUpLimitInstrument.value &&
+      isInstrumentUpLimit(basketInstrument)
+    ) {
+      upLimitBasketInstrumentKeys.push(basketInstrument.basketInstrumentId);
+    }
+    if (
+      isWithoutUpLimitInstrument.value &&
+      isInstrumentLowLimit(basketInstrument)
+    ) {
+      lowLimitBasketInstrumentKeys.push(basketInstrument.basketInstrumentId);
+    }
+  });
+
+  const basketInstrumentsToDisabled = Array.from(
+    new Set([
+      ...suspensionBasketInstrumentKeys,
+      ...upLimitBasketInstrumentKeys,
+      ...lowLimitBasketInstrumentKeys,
+    ]),
+  );
+
+  dataSelection.value = basketInstrumentsToDisabled.reduce((selection, key) => {
+    selection[key] = {
+      disabled: true,
+    };
+
+    currentGlobalBasket.value &&
+      dataTableRef.value &&
+      dataTableRef.value.handleSelectRow(
+        false,
+        basketInstrumentsResolvedMap.value[currentGlobalBasket.value.id][key],
+      );
+
+    return selection;
+  }, {} as KfTradingDataTableSelection);
+});
 
 function handleGetAllBasketInstruments() {
   if (!currentGlobalBasket.value) return Promise.resolve();
@@ -542,50 +582,6 @@ function handleRemoveBasketInstrument(
       .map((map) => Object.values(map))
       .flat(1),
   );
-}
-
-function handleFilterChange() {
-  const suspensionBasketInstrumentKeys: string[] = [];
-  const upLimitBasketInstrumentKeys: string[] = [];
-  const lowLimitBasketInstrumentKeys: string[] = [];
-
-  basketInstrumentsResolved.value.forEach((basketInstrument) => {
-    if (
-      isWithoutUpLimitInstrument.value &&
-      isInstrumentUpLimit(basketInstrument)
-    ) {
-      upLimitBasketInstrumentKeys.push(basketInstrument.basketInstrumentId);
-    }
-    if (
-      isWithoutUpLimitInstrument.value &&
-      isInstrumentLowLimit(basketInstrument)
-    ) {
-      lowLimitBasketInstrumentKeys.push(basketInstrument.basketInstrumentId);
-    }
-  });
-
-  const basketInstrumentsToDisabled = Array.from(
-    new Set([
-      ...suspensionBasketInstrumentKeys,
-      ...upLimitBasketInstrumentKeys,
-      ...lowLimitBasketInstrumentKeys,
-    ]),
-  );
-
-  dataSelection.value = basketInstrumentsToDisabled.reduce((selection, key) => {
-    selection[key] = {
-      disabled: true,
-    };
-
-    currentGlobalBasket.value &&
-      dataTableRef.value &&
-      dataTableRef.value.handleSelectRow(
-        false,
-        basketInstrumentsResolvedMap.value[currentGlobalBasket.value.id][key],
-      );
-
-    return selection;
-  }, {} as KfTradingDataTableSelection);
 }
 </script>
 
