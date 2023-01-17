@@ -558,9 +558,64 @@ function buildCsvHeadersDescription(headers: KungfuApi.KfConfigItemHeader[]) {
   );
 }
 
+function buildCsvHeadersValidator(
+  headers: KungfuApi.KfConfigItemHeader[] | undefined,
+) {
+  if (!headers || !headers.length) return undefined;
+
+  const requiredHeaders: string[] = [];
+  headers.forEach((header) => {
+    if (header.required) {
+      requiredHeaders.push(header.title);
+    }
+  });
+
+  return (row) => {
+    for (let header of requiredHeaders) {
+      if (
+        !(
+          header in row &&
+          row[header] !== null &&
+          row[header] !== undefined &&
+          row[header] !== ''
+        )
+      ) {
+        return false;
+      }
+    }
+    return true;
+  };
+}
+
+function buildCsvHeadersTransformer(
+  headers: KungfuApi.KfConfigItemHeader[] | undefined,
+) {
+  if (!headers || !headers.length) return undefined;
+
+  const headerWithDefault: Record<string, KungfuApi.KfConfigValue> = {};
+  headers.forEach((header) => {
+    if (header.default) {
+      headerWithDefault[header.title] = header.default;
+    }
+  });
+
+  return (row) => {
+    for (let header in headerWithDefault) {
+      if (
+        row[header] === null ||
+        row[header] === undefined ||
+        row[header] === ''
+      ) {
+        row[header] = headerWithDefault[header];
+      }
+    }
+    return row;
+  };
+}
+
 function handleSelectCsv<T>(
   targetKey: string,
-  headers?: string[],
+  headers: KungfuApi.KfConfigItemHeader[],
   callback?: (
     data: T[],
     errRows: {
@@ -578,7 +633,10 @@ function handleSelectCsv<T>(
     .then((res) => {
       const { filePaths } = res;
       if (filePaths.length) {
-        readCSV<T>(filePaths[0], headers)
+        readCSV<T>(filePaths[0], true, {
+          validator: buildCsvHeadersValidator(headers),
+          transformer: buildCsvHeadersTransformer(headers),
+        })
           .then(({ resRows, errRows }) => {
             callback && callback(resRows, errRows, targetKey);
           })
@@ -1152,7 +1210,7 @@ defineExpose({
               @click="
                 handleSelectCsv<KungfuApi.Instrument>(
                   item.key,
-                  item.headers?.map((header) => header.title),
+                  item.headers || [],
                   instrumentsCsvCallback,
                 )
               "
@@ -1244,7 +1302,7 @@ defineExpose({
               @click="
                 handleSelectCsv<Record<string, KungfuApi.KfConfigValue>>(
                   item.key,
-                  item.headers?.map((header) => header.title),
+                  item.headers || [],
                   csvTableCallback(item.columns || []),
                 )
               "
