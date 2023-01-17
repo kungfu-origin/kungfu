@@ -6,7 +6,7 @@ export const BASKET_CATEGORYS = {
   ORDER: 'basketOrder',
 };
 
-export const CanCancelBasketOrderStatus = [
+export const UnfinishedBasketOrderStatus = [
   BasketOrderStatusEnum.PartialFilledActive,
   BasketOrderStatusEnum.Pending,
 ];

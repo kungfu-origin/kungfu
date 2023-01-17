@@ -61,15 +61,13 @@
             </template>
             <template v-else-if="column.dataIndex === 'actions'">
               <div class="kf-actions__warp">
-                <a-button
-                  v-if="CanCancelBasketOrderStatus.includes(item.status)"
-                  type="link"
-                  size="small"
-                  danger
+                <div
+                  v-if="UnfinishedBasketOrderStatus.includes(item.status)"
+                  class="color-red"
                   @click.stop="handleCancelBasketOrder(item)"
                 >
                   {{ $t('BasketTrade.cancel_order') }}
-                </a-button>
+                </div>
               </div>
             </template>
           </template>
@@ -105,7 +103,7 @@ import {
   useDashboardBodySize,
   confirmModal,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
-import { BASKET_CATEGORYS, CanCancelBasketOrderStatus } from '../../../config';
+import { BASKET_CATEGORYS, UnfinishedBasketOrderStatus } from '../../../config';
 import { getColumns, basketOrderTradingDataGetter } from './config';
 import { DealTradingDataHooks } from '@kungfu-trader/kungfu-js-api/hooks/dealTradingDataHook';
 import { dealKfTime } from '@kungfu-trader/kungfu-js-api/kungfu';

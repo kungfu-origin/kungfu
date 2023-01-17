@@ -157,9 +157,9 @@ function handleConfirm(): void {
     });
 }
 
-function handleCancel(): void{
+function handleCancel(): void {
   app && app.emit('close');
-  closeModal()
+  closeModal();
 }
 </script>
 <template>

@@ -149,6 +149,9 @@ declare namespace KungfuApi {
     headers?: KfConfigItemHeader[];
     template?: KfConfigItemTemplate[];
     search?: KfConfigItemSearch;
+
+    // ---- some ui releated ----;
+    noDivider?: boolean;
   }
 
   export interface KfExhibitConfigItem {

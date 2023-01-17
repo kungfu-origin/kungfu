@@ -201,6 +201,7 @@ export const getSetBasketInstrumentFormSettings =
             },
           ],
           default: [],
+          noDivider: true,
           columns: [
             {
               key: 'instrument',
