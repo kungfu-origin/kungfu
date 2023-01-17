@@ -102,6 +102,11 @@
           <template v-else-if="column.dataIndex === 'position_volume'">
             {{ getBasketInstrumentPositionData(item, 'volume') }}
           </template>
+          <template v-else-if="column.dataIndex === 'direction'">
+            <span :class="`color-${dealDirection(item.direction).color}`">
+              {{ dealDirection(item.direction).name }}
+            </span>
+          </template>
           <template v-else-if="column.dataIndex === 'avg_open_price'">
             {{
               dealKfNumber(
@@ -141,7 +146,9 @@
     <KfSetByConfigModal
       v-if="addBasketInstrumentModalVisble"
       v-model:visible="addBasketInstrumentModalVisble"
-      style="width: 900px"
+      :width="1000"
+      :label-col="4"
+      :wrapper-col="17"
       :payload="setBasketInstrumentConfigPayload"
       @confirm="
         ({ formState }) => handleConfirmAddUpdateBasketInstrument(formState)
@@ -198,10 +205,14 @@ import {
   dealKfNumber,
   dealKfPrice,
   dealAssetPrice,
+  dealDirection,
   getKfLocationByProcessId,
   transformSearchInstrumentResultToInstrument,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import { BasketVolumeTypeEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
+import {
+  BasketVolumeTypeEnum,
+  DirectionEnum,
+} from '@kungfu-trader/kungfu-js-api/typings/enums';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import { promiseMessageWrapper } from '../../../utils';
 import { useBasketTradeStore } from '../../../store';
@@ -247,7 +258,7 @@ const getBasketInstrumentPositionData = (
       buildPrositionMapKey(
         basketInstrument.exchangeId,
         basketInstrument.instrumentId,
-        0,
+        basketInstrument.direction,
       )
     ]?.[key] ?? '--'
   );
@@ -375,7 +386,6 @@ function handlePlaceBasketOrder(formState) {
 
   const basketOrderInput: KungfuApi.BasketOrderInput = {
     side: +formState.side,
-    offset: +formState.offset,
     price_type: +formState.priceType,
     price_level: +formState.priceLevel,
     price_offset: +formState.priceOffset,
@@ -441,6 +451,7 @@ function handleOpenSetBasketInstrumentModal() {
     basketInstruments: toRaw(basketInstrumentsResolved.value).map((item) => {
       return {
         ...item,
+        direction: `${item.direction}`,
         volume: Number(item.volume),
         instrument: buildInstrumentSelectOptionValue(
           getInstrumentByIds(
@@ -466,6 +477,7 @@ function handleConfirmAddUpdateBasketInstrument(
   const newBasketInstruments: KungfuApi.BasketInstrument[] = (
     formState.basketInstruments as Array<{
       instrument: string;
+      direction: DirectionEnum;
       volume: bigint;
       rate: number;
     }>
@@ -487,6 +499,7 @@ function handleConfirmAddUpdateBasketInstrument(
       instrument_id: instrumentId,
       exchange_id: exchangeId,
       instrument_type: instrumentType,
+      direction: +item.direction,
       volume: isBasketVolumeByQuantity ? BigInt(item.volume) : BigInt(0),
       rate: isBasketVolumeByQuantity ? 0 : +item.rate,
     });

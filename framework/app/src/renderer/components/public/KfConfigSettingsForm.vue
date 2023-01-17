@@ -290,7 +290,10 @@ function getTablesSearchRelated(
 ): TablesSearchRelated {
   return Object.keys(tableKeys).reduce((tablesSearchRelated, key) => {
     const targetList = ref(formState[key]);
-    const keys = tableKeys[key].search?.keys || tableKeys[key].headers || [];
+    const keys =
+      tableKeys[key].search?.keys ||
+      tableKeys[key].headers?.map((header) => header.title) ||
+      [];
     const { searchKeyword, tableData } = useWritableTableSearchKeyword<
       Record<string, KungfuApi.KfConfigItem>
     >(targetList, keys);
@@ -507,38 +510,52 @@ function csvTableCallback(columns: KungfuApi.KfConfigItem[]) {
     }[],
     targetKey: string,
   ) {
-    console.error(errRows);
+    if (errRows.length) {
+      console.warn('Csv resolve error rows:', errRows);
+    }
     if (data.length) {
       const headers = Object.keys(data[0]);
       const isInstrumentHeader =
-        'instrument_id' in headers && 'exchange_id' in headers;
+        headers.includes('instrument_id') && headers.includes('exchange_id');
       const instrumentColumnConfig = columns.find(
         (item) => item.type === 'instrument',
       );
       const shouldResolveInstrument =
         isInstrumentHeader && instrumentColumnConfig;
-
       if (shouldResolveInstrument) {
         const { getInstrumentByIds } = useActiveInstruments();
 
-        formState[targetKey] = data.map((item) => {
+        data.forEach((item) => {
           const instrument = getInstrumentByIds(
             item.instrument_id,
-            item.exchange_id,
+            `${item.exchange_id}`.toUpperCase(),
             true,
           ) as KungfuApi.InstrumentResolved;
 
-          return {
+          formState[targetKey].push({
             ...item,
             [instrumentColumnConfig.key]:
               buildInstrumentSelectOptionValue(instrument),
-          };
+          });
         });
       } else {
-        formState[targetKey] = data;
+        formState[targetKey].push(...data);
       }
     }
   };
+}
+
+function buildCsvHeadersDescription(headers: KungfuApi.KfConfigItemHeader[]) {
+  return (
+    headers
+      .map((header) =>
+        [
+          header.title,
+          ...(header.description ? [header.description] : []),
+        ].join(': '),
+      )
+      .join('. ') + '.'
+  );
 }
 
 function handleSelectCsv<T>(
@@ -1135,7 +1152,7 @@ defineExpose({
               @click="
                 handleSelectCsv<KungfuApi.Instrument>(
                   item.key,
-                  item.headers,
+                  item.headers?.map((header) => header.title),
                   instrumentsCsvCallback,
                 )
               "
@@ -1159,7 +1176,7 @@ defineExpose({
           <span v-if="item.headers" class="select-csv-tip">
             {{
               $t('settingsFormConfig.add_csv_desc', {
-                header: item.headers.join(', '),
+                header: buildCsvHeadersDescription(item.headers),
               })
             }}
           </span>
@@ -1227,7 +1244,7 @@ defineExpose({
               @click="
                 handleSelectCsv<Record<string, KungfuApi.KfConfigValue>>(
                   item.key,
-                  item.headers,
+                  item.headers?.map((header) => header.title),
                   csvTableCallback(item.columns || []),
                 )
               "
@@ -1250,7 +1267,7 @@ defineExpose({
           <span v-if="!!item.headers" class="select-csv-tip">
             {{
               $t('settingsFormConfig.add_csv_desc', {
-                header: item.headers.join(', '),
+                header: buildCsvHeadersDescription(item.headers),
               })
             }}
           </span>
@@ -1453,7 +1470,7 @@ export default defineComponent({
       display: block;
       margin: 4px 0;
       color: grey;
-      word-break: break-all;
+      word-break: break-word;
       user-select: text;
     }
   }

@@ -271,6 +271,7 @@ export default {
     price_offset: '偏移',
     side: '买卖',
     offset: '开平',
+    direction: '多空',
     limit_price: '下单价格',
     algorithm: '算法',
 

@@ -1,5 +1,8 @@
 import { Ref } from 'vue';
-import { BasketVolumeTypeEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
+import {
+  BasketVolumeTypeEnum,
+  DirectionEnum,
+} from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
   buildConfigGetterWrapByComputed,
   buildTableColumnSorter,
@@ -52,6 +55,16 @@ export const getColumns = buildConfigGetterWrapByComputed(
             ),
           },
       {
+        type: 'string',
+        name: '',
+        dataIndex: 'direction',
+        sorter: buildTableColumnSorter<KungfuApi.BasketInstrumentResolved>(
+          'num',
+          'direction',
+        ),
+        width: 40,
+      },
+      {
         type: 'number',
         name: t('posGlobalConfig.sum_volume'),
         dataIndex: 'position_volume',
@@ -62,7 +75,7 @@ export const getColumns = buildConfigGetterWrapByComputed(
         type: 'number',
         name: t('posGlobalConfig.avg_open_price'),
         dataIndex: 'avg_open_price',
-        width: 110,
+        width: 100,
         sorter: basketInstrumentSorters['avg_open_price'],
       },
       {
@@ -76,7 +89,7 @@ export const getColumns = buildConfigGetterWrapByComputed(
         type: 'number',
         name: t('posGlobalConfig.unrealized_pnl'),
         dataIndex: 'unrealized_pnl',
-        width: 110,
+        width: 100,
         sorter: basketInstrumentSorters['unrealized_pnl'],
       },
       {
@@ -89,11 +102,41 @@ export const getColumns = buildConfigGetterWrapByComputed(
 
 const getExportData = (basketVolumeType: BasketVolumeTypeEnum) => {
   const data = [
-    { instrument_id: '600000', exchange_id: 'SSE', volume: 1000, rate: 0.2 },
-    { instrument_id: '600002', exchange_id: 'SSE', volume: 1000, rate: 0.2 },
-    { instrument_id: '600004', exchange_id: 'SSE', volume: 1000, rate: 0.2 },
-    { instrument_id: '600006', exchange_id: 'SSE', volume: 1000, rate: 0.2 },
-    { instrument_id: '600009', exchange_id: 'SSE', volume: 1000, rate: 0.2 },
+    {
+      instrument_id: '600000',
+      exchange_id: 'SSE',
+      direction: 0,
+      volume: 1000,
+      rate: 0.2,
+    },
+    {
+      instrument_id: '600002',
+      exchange_id: 'SSE',
+      direction: 0,
+      volume: 1000,
+      rate: 0.2,
+    },
+    {
+      instrument_id: '600004',
+      exchange_id: 'SSE',
+      direction: 0,
+      volume: 1000,
+      rate: 0.2,
+    },
+    {
+      instrument_id: '600006',
+      exchange_id: 'SSE',
+      direction: 0,
+      volume: 1000,
+      rate: 0.2,
+    },
+    {
+      instrument_id: '600009',
+      exchange_id: 'SSE',
+      direction: 0,
+      volume: 1000,
+      rate: 0.2,
+    },
   ];
   return data.map((item) => ({
     ...item,
@@ -122,9 +165,33 @@ export const getSetBasketInstrumentFormSettings =
             },
           ],
           search: {
-            keys: ['instrument_id', 'exchange_id', 'instrumentName'],
+            keys: [
+              'instrument_id',
+              'exchange_id',
+              'instrument',
+              'volume',
+              'rate',
+            ],
           },
-          headers: ['instrument_id', 'exchange_id', 'volume', 'rate'],
+          headers: [
+            {
+              title: 'instrument_id',
+              description: t('BasketTrade.instrument_id_header_desc'),
+            },
+            {
+              title: 'exchange_id',
+              description: t('BasketTrade.exchange_id_header_desc'),
+            },
+            {
+              title: 'direction',
+              description: t('BasketTrade.direction_header_desc'),
+            },
+            {
+              title: 'volume',
+              description: t('BasketTrade.volume_header_desc'),
+            },
+            { title: 'rate', description: t('BasketTrade.rate_header_desc') },
+          ],
           default: [],
           noDivider: true,
           columns: [
@@ -132,6 +199,24 @@ export const getSetBasketInstrumentFormSettings =
               key: 'instrument',
               name: t('tradingConfig.instrument'),
               type: 'instrument',
+              required: true,
+            },
+            {
+              key: 'direction',
+              name: t('tradingConfig.direction'),
+              type: 'select',
+              options: [
+                {
+                  label: t('tradingConfig.long'),
+                  value: `${DirectionEnum.Long}`,
+                },
+                {
+                  label: t('tradingConfig.short'),
+                  value: `${DirectionEnum.Short}`,
+                },
+              ],
+              default: `${DirectionEnum.Long}`,
+              required: true,
             },
             basketVolumeType === BasketVolumeTypeEnum.Quantity
               ? {

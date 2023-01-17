@@ -1335,6 +1335,40 @@ export const dealDirection = (
   return Direction[+direction as DirectionEnum];
 };
 
+export const resolveOffsetBySideAndDirection = (
+  side: SideEnum,
+  direction: DirectionEnum,
+): OffsetEnum => {
+  if (side === SideEnum.Buy) {
+    return direction === DirectionEnum.Long
+      ? OffsetEnum.Open
+      : OffsetEnum.Close;
+  } else if (side === SideEnum.Sell) {
+    return direction === DirectionEnum.Long
+      ? OffsetEnum.Close
+      : OffsetEnum.Open;
+  }
+
+  return OffsetEnum.Open;
+};
+
+export const resolveDirectionBySideAndOffset = (
+  side: SideEnum,
+  offset: OffsetEnum,
+): DirectionEnum => {
+  if (side === SideEnum.Buy) {
+    return offset === OffsetEnum.Open
+      ? DirectionEnum.Long
+      : DirectionEnum.Short;
+  } else if (side === SideEnum.Sell) {
+    return offset === OffsetEnum.Open
+      ? DirectionEnum.Short
+      : DirectionEnum.Long;
+  }
+
+  return DirectionEnum.Long;
+};
+
 export const dealOrderStatus = (
   status: OrderStatusEnum | number,
   errorMsg?: string,
