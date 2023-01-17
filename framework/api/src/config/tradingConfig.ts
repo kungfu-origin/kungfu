@@ -312,6 +312,7 @@ export const OrderStatus: Record<
 };
 
 export const UnfinishedOrderStatus = [
+  OrderStatusEnum.Submitted,
   OrderStatusEnum.Pending,
   OrderStatusEnum.Submitted,
   OrderStatusEnum.PartialFilledActive,

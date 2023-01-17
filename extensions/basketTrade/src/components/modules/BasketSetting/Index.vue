@@ -52,6 +52,9 @@
               :num="dealAssetPrice(getBasketMarkedValue(record))"
             ></KfBlinkNum>
           </template>
+          <template v-else-if="column.dataIndex === 'total_volume'">
+            <span style="float: right">{{ record.total_volume }}</span>
+          </template>
           <template v-else-if="column.dataIndex === 'actions'">
             <div class="kf-actions__warp">
               <SettingOutlined
@@ -218,7 +221,9 @@ function handleOpenSetBasketModal(
     category: BASKET_CATEGORYS.SETTING,
     key: BASKET_CATEGORYS.SETTING,
     extPath: '',
-    settings: getBasketFormSettings(BasketVolumeTypeEnum.Quantity),
+    settings: getBasketFormSettings(
+      initValue?.volume_type ?? BasketVolumeTypeEnum.Quantity,
+    ),
   };
 
   setBasketConfigPayload.value.initValue =
