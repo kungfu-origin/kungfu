@@ -252,7 +252,7 @@ function handleOpenSetBasketModal(
         };
 
   addBasketModalVisble.value = true;
-  currentSetBasket.value = initValue;
+  currentSetBasket.value = initValue ?? null;
 }
 
 function handleFormStateChange(formState) {
