@@ -17,11 +17,12 @@ void BasketOrderState::update(const longfist::types::Order &order) {
 
   orders.insert_or_assign(order.order_id, order);
   auto &basket_order = state_data.data;
-  auto is_all_order_end_val = is_all_order_end();
-  auto is_all_order_filled_val = is_all_order_filled();
+
   // after supplementing order, the total volume may be changed, bigger than the original volume
-  basket_order.volume = std::max(basket_order.volume, get_total_volume());
-  basket_order.volume_left = get_total_volume_left();
+  basket_order.volume = std::max(basket_order.volume, get_merged_total_volume(orders));
+  basket_order.volume_left = basket_order.volume - get_total_traded_volume(orders);
+  auto is_all_order_end_val = is_all_order_end(orders);
+  auto is_all_order_filled_val = basket_order.volume_left == 0;
   if (is_all_order_end_val and is_all_order_filled_val) {
     basket_order.status = BasketOrderStatus::Filled;
   } else if (is_all_order_end_val) {
@@ -35,37 +36,4 @@ void BasketOrderState::update(const longfist::types::Order &order) {
 
 state<longfist::types::BasketOrder> &BasketOrderState::get_state() { return state_data; }
 
-bool BasketOrderState::is_all_order_end() {
-  for (auto &iter : orders) {
-    if (not is_final_status(iter.second.status)) {
-      return false;
-    }
-  }
-  return true;
-}
-
-bool BasketOrderState::is_all_order_filled() {
-  for (auto &iter : orders) {
-    if (iter.second.volume_left > 0) {
-      return false;
-    }
-  }
-  return true;
-}
-
-int64_t BasketOrderState::get_total_volume() {
-  int64_t volume = 0;
-  for (auto &iter : orders) {
-    volume += iter.second.volume;
-  }
-  return volume;
-}
-
-int64_t BasketOrderState::get_total_volume_left() {
-  int64_t volume_left = 0;
-  for (auto &iter : orders) {
-    volume_left += iter.second.volume_left;
-  }
-  return volume_left;
-}
 } // namespace kungfu::wingchun::basketorder
