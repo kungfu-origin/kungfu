@@ -118,6 +118,8 @@ declare namespace KungfuApi {
   export interface KfConfigItemHeader {
     title: string;
     description: string;
+    required?: boolean;
+    default?: KfConfigValue;
   }
 
   export interface KfConfigItemTemplate {

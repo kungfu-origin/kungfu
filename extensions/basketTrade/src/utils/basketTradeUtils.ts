@@ -742,12 +742,16 @@ export const useMakeOrCancelBasketOrder = () => {
     return `${instrumentId}_${exchangeId}`;
   };
 
-  const getBasketOrderTargetStatusOrdersMap = (
+  const getBasketOrderTargetStatusOrdersMap = <
+    T extends Record<string, OrderStatusEnum[]>,
+  >(
     watcher: KungfuApi.Watcher,
     basketOrder: KungfuApi.BasketOrderResolved,
     mapKeyBuilter: (order: KungfuApi.Order) => string,
-    targetStatus?: OrderStatusEnum[],
-  ) => {
+    targetStatus: T,
+  ): {
+    [K in keyof T]: Record<string, KungfuApi.Order>;
+  } => {
     return (
       globalThis.HookKeeper.getHooks().dealTradingData.trigger(
         watcher,
@@ -755,15 +759,27 @@ export const useMakeOrCancelBasketOrder = () => {
         watcher.ledger.Order,
         'order',
       ) as KungfuApi.Order[]
-    ).reduce((map, item) => {
-      const key = mapKeyBuilter(item);
-      if (key in map) return map;
-
-      if (!targetStatus || targetStatus.includes(item.status)) {
-        map[key] = item;
-      }
-      return map;
-    }, {} as Record<string, KungfuApi.Order>);
+    ).reduce(
+      (map, item) => {
+        const key = mapKeyBuilter(item);
+        Object.keys(targetStatus).forEach((statusKey) => {
+          const targetStatusKey = statusKey as keyof T;
+          if (!map[targetStatusKey]) map[targetStatusKey] = {};
+          if (targetStatus[targetStatusKey].includes(item.status)) {
+            const targetMap = map[targetStatusKey] as Record<
+              string,
+              KungfuApi.Order
+            >;
+            if (key in targetMap) return;
+            targetMap[key] = item;
+          }
+        });
+        return map;
+      },
+      {} as {
+        [K in keyof T]: Record<string, KungfuApi.Order>;
+      },
+    );
   };
 
   const getBasketOrderUnfinishedOrdersMap = (
@@ -775,8 +791,8 @@ export const useMakeOrCancelBasketOrder = () => {
       basketOrder,
       (order: KungfuApi.Order) =>
         buildOrdersMapKey(order.instrument_id, order.exchange_id),
-      UnfinishedOrderStatus,
-    );
+      { unfinished: UnfinishedOrderStatus },
+    ).unfinished;
   };
 
   const cancalBasketOrder = (
@@ -787,7 +803,7 @@ export const useMakeOrCancelBasketOrder = () => {
       watcher,
       basketOrder,
     );
-    const ordersResolved = Object.values(resolvedOrdersMap);
+    const ordersResolved = Object.values(resolvedOrdersMap ?? {});
 
     if (!ordersResolved.length)
       return promiseMessageWrapper(
@@ -938,39 +954,43 @@ export const useMakeOrCancelBasketOrder = () => {
     watcher: KungfuApi.Watcher,
     basketOrder: KungfuApi.BasketOrderResolved,
   ) => {
-    const notTradeAllOrdersMap = getBasketOrderTargetStatusOrdersMap(
-      watcher,
-      basketOrder,
-      (order: KungfuApi.Order) =>
-        buildOrdersMapKey(order.instrument_id, order.exchange_id),
-      NotTradeAllOrderStatus,
-    );
-    const notTradeAllKeys = Object.keys(notTradeAllOrdersMap);
-    if (notTradeAllKeys.length) {
-      const finishedOrdersMap = getBasketOrderTargetStatusOrdersMap(
+    const { notTradeAll, filled, unfinished } =
+      getBasketOrderTargetStatusOrdersMap(
         watcher,
         basketOrder,
         (order: KungfuApi.Order) =>
           buildOrdersMapKey(order.instrument_id, order.exchange_id),
-        [OrderStatusEnum.Filled],
+        {
+          notTradeAll: NotTradeAllOrderStatus,
+          filled: [OrderStatusEnum.Filled],
+          unfinished: UnfinishedOrderStatus,
+        },
       );
+    const notTradeAllKeys = Object.keys(notTradeAll);
+    if (notTradeAllKeys.length) {
       return notTradeAllKeys.reduce((ordersMap, key) => {
-        if (key in finishedOrdersMap) {
-          const volumeLeft = notTradeAllOrdersMap[key].volume_left;
-          const tradedVolume =
-            finishedOrdersMap[key].volume - finishedOrdersMap[key].volume_left;
+        if (key in filled) {
+          const volumeLeft = notTradeAll[key].volume_left;
+          const tradedVolume = filled[key].volume - filled[key].volume_left;
           if (volumeLeft === tradedVolume) {
             return ordersMap;
           }
+
+          if (key in unfinished) {
+            const unfinshedVolumeLeft = unfinished[key].volume_left;
+            if (unfinshedVolumeLeft === tradedVolume) {
+              return ordersMap;
+            }
+          }
         }
 
-        ordersMap[key] = notTradeAllOrdersMap[key];
+        ordersMap[key] = notTradeAll[key];
 
         return ordersMap;
       }, {} as Record<string, KungfuApi.Order>);
     }
 
-    return notTradeAllOrdersMap;
+    return notTradeAll;
   };
 
   const replenishBasketOrder = (
@@ -1005,6 +1025,22 @@ export const useMakeOrCancelBasketOrder = () => {
         ),
         { errorTextByError: true },
       );
+
+    const unfinishedOrdersMap = getBasketOrderUnfinishedOrdersMap(
+      watcher,
+      basketOrder,
+    );
+
+    ordersResolved = ordersResolved.map((order) => {
+      const orderKey = buildOrdersMapKey(
+        order.instrument_id,
+        order.exchange_id,
+      );
+      if (orderKey in unfinishedOrdersMap) {
+        order.volume_left = unfinishedOrdersMap[orderKey].volume_left;
+      }
+      return order;
+    });
 
     const basketInstrumentsForOrder = getBasketInstrumentsForOrder(
       ordersResolved,

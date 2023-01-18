@@ -110,7 +110,7 @@ const getExportData = (basketVolumeType: BasketVolumeTypeEnum) => {
       rate: 0.2,
     },
     {
-      instrument_id: '600002',
+      instrument_id: '600006',
       exchange_id: 'SSE',
       direction: 0,
       volume: 1000,
@@ -177,20 +177,28 @@ export const getSetBasketInstrumentFormSettings =
             {
               title: 'instrument_id',
               description: t('BasketTrade.instrument_id_header_desc'),
+              required: true,
             },
             {
               title: 'exchange_id',
               description: t('BasketTrade.exchange_id_header_desc'),
+              required: true,
             },
             {
               title: 'direction',
               description: t('BasketTrade.direction_header_desc'),
+              default: `${DirectionEnum.Long}`,
             },
             {
               title: 'volume',
               description: t('BasketTrade.volume_header_desc'),
+              required: true,
             },
-            { title: 'rate', description: t('BasketTrade.rate_header_desc') },
+            {
+              title: 'rate',
+              description: t('BasketTrade.rate_header_desc'),
+              required: true,
+            },
           ],
           default: [],
           noDivider: true,
