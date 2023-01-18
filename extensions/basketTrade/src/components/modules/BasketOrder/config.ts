@@ -88,6 +88,16 @@ export const getColumns = buildConfigGetterWrapByComputed(
         ),
       },
       {
+        type: 'source',
+        name: t('orderConfig.source_uname'),
+        dataIndex: 'source_uname',
+        width: 100,
+        sorter: buildTableColumnSorter<KungfuApi.BasketOrderResolved>(
+          'str',
+          'source_uname',
+        ),
+      },
+      {
         name: t('BasketTrade.actions'),
         dataIndex: 'actions',
         width: 50,

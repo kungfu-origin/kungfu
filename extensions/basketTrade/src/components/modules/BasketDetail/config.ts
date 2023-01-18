@@ -26,13 +26,22 @@ export const getColumns = buildConfigGetterWrapByComputed(
         type: 'string',
         name: t('BasketTrade.instrument_id'),
         dataIndex: 'basketInstrumentName',
-        flex: 1.5,
+        flex: 1.8,
         sorter: buildTableColumnSorter<KungfuApi.BasketInstrumentResolved>(
           'str',
           'basketInstrumentName',
         ),
       },
-
+      {
+        type: 'string',
+        name: '',
+        dataIndex: 'direction',
+        sorter: buildTableColumnSorter<KungfuApi.BasketInstrumentResolved>(
+          'num',
+          'direction',
+        ),
+        width: 40,
+      },
       basket.value?.volume_type === BasketVolumeTypeEnum.Quantity
         ? {
             type: 'number',
@@ -55,42 +64,11 @@ export const getColumns = buildConfigGetterWrapByComputed(
             ),
           },
       {
-        type: 'string',
-        name: '',
-        dataIndex: 'direction',
-        sorter: buildTableColumnSorter<KungfuApi.BasketInstrumentResolved>(
-          'num',
-          'direction',
-        ),
-        width: 40,
-      },
-      {
-        type: 'number',
-        name: t('posGlobalConfig.sum_volume'),
-        dataIndex: 'position_volume',
-        width: 80,
-        sorter: basketInstrumentSorters['volume'],
-      },
-      {
-        type: 'number',
-        name: t('posGlobalConfig.avg_open_price'),
-        dataIndex: 'avg_open_price',
-        width: 100,
-        sorter: basketInstrumentSorters['avg_open_price'],
-      },
-      {
         type: 'number',
         name: t('BasketTrade.last_price'),
         dataIndex: 'last_price',
         flex: 1,
         sorter: basketInstrumentSorters['last_price'],
-      },
-      {
-        type: 'number',
-        name: t('posGlobalConfig.unrealized_pnl'),
-        dataIndex: 'unrealized_pnl',
-        width: 100,
-        sorter: basketInstrumentSorters['unrealized_pnl'],
       },
       {
         name: t('tdConfig.actions'),

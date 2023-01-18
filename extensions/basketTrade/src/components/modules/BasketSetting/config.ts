@@ -72,9 +72,18 @@ export const BasketVolumeType: Record<
   BasketVolumeTypeEnum,
   KungfuApi.KfTradeValueCommonData
 > = {
-  [BasketVolumeTypeEnum.Unknown]: { name: t('tradingConfig.unknown') },
-  [BasketVolumeTypeEnum.Quantity]: { name: t('BasketTrade.by_quantity') },
-  [BasketVolumeTypeEnum.Proportion]: { name: t('BasketTrade.by_proportion') },
+  [BasketVolumeTypeEnum.Unknown]: {
+    name: t('tradingConfig.unknown'),
+    color: 'default',
+  },
+  [BasketVolumeTypeEnum.Quantity]: {
+    name: t('BasketTrade.by_quantity'),
+    color: 'cyan',
+  },
+  [BasketVolumeTypeEnum.Proportion]: {
+    name: t('BasketTrade.by_proportion'),
+    color: 'purple',
+  },
 };
 
 export const getBasketFormSettings = (volumeType: BasketVolumeTypeEnum) =>
@@ -90,15 +99,19 @@ export const getBasketFormSettings = (volumeType: BasketVolumeTypeEnum) =>
     {
       key: 'volume_type',
       name: t('BasketTrade.volume_type'),
-      type: 'select',
+      type: 'radio',
       options: [
         {
           label: BasketVolumeType[BasketVolumeTypeEnum.Quantity].name,
           value: `${BasketVolumeTypeEnum.Quantity}`,
+          type: 'tag',
+          color: BasketVolumeType[BasketVolumeTypeEnum.Quantity].color,
         },
         {
           label: BasketVolumeType[BasketVolumeTypeEnum.Proportion].name,
           value: `${BasketVolumeTypeEnum.Proportion}`,
+          type: 'tag',
+          color: BasketVolumeType[BasketVolumeTypeEnum.Proportion].color,
         },
       ],
       default: `${BasketVolumeTypeEnum.Quantity}`,

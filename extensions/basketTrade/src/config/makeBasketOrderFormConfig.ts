@@ -9,8 +9,8 @@ const { t } = VueI18n.global;
 export const getMakeBasketOrderConfigSettings =
   (): KungfuApi.KfConfigItem[] => [
     {
-      type: 'td',
-      key: 'accountId',
+      type: 'tds',
+      key: 'accountIds',
       name: t('tradingConfig.account'),
       required: true,
     },

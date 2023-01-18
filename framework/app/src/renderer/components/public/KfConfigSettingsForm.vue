@@ -33,6 +33,7 @@ import {
   KfConfigValueArrayType,
   KfConfigValueBooleanType,
   getCombineValueByPrimaryKeys,
+  getPriceTypeConfig,
   initFormStateByConfig,
   getPrimaryKeys,
   dealPriceType,
@@ -61,8 +62,9 @@ import {
   buildInstrumentSelectOptionValue,
   useWritableTableSearchKeyword,
   messagePrompt,
+  dealKungfuColorToClassname,
+  dealKungfuColorToStyleColor,
 } from '../../assets/methods/uiUtils';
-import { getPriceTypeConfig } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 
 const { t } = VueI18n.global;
 
@@ -996,11 +998,29 @@ defineExpose({
           :key="option.value"
           :value="option.value"
         >
-          {{
-            isLanguageKeyAvailable(option.label + '')
-              ? $t(option.label + '')
-              : option.label
-          }}
+          <a-tag
+            v-if="option.type === 'tag'"
+            :color="dealKungfuColorToStyleColor(option.color || 'default')"
+          >
+            {{
+              isLanguageKeyAvailable(option.label + '')
+                ? $t(option.label + '')
+                : option.label
+            }}
+          </a-tag>
+          <span
+            v-else
+            :class="dealKungfuColorToClassname(option.color || 'default')"
+            :style="{
+              color: dealKungfuColorToStyleColor(option.color || 'default'),
+            }"
+          >
+            {{
+              isLanguageKeyAvailable(option.label + '')
+                ? $t(option.label + '')
+                : option.label
+            }}
+          </span>
         </a-radio>
       </a-radio-group>
       <a-checkbox
@@ -1058,11 +1078,29 @@ defineExpose({
           :key="option.value"
           :value="option.value"
         >
-          {{
-            isLanguageKeyAvailable(option.label + '')
-              ? $t(option.label + '')
-              : option.label
-          }}
+          <a-tag
+            v-if="option.type === 'tag'"
+            :color="dealKungfuColorToStyleColor(option.color || 'default')"
+          >
+            {{
+              isLanguageKeyAvailable(option.label + '')
+                ? $t(option.label + '')
+                : option.label
+            }}
+          </a-tag>
+          <span
+            v-else
+            :class="dealKungfuColorToClassname(option.color || 'default')"
+            :style="{
+              color: dealKungfuColorToStyleColor(option.color || 'default'),
+            }"
+          >
+            {{
+              isLanguageKeyAvailable(option.label + '')
+                ? $t(option.label + '')
+                : option.label
+            }}
+          </span>
         </a-select-option>
       </a-select>
       <a-select
@@ -1106,6 +1144,24 @@ defineExpose({
           (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
           item.disabled
         "
+      >
+        <a-select-option
+          v-for="config in td"
+          :key="getIdByKfLocation(config)"
+          :value="getIdByKfLocation(config)"
+        >
+          {{ getIdByKfLocation(config) }}
+        </a-select-option>
+      </a-select>
+      <a-select
+        v-else-if="item.type === 'tds'"
+        v-model:value="formState[item.key]"
+        :disabled="
+          (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
+          item.disabled
+        "
+        mode="multiple"
+        show-search
       >
         <a-select-option
           v-for="config in td"

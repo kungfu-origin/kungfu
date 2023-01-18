@@ -1276,6 +1276,11 @@ export const isT0 = (
   );
 };
 
+export const isKfColor = (color: string) => color.startsWith('kf-color');
+
+export const isHexOrRgbColor = (color: string) =>
+  color.startsWith('#') || color.startsWith('rgb') || color.startsWith('rgba');
+
 export const dealKfNumber = (
   preNumber: bigint | number | undefined | unknown,
 ): string | number | bigint | unknown => {
@@ -1847,6 +1852,7 @@ export const KfConfigValueNumberType = [
 export const KfConfigValueBooleanType = ['bool', 'checkbox'];
 
 export const KfConfigValueArrayType = [
+  'tds',
   'files',
   'instruments',
   'instrumentsCsv',

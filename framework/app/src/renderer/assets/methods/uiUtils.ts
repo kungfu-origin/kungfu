@@ -27,6 +27,8 @@ import {
   resolveInstrumentValue,
   transformSearchInstrumentResultToInstrument,
   removeArchiveBeforeToday,
+  isKfColor,
+  isHexOrRgbColor,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { readRootPackageJsonSync } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
@@ -773,4 +775,20 @@ export const useBoardFilter = () => {
     boardFilter,
     getBoard,
   };
+};
+
+export const dealKungfuColorToClassname = (
+  color: KungfuApi.AntInKungfuColorTypes,
+) => {
+  return isKfColor(color)
+    ? color
+    : !isHexOrRgbColor(color)
+    ? `color-${color || 'default'}`
+    : '';
+};
+
+export const dealKungfuColorToStyleColor = (
+  color: KungfuApi.AntInKungfuColorTypes,
+) => {
+  return isKfColor(color) ? '' : color;
 };

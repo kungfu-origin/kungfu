@@ -89,8 +89,7 @@ const unfinishedOrder = ref<boolean>(false);
 const historyDate = ref<Dayjs>();
 const historyDataLoading = ref<boolean>();
 
-const { currentGlobalKfLocation, currentCategoryData } =
-  useCurrentGlobalKfLocation(window.watcher);
+const { currentGlobalKfLocation } = useCurrentGlobalKfLocation(window.watcher);
 
 const {
   currentGlobalBasket,
@@ -270,9 +269,9 @@ function handleCancelAllOrders(): void {
 
   confirmModal(
     t('orderConfig.confirm_cancel_all'),
-    `${t('orderConfig.confirm')} ${currentCategoryData.value?.name} ${name} ${t(
-      'orderConfig.cancel_all',
-    )}`,
+    `${t('orderConfig.confirm')} ${
+      currentBasketOrderData.value?.name
+    } ${name} ${t('orderConfig.cancel_all')}`,
   ).then((flag) => {
     if (!flag || !currentGlobalBasketOrder.value || !window.watcher) {
       return;

@@ -9,7 +9,6 @@ import {
 } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useSubscibeInstrumentAtEntry } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
-import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
 import { dealKfTime } from '@kungfu-trader/kungfu-js-api/kungfu';
 import { BasketOrderStatus } from '../components/modules/BasketOrder/config';
 import { BasketVolumeType } from '../components/modules/BasketSetting/config';
@@ -24,13 +23,16 @@ import {
 } from '@kungfu-trader/kungfu-js-api/kungfu';
 import {
   BasketVolumeTypeEnum,
+  DirectionEnum,
   OrderStatusEnum,
   PriceLevelEnum,
   SideEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
+  resolveAccountId,
   getProcessIdByKfLocation,
   resolveDirectionBySideAndOffset,
+  delayMilliSeconds,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
   UnfinishedOrderStatus,
@@ -192,9 +194,16 @@ export const dealBasketOrdersToMap = (
 
   return basketOrders.reduce((basketOrdersMap, curBasketOrder) => {
     const { key, location } = buildBasketOrderMapKeyAndLocation(curBasketOrder);
+    const source_resolved_data = resolveAccountId(
+      window.watcher,
+      curBasketOrder.source,
+      curBasketOrder.dest,
+    );
 
     basketOrdersMap[key] = {
       ...curBasketOrder,
+      source_resolved_data,
+      source_uname: source_resolved_data.name,
       basket_order_location: location,
       primary_time_resolved: dealKfTime(curBasketOrder.insert_time),
       status_uname: BasketOrderStatus[curBasketOrder.status].name,
@@ -209,7 +218,6 @@ export const dealBasketOrdersToMap = (
 };
 
 export const useCurrentGlobalBasket = () => {
-  const { setCurrentGlobalKfLocation } = useGlobalStore();
   const { currentGlobalBasket, currentGlobalBasketOrder } = storeToRefs(
     useBasketTradeStore(),
   );
@@ -257,16 +265,12 @@ export const useCurrentGlobalBasket = () => {
   };
 
   const setCurrentGlobalBasket = (basket: KungfuApi.BasketResolved | null) => {
-    setCurrentGlobalKfLocation(basket ? basket.basket_location : null);
     useBasketTradeStore().setCurrentGlobalBasket(basket);
   };
 
   const setCurrentGlobalBasketOrder = (
     basketOrder: KungfuApi.BasketOrderResolved | null,
   ) => {
-    setCurrentGlobalKfLocation(
-      basketOrder ? basketOrder.basket_order_location : null,
-    );
     useBasketTradeStore().setCurrentGlobalBasketOrder(basketOrder);
   };
 
@@ -576,6 +580,7 @@ export const useMakeOrCancelBasketOrder = () => {
               buildOrdersMapKey(
                 basketInstrument.instrumentId,
                 basketInstrument.exchangeId,
+                basketInstrument.direction,
               )
             ].limit_price
           : 0;
@@ -685,7 +690,7 @@ export const useMakeOrCancelBasketOrder = () => {
     basket: KungfuApi.Basket,
     basketOrderInput: KungfuApi.BasketOrderInput,
     basketInstruments: KungfuApi.BasketInstrumentResolved[],
-    accountLocation: KungfuApi.KfLocation,
+    accountLocations: KungfuApi.KfLocation[],
     basketVolume: number,
   ) => {
     const basketInstrumentsForOrder = dealBasketInstrumentsToForOrder(
@@ -711,22 +716,31 @@ export const useMakeOrCancelBasketOrder = () => {
         if (flag) {
           if (!normal.length) return Promise.resolve();
 
-          const makeBasketOrderPromise = makeOrderByBasketTrade(
-            watcher,
-            {
-              ...basket,
-              total_volume: basket.total_volume * BigInt(basketVolume),
-            },
-            basketOrderInput,
-            normal,
-            accountLocation,
-          ).then((orderIds) => {
-            if (orderIds && orderIds.length === basketInstruments.length) {
-              return Promise.resolve();
-            }
+          const makeBasketOrderPromise = Promise.all(
+            accountLocations.map((accountLocation) => {
+              return makeOrderByBasketTrade(
+                watcher,
+                {
+                  ...basket,
+                  total_volume: basket.total_volume * BigInt(basketVolume),
+                },
+                basketOrderInput,
+                normal,
+                accountLocation,
+              )
+                .then((orderIds) => {
+                  if (
+                    orderIds &&
+                    orderIds.length === basketInstruments.length
+                  ) {
+                    return Promise.resolve();
+                  }
 
-            return Promise.reject();
-          });
+                  return Promise.reject();
+                })
+                .then(() => delayMilliSeconds(160));
+            }),
+          );
 
           return promiseMessageWrapper(makeBasketOrderPromise, {
             errorTextByError: true,
@@ -738,9 +752,20 @@ export const useMakeOrCancelBasketOrder = () => {
     );
   };
 
-  const buildOrdersMapKey = (instrumentId: string, exchangeId: string) => {
-    return `${instrumentId}_${exchangeId}`;
+  const buildOrdersMapKey = (
+    instrumentId: string,
+    exchangeId: string,
+    direction: DirectionEnum,
+  ) => {
+    return `${instrumentId}_${exchangeId}_${direction}`;
   };
+
+  const defaultOrdersMapKeyBuilder = (order: KungfuApi.Order) =>
+    buildOrdersMapKey(
+      order.instrument_id,
+      order.exchange_id,
+      resolveDirectionBySideAndOffset(order.side, order.offset),
+    );
 
   const getBasketOrderTargetStatusOrdersMap = <
     T extends Record<string, OrderStatusEnum[]>,
@@ -786,13 +811,44 @@ export const useMakeOrCancelBasketOrder = () => {
     watcher: KungfuApi.Watcher,
     basketOrder: KungfuApi.BasketOrderResolved,
   ) => {
-    return getBasketOrderTargetStatusOrdersMap(
-      watcher,
-      basketOrder,
-      (order: KungfuApi.Order) =>
-        buildOrdersMapKey(order.instrument_id, order.exchange_id),
-      { unfinished: UnfinishedOrderStatus },
-    ).unfinished;
+    const { unfinished, filled, notTradeAll } =
+      getBasketOrderTargetStatusOrdersMap(
+        watcher,
+        basketOrder,
+        defaultOrdersMapKeyBuilder,
+        {
+          unfinished: UnfinishedOrderStatus,
+          filled: [OrderStatusEnum.Filled],
+          notTradeAll: NotTradeAllOrderStatus,
+        },
+      );
+    const unfinishedOrderKeys = Object.keys(unfinished);
+    if (unfinishedOrderKeys.length) {
+      return unfinishedOrderKeys.reduce((ordersMap, key) => {
+        if (key in filled) {
+          const volumeLeft = unfinishedOrderKeys[key].volume_left;
+          const tradedVolume = filled[key].volume - filled[key].volume_left;
+          if (volumeLeft === tradedVolume) {
+            return ordersMap;
+          }
+
+          if (
+            key in notTradeAll &&
+            notTradeAll[key].volume_left <= filled[key].volume_left
+          ) {
+            if (notTradeAll[key].volume_left === tradedVolume) {
+              return ordersMap;
+            }
+          }
+        }
+
+        ordersMap[key] = unfinished[key];
+
+        return ordersMap;
+      }, {} as Record<string, KungfuApi.Order>);
+    }
+
+    return unfinished;
   };
 
   const cancalBasketOrder = (
@@ -900,6 +956,28 @@ export const useMakeOrCancelBasketOrder = () => {
         { errorTextByError: true },
       );
 
+    const { notTradeAll } = getBasketOrderTargetStatusOrdersMap(
+      watcher,
+      basketOrder,
+      defaultOrdersMapKeyBuilder,
+      { notTradeAll: UnfinishedOrderStatus },
+    );
+
+    ordersResolved = ordersResolved.map((order) => {
+      const orderKey = buildOrdersMapKey(
+        order.instrument_id,
+        order.exchange_id,
+        resolveDirectionBySideAndOffset(order.side, order.offset),
+      );
+      if (
+        orderKey in notTradeAll &&
+        notTradeAll[orderKey].volume_left <= order.volume_left
+      ) {
+        order.volume_left = notTradeAll[orderKey].volume_left;
+      }
+      return order;
+    });
+
     const basketInstrumentsForOrder = getBasketInstrumentsForOrder(
       ordersResolved,
       basket,
@@ -958,8 +1036,7 @@ export const useMakeOrCancelBasketOrder = () => {
       getBasketOrderTargetStatusOrdersMap(
         watcher,
         basketOrder,
-        (order: KungfuApi.Order) =>
-          buildOrdersMapKey(order.instrument_id, order.exchange_id),
+        defaultOrdersMapKeyBuilder,
         {
           notTradeAll: NotTradeAllOrderStatus,
           filled: [OrderStatusEnum.Filled],
@@ -1026,18 +1103,24 @@ export const useMakeOrCancelBasketOrder = () => {
         { errorTextByError: true },
       );
 
-    const unfinishedOrdersMap = getBasketOrderUnfinishedOrdersMap(
+    const { unfinished } = getBasketOrderTargetStatusOrdersMap(
       watcher,
       basketOrder,
+      defaultOrdersMapKeyBuilder,
+      { unfinished: UnfinishedOrderStatus },
     );
 
     ordersResolved = ordersResolved.map((order) => {
       const orderKey = buildOrdersMapKey(
         order.instrument_id,
         order.exchange_id,
+        resolveDirectionBySideAndOffset(order.side, order.offset),
       );
-      if (orderKey in unfinishedOrdersMap) {
-        order.volume_left = unfinishedOrdersMap[orderKey].volume_left;
+      if (
+        orderKey in unfinished &&
+        unfinished[orderKey].volume_left <= order.volume_left
+      ) {
+        order.volume_left = unfinished[orderKey].volume_left;
       }
       return order;
     });

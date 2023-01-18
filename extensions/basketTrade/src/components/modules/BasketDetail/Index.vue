@@ -94,32 +94,11 @@
           <template v-else-if="column.dataIndex === 'rate'">
             {{ `${item['rate']}%` }}
           </template>
-          <template v-else-if="column.dataIndex === 'position_volume'">
-            {{ getBasketInstrumentPositionData(item, 'volume') }}
-          </template>
           <template v-else-if="column.dataIndex === 'direction'">
             <span :class="`color-${dealDirection(item.direction).color}`">
               {{ dealDirection(item.direction).name }}
             </span>
           </template>
-          <template v-else-if="column.dataIndex === 'avg_open_price'">
-            {{
-              dealKfPrice(
-                getBasketInstrumentPositionData(item, 'avg_open_price'),
-              )
-            }}
-          </template>
-          <template v-else-if="column.dataIndex === 'unrealized_pnl'">
-            <KfBlinkNum
-              mode="compare-zero"
-              :num="
-                dealAssetPrice(
-                  getBasketInstrumentPositionData(item, 'unrealized_pnl'),
-                )
-              "
-            ></KfBlinkNum>
-          </template>
-
           <template v-else-if="column.dataIndex === 'actions'">
             <div class="kf-actions__warp">
               <a-button
@@ -141,7 +120,7 @@
     <KfSetByConfigModal
       v-if="addBasketInstrumentModalVisble"
       v-model:visible="addBasketInstrumentModalVisble"
-      :width="1000"
+      :width="1010"
       :label-col="4"
       :wrapper-col="17"
       :payload="setBasketInstrumentConfigPayload"
@@ -188,7 +167,6 @@ import {
 } from '../../../utils/basketTradeUtils';
 import {
   useActiveInstruments,
-  useCurrentPositionList,
   useExtConfigsRelated,
   useInstruments,
   useProcessStatusDetailData,
@@ -199,7 +177,6 @@ import { BASKET_CATEGORYS } from '../../../config';
 import { getMakeBasketOrderConfigSettings } from '../../../config/makeBasketOrderFormConfig';
 import {
   dealKfPrice,
-  dealAssetPrice,
   dealDirection,
   getKfLocationByProcessId,
   transformSearchInstrumentResultToInstrument,
@@ -225,7 +202,6 @@ const { subscribeAllInstrumentByAppStates } = useInstruments();
 useSubscribeBasketInstruments();
 const { getQuoteByInstrument, isInstrumentUpLimit, isInstrumentLowLimit } =
   useQuote();
-const { buildPrositionMapKey, allPositionMap } = useCurrentPositionList();
 
 const dataTableRef = ref();
 const dataSelection = ref<KfTradingDataTableSelection>({});
@@ -244,37 +220,10 @@ const basketInstrumentSorter = (
   };
 };
 
-const getBasketInstrumentPositionData = (
-  basketInstrument: KungfuApi.BasketInstrumentResolved,
-  key: string,
-) => {
-  return (
-    allPositionMap.value[
-      buildPrositionMapKey(
-        basketInstrument.exchangeId,
-        basketInstrument.instrumentId,
-        basketInstrument.direction,
-      )
-    ]?.[key] ?? '--'
-  );
-};
-
 const columns = getColumns(currentGlobalBasket, {
   last_price: basketInstrumentSorter(
     (bi: KungfuApi.BasketInstrumentResolved) =>
       getQuoteByInstrument(bi)?.last_price ?? 0,
-  ),
-  volume: basketInstrumentSorter(
-    (bi: KungfuApi.BasketInstrumentResolved) =>
-      getBasketInstrumentPositionData(bi, 'volume') ?? 0,
-  ),
-  avg_open_price: basketInstrumentSorter(
-    (bi: KungfuApi.BasketInstrumentResolved) =>
-      getBasketInstrumentPositionData(bi, 'avg_open_price') ?? 0,
-  ),
-  unrealized_pnl: basketInstrumentSorter(
-    (bi: KungfuApi.BasketInstrumentResolved) =>
-      getBasketInstrumentPositionData(bi, 'unrealized_pnl') ?? 0,
   ),
 });
 
@@ -414,8 +363,11 @@ function handleSubscribeBasketInstruments(
 function handlePlaceBasketOrder(formState) {
   if (!currentGlobalBasket.value) return;
 
-  const accountLocation = getKfLocationByProcessId(`td_${formState.accountId}`);
-  if (!accountLocation) return;
+  const accountIds = formState.accountIds as string[];
+  console.log(accountIds);
+  const accountLocations = accountIds
+    .map((accountId) => getKfLocationByProcessId(`td_${accountId}`))
+    .filter((item) => !!item) as KungfuApi.KfLocation[];
 
   if (!dataTableRef.value) return;
 
@@ -436,7 +388,7 @@ function handlePlaceBasketOrder(formState) {
     currentGlobalBasket.value,
     basketOrderInput,
     selectBasketInstruments,
-    accountLocation,
+    accountLocations,
     +formState.basketVolume,
   ).then(() => {
     app?.proxy?.$globalBus.next({

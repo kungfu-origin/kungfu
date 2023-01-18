@@ -92,6 +92,7 @@ declare namespace KungfuApi {
     | 'commissionMode' // select - number
     | 'instrumentType' // select - number
     | 'td'
+    | 'tds'
     | 'md'
     | 'strategy'
     | 'instrument'
@@ -113,6 +114,8 @@ declare namespace KungfuApi {
   export interface KfSelectOption {
     value: string | number;
     label: string | number;
+    type?: 'tag' | 'text';
+    color?: AntInKungfuColorTypes;
   }
 
   export interface KfConfigItemHeader {
@@ -545,15 +548,20 @@ declare namespace KungfuApi {
     side: SideEnum;
     price_type: PriceTypeEnum;
     price_level: PriceLevelEnum;
-    price_offset: number;
+    price_offset: number; // 价格偏移
     volume: bigint;
     volume_left: bigint;
     status: BasketOrderStatusEnum;
+
+    source: number; // 下单方
+    dest: number;
   }
 
   export interface BasketOrderResolved extends BasketOrder {
     basket_order_location: KfExtraLocation;
     primary_time_resolved: string;
+    source_uname: string;
+    source_resolved_data: KfTradeValueCommonData;
     status_uname: string;
     status_color: AntInKungfuColorTypes;
     progress: number;

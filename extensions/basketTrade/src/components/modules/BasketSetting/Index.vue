@@ -52,6 +52,17 @@
               :num="dealAssetPrice(getBasketMarkedValue(record))"
             ></KfBlinkNum>
           </template>
+          <template v-else-if="column.dataIndex === 'volume_type_resolved'">
+            <a-tag
+              :color="
+                dealKungfuColorToStyleColor(
+                  BasketVolumeType[record.volume_type].color,
+                )
+              "
+            >
+              {{ record.volume_type_resolved }}
+            </a-tag>
+          </template>
           <template v-else-if="column.dataIndex === 'total_volume'">
             <span style="float: right">{{ record.total_volume }}</span>
           </template>
@@ -92,6 +103,7 @@ import { SettingOutlined, DeleteOutlined } from '@ant-design/icons-vue';
 import {
   messagePrompt,
   useDashboardBodySize,
+  dealKungfuColorToStyleColor,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import {
@@ -106,6 +118,7 @@ import {
   getColumns,
   getBasketFormSettings,
   basketTradingDataGetter,
+  BasketVolumeType,
 } from './config';
 import { BASKET_CATEGORYS } from '../../../config';
 import { DealTradingDataHooks } from '@kungfu-trader/kungfu-js-api/hooks/dealTradingDataHook';
@@ -140,6 +153,8 @@ const addBasketModalVisble = ref(false);
 const basketsNames = computed(() => {
   return basketsResolved.value.map((basket) => basket.name);
 });
+
+const currentSetBasket = ref<KungfuApi.BasketResolved | null>(null);
 
 const setBasketConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
   type: 'add',
@@ -212,8 +227,9 @@ function handleSetAllBaskets(baskets: KungfuApi.Basket[]) {
 
 function handleOpenSetBasketModal(
   type: 'add' | 'update',
-  initValue?: KungfuApi.Basket,
+  initValue?: KungfuApi.BasketResolved,
 ) {
+  currentSetBasket.value = null;
   setBasketConfigPayload.value.type = type;
   setBasketConfigPayload.value.config = {
     type: [],
@@ -236,6 +252,7 @@ function handleOpenSetBasketModal(
         };
 
   addBasketModalVisble.value = true;
+  currentSetBasket.value = initValue;
 }
 
 function handleFormStateChange(formState) {
@@ -252,8 +269,10 @@ function handleFormStateChange(formState) {
 function handleConfirmAddUpdateBasket(
   formState: Record<string, KungfuApi.KfConfigValue>,
 ) {
+  if (!currentSetBasket.value) return;
+
   const newBasket: KungfuApi.Basket = {
-    id: new Date().getTime(),
+    id: currentSetBasket.value.id,
     name: formState.name,
     volume_type: +formState.volume_type,
     total_volume:
@@ -268,7 +287,12 @@ function handleConfirmAddUpdateBasket(
     newBasketMap,
   );
 
-  return handleSetAllBaskets(Object.values(allBaskets));
+  return handleSetAllBaskets(Object.values(allBaskets)).then(() => {
+    if (currentSetBasket.value?.id === currentGlobalBasket.value?.id) {
+      setCurrentGlobalBasket(currentSetBasket.value);
+    }
+    currentSetBasket.value = null;
+  });
 }
 
 function handleRemoveBasket(targetBasket: KungfuApi.BasketResolved) {
