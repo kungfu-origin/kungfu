@@ -297,12 +297,12 @@ Napi::Value Watcher::IssueBasketOrder(const Napi::CallbackInfo &info) {
 
   auto account_location = ExtractLocation(info, 1, get_locator());
   auto basket_order_info = info[0].ToObject();
-  basket_order_info.Set("dest", Napi::Number::New(info.Env(), account_location->uid));
+  basket_order_info.Set("dest_location_uid", Napi::Number::New(info.Env(), account_location->uid));
   if (info.Length() == 2) {
-    basket_order_info.Set("source", Napi::Number::New(info.Env(), get_home_uid()));
+    basket_order_info.Set("source_location_uid", Napi::Number::New(info.Env(), get_home_uid()));
   } else {
     auto strategy_location = ExtractLocation(info, 2, get_locator());
-    basket_order_info.Set("source", Napi::Number::New(info.Env(), strategy_location->uid));
+    basket_order_info.Set("source_location_uid", Napi::Number::New(info.Env(), strategy_location->uid));
   }
 
   return InteractWithTD<BasketOrder>(info, info[0].ToObject(), &BasketOrder::order_id);

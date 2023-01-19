@@ -213,7 +213,7 @@ KF_DEFINE_DATA_TYPE(                     //
     (uint32_t, id),                      //
     (std::string, name),                 //
     (BasketVolumeType, volume_type),     // 比例/数量
-    (int64_t, total_volume),             // 总数量
+    (int64_t, total_amount),             // 总数量
     (BasketType, type)                   // 类型: Custom 或 ETF
 );
 
@@ -754,8 +754,9 @@ KF_DEFINE_PACK_TYPE(                                        //
 
     (BasketOrderStatus, status), // 订单状态
 
-    (uint32_t, source), // 下单方
-    (uint32_t, dest)    //
+    (uint32_t, source_location_uid), // 下单方
+    (uint32_t, dest_location_uid),   //
+    (BasketOrderVolumeMode, mode)    //
 );
 
 KF_DEFINE_PACK_TYPE(                                                       //
