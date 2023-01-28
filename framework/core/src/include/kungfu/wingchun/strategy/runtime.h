@@ -177,6 +177,12 @@ public:
   book::Bookkeeper &get_bookkeeper();
 
   /**
+   * Get basketorder engine.
+   * @return basketorder engine reference
+   */
+  basketorder::BasketOrderEngine &get_basketorder_engine();
+
+  /**
    * query history order
    */
   void req_history_order(const std::string &source, const std::string &account, uint32_t query_num = 0) override;

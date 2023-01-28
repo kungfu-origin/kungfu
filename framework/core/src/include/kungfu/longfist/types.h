@@ -754,9 +754,9 @@ KF_DEFINE_PACK_TYPE(                                        //
 
     (BasketOrderStatus, status), // 订单状态
 
-    (uint32_t, source_location_uid), // 下单方
-    (uint32_t, dest_location_uid),   //
-    (BasketOrderVolumeMode, mode)    //
+    (uint32_t, source_id),        // 下单方
+    (uint32_t, dest_id),          //
+    (BasketOrderVolumeMode, mode) //
 );
 
 KF_DEFINE_PACK_TYPE(                                                       //

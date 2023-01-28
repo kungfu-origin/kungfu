@@ -200,8 +200,8 @@ uint64_t RuntimeContext::insert_basket_order(uint64_t basket_id, const std::stri
   BasketOrder &input = writer->open_data<BasketOrder>(app_.now());
   input.order_id = writer->current_frame_uid();
   input.parent_id = basket_id;
-  input.source_location_uid = app_.get_home_uid();
-  input.dest_location_uid = account_location_uid;
+  input.source_id = app_.get_home_uid();
+  input.dest_id = account_location_uid;
   input.price_type = price_type;
   input.price_level = price_level;
   input.price_offset = price_offset;
