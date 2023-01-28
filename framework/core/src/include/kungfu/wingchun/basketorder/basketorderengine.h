@@ -45,15 +45,7 @@ public:
 
   [[nodiscard]] const BasketMap &get_baskets() const { return baskets_; }
 
-  [[nodiscard]] const BasketInstrumentMap get_basket_instruments(uint32_t basket_id) const {
-    BasketInstrumentMap basket_instruments = {};
-    for (auto &pair : basket_instruments_) {
-      if (pair.second.basket_uid == basket_id) {
-        basket_instruments.insert_or_assign(pair.first, pair.second);
-      }
-    }
-    return basket_instruments;
-  }
+  [[nodiscard]] const BasketInstrumentMap &get_basket_instruments() const { return basket_instruments_; }
 
 private:
   yijinjing::practice::apprentice &app_;
