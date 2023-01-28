@@ -129,6 +129,7 @@ class Strategy(wc.Strategy):
             self.ctx.runtime_locator,
         )
         self.ctx.book = self.ctx.wc_context.bookkeeper.get_book(location.uid)
+        self.ctx.basketorder_engine = self.ctx.wc_context.basketorder_engine
 
     def __add_timer(self, nanotime, callback):
         def wrap_callback(event):

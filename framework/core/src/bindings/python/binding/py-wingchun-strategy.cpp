@@ -189,6 +189,8 @@ void bind_strategy(pybind11::module &m) {
 
   py::class_<strategy::RuntimeContext, strategy::Context, strategy::RuntimeContext_ptr>(m, "RuntimeContext")
       .def_property_readonly("bookkeeper", &strategy::RuntimeContext::get_bookkeeper,
+                             py::return_value_policy::reference)
+      .def_property_readonly("basketorderengine", &strategy::RuntimeContext::get_basketorder_engine,
                              py::return_value_policy::reference);
 
   py::class_<strategy::Strategy, PyStrategy, strategy::Strategy_ptr>(m, "Strategy")
@@ -215,6 +217,5 @@ void bind_strategy(pybind11::module &m) {
       .def("on_history_trade", &strategy::Strategy::on_history_trade)
       .def("on_req_history_order_error", &strategy::Strategy::on_req_history_order_error)
       .def("on_req_history_trade_error", &strategy::Strategy::on_req_history_trade_error);
-  ;
 }
 } // namespace kungfu::wingchun::pybind

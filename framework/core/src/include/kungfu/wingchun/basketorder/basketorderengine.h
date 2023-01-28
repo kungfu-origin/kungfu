@@ -43,6 +43,18 @@ public:
 
   kungfu::state<longfist::types::BasketOrder> &get_basket_order(uint64_t basket_order_id);
 
+  [[nodiscard]] const BasketMap &get_baskets() const { return baskets_; }
+
+  [[nodiscard]] const BasketInstrumentMap get_basket_instruments(uint32_t basket_id) const {
+    BasketInstrumentMap basket_instruments = {};
+    for (auto &pair : basket_instruments_) {
+      if (pair.second.basket_uid == basket_id) {
+        basket_instruments.insert_or_assign(pair.first, pair.second);
+      }
+    }
+    return basket_instruments;
+  }
+
 private:
   yijinjing::practice::apprentice &app_;
   BasketMap baskets_ = {};
@@ -50,6 +62,14 @@ private:
   BasketOrderStateMap basket_order_states_ = {};
 
   BasketOrderState_ptr make_basket_order_state(int64_t update_time, const longfist::types::BasketOrder &basket_order);
+
+  void update_basket(const longfist::types::Basket &basket) { baskets_.insert_or_assign(basket.id, basket); }
+
+  void update_basket_instrument(const longfist::types::BasketInstrument &basket_instrument) {
+    auto basket_instrument_hashed = hash_basket_instrument(basket_instrument.basket_uid, basket_instrument.exchange_id,
+                                                           basket_instrument.instrument_id);
+    basket_instruments_.insert_or_assign(basket_instrument_hashed, basket_instrument);
+  }
 };
 
 } // namespace kungfu::wingchun::basketorder

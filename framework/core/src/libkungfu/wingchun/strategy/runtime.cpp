@@ -240,6 +240,8 @@ broker::Client &RuntimeContext::get_broker_client() { return broker_client_; }
 
 book::Bookkeeper &RuntimeContext::get_bookkeeper() { return bookkeeper_; }
 
+basketorder::BasketOrderEngine &RuntimeContext::get_basketorder_engine() { return basketorder_engine_; }
+
 uint32_t RuntimeContext::lookup_account_location_id(const std::string &account) const {
   return account_location_ids_.at(hash_str_32(account));
 }

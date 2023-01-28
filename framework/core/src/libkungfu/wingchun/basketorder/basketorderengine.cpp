@@ -18,6 +18,8 @@ void BasketOrderEngine::on_start(const rx::connectable_observable<event_ptr> &ev
 
   events | is(BasketOrder::tag) | $$(on_basket_order(event->trigger_time(), event->data<BasketOrder>()));
   events | is(Order::tag) | $$(update_basket_order(event->trigger_time(), event->data<Order>()));
+  events | is(Basket::tag) | $$(update_basket(event->data<Basket>()));
+  events | is(BasketInstrument::tag) | $$(update_basket_instrument(event->data<BasketInstrument>()));
 }
 
 void BasketOrderEngine::restore(const cache::bank &state_bank) {
@@ -29,6 +31,14 @@ void BasketOrderEngine::restore(const cache::bank &state_bank) {
   for (auto &pair : state_bank[boost::hana::type_c<Order>]) {
     auto order_state = pair.second;
     try_update_basket_order(order_state.update_time, order_state.data);
+  }
+
+  for (auto &pair : state_bank[boost::hana::type_c<Basket>]) {
+    update_basket(pair.second.data);
+  }
+
+  for (auto &pair : state_bank[boost::hana::type_c<BasketInstrument>]) {
+    update_basket_instrument(pair.second.data);
   }
 }
 
