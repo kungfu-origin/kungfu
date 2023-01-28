@@ -70,8 +70,8 @@ export enum PriceLevelEnum {
   Buy3,
   Buy4,
   Buy5,
-  UpLimitPrice, // 涨停价
-  LowLimitPrice, // 跌停价
+  UpperLimitPrice, // 涨停价
+  LowerLimitPrice, // 跌停价
   Unknown,
 }
 

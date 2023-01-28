@@ -21,13 +21,14 @@ using namespace kungfu::yijinjing::util;
 namespace kungfu::wingchun::strategy {
 
 RuntimeContext::RuntimeContext(apprentice &app, const rx::connectable_observable<event_ptr> &events)
-    : app_(app), events_(events), broker_client_(app_), bookkeeper_(app_, broker_client_) {
+    : app_(app), events_(events), broker_client_(app_), bookkeeper_(app_, broker_client_), basketorder_engine_(app_) {
   log::copy_log_settings(app_.get_home(), app_.get_home()->name);
 }
 
 void RuntimeContext::on_start() {
   broker_client_.on_start(events_);
   bookkeeper_.on_start(events_);
+  basketorder_engine_.on_start(events_);
 }
 
 int64_t RuntimeContext::now() const { return app_.now(); }
@@ -94,7 +95,7 @@ uint64_t RuntimeContext::insert_block_message(const std::string &source, const s
 uint64_t RuntimeContext::insert_order(const std::string &instrument_id, const std::string &exchange_id,
                                       const std::string &source, const std::string &account, double limit_price,
                                       int64_t volume, PriceType type, Side side, Offset offset, HedgeFlag hedge_flag,
-                                      bool is_swap, uint64_t block_id) {
+                                      bool is_swap, uint64_t block_id, uint64_t parent_id) {
   auto account_location_uid = get_td_location_uid(source, account);
   auto insert_time = time::now_in_nano();
   if (not broker_client_.is_ready(account_location_uid)) {
@@ -121,6 +122,7 @@ uint64_t RuntimeContext::insert_order(const std::string &instrument_id, const st
   input.offset = offset;
   input.hedge_flag = hedge_flag;
   input.block_id = block_id;
+  input.parent_id = parent_id;
   input.is_swap = is_swap;
   input.insert_time = insert_time;
   writer->close_data();
@@ -181,6 +183,33 @@ std::vector<uint64_t> RuntimeContext::insert_array_orders(const std::string &sou
   writer->mark(time::now_in_nano(), BatchOrderEnd::tag);
   writer->close_data();
   return order_ids;
+}
+
+uint64_t RuntimeContext::insert_basket_order(uint64_t basket_id, const std::string &source, const std::string account,
+                                             longfist::enums::PriceType price_type,
+                                             longfist::enums::PriceLevel price_level, double price_offset,
+                                             longfist::enums::BasketOrderVolumeMode volume_mode) {
+  auto account_location_uid = get_td_location_uid(source, account);
+  auto insert_time = time::now_in_nano();
+  if (not broker_client_.is_ready(account_location_uid)) {
+    SPDLOG_ERROR("account {} not ready", td_locations_.at(account_location_uid)->uname);
+    return 0;
+  }
+
+  auto writer = app_.get_writer(account_location_uid);
+  BasketOrder &input = writer->open_data<BasketOrder>(app_.now());
+  input.order_id = writer->current_frame_uid();
+  input.parent_id = basket_id;
+  input.source_location_uid = app_.get_home_uid();
+  input.dest_location_uid = account_location_uid;
+  input.price_type = price_type;
+  input.price_level = price_level;
+  input.price_offset = price_offset;
+  input.mode = volume_mode;
+  input.insert_time = insert_time;
+  writer->close_data();
+  basketorder_engine_.insert_basket_order(app_.now(), input);
+  return input.order_id;
 }
 
 uint64_t RuntimeContext::cancel_order(uint64_t order_id) {

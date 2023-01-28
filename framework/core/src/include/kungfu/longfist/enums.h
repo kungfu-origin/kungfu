@@ -200,7 +200,7 @@ enum class PriceType : int8_t {
   ReverseBest, // 上海最优五档即时成交剩余转限价, 深圳对手方最优价格申报，不需要报价
   Fak,         // 深圳即时成交剩余撤销，不需要报价
   Fok,         // 深圳市价全额成交或者撤销，不需要报价
-  UnKnown
+  Unknown
 };
 
 inline std::ostream &operator<<(std::ostream &os, PriceType t) { return os << int8_t(t); }
@@ -217,9 +217,9 @@ enum class PriceLevel : int8_t {
   Buy3,
   Buy4,
   Buy5,
-  UpLimitPrice,  // 涨停价
-  lowLimitPrice, // 跌停价
-  UnKnown
+  UpperLimitPrice, // 涨停价
+  LowerLimitPrice, // 跌停价
+  Unknown
 };
 
 inline std::ostream &operator<<(std::ostream &os, PriceLevel t) { return os << int8_t(t); }
@@ -254,7 +254,7 @@ enum class BasketVolumeType : int8_t { Unknown, Quantity, Proportion };
 
 inline std::ostream &operator<<(std::ostream &os, BasketVolumeType t) { return os << int8_t(t); }
 
-enum class BasketOrderVolumeMode: int8_t { Static, Accumulation };
+enum class BasketOrderVolumeMode : int8_t { Static, Accumulation };
 
 inline std::ostream &operator<<(std::ostream &os, BasketOrderVolumeMode t) { return os << int8_t(t); }
 

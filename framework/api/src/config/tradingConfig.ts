@@ -377,8 +377,10 @@ export const PriceLevel: Record<
   [PriceLevelEnum.Buy3]: { name: t('tradingConfig.buy3') },
   [PriceLevelEnum.Buy4]: { name: t('tradingConfig.buy4') },
   [PriceLevelEnum.Buy5]: { name: t('tradingConfig.buy5') },
-  [PriceLevelEnum.UpLimitPrice]: { name: t('tradingConfig.up_limit_price') },
-  [PriceLevelEnum.LowLimitPrice]: { name: t('tradingConfig.low_limit_price') },
+  [PriceLevelEnum.UpperLimitPrice]: { name: t('tradingConfig.up_limit_price') },
+  [PriceLevelEnum.LowerLimitPrice]: {
+    name: t('tradingConfig.low_limit_price'),
+  },
   [PriceLevelEnum.Unknown]: { name: t('tradingConfig.unknown') },
 };
 

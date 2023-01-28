@@ -290,7 +290,7 @@ inline void from_xtp(const XTP_PRICE_TYPE &xtp_price_type, const XTP_MARKET_TYPE
     else if (xtp_price_type == XTP_PRICE_ALL_OR_CANCEL)
       price_type = PriceType::Fok;
   } else
-    price_type = PriceType::UnKnown;
+    price_type = PriceType::Unknown;
 }
 
 inline void to_xtp(XTP_PRICE_TYPE &xtp_price_type, const PriceType &price_type, const char *exchange) {

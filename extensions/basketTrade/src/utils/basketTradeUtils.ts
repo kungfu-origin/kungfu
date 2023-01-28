@@ -520,13 +520,13 @@ export const useMakeOrCancelBasketOrder = () => {
     instrumentQuote: KungfuApi.Quote,
   ) => {
     switch (priceLevel) {
-      case PriceLevelEnum.LowLimitPrice:
+      case PriceLevelEnum.LowerLimitPrice:
         return getPriceByPriceOffset(
           instrumentQuote.lower_limit_price,
           side,
           priceOffset,
         );
-      case PriceLevelEnum.UpLimitPrice:
+      case PriceLevelEnum.UpperLimitPrice:
         return getPriceByPriceOffset(
           instrumentQuote.upper_limit_price,
           side,
