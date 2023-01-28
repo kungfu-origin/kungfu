@@ -269,10 +269,11 @@ function handleFormStateChange(formState) {
 function handleConfirmAddUpdateBasket(
   formState: Record<string, KungfuApi.KfConfigValue>,
 ) {
-  if (!currentSetBasket.value) return;
+  if (setBasketConfigPayload.value.type === 'update' && !currentSetBasket.value)
+    return;
 
   const newBasket: KungfuApi.Basket = {
-    id: currentSetBasket.value.id,
+    id: currentSetBasket.value?.id ?? new Date().getTime(),
     name: formState.name,
     volume_type: +formState.volume_type,
     total_volume:
@@ -287,12 +288,15 @@ function handleConfirmAddUpdateBasket(
     newBasketMap,
   );
 
-  return handleSetAllBaskets(Object.values(allBaskets)).then(() => {
-    if (currentSetBasket.value?.id === currentGlobalBasket.value?.id) {
-      setCurrentGlobalBasket(currentSetBasket.value);
-    }
-    currentSetBasket.value = null;
-  });
+  return handleSetAllBaskets(Object.values(allBaskets))
+    .then(() => {
+      if (currentSetBasket.value?.id === currentGlobalBasket.value?.id) {
+        setCurrentGlobalBasket(currentSetBasket.value);
+      }
+    })
+    .finally(() => {
+      currentSetBasket.value = null;
+    });
 }
 
 function handleRemoveBasket(targetBasket: KungfuApi.BasketResolved) {
