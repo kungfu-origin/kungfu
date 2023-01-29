@@ -39,6 +39,8 @@ public:
 
   bool has_basket_order_state(uint64_t basket_order_id);
 
+  BasketOrderStateMap &get_all_basket_order_states();
+
   BasketOrderState_ptr get_basket_order_state(uint64_t basket_order_id);
 
   kungfu::state<longfist::types::BasketOrder> &get_basket_order(uint64_t basket_order_id);

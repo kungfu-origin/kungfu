@@ -255,6 +255,12 @@ private:
     }
   }
 
+  void UpdateBasketOrders() {
+    for (auto &pair : basketorder_engine_.get_all_basket_order_states()) {
+      trading_bank_ << pair.second->get_state();
+    }
+  }
+
   template <typename TradingData>
   std::enable_if_t<std::is_same_v<TradingData, longfist::types::OrderInput>> UpdateBook(uint32_t source, uint32_t dest,
                                                                                         const TradingData &data) {

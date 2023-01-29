@@ -19,7 +19,7 @@ namespace kungfu::wingchun::pybind {
 
 void bind_book(pybind11::module &m);
 
-void bind_basketorder(pybind11::module& m);
+void bind_basketorder(pybind11::module &m);
 
 void bind_broker(pybind11::module &m);
 

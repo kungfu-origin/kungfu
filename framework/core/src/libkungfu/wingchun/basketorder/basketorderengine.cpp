@@ -82,6 +82,8 @@ bool BasketOrderEngine::has_basket_order_state(uint64_t basket_order_id) {
   return basket_order_states_.find(basket_order_id) != basket_order_states_.end();
 }
 
+BasketOrderStateMap &BasketOrderEngine::get_all_basket_order_states() { return basket_order_states_; }
+
 state<longfist::types::BasketOrder> &BasketOrderEngine::get_basket_order(uint64_t basket_order_id) {
   return basket_order_states_.at(basket_order_id)->get_state();
 }
