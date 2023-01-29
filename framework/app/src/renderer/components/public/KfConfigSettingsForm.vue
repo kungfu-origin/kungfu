@@ -1203,6 +1203,23 @@ defineExpose({
           {{ getIdByKfLocation(config) }}
         </a-select-option>
       </a-select>
+      <a-select
+        v-else-if="item.type === 'basket'"
+        v-model:value="formState[item.key]"
+        :disabled="
+          (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
+          item.disabled
+        "
+      >
+        <a-select-option
+          v-for="config in strategy"
+          :key="getIdByKfLocation(config)"
+          :value="getIdByKfLocation(config)"
+        >
+          {{ getIdByKfLocation(config) }}
+        </a-select-option>
+      </a-select>
+      
       <a-switch
         size="small"
         v-else-if="item.type === 'bool'"
