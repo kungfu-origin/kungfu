@@ -14,6 +14,8 @@ import {
   getAllRiskSettingList,
   getSubscribedInstruments,
   getTdGroups,
+  getAllBaskets,
+  getAllBasketInstruments,
 } from '@kungfu-trader/kungfu-js-api/actions';
 import {
   Pm2ProcessStatusDetailData,
@@ -36,6 +38,8 @@ interface GlobalState {
   tdGroupList: KungfuApi.KfExtraLocation[];
   mdList: KungfuApi.KfConfig[];
   strategyList: KungfuApi.KfConfig[];
+  basketList: KungfuApi.Basket[];
+  basketInstrumentList: KungfuApi.BasketInstrument[];
 
   processStatusData: Pm2ProcessStatusData;
   processStatusWithDetail: Pm2ProcessStatusDetailData;
@@ -73,6 +77,8 @@ export const useGlobalStore = defineStore('global', {
       tdGroupList: [],
       mdList: [],
       strategyList: [],
+      basketList: [],
+      basketInstrumentList: [],
 
       processStatusData: {},
       processStatusWithDetail: {},
@@ -191,6 +197,18 @@ export const useGlobalStore = defineStore('global', {
     setRiskSettingList() {
       return getAllRiskSettingList().then((res) => {
         this.riskSettings = res;
+      });
+    },
+
+    setBasketList() {
+      return getAllBaskets().then((basketList) => {
+        this.basketList = basketList;
+      });
+    },
+
+    setBasketInstrumentList() {
+      return getAllBasketInstruments().then((basketInstrumentList) => {
+        this.basketInstrumentList = basketInstrumentList;
       });
     },
 

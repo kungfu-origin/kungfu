@@ -49,8 +49,8 @@
                 :title="`${item.volume - item.volume_left}/${item.volume}`"
               />
             </template>
-            <template v-else-if="column.dataIndex === 'volume_condition'">
-              <span>
+            <template v-else-if="column.dataIndex === 'volume_left'">
+              <span style="float: right">
                 {{ `${item.volume - item.volume_left}/${item.volume}` }}
               </span>
             </template>

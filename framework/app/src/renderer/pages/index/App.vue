@@ -85,6 +85,8 @@ store.setKfExtConfigs();
 store.setSubscribedInstrumentsByLocal();
 store.setRiskSettingList();
 store.setKfGlobalSetting();
+store.setBasketList();
+store.setBasketInstrumentList();
 
 const busSubscription = globalBus.subscribe((data: KfEvent.KfBusEvent) => {
   if (data.tag === 'main') {

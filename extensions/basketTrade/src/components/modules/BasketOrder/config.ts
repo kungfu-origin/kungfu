@@ -66,7 +66,7 @@ export const getColumns = buildConfigGetterWrapByComputed(
       {
         type: 'string',
         name: `${t('orderConfig.clinch')}/${t('orderConfig.all')}`,
-        dataIndex: 'volume_condition',
+        dataIndex: 'volume_left',
         width: 110,
         sorter: (
           a: KungfuApi.BasketOrderResolved,
@@ -89,16 +89,16 @@ export const getColumns = buildConfigGetterWrapByComputed(
       },
       {
         type: 'source',
-        name: t('orderConfig.source_uname'),
-        dataIndex: 'source_uname',
+        name: t('orderConfig.dest_uname'),
+        dataIndex: 'dest_uname',
         width: 100,
         sorter: buildTableColumnSorter<KungfuApi.BasketOrderResolved>(
           'str',
-          'source_uname',
+          'dest_uname',
         ),
       },
       {
-        name: t('BasketTrade.actions'),
+        name: '',
         dataIndex: 'actions',
         width: 50,
       },

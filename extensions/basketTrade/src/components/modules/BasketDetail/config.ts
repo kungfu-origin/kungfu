@@ -71,7 +71,7 @@ export const getColumns = buildConfigGetterWrapByComputed(
         sorter: basketInstrumentSorters['last_price'],
       },
       {
-        name: t('tdConfig.actions'),
+        name: '',
         dataIndex: 'actions',
         width: 100,
       },

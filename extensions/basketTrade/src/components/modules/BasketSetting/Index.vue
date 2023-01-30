@@ -63,8 +63,14 @@
               {{ record.volume_type_resolved }}
             </a-tag>
           </template>
-          <template v-else-if="column.dataIndex === 'total_volume'">
-            <span style="float: right">{{ record.total_volume }}</span>
+          <template v-else-if="column.dataIndex === 'total_amount'">
+            <span style="float: right">
+              {{
+                record.volume_type === BasketVolumeTypeEnum.Proportion
+                  ? getBasketTotalAmount(record)
+                  : record.total_amount
+              }}
+            </span>
           </template>
           <template v-else-if="column.dataIndex === 'actions'">
             <div class="kf-actions__warp">
@@ -107,11 +113,13 @@ import {
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import {
-  buildBasketMapKeyAndLocation,
-  dealBasketsToMap,
   getAllBaskets,
   setAllBaskets,
-  useBasketMarkedValue,
+} from '@kungfu-trader/kungfu-js-api/actions';
+import {
+  buildBasketMapKeyAndLocation,
+  dealBasketsToMap,
+  useBasketQuote,
   useCurrentGlobalBasket,
 } from '../../../utils/basketTradeUtils';
 import {
@@ -142,7 +150,7 @@ const app = getCurrentInstance();
 const { dashboardBodyHeight, handleBodySizeChange } = useDashboardBodySize();
 const { currentGlobalBasket, dealBasketRowClassName, setCurrentGlobalBasket } =
   useCurrentGlobalBasket();
-const { getBasketMarkedValue } = useBasketMarkedValue();
+const { getBasketMarkedValue, getBasketTotalAmount } = useBasketQuote();
 
 const basketDataLoaded = ref(false);
 const columns = getColumns(getBasketMarkedValue);
@@ -247,7 +255,7 @@ function handleOpenSetBasketModal(
       ? undefined
       : {
           ...initValue,
-          total_volume: `${initValue?.total_volume}`,
+          total_amount: `${initValue?.total_amount}`,
           volume_type: `${initValue?.volume_type}`,
         };
 
@@ -276,10 +284,10 @@ function handleConfirmAddUpdateBasket(
     id: currentSetBasket.value?.id ?? new Date().getTime(),
     name: formState.name,
     volume_type: +formState.volume_type,
-    total_volume:
+    total_amount:
       BasketVolumeTypeEnum.Quantity === +formState.volume_type
         ? 0n
-        : BigInt(formState.total_volume),
+        : BigInt(formState.total_amount),
   };
 
   const newBasketMap = dealBasketsToMap([newBasket]);
@@ -301,7 +309,8 @@ function handleConfirmAddUpdateBasket(
 
 function handleRemoveBasket(targetBasket: KungfuApi.BasketResolved) {
   const allBaskets = Object.assign({}, toRaw(basketsResolvedMap.value));
-  delete allBaskets[targetBasket.location_id];
+  const { key } = buildBasketMapKeyAndLocation(targetBasket);
+  delete allBaskets[key];
 
   return handleSetAllBaskets(Object.values(allBaskets));
 }

@@ -157,14 +157,16 @@ import {
 import {
   buildBasketMapKeyAndLocation,
   dealBasketInstrumentsToMap,
-  getAllBasketInstruments,
-  setAllBasketInstruments,
   useCurrentGlobalBasket,
   useMakeBasketOrderFormModal,
   useSubscribeBasketInstruments,
   useMakeOrCancelBasketOrder,
-  setAllBaskets,
 } from '../../../utils/basketTradeUtils';
+import {
+  getAllBasketInstruments,
+  setAllBasketInstruments,
+  setAllBaskets,
+} from '@kungfu-trader/kungfu-js-api/actions';
 import {
   useActiveInstruments,
   useExtConfigsRelated,
@@ -188,10 +190,12 @@ import {
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import { promiseMessageWrapper } from '../../../utils';
 import { useBasketTradeStore } from '../../../store';
+import { storeToRefs } from 'pinia';
 const { t } = VueI18n.global;
 
 const app = getCurrentInstance();
 const { handleBodySizeChange } = useDashboardBodySize();
+const { basketsMap } = storeToRefs(useBasketTradeStore());
 const { currentGlobalBasket, currentBasketData } = useCurrentGlobalBasket();
 const { getInstrumentByIds } = useActiveInstruments();
 const { handleShowMakeBasketOrderModal } = useMakeBasketOrderFormModal();
@@ -323,6 +327,7 @@ function handleGetAllBasketInstruments() {
       currentGlobalBasket.value,
       basketInstruments,
     );
+
     nextTick(() => {
       dataTableRef.value && dataTableRef.value.handleSelectAll(true);
     });
@@ -364,7 +369,7 @@ function handlePlaceBasketOrder(formState) {
   if (!currentGlobalBasket.value) return;
 
   const accountIds = formState.accountIds as string[];
-  console.log(accountIds);
+
   const accountLocations = accountIds
     .map((accountId) => getKfLocationByProcessId(`td_${accountId}`))
     .filter((item) => !!item) as KungfuApi.KfLocation[];
@@ -380,7 +385,7 @@ function handlePlaceBasketOrder(formState) {
     price_type: +formState.priceType,
     price_level: +formState.priceLevel,
     price_offset: +formState.priceOffset,
-    volume: BigInt(currentGlobalBasket.value.total_volume),
+    volume: BigInt(currentGlobalBasket.value.total_amount),
   };
 
   makeBasketOrder(
@@ -403,15 +408,14 @@ function updateBasketTotalVolume(
   if (!currentGlobalBasket.value) return Promise.resolve();
 
   if (currentGlobalBasket.value.volume_type === BasketVolumeTypeEnum.Quantity) {
-    const { basketsMap } = useBasketTradeStore();
-    basketsMap[
+    basketsMap.value[
       buildBasketMapKeyAndLocation(currentGlobalBasket.value).key
-    ].total_volume = basketInstruments.reduce(
+    ].total_amount = basketInstruments.reduce(
       (totalVolume, cur) => totalVolume + cur.volume,
       0n,
     );
 
-    return setAllBaskets(Object.values(basketsMap)).then((res) => {
+    return setAllBaskets(Object.values(basketsMap.value)).then((res) => {
       if (res) {
         return Promise.resolve();
       } else {

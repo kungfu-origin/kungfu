@@ -48,18 +48,18 @@ export const getColumns = buildConfigGetterWrapByComputed(
         },
       },
       {
-        title: t('BasketTrade.total_volume'),
-        dataIndex: 'total_volume',
+        title: t('BasketTrade.total_amount'),
+        dataIndex: 'total_amount',
         width: 60,
         sorter: {
           compare: buildTableColumnSorter<KungfuApi.BasketResolved>(
             'num',
-            'name',
+            'total_amount',
           ),
         },
       },
       {
-        title: t('tdConfig.actions'),
+        title: '',
         dataIndex: 'actions',
         align: 'right',
         width: 60,
@@ -115,13 +115,14 @@ export const getBasketFormSettings = (volumeType: BasketVolumeTypeEnum) =>
         },
       ],
       default: `${BasketVolumeTypeEnum.Quantity}`,
+      primary: true,
       required: true,
     },
     ...(volumeType === BasketVolumeTypeEnum.Proportion
       ? [
           {
-            key: 'total_volume',
-            name: t('BasketTrade.total_volume'),
+            key: 'total_amount',
+            name: t('BasketTrade.total_asset'),
             type: 'int',
             required: true,
             min: 1,

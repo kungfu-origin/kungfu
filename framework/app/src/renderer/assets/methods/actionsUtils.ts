@@ -2247,3 +2247,54 @@ export const useMakeOrderSubscribe = (
     }
   });
 };
+
+export const useBasket = () => {
+  const app = getCurrentInstance();
+
+  const basketList = ref<KungfuApi.Basket[]>([]);
+  const basketInstrumentList = ref<KungfuApi.BasketInstrument[]>([]);
+
+  onMounted(() => {
+    if (app?.proxy) {
+      const subscription = app.proxy.$tradingDataSubject.subscribe(
+        (watcher: KungfuApi.Watcher) => {
+          basketList.value = watcher.ledger.Basket.sort('id');
+          basketInstrumentList.value = watcher.ledger.BasketInstrument.list();
+        },
+      );
+
+      onBeforeUnmount(() => {
+        subscription.unsubscribe();
+      });
+    }
+  });
+
+  function buildBasketOptionLabel(basket: KungfuApi.Basket) {
+    return `${basket.name} ${basket.volume_type}`;
+  }
+
+  function buildBasketOptionValue(basket: KungfuApi.Basket) {
+    return `${basket.id}_${basket.name}_${basket.volume_type}_${basket.total_amount}`;
+  }
+
+  function parseBasketOptionValue(val: string): KungfuApi.Basket | null {
+    const res = val.split('_');
+    if (res.length !== 4) return null;
+    const [id, name, volume_type, total_amount] = res;
+
+    return {
+      id: Number(id),
+      name,
+      volume_type,
+      total_amount: BigInt(total_amount),
+    };
+  }
+
+  return {
+    basketList,
+    basketInstrumentList,
+    buildBasketOptionLabel,
+    buildBasketOptionValue,
+    parseBasketOptionValue,
+  };
+};

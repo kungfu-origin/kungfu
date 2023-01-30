@@ -76,7 +76,7 @@ export const defaultBasketTradeBoardsMap: KfLayout.BoardsMap = {
   '10': {
     paId: 8,
     direction: 'v',
-    contents: ['篮子详情'],
+    contents: ['篮子详情', 'TradingTask'],
     current: '篮子详情',
     width: '58%',
     height: '100%',
