@@ -95,6 +95,7 @@ declare namespace KungfuApi {
     | 'tds'
     | 'md'
     | 'strategy'
+    | 'basket'
     | 'instrument'
     | 'instruments'
     | 'instrumentsCsv'

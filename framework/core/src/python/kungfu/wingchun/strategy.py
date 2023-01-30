@@ -66,9 +66,6 @@ class Strategy(wc.Strategy):
         self._on_order_action_error = getattr(
             self._module, "on_order_action_error", lambda ctx, error, location: None
         )
-        self._on_basket_order = getattr(
-            self._module, "on_basket_order", lambda ctx, basket_order, location: None
-        )
 
         self._on_trade = getattr(
             self._module, "on_trade", lambda ctx, trade, location: None
@@ -198,6 +195,7 @@ class Strategy(wc.Strategy):
         self.ctx.add_account = self.__add_account
         self.ctx.insert_block_message = wc_context.insert_block_message
         self.ctx.insert_order = wc_context.insert_order
+        self.ctx.insert_basket_order = wc_context.insert_basket_order
         self.ctx.insert_batch_orders = wc_context.insert_batch_orders
         self.ctx.insert_array_orders = wc_context.insert_array_orders
         self.ctx.cancel_order = wc_context.cancel_order
@@ -241,9 +239,6 @@ class Strategy(wc.Strategy):
 
     def on_order_action_error(self, wc_context, error, location):
         self.__call_proxy(self._on_order_action_error, self.ctx, error, location)
-
-    def on_basket_order(self, wc_context, basket_order, location):
-        self.__call_proxy(self._on_basket_order, self.ctx, basket_order, location)
 
     def on_trade(self, wc_context, trade, location):
         self.__call_proxy(self._on_trade, self.ctx, trade, location)

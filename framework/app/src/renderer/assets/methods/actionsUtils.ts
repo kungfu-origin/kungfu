@@ -52,7 +52,7 @@ import {
   Pm2ProcessStatusData,
   Pm2ProcessStatusDetailData,
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
-import { Modal } from 'ant-design-vue';
+import { message, Modal } from 'ant-design-vue';
 import path from 'path';
 import { Proc } from 'pm2';
 import {
@@ -97,18 +97,48 @@ import { TradeAmountUsageMap } from './accounting';
 const { t } = VueI18n.global;
 const { success, error } = messagePrompt();
 
+export const handleSwitchProcessStatusGenerator = (): ((
+  checked: boolean,
+  mouseEvent: MouseEvent,
+  kfLocation: KungfuApi.KfLocation,
+) => Promise<void | Proc>) => {
+  const switchController = {};
+  return (
+    checked: boolean,
+    mouseEvent: MouseEvent,
+    kfLocation: KungfuApi.KfLocation,
+  ) =>
+    handleSwitchProcessStatus(
+      checked,
+      mouseEvent,
+      kfLocation,
+      switchController,
+    );
+};
+
 export const handleSwitchProcessStatus = (
   checked: boolean,
   mouseEvent: MouseEvent,
   kfLocation: KungfuApi.KfLocation,
+  switchController: Record<string, boolean>,
 ): Promise<void | Proc> => {
   mouseEvent.stopPropagation();
+  const processId = getProcessIdByKfLocation(kfLocation);
+  if (switchController[processId]) {
+    message.warn(t('please_wait'));
+    return Promise.resolve();
+  }
+
+  switchController[processId] = true;
   return switchKfLocation(window.watcher, kfLocation, checked)
     .then(() => {
       success();
     })
     .catch((err: Error) => {
       error(err.message || t('operation_failed'));
+    })
+    .finally(() => {
+      switchController[processId] = false;
     });
 };
 

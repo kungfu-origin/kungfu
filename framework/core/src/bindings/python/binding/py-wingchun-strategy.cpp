@@ -83,11 +83,6 @@ public:
     PYBIND11_OVERLOAD(void, strategy::Strategy, on_order_action_error, context, error, location);
   }
 
-  void on_basket_order(strategy::Context_ptr &context, const BasketOrder &basket_order,
-                       const kungfu::yijinjing::data::location_ptr &location) override {
-    PYBIND11_OVERLOAD(void, strategy::Strategy, on_basket_order, context, basket_order, location);
-  }
-
   void on_trade(strategy::Context_ptr &context, const Trade &trade,
                 const kungfu::yijinjing::data::location_ptr &location) override {
     PYBIND11_OVERLOAD(void, strategy::Strategy, on_trade, context, trade, location);
@@ -190,7 +185,7 @@ void bind_strategy(pybind11::module &m) {
   py::class_<strategy::RuntimeContext, strategy::Context, strategy::RuntimeContext_ptr>(m, "RuntimeContext")
       .def_property_readonly("bookkeeper", &strategy::RuntimeContext::get_bookkeeper,
                              py::return_value_policy::reference)
-      .def_property_readonly("basketorderengine", &strategy::RuntimeContext::get_basketorder_engine,
+      .def_property_readonly("basketorder_engine", &strategy::RuntimeContext::get_basketorder_engine,
                              py::return_value_policy::reference);
 
   py::class_<strategy::Strategy, PyStrategy, strategy::Strategy_ptr>(m, "Strategy")
@@ -206,7 +201,6 @@ void bind_strategy(pybind11::module &m) {
       .def("on_transaction", &strategy::Strategy::on_transaction)
       .def("on_order", &strategy::Strategy::on_order)
       .def("on_order_action_error", &strategy::Strategy::on_order_action_error)
-      .def("on_basket_order", &strategy::Strategy::on_basket_order)
       .def("on_trade", &strategy::Strategy::on_trade)
       .def("on_position_sync_reset", &strategy::Strategy::on_position_sync_reset)
       .def("on_asset_sync_reset", &strategy::Strategy::on_asset_sync_reset)

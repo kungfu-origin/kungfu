@@ -403,6 +403,7 @@ void Watcher::on_react() {
 void Watcher::on_start() {
   broker_client_.on_start(events_);
   basketorder_engine_.on_start(events_);
+  UpdateBasketOrders(); // refresh basketorders
 
   if (not bypass_accounting_ and not bypass_trading_data_) {
     bookkeeper_.on_start(events_);
