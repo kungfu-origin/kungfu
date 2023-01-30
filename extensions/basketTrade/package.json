@@ -25,11 +25,11 @@
     "format": "prettier -l -w --config ../../.prettierrc.js ."
   },
   "dependencies": {
-    "@kungfu-trader/kungfu-app": "^2.4.42-alpha.0",
-    "@kungfu-trader/kungfu-js-api": "^2.4.42-alpha.0"
+    "@kungfu-trader/kungfu-app": "^2.4.45-alpha.0",
+    "@kungfu-trader/kungfu-js-api": "^2.4.45-alpha.0"
   },
   "devDependencies": {
-    "@kungfu-trader/kungfu-toolchain": "^2.4.42-alpha.0"
+    "@kungfu-trader/kungfu-toolchain": "^2.4.45-alpha.0"
   },
   "kungfuConfig": {
     "key": "BasketTrade",
