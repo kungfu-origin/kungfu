@@ -91,6 +91,8 @@ export default {
   PosGlobal: 'Positon Global',
   Pos: 'Positon',
 
+  please_wait: '请稍后',
+
   baseConfig: {
     main_panel: 'HOME',
     control_center: 'Control',
