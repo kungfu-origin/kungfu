@@ -10,17 +10,16 @@ import {
 import { storeToRefs } from 'pinia';
 import { useSubscibeInstrumentAtEntry } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import { dealKfTime } from '@kungfu-trader/kungfu-js-api/kungfu';
-import { BasketOrderStatus } from '../components/modules/BasketOrder/config';
-import { BasketVolumeType } from '../components/modules/BasketSetting/config';
+import { BasketOrderStatus } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
+import { BasketVolumeType } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import { BASKET_CATEGORYS } from '../config';
 import {
-  basketStore,
-  basketInstrumentStore,
   hashInstrumentUKey,
   makeOrderByBasketTrade,
   makeOrderByBasketInstruments,
   kfCancelAllOrders,
 } from '@kungfu-trader/kungfu-js-api/kungfu';
+import { getAllBasketInstruments } from '@kungfu-trader/kungfu-js-api/actions';
 import {
   BasketVolumeTypeEnum,
   DirectionEnum,
@@ -29,7 +28,7 @@ import {
   SideEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
-  resolveAccountId,
+  resolveClientId,
   getProcessIdByKfLocation,
   resolveDirectionBySideAndOffset,
   delayMilliSeconds,
@@ -49,36 +48,6 @@ import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import { promiseMessageWrapper } from './index';
 const { t } = VueI18n.global;
 
-export const getAllBaskets = (): Promise<KungfuApi.Basket[]> => {
-  const baskets = basketStore.getAllBasket();
-  if (baskets) {
-    return Promise.resolve(baskets);
-  }
-  return Promise.resolve([]);
-};
-
-export const setAllBaskets = (baskets: KungfuApi.Basket[]) => {
-  return Promise.resolve(basketStore.setAllBasket(baskets));
-};
-
-export const getAllBasketInstruments = (): Promise<
-  KungfuApi.BasketInstrument[]
-> => {
-  const basketInstruments = basketInstrumentStore.getAllBasketInstrument();
-  if (basketInstruments) {
-    return Promise.resolve(basketInstruments);
-  }
-  return Promise.resolve([]);
-};
-
-export const setAllBasketInstruments = (
-  basketInstruments: KungfuApi.BasketInstrument[],
-) => {
-  return Promise.resolve(
-    basketInstrumentStore.setAllBasketInstrument(basketInstruments),
-  );
-};
-
 export const buildBasketMapKeyAndLocation = (basket: KungfuApi.Basket) => {
   const basketLocation: KungfuApi.KfExtraLocation = {
     category: BASKET_CATEGORYS.SETTING,
@@ -86,11 +55,10 @@ export const buildBasketMapKeyAndLocation = (basket: KungfuApi.Basket) => {
     name: basket.name,
     mode: 'live',
   };
-  const locationId = getProcessIdByKfLocation(basketLocation);
 
   return {
     location: basketLocation,
-    key: locationId,
+    key: `${basket.id}`,
   };
 };
 
@@ -101,26 +69,11 @@ export const dealBasketsToMap = (baskets: KungfuApi.Basket[]) => {
     basketsResolved[key] = {
       ...curBasket,
       basket_location: location,
-      location_id: key,
+      location_id: getProcessIdByKfLocation(location),
       volume_type_resolved: BasketVolumeType[curBasket.volume_type].name,
     };
     return basketsResolved;
   }, {} as Record<string, KungfuApi.BasketResolved>);
-};
-
-export const getBasketInstrumentVolume = (
-  volumeType: BasketVolumeTypeEnum,
-  volume: bigint,
-  rate: number,
-  totalVolume: bigint,
-) => {
-  if (volumeType === BasketVolumeTypeEnum.Quantity) {
-    return Number(volume);
-  } else if (volumeType === BasketVolumeTypeEnum.Proportion) {
-    return Math.floor((Number(totalVolume) * rate) / 100);
-  }
-
-  return 0;
 };
 
 export const dealBasketInstrumentsToMap = (
@@ -142,12 +95,6 @@ export const dealBasketInstrumentsToMap = (
         ...instrumentResolved,
         basketInstrumentName: `${instrument_id} ${ExchangeIds[exchange_id].name} ${instrumentResolved.instrumentName}`,
         basketInstrumentId: `${instrument_id}_${exchange_id}_${new Date().getTime()}`,
-        volumeResolved: getBasketInstrumentVolume(
-          basket.volume_type,
-          curBasketInstrument.volume,
-          curBasketInstrument.rate,
-          basket.total_volume,
-        ),
       };
 
       if (!basketInstrumentsResolved[basket_uid]) {
@@ -194,16 +141,15 @@ export const dealBasketOrdersToMap = (
 
   return basketOrders.reduce((basketOrdersMap, curBasketOrder) => {
     const { key, location } = buildBasketOrderMapKeyAndLocation(curBasketOrder);
-    const source_resolved_data = resolveAccountId(
+    const dest_resolved_data = resolveClientId(
       window.watcher,
-      curBasketOrder.source,
-      curBasketOrder.dest,
+      curBasketOrder.dest_id,
     );
 
     basketOrdersMap[key] = {
       ...curBasketOrder,
-      source_resolved_data,
-      source_uname: source_resolved_data.name,
+      dest_resolved_data,
+      dest_uname: dest_resolved_data.name,
       basket_order_location: location,
       primary_time_resolved: dealKfTime(curBasketOrder.insert_time),
       status_uname: BasketOrderStatus[curBasketOrder.status].name,
@@ -310,11 +256,33 @@ export const useSubscribeBasketInstruments = () => {
   useSubscibeInstrumentAtEntry(window.watcher, basketInstrumentForSubGetter);
 };
 
-export const useBasketMarkedValue = () => {
+export const getBasketInstrumentOrderVolume = (
+  basket: KungfuApi.Basket,
+  basketInstrument: KungfuApi.BasketInstrument,
+  lastPrice: number,
+) => {
+  if (!lastPrice) return 0;
+
+  if (basket.volume_type === BasketVolumeTypeEnum.Proportion) {
+    const basketInstrumentAsset =
+      Number(basket.total_amount) * (basketInstrument.rate / 100);
+    return Math.floor(basketInstrumentAsset / lastPrice);
+  } else if (basket.volume_type === BasketVolumeTypeEnum.Quantity) {
+    return Number(basketInstrument.volume);
+  } else {
+    return 0;
+  }
+};
+
+export const useBasketQuote = () => {
   const app = getCurrentInstance();
-  const { basketOrdersMapByLocationId } = storeToRefs(useBasketTradeStore());
+  const { basketsMap, basketOrdersMapByLocationId } = storeToRefs(
+    useBasketTradeStore(),
+  );
 
   const basketOrderMarkedValueMap = ref<Record<string, number>>({});
+
+  const basketTotalAmountMap = ref<Record<string, number>>({});
 
   const getBasketMarkedValue = (basket: KungfuApi.BasketResolved) => {
     return Object.values(basketOrdersMapByLocationId.value)
@@ -326,9 +294,37 @@ export const useBasketMarkedValue = () => {
       }, 0);
   };
 
+  const getBasketTotalAmount = (basket: KungfuApi.BasketResolved) => {
+    return basketTotalAmountMap.value[basket.id] ?? 0;
+  };
+
   onMounted(() => {
     const subscibtion = app?.proxy?.$tradingDataSubject.subscribe(
       (watcher: KungfuApi.Watcher) => {
+        basketTotalAmountMap.value = {};
+        getAllBasketInstruments().then((basketInstruments) => {
+          basketInstruments.forEach((basketInstrument) => {
+            const ukey = hashInstrumentUKey(
+              basketInstrument.instrument_id,
+              basketInstrument.exchange_id,
+            );
+            const quote = watcher.ledger.Quote[ukey] as KungfuApi.Quote | null;
+            const basket = basketsMap.value[
+              basketInstrument.basket_uid
+            ] as KungfuApi.BasketResolved | null;
+
+            if (quote && basket) {
+              basketTotalAmountMap.value[basketInstrument.basket_uid] =
+                (basketTotalAmountMap.value[basketInstrument.basket_uid] ?? 0) +
+                getBasketInstrumentOrderVolume(
+                  basket,
+                  basketInstrument,
+                  quote.last_price,
+                );
+            }
+          });
+        });
+
         Object.keys(basketOrdersMapByLocationId.value).forEach((key) => {
           const curBasketOrder = basketOrdersMapByLocationId.value[key];
 
@@ -370,6 +366,7 @@ export const useBasketMarkedValue = () => {
 
   return {
     getBasketMarkedValue,
+    getBasketTotalAmount,
   };
 };
 
@@ -379,7 +376,6 @@ export const useMakeBasketOrderFormModal = () => {
   const formStateChangeTag = 'input:currentConfigModal';
 
   const app = getCurrentInstance();
-  const currentKey = ref(0);
   const showMakeOrderModal = ref(false);
   const makeBasketOrderConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
     type: 'custom',
@@ -390,6 +386,7 @@ export const useMakeBasketOrderFormModal = () => {
   let handleFormStateChangeCallback:
     | ((formState, payload: Ref<KungfuApi.SetKfConfigPayload>) => void)
     | undefined;
+  const isUseHandleShowModal = ref(false);
 
   const handleShowMakeBasketOrderModal = (
     title: string,
@@ -400,8 +397,7 @@ export const useMakeBasketOrderFormModal = () => {
       payload: Ref<KungfuApi.SetKfConfigPayload>,
     ) => void,
   ) => {
-    currentKey.value = new Date().getTime();
-
+    isUseHandleShowModal.value = true;
     makeBasketOrderConfigPayload.value.type = 'custom';
     makeBasketOrderConfigPayload.value.title = title;
 
@@ -426,14 +422,13 @@ export const useMakeBasketOrderFormModal = () => {
     if (app?.proxy) {
       app.proxy.$globalBus.next({
         tag: openModalTag,
-        key: currentKey.value,
         payload,
       });
     }
   };
 
   const handleCloseModal = () => {
-    currentKey.value = 0;
+    isUseHandleShowModal.value = false;
     showMakeOrderModal.value = false;
     makeBasketOrderConfigPayload.value = {
       type: 'custom',
@@ -448,7 +443,6 @@ export const useMakeBasketOrderFormModal = () => {
     if (app?.proxy) {
       app.proxy.$globalBus.next({
         tag: confirmModalTag,
-        key: currentKey.value,
         formState,
       });
     }
@@ -456,18 +450,14 @@ export const useMakeBasketOrderFormModal = () => {
 
   onMounted(() => {
     const subscribtion = app?.proxy?.$globalBus.subscribe((data) => {
-      if (data.tag === openModalTag) {
-        currentKey.value = data.key;
+      if (data.tag === openModalTag && !isUseHandleShowModal.value) {
         makeBasketOrderConfigPayload.value = data.payload;
         showMakeOrderModal.value = true;
       }
 
-      if (
-        data.tag === confirmModalTag &&
-        currentKey.value &&
-        currentKey.value === data.key
-      ) {
+      if (data.tag === confirmModalTag && isUseHandleShowModal.value) {
         handleConfirmModalCallback?.(data.formState);
+        isUseHandleShowModal.value = false;
       }
 
       if (
@@ -565,6 +555,7 @@ export const useMakeOrCancelBasketOrder = () => {
   };
 
   const dealBasketInstrumentsToForOrder = (
+    basket: KungfuApi.BasketResolved,
     basketInstruments: KungfuApi.BasketInstrumentResolved[],
     priceLevel: PriceLevelEnum,
     side: SideEnum,
@@ -584,19 +575,33 @@ export const useMakeOrCancelBasketOrder = () => {
               )
             ].limit_price
           : 0;
-        return {
-          ...basketInstrument,
-          volumeResolved: basketInstrument.volumeResolved * basketVolume,
-          priceResolved: instrumentQuote
-            ? getBasketInstrumentOrderPrice(
-                priceLevel,
-                side,
-                priceOffset,
-                instrumentQuote,
-              )
-            : orderPrice,
-          isNoQuote: !instrumentQuote,
-        };
+
+        if (instrumentQuote) {
+          const priceForOrder = getBasketInstrumentOrderPrice(
+            priceLevel,
+            side,
+            priceOffset,
+            instrumentQuote,
+          );
+          return {
+            ...basketInstrument,
+            volumeResolved:
+              getBasketInstrumentOrderVolume(
+                basket,
+                basketInstrument,
+                priceForOrder,
+              ) * basketVolume,
+            priceResolved: priceForOrder,
+            isNoQuote: false,
+          };
+        } else {
+          return {
+            ...basketInstrument,
+            volumeResolved: 0,
+            priceResolved: orderPrice,
+            isNoQuote: true,
+          };
+        }
       });
 
     return basketInstrumentsResolved;
@@ -687,13 +692,14 @@ export const useMakeOrCancelBasketOrder = () => {
 
   const makeBasketOrder = (
     watcher: KungfuApi.Watcher,
-    basket: KungfuApi.Basket,
+    basket: KungfuApi.BasketResolved,
     basketOrderInput: KungfuApi.BasketOrderInput,
     basketInstruments: KungfuApi.BasketInstrumentResolved[],
     accountLocations: KungfuApi.KfLocation[],
     basketVolume: number,
   ) => {
     const basketInstrumentsForOrder = dealBasketInstrumentsToForOrder(
+      basket,
       basketInstruments,
       basketOrderInput.price_level,
       basketOrderInput.side,
@@ -720,10 +726,7 @@ export const useMakeOrCancelBasketOrder = () => {
             accountLocations.map((accountLocation) => {
               return makeOrderByBasketTrade(
                 watcher,
-                {
-                  ...basket,
-                  total_volume: basket.total_volume * BigInt(basketVolume),
-                },
+                basket,
                 basketOrderInput,
                 normal,
                 accountLocation,
@@ -848,7 +851,7 @@ export const useMakeOrCancelBasketOrder = () => {
       }, {} as Record<string, KungfuApi.Order>);
     }
 
-    return unfinished;
+    return unfinished || {};
   };
 
   const cancalBasketOrder = (
@@ -907,13 +910,13 @@ export const useMakeOrCancelBasketOrder = () => {
         rate: 0,
         basketInstrumentId: '',
         basketInstrumentName: '',
-        volumeResolved: Number(order.volume_left),
       };
 
       const instrumentQuote = getQuoteByInstrument(curBasketInstrument);
 
       return {
         ...curBasketInstrument,
+        volumeResolved: Number(order.volume_left),
         priceResolved: instrumentQuote
           ? getBasketInstrumentOrderPrice(
               basketOrder.price_level,
@@ -1067,7 +1070,7 @@ export const useMakeOrCancelBasketOrder = () => {
       }, {} as Record<string, KungfuApi.Order>);
     }
 
-    return notTradeAll;
+    return notTradeAll || {};
   };
 
   const replenishBasketOrder = (

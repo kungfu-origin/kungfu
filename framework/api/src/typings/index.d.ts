@@ -99,7 +99,8 @@ declare namespace KungfuApi {
     | 'instrument'
     | 'instruments'
     | 'instrumentsCsv'
-    | 'csvTable';
+    | 'csvTable'
+    | 'basket';
 
   export type KfConfigValue =
     | string
@@ -554,15 +555,15 @@ declare namespace KungfuApi {
     volume_left: bigint;
     status: BasketOrderStatusEnum;
 
-    source: number; // 下单方
-    dest: number;
+    source_id: number; // 下单方
+    dest_id: number;
   }
 
   export interface BasketOrderResolved extends BasketOrder {
     basket_order_location: KfExtraLocation;
     primary_time_resolved: string;
-    source_uname: string;
-    source_resolved_data: KfTradeValueCommonData;
+    dest_uname: string;
+    dest_resolved_data: KfTradeValueCommonData;
     status_uname: string;
     status_color: AntInKungfuColorTypes;
     progress: number;
@@ -774,7 +775,7 @@ declare namespace KungfuApi {
     id: number;
     name: string;
     volume_type: BasketVolumeTypeEnum;
-    total_volume: bigint;
+    total_amount: bigint;
   }
 
   export interface BasketResolved extends Basket {
@@ -798,11 +799,11 @@ declare namespace KungfuApi {
       InstrumentResolved {
     basketInstrumentName: string;
     basketInstrumentId: string;
-    volumeResolved: number; // 最终下单量
   }
 
   export interface BasketInstrumentForOrder extends BasketInstrumentResolved {
     isNoQuote: boolean;
+    volumeResolved: number; // 最终下单量
     priceResolved: number; // 最终下单价
   }
 

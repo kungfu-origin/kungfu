@@ -1,4 +1,5 @@
 import { BasketVolumeTypeEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
+import { BasketVolumeType } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import { DealTradingDataGetter } from '@kungfu-trader/kungfu-js-api/hooks/dealTradingDataHook';
 import { getTradingDataSortKey } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
@@ -48,18 +49,18 @@ export const getColumns = buildConfigGetterWrapByComputed(
         },
       },
       {
-        title: t('BasketTrade.total_volume'),
-        dataIndex: 'total_volume',
+        title: t('BasketTrade.total_amount'),
+        dataIndex: 'total_amount',
         width: 60,
         sorter: {
           compare: buildTableColumnSorter<KungfuApi.BasketResolved>(
             'num',
-            'name',
+            'total_amount',
           ),
         },
       },
       {
-        title: t('tdConfig.actions'),
+        title: '',
         dataIndex: 'actions',
         align: 'right',
         width: 60,
@@ -67,24 +68,6 @@ export const getColumns = buildConfigGetterWrapByComputed(
       },
     ] as AntTableColumns,
 );
-
-export const BasketVolumeType: Record<
-  BasketVolumeTypeEnum,
-  KungfuApi.KfTradeValueCommonData
-> = {
-  [BasketVolumeTypeEnum.Unknown]: {
-    name: t('tradingConfig.unknown'),
-    color: 'default',
-  },
-  [BasketVolumeTypeEnum.Quantity]: {
-    name: t('BasketTrade.by_quantity'),
-    color: 'cyan',
-  },
-  [BasketVolumeTypeEnum.Proportion]: {
-    name: t('BasketTrade.by_proportion'),
-    color: 'purple',
-  },
-};
 
 export const getBasketFormSettings = (volumeType: BasketVolumeTypeEnum) =>
   [
@@ -115,13 +98,14 @@ export const getBasketFormSettings = (volumeType: BasketVolumeTypeEnum) =>
         },
       ],
       default: `${BasketVolumeTypeEnum.Quantity}`,
+      primary: true,
       required: true,
     },
     ...(volumeType === BasketVolumeTypeEnum.Proportion
       ? [
           {
-            key: 'total_volume',
-            name: t('BasketTrade.total_volume'),
+            key: 'total_amount',
+            name: t('BasketTrade.total_asset'),
             type: 'int',
             required: true,
             min: 1,

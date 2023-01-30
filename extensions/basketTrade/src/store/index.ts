@@ -30,11 +30,9 @@ export const useBasketTradeStore = defineStore('basketTrade', {
       this.basketsMap = basketsMap;
     },
 
-    getBasketByLocation(basketLocation: KungfuApi.KfExtraLocation) {
-      const basketLocationId = getProcessIdByKfLocation(basketLocation);
-
-      if (this.basketsMap[basketLocationId]) {
-        return this.basketsMap[basketLocationId];
+    getBasketById(basketId: string) {
+      if (this.basketsMap[basketId]) {
+        return this.basketsMap[basketId];
       }
 
       return null;

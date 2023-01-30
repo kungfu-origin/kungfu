@@ -44,6 +44,7 @@ import { RuleObject } from 'ant-design-vue/lib/form';
 import {
   useActiveInstruments,
   useAllKfConfigData,
+  useBasket,
   useInstruments,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import dayjs, { Dayjs } from 'dayjs';
@@ -145,6 +146,8 @@ const formRef = ref();
 
 const formState = reactive(props.formState);
 const { td, md, strategy } = toRefs(useAllKfConfigData());
+const { basketList, buildBasketOptionLabel, buildBasketOptionValue } =
+  useBasket();
 const { isLanguageKeyAvailable } = useLanguage();
 
 const primaryKeys = ref<string[]>(getPrimaryKeys(props.configSettings || []));
@@ -1010,9 +1013,9 @@ defineExpose({
           </a-tag>
           <span
             v-else
-            :class="dealKungfuColorToClassname(option.color || 'default')"
+            :class="dealKungfuColorToClassname(option.color || 'text')"
             :style="{
-              color: dealKungfuColorToStyleColor(option.color || 'default'),
+              color: dealKungfuColorToStyleColor(option.color || 'text'),
             }"
           >
             {{
@@ -1090,9 +1093,9 @@ defineExpose({
           </a-tag>
           <span
             v-else
-            :class="dealKungfuColorToClassname(option.color || 'default')"
+            :class="dealKungfuColorToClassname(option.color || 'text')"
             :style="{
-              color: dealKungfuColorToStyleColor(option.color || 'default'),
+              color: dealKungfuColorToStyleColor(option.color || 'text'),
             }"
           >
             {{
@@ -1212,14 +1215,13 @@ defineExpose({
         "
       >
         <a-select-option
-          v-for="config in strategy"
-          :key="getIdByKfLocation(config)"
-          :value="getIdByKfLocation(config)"
+          v-for="basket in basketList"
+          :key="basket.id"
+          :value="buildBasketOptionValue(basket)"
         >
-          {{ getIdByKfLocation(config) }}
+          {{ buildBasketOptionLabel(basket) }}
         </a-select-option>
       </a-select>
-      
       <a-switch
         size="small"
         v-else-if="item.type === 'bool'"
