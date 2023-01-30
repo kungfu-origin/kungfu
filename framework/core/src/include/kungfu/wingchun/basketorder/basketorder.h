@@ -20,12 +20,10 @@ inline int64_t get_merged_total_volume(const OrderMap &orders) {
     auto &order = iter.second;
     auto instrument_key = hash_instrument(order.exchange_id, order.instrument_id);
     auto direction = get_direction(order.instrument_type, order.side, order.offset);
-    auto &hash_to_total_merge_volume = long_hash_to_total_merge_volume;
-    if (direction == longfist::enums::Direction::Short) {
-      hash_to_total_merge_volume = short_hash_to_total_merge_volume;
-    }
-    hash_to_total_merge_volume.insert_or_assign(instrument_key,
-                                                std::max(hash_to_total_merge_volume[instrument_key], order.volume));
+    auto &hash_to_total_merge_volume = direction == longfist::enums::Direction::Short ? short_hash_to_total_merge_volume
+                                                                                      : long_hash_to_total_merge_volume;
+    int64_t final_merge_volume = (std::max)(hash_to_total_merge_volume[instrument_key], order.volume);
+    hash_to_total_merge_volume.insert_or_assign(instrument_key, final_merge_volume);
   }
 
   int64_t total_volume = 0;
