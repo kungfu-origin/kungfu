@@ -47,7 +47,7 @@ void MarketDataXTP::on_start() {
 
   MDConfiguration config = nlohmann::json::parse(get_config());
   if (config.client_id < 1 or config.client_id > 99) {
-    throw wingchun_error("client_id must between 1 and 99");
+    SPDLOG_ERROR("client_id must between 1 and 99");
   }
   auto md_ip = config.md_ip.c_str();
   auto account_id = config.account_id.c_str();

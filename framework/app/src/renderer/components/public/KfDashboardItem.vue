@@ -12,9 +12,15 @@ export default defineComponent({});
   padding-left: 8px;
   white-space: nowrap;
   flex-wrap: wrap;
+  display: flex;
 
   .ant-btn.ant-btn-sm {
     height: 28px;
+  }
+
+  .ant-input-search-button {
+    height: 28px;
+    width: 28px;
   }
 }
 </style>

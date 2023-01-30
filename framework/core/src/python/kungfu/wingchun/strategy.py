@@ -63,6 +63,10 @@ class Strategy(wc.Strategy):
         self._on_order = getattr(
             self._module, "on_order", lambda ctx, order, location: None
         )
+        self._on_order_action_error = getattr(
+            self._module, "on_order_action_error", lambda ctx, error, location: None
+        )
+
         self._on_trade = getattr(
             self._module, "on_trade", lambda ctx, trade, location: None
         )
@@ -89,9 +93,6 @@ class Strategy(wc.Strategy):
             self._module,
             "on_req_history_trade_error",
             lambda ctx, error, location: None,
-        )
-        self._on_order_action_error = getattr(
-            self._module, "on_order_action_error", lambda ctx, error, location: None
         )
         self._on_position_sync_reset = getattr(
             self._module, "on_position_sync_reset", lambda ctx, old_book, new_book: None
@@ -125,6 +126,7 @@ class Strategy(wc.Strategy):
             self.ctx.runtime_locator,
         )
         self.ctx.book = self.ctx.wc_context.bookkeeper.get_book(location.uid)
+        self.ctx.basketorder_engine = self.ctx.wc_context.basketorder_engine
 
     def __add_timer(self, nanotime, callback):
         def wrap_callback(event):
@@ -193,6 +195,7 @@ class Strategy(wc.Strategy):
         self.ctx.add_account = self.__add_account
         self.ctx.insert_block_message = wc_context.insert_block_message
         self.ctx.insert_order = wc_context.insert_order
+        self.ctx.insert_basket_order = wc_context.insert_basket_order
         self.ctx.insert_batch_orders = wc_context.insert_batch_orders
         self.ctx.insert_array_orders = wc_context.insert_array_orders
         self.ctx.cancel_order = wc_context.cancel_order

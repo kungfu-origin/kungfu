@@ -137,25 +137,34 @@ const DefaultUnkownDealTrdaingDataHook = {
 
   order: {
     getter: (
-      watcher: KungfuApi.Watcher,
-      orders: KungfuApi.DataTable<KungfuApi.Order>,
-      kfLocation: KungfuApi.KfLocation,
+      // eslint-disable-next-line
+      ...args: [
+        watcher: KungfuApi.Watcher,
+        orders: KungfuApi.DataTable<KungfuApi.Order>,
+        kfLocation: KungfuApi.KfLocation,
+      ]
     ) => [] as KungfuApi.Order[],
   },
 
   trade: {
     getter: (
-      watcher: KungfuApi.Watcher,
-      trades: KungfuApi.DataTable<KungfuApi.Trade>,
-      kfLocation: KungfuApi.KfLocation,
+      // eslint-disable-next-line
+      ...args: [
+        watcher: KungfuApi.Watcher,
+        trades: KungfuApi.DataTable<KungfuApi.Trade>,
+        kfLocation: KungfuApi.KfLocation,
+      ]
     ) => [] as KungfuApi.Trade[],
   },
 
   position: {
     getter: (
-      watcher: KungfuApi.Watcher,
-      positions: KungfuApi.DataTable<KungfuApi.Position>,
-      kfLocation: KungfuApi.KfLocation,
+      // eslint-disable-next-line
+      ...args: [
+        watcher: KungfuApi.Watcher,
+        positions: KungfuApi.DataTable<KungfuApi.Position>,
+        kfLocation: KungfuApi.KfLocation,
+      ]
     ) => [] as KungfuApi.Position[],
   },
 };
@@ -187,6 +196,7 @@ export class DealTradingDataHooks {
             return target[`${category}_*_*`];
           }
 
+          // eslint-disable-next-line
           return (key: string) => DefaultUnkownDealTrdaingDataHook;
         },
 

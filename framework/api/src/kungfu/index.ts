@@ -21,6 +21,7 @@ import {
   kfLogger,
   resolveAccountId,
   resolveClientId,
+  resolveOffsetBySideAndDirection,
 } from '../utils/busiUtils';
 import {
   HistoryDateEnum,
@@ -37,6 +38,8 @@ export const configStore = kf.ConfigStore(KF_RUNTIME_DIR);
 export const riskSettingStore = kf.RiskSettingStore(KF_RUNTIME_DIR);
 export const history = kf.History(KF_RUNTIME_DIR);
 export const commissionStore = kf.CommissionStore(KF_RUNTIME_DIR);
+export const basketStore = kf.BasketStore(KF_RUNTIME_DIR);
+export const basketInstrumentStore = kf.BasketInstrumentStore(KF_RUNTIME_DIR);
 export const longfist = kf.longfist;
 
 export const dealKfTime = (nano: bigint, date = false): string => {
@@ -530,6 +533,97 @@ export const makeOrderByBlockMessage = (
         });
     }
   });
+};
+
+export const makeOrderByBasketInstruments = (
+  watcher: KungfuApi.Watcher | null,
+  parentId: bigint,
+  basketOrderInput: KungfuApi.BasketOrderInput,
+  basketInstruments: KungfuApi.BasketInstrumentForOrder[],
+  kfLocation: KungfuApi.KfLocation,
+) => {
+  if (!watcher) {
+    return Promise.reject(new Error(`Watcher is NULL`));
+  }
+
+  if (!watcher.isLive()) {
+    return Promise.reject(new Error(`Watcher is not live`));
+  }
+
+  if (!watcher.isReadyToInteract(kfLocation)) {
+    const accountId = getIdByKfLocation(kfLocation);
+    return Promise.reject(new Error(`Td ${accountId} not ready`));
+  }
+
+  console.log(parentId, basketOrderInput, basketInstruments, kfLocation);
+
+  const makeOrderTasks = basketInstruments.map((basketInstrument) => {
+    const now = watcher.now();
+
+    const orderInput: KungfuApi.OrderInput = {
+      ...longfist.OrderInput(),
+      parent_id: parentId,
+      insert_time: now,
+      instrument_id: `${basketInstrument.instrument_id}`,
+      exchange_id: `${basketInstrument.exchange_id}`,
+      instrument_type: +basketInstrument.instrument_type,
+      side: +basketOrderInput.side,
+      offset: resolveOffsetBySideAndDirection(
+        +basketOrderInput.side,
+        +basketInstrument.direction,
+      ),
+      price_type: +basketOrderInput.price_type,
+      limit_price: +basketInstrument.priceResolved || 0,
+      frozen_price: +basketInstrument.priceResolved || 0,
+      volume: BigInt(basketInstrument.volumeResolved),
+    };
+    return Promise.resolve(watcher.issueOrder(orderInput, kfLocation));
+  });
+
+  return Promise.all(makeOrderTasks);
+};
+
+export const makeOrderByBasketTrade = (
+  watcher: KungfuApi.Watcher | null,
+  basket: KungfuApi.Basket,
+  basketOrderInput: KungfuApi.BasketOrderInput,
+  basketInstruments: KungfuApi.BasketInstrumentForOrder[],
+  kfLocation: KungfuApi.KfLocation,
+) => {
+  if (!watcher) {
+    return Promise.reject(new Error(`Watcher is NULL`));
+  }
+
+  if (!watcher.isLive()) {
+    return Promise.reject(new Error(`Watcher is not live`));
+  }
+
+  if (!watcher.isReadyToInteract(kfLocation)) {
+    const accountId = getIdByKfLocation(kfLocation);
+    return Promise.reject(new Error(`Td ${accountId} not ready`));
+  }
+
+  if (!basketInstruments.length) return Promise.resolve();
+
+  const now = watcher.now();
+  const basketOrder: KungfuApi.BasketOrder = {
+    ...longfist.BasketOrder(),
+    parent_id: BigInt(basket.id),
+    insert_time: now,
+    price_type: +basketOrderInput.price_type,
+    price_level: +basketOrderInput.price_level,
+    price_offset: +basketOrderInput.price_offset,
+  };
+
+  const parent_id = watcher.issueBasketOrder(basketOrder, kfLocation);
+
+  return makeOrderByBasketInstruments(
+    watcher,
+    parent_id,
+    basketOrderInput,
+    basketInstruments,
+    kfLocation,
+  );
 };
 
 export const hashInstrumentUKey = (

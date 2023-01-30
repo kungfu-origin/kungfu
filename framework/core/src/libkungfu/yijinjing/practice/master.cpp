@@ -256,6 +256,11 @@ void master::on_request_write_to_band(const event_ptr &event) {
   auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());
   auto home = io_device->get_home();
   auto target_location = location::make_shared(request, home->locator);
+
+  // notify others band location, but it represents a simulation location, no register, only location
+  try_add_location(now(), target_location);
+  get_writer(location::PUBLIC)->write(now(), dynamic_cast<Location &>(*target_location));
+
   SPDLOG_INFO("on_request_write_to_band for {} to {}", get_location_uname(app_uid), request.name);
   reader_->join(get_location(app_uid), request.location_uid, trigger_time);
   require_write_to_band(trigger_time, app_uid, target_location);

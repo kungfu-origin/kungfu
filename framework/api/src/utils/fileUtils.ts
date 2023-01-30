@@ -31,7 +31,11 @@ export const addFileSync = (
 
 export const readCSV = <T>(
   filepath: string,
-  headers: ParserOptionsArgs['headers'] = true,
+  headers: ParserOptionsArgs['headers'],
+  options?: {
+    transformer?: (row) => T;
+    validator?: (row) => boolean;
+  },
 ) => {
   filepath = path.normalize(filepath);
   return new Promise<{
@@ -43,15 +47,19 @@ export const readCSV = <T>(
       row: number;
       data: Array<string | number | boolean>;
     }> = [];
-    csv
-      .parseFile(filepath, {
-        headers: headers,
-        ignoreEmpty: true,
-        skipLines: headers === true ? 0 : 1,
-        strictColumnHandling: true,
-      })
+
+    let parsing = csv.parseFile(filepath, {
+      headers: headers,
+      skipLines: headers === true ? 0 : 1,
+    });
+
+    if (options?.validator) {
+      parsing = parsing.validate(options.validator);
+    }
+
+    parsing
       .on('data', function (row) {
-        resRows.push(row);
+        resRows.push(options?.transformer ? options.transformer(row) : row);
       })
       .on('data-invalid', function (data, row) {
         errRows.push({

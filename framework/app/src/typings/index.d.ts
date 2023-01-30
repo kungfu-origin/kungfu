@@ -60,6 +60,13 @@ interface KfTradingDataTableHeaderConfig {
   sorter?: (a: any, b: any) => number;
 }
 
+type KfTradingDataTableSelection = Record<
+  string,
+  {
+    disabled?: boolean;
+  }
+>;
+
 declare module 'worker-loader!*' {
   class WebpackWorker extends Worker {
     constructor();

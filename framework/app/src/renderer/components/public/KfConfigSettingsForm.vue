@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import path from 'path';
 import { dialog } from '@electron/remote';
 import {
   DeleteOutlined,
@@ -18,7 +19,10 @@ import {
   nextTick,
   defineComponent,
 } from 'vue';
-import { Side } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
+import {
+  PriceLevel,
+  Side,
+} from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import {
   getIdByKfLocation,
   transformSearchInstrumentResultToInstrument,
@@ -29,14 +33,18 @@ import {
   KfConfigValueArrayType,
   KfConfigValueBooleanType,
   getCombineValueByPrimaryKeys,
+  getPriceTypeConfig,
   initFormStateByConfig,
   getPrimaryKeys,
   dealPriceType,
+  dealPriceLevel,
   dealSide,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { RuleObject } from 'ant-design-vue/lib/form';
 import {
+  useActiveInstruments,
   useAllKfConfigData,
+  useBasket,
   useInstruments,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import dayjs, { Dayjs } from 'dayjs';
@@ -46,11 +54,18 @@ import {
   PriceTypeEnum,
   SideEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
-import { readCSV } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
-import { useGlobalStore } from '../../pages/index/store/global';
+import {
+  readCSV,
+  writeCSV,
+} from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import { hashInstrumentUKey } from '@kungfu-trader/kungfu-js-api/kungfu';
-import { buildInstrumentSelectOptionValue } from '../../assets/methods/uiUtils';
-import { getPriceTypeConfig } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import {
+  buildInstrumentSelectOptionValue,
+  useWritableTableSearchKeyword,
+  messagePrompt,
+  dealKungfuColorToClassname,
+  dealKungfuColorToStyleColor,
+} from '../../assets/methods/uiUtils';
 
 const { t } = VueI18n.global;
 
@@ -116,11 +131,23 @@ type InstrumentsSearchRelated = Record<
   }
 >;
 
+type TablesSearchRelated = Record<
+  string,
+  {
+    searchKeyword: Ref<string>;
+    tableData: Ref<
+      { data: Record<string, KungfuApi.KfConfigValue>; index: number }[]
+    >;
+  }
+>;
+
 const app = getCurrentInstance();
 const formRef = ref();
 
 const formState = reactive(props.formState);
 const { td, md, strategy } = toRefs(useAllKfConfigData());
+const { basketList, buildBasketOptionLabel, buildBasketOptionValue } =
+  useBasket();
 const { isLanguageKeyAvailable } = useLanguage();
 
 const primaryKeys = ref<string[]>(getPrimaryKeys(props.configSettings || []));
@@ -132,12 +159,16 @@ const instrumentKeys = ref<
 const instrumentsCsvData = reactive<
   Record<string, Record<string, KungfuApi.InstrumentResolved>>
 >({});
+const tableKeys = ref<Record<string, KungfuApi.KfConfigItem>>(
+  filterTableKeysFromConfigSettings(props.configSettings),
+);
 
 watch(
   () => props.configSettings,
   (newVal) => {
     primaryKeys.value = getPrimaryKeys(newVal);
     instrumentKeys.value = filterInstrumentKeysFromConfigSettings(newVal);
+    tableKeys.value = filterTableKeysFromConfigSettings(newVal);
 
     const rowFormState = toRaw(props.formState);
     Object.keys(rowFormState).forEach(
@@ -153,6 +184,14 @@ watch(
   () => instrumentKeys.value,
   (newVal) => {
     instrumentsSearchRelated = getInstrumentsSearchRelated(newVal);
+  },
+);
+
+let tablesSearchRelated = getTablesSearchRelated(tableKeys.value);
+watch(
+  () => tableKeys.value,
+  (newVal) => {
+    tablesSearchRelated = getTablesSearchRelated(newVal);
   },
 );
 
@@ -185,7 +224,7 @@ watch(formState, (newVal) => {
   app && app.emit('update:formState', newVal);
 });
 
-if ('instrument' in formState) {
+if ('instrument' in formState && 'side' in formState) {
   watch(
     () => formState.instrument,
     (newInstrument: string) => {
@@ -251,6 +290,26 @@ function getInstrumentsSearchRelated(
   );
 }
 
+function getTablesSearchRelated(
+  tableKeys: Record<string, KungfuApi.KfConfigItem>,
+): TablesSearchRelated {
+  return Object.keys(tableKeys).reduce((tablesSearchRelated, key) => {
+    const targetList = ref(formState[key]);
+    const keys =
+      tableKeys[key].search?.keys ||
+      tableKeys[key].headers?.map((header) => header.title) ||
+      [];
+    const { searchKeyword, tableData } = useWritableTableSearchKeyword<
+      Record<string, KungfuApi.KfConfigItem>
+    >(targetList, keys);
+    tablesSearchRelated[key] = {
+      searchKeyword,
+      tableData,
+    };
+    return tablesSearchRelated;
+  }, {} as TablesSearchRelated);
+}
+
 function getValidatorType(
   type: string,
 ): 'number' | 'string' | 'array' | 'boolean' {
@@ -282,6 +341,17 @@ function filterInstrumentKeysFromConfigSettings(
         | 'instrumentsCsv';
       return data;
     }, {} as Record<string, 'instrument' | 'instruments' | 'instrumentsCsv'>);
+}
+
+function filterTableKeysFromConfigSettings(
+  configSettings: KungfuApi.KfConfigItem[],
+) {
+  return configSettings
+    .filter((item) => item.type === 'table' || item.type === 'csvTable')
+    .reduce((data, setting) => {
+      data[setting.key.toString()] = setting;
+      return data;
+    }, {} as Record<string, KungfuApi.KfConfigItem>);
 }
 
 function isNumberInputType(type: string): boolean {
@@ -392,7 +462,8 @@ function instrumentsCsvCallback(
   }[],
   targetKey: string,
 ) {
-  const { instrumentsMap } = useGlobalStore();
+  const { getInstrumentByIds } = useActiveInstruments();
+
   if (!instrumentsCsvData[targetKey]) instrumentsCsvData[targetKey] = {};
 
   instruments.forEach((item) => {
@@ -400,17 +471,11 @@ function instrumentsCsvCallback(
       const ukey = hashInstrumentUKey(item.instrument_id, item.exchange_id);
       const existedInstrument = instrumentsCsvData[targetKey][ukey];
       if (!existedInstrument || !existedInstrument.instrumentName) {
-        const instrumentResolved = instrumentsMap[ukey] ?? {
-          instrumentId: item.instrument_id,
-          exchangeId: item.exchange_id,
-          instrumentType: window.watcher.getInstrumentType(
-            item.exchange_id,
-            item.instrument_id,
-          ),
-          ukey,
-          instrumentName: '',
-          id: `${item.instrument_id}_${''}_${item.exchange_id}`.toLowerCase(),
-        };
+        const instrumentResolved = getInstrumentByIds(
+          item.instrument_id,
+          item.exchange_id,
+          true,
+        ) as KungfuApi.InstrumentResolved;
 
         instrumentsCsvData[targetKey][ukey] = instrumentResolved;
       }
@@ -441,9 +506,121 @@ function handleClearInstrumentsCsv(targetKey: string) {
   customerFormItemTips[targetKey] = '';
 }
 
+function csvTableCallback(columns: KungfuApi.KfConfigItem[]) {
+  return function (
+    data: Record<string, KungfuApi.KfConfigValue>[],
+    errRows: {
+      row: number;
+      data: (string | number | boolean)[];
+    }[],
+    targetKey: string,
+  ) {
+    if (errRows.length) {
+      console.warn('Csv resolve error rows:', errRows);
+    }
+    if (data.length) {
+      const headers = Object.keys(data[0]);
+      const isInstrumentHeader =
+        headers.includes('instrument_id') && headers.includes('exchange_id');
+      const instrumentColumnConfig = columns.find(
+        (item) => item.type === 'instrument',
+      );
+      const shouldResolveInstrument =
+        isInstrumentHeader && instrumentColumnConfig;
+      if (shouldResolveInstrument) {
+        const { getInstrumentByIds } = useActiveInstruments();
+
+        data.forEach((item) => {
+          const instrument = getInstrumentByIds(
+            item.instrument_id,
+            `${item.exchange_id}`.toUpperCase(),
+            true,
+          ) as KungfuApi.InstrumentResolved;
+
+          formState[targetKey].push({
+            ...item,
+            [instrumentColumnConfig.key]:
+              buildInstrumentSelectOptionValue(instrument),
+          });
+        });
+      } else {
+        formState[targetKey].push(...data);
+      }
+    }
+  };
+}
+
+function buildCsvHeadersDescription(headers: KungfuApi.KfConfigItemHeader[]) {
+  return (
+    headers
+      .map((header) =>
+        [
+          header.title,
+          ...(header.description ? [header.description] : []),
+        ].join(': '),
+      )
+      .join('. ') + '.'
+  );
+}
+
+function buildCsvHeadersValidator(
+  headers: KungfuApi.KfConfigItemHeader[] | undefined,
+) {
+  if (!headers || !headers.length) return undefined;
+
+  const requiredHeaders: string[] = [];
+  headers.forEach((header) => {
+    if (header.required) {
+      requiredHeaders.push(header.title);
+    }
+  });
+
+  return (row) => {
+    for (let header of requiredHeaders) {
+      if (
+        !(
+          header in row &&
+          row[header] !== null &&
+          row[header] !== undefined &&
+          row[header] !== ''
+        )
+      ) {
+        return false;
+      }
+    }
+    return true;
+  };
+}
+
+function buildCsvHeadersTransformer(
+  headers: KungfuApi.KfConfigItemHeader[] | undefined,
+) {
+  if (!headers || !headers.length) return undefined;
+
+  const headerWithDefault: Record<string, KungfuApi.KfConfigValue> = {};
+  headers.forEach((header) => {
+    if (header.default) {
+      headerWithDefault[header.title] = header.default;
+    }
+  });
+
+  return (row) => {
+    for (let header in headerWithDefault) {
+      if (
+        row[header] === null ||
+        row[header] === undefined ||
+        row[header] === ''
+      ) {
+        row[header] = headerWithDefault[header];
+      }
+    }
+    return row;
+  };
+}
+
 function handleSelectCsv<T>(
   targetKey: string,
-  headers?: string[],
+  headers: KungfuApi.KfConfigItemHeader[],
   callback?: (
     data: T[],
     errRows: {
@@ -461,7 +638,10 @@ function handleSelectCsv<T>(
     .then((res) => {
       const { filePaths } = res;
       if (filePaths.length) {
-        readCSV<T>(filePaths[0], headers)
+        readCSV<T>(filePaths[0], true, {
+          validator: buildCsvHeadersValidator(headers),
+          transformer: buildCsvHeadersTransformer(headers),
+        })
           .then(({ resRows, errRows }) => {
             callback && callback(resRows, errRows, targetKey);
           })
@@ -472,6 +652,33 @@ function handleSelectCsv<T>(
           });
       }
     });
+}
+
+function handleDownloadCsvTemplate(
+  templates: KungfuApi.KfConfigItemTemplate[],
+) {
+  if (templates && Array.isArray(templates)) {
+    dialog
+      .showOpenDialog({
+        title: t('settingsFormConfig.csv_template'),
+        properties: ['createDirectory', 'openDirectory'],
+      })
+      .then(({ filePaths }) => {
+        if (filePaths && filePaths.length) {
+          Promise.all(
+            templates.map((template) => {
+              const filePath = path.join(
+                filePaths[0],
+                template.name || t('settingsFormConfig.csv_template') + '.csv',
+              );
+              return writeCSV(filePath, template.data || []);
+            }),
+          ).then(() => {
+            messagePrompt().success();
+          });
+        }
+      });
+  }
 }
 
 function handleSelectFile(targetKey: string): void {
@@ -748,6 +955,22 @@ defineExpose({
           {{ dealPriceType(+key).name }}
         </a-select-option>
       </a-select>
+      <a-select
+        v-else-if="item.type === 'priceLevel'"
+        v-model:value="formState[item.key]"
+        :disabled="
+          (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
+          item.disabled
+        "
+      >
+        <a-select-option
+          v-for="key in Object.keys(PriceLevel).slice(0, 13)"
+          :key="key"
+          :value="+key"
+        >
+          {{ dealPriceLevel(+key).name }}
+        </a-select-option>
+      </a-select>
       <a-radio-group
         v-else-if="numberEnumRadioType[item.type]"
         v-model:value="formState[item.key]"
@@ -778,11 +1001,29 @@ defineExpose({
           :key="option.value"
           :value="option.value"
         >
-          {{
-            isLanguageKeyAvailable(option.label + '')
-              ? $t(option.label + '')
-              : option.label
-          }}
+          <a-tag
+            v-if="option.type === 'tag'"
+            :color="dealKungfuColorToStyleColor(option.color || 'default')"
+          >
+            {{
+              isLanguageKeyAvailable(option.label + '')
+                ? $t(option.label + '')
+                : option.label
+            }}
+          </a-tag>
+          <span
+            v-else
+            :class="dealKungfuColorToClassname(option.color || 'text')"
+            :style="{
+              color: dealKungfuColorToStyleColor(option.color || 'text'),
+            }"
+          >
+            {{
+              isLanguageKeyAvailable(option.label + '')
+                ? $t(option.label + '')
+                : option.label
+            }}
+          </span>
         </a-radio>
       </a-radio-group>
       <a-checkbox
@@ -840,16 +1081,35 @@ defineExpose({
           :key="option.value"
           :value="option.value"
         >
-          {{
-            isLanguageKeyAvailable(option.label + '')
-              ? $t(option.label + '')
-              : option.label
-          }}
+          <a-tag
+            v-if="option.type === 'tag'"
+            :color="dealKungfuColorToStyleColor(option.color || 'default')"
+          >
+            {{
+              isLanguageKeyAvailable(option.label + '')
+                ? $t(option.label + '')
+                : option.label
+            }}
+          </a-tag>
+          <span
+            v-else
+            :class="dealKungfuColorToClassname(option.color || 'text')"
+            :style="{
+              color: dealKungfuColorToStyleColor(option.color || 'text'),
+            }"
+          >
+            {{
+              isLanguageKeyAvailable(option.label + '')
+                ? $t(option.label + '')
+                : option.label
+            }}
+          </span>
         </a-select-option>
       </a-select>
       <a-select
         v-else-if="item.type === 'instrument'"
         :ref="item.key"
+        class="instrument-select"
         :disabled="
           (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
           item.disabled
@@ -864,6 +1124,7 @@ defineExpose({
       <a-select
         v-else-if="item.type === 'instruments'"
         :ref="item.key"
+        class="instrument-select"
         :disabled="
           (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
           item.disabled
@@ -886,6 +1147,24 @@ defineExpose({
           (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
           item.disabled
         "
+      >
+        <a-select-option
+          v-for="config in td"
+          :key="getIdByKfLocation(config)"
+          :value="getIdByKfLocation(config)"
+        >
+          {{ getIdByKfLocation(config) }}
+        </a-select-option>
+      </a-select>
+      <a-select
+        v-else-if="item.type === 'tds'"
+        v-model:value="formState[item.key]"
+        :disabled="
+          (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
+          item.disabled
+        "
+        mode="multiple"
+        show-search
       >
         <a-select-option
           v-for="config in td"
@@ -927,6 +1206,22 @@ defineExpose({
           {{ getIdByKfLocation(config) }}
         </a-select-option>
       </a-select>
+      <a-select
+        v-else-if="item.type === 'basket'"
+        v-model:value="formState[item.key]"
+        :disabled="
+          (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
+          item.disabled
+        "
+      >
+        <a-select-option
+          v-for="basket in basketList"
+          :key="basket.id"
+          :value="buildBasketOptionValue(basket)"
+        >
+          {{ buildBasketOptionLabel(basket) }}
+        </a-select-option>
+      </a-select>
       <a-switch
         size="small"
         v-else-if="item.type === 'bool'"
@@ -960,6 +1255,7 @@ defineExpose({
         class="kf-form-item__warp instruments-csv__wrap"
       >
         <a-select
+          class="instrument-select"
           :value="formState[item.key]"
           :disabled="
             (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
@@ -976,28 +1272,46 @@ defineExpose({
           @deselect="handleInstrumentDeselected($event, item.key)"
           @blur="instrumentsSearchRelated[item.key].handleSearchInstrumentBlur"
         ></a-select>
-        <div
-          class="select-csv-button__wrap"
-          :title="$t('settingsFormConfig.add_csv_desc')"
-        >
-          <a-button
-            size="small"
-            :disabled="
-              (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
-              item.disabled
-            "
-            @click="
-              handleSelectCsv<KungfuApi.Instrument>(
-                item.key,
-                item.headers,
-                instrumentsCsvCallback,
-              )
-            "
-          >
-            {{ $t('settingsFormConfig.add_csv') }}
-          </a-button>
-          <span class="select-csv-tip">
-            {{ $t('settingsFormConfig.add_csv_desc') }}
+        <div class="select-csv-button__wrap">
+          <div class="select-csv-buttons">
+            <a-button
+              size="small"
+              :disabled="
+                (changeType === 'update' &&
+                  item.primary &&
+                  !isPrimaryDisabled) ||
+                item.disabled
+              "
+              @click="
+                handleSelectCsv<KungfuApi.Instrument>(
+                  item.key,
+                  item.headers || [],
+                  instrumentsCsvCallback,
+                )
+              "
+            >
+              {{ $t('settingsFormConfig.add_csv') }}
+            </a-button>
+            <a-button
+              v-if="!!item.template"
+              size="small"
+              :disabled="
+                (changeType === 'update' &&
+                  item.primary &&
+                  !isPrimaryDisabled) ||
+                item.disabled
+              "
+              @click="handleDownloadCsvTemplate(item.template || [])"
+            >
+              {{ $t('settingsFormConfig.csv_template') }}
+            </a-button>
+          </div>
+          <span v-if="item.headers" class="select-csv-tip">
+            {{
+              $t('settingsFormConfig.add_csv_desc', {
+                header: buildCsvHeadersDescription(item.headers),
+              })
+            }}
           </span>
         </div>
         <div
@@ -1048,48 +1362,179 @@ defineExpose({
         @change="handleTimePickerChange($event as unknown as Dayjs, item.key)"
       ></a-time-picker>
       <div
+        v-else-if="item.type === 'table' || item.type === 'csvTable'"
         class="table-in-config-setting-form"
-        v-else-if="item.type === 'table'"
       >
-        <a-button
-          :disabled="
-            (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
-            item.disabled
-          "
-        >
-          <template #icon>
-            <PlusOutlined @click.stop="handleAddItemIntoTableRows(item)" />
-          </template>
-        </a-button>
-        <div
-          class="table-in-config-setting-row"
-          v-for="(_item, index) in formState[item.key]"
-          :key="`${index}_${formState[item.key].length}`"
-        >
+        <div v-if="item.type === 'csvTable'" class="select-csv-button__wrap">
+          <div class="select-csv-buttons">
+            <a-button
+              :disabled="
+                (changeType === 'update' &&
+                  item.primary &&
+                  !isPrimaryDisabled) ||
+                item.disabled
+              "
+              @click="
+                handleSelectCsv<Record<string, KungfuApi.KfConfigValue>>(
+                  item.key,
+                  item.headers || [],
+                  csvTableCallback(item.columns || []),
+                )
+              "
+            >
+              {{ $t('settingsFormConfig.add_csv') }}
+            </a-button>
+            <a-button
+              v-if="!!item.template"
+              :disabled="
+                (changeType === 'update' &&
+                  item.primary &&
+                  !isPrimaryDisabled) ||
+                item.disabled
+              "
+              @click="handleDownloadCsvTemplate(item.template || [])"
+            >
+              {{ $t('settingsFormConfig.csv_template') }}
+            </a-button>
+          </div>
+          <span v-if="!!item.headers" class="select-csv-tip">
+            {{
+              $t('settingsFormConfig.add_csv_desc', {
+                header: buildCsvHeadersDescription(item.headers),
+              })
+            }}
+          </span>
+        </div>
+
+        <div class="table-in-config-setting-form-head">
+          <a-input-search
+            v-if="!!item.search"
+            v-model:value="tablesSearchRelated[item.key].searchKeyword.value"
+            class="table-in-config-setting-search"
+            :placeholder="$t('settingsFormConfig.keyword')"
+          />
           <a-button
-            size="small"
             :disabled="
               (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
               item.disabled
             "
           >
             <template #icon>
-              <DeleteOutlined
-                @click="handleRemoveItemIntoTableRows(item, index)"
-              />
+              <PlusOutlined @click.stop="handleAddItemIntoTableRows(item)" />
             </template>
           </a-button>
-          <KfConfigSettingsForm
-            v-model:formState="formState[item.key][index]"
-            :configSettings="item.columns || []"
-            :changeType="changeType"
-            :rules="rules"
-            layout="inline"
-          ></KfConfigSettingsForm>
-          <a-divider
-            v-if="index !== formState[item.key].length - 1"
-          ></a-divider>
         </div>
+        <template v-if="!!item.search">
+          <div
+            v-for="(_item, index) in tablesSearchRelated[item.key].tableData
+              .value"
+            :key="`${index}_${
+              tablesSearchRelated[item.key].tableData.value.length
+            }`"
+            class="table-in-config-setting-row"
+          >
+            <a-button
+              size="small"
+              :disabled="
+                (changeType === 'update' &&
+                  item.primary &&
+                  !isPrimaryDisabled) ||
+                item.disabled
+              "
+            >
+              <template #icon>
+                <DeleteOutlined
+                  @click="
+                    handleRemoveItemIntoTableRows(
+                      item,
+                      tablesSearchRelated[item.key].tableData.value[index]
+                        .index,
+                    )
+                  "
+                />
+              </template>
+            </a-button>
+            <KfConfigSettingsForm
+              v-model:formState="
+                tablesSearchRelated[item.key].tableData.value[index].data
+              "
+              :configSettings="item.columns || []"
+              :changeType="changeType"
+              :primaryKeyAvoidRepeatCompareExtra="
+                primaryKeyAvoidRepeatCompareExtra
+              "
+              :primaryKeyAvoidRepeatCompareTarget="
+                primaryKeyAvoidRepeatCompareTarget
+              "
+              layout="inline"
+              :labelAlign="labelAlign"
+              :labelWrap="labelWrap"
+              :labelCol="labelCol"
+              :wrapperCol="wrapperCol"
+              :rules="rules"
+              :steps="steps"
+              :passPrimaryKeySpecialWordsVerify="
+                passPrimaryKeySpecialWordsVerify
+              "
+              :isPrimaryDisabled="isPrimaryDisabled"
+            ></KfConfigSettingsForm>
+            <a-divider
+              v-if="
+                index !==
+                  tablesSearchRelated[item.key].tableData.value.length - 1 &&
+                !item.noDivider
+              "
+            ></a-divider>
+          </div>
+        </template>
+        <template v-else>
+          <div
+            class="table-in-config-setting-row"
+            v-for="(_item, index) in formState[item.key]"
+            :key="`${index}_${formState[item.key].length}`"
+          >
+            <a-button
+              size="small"
+              :disabled="
+                (changeType === 'update' &&
+                  item.primary &&
+                  !isPrimaryDisabled) ||
+                item.disabled
+              "
+            >
+              <template #icon>
+                <DeleteOutlined
+                  @click="handleRemoveItemIntoTableRows(item, index)"
+                />
+              </template>
+            </a-button>
+            <KfConfigSettingsForm
+              v-model:formState="formState[item.key][index]"
+              :configSettings="item.columns || []"
+              :changeType="changeType"
+              :primaryKeyAvoidRepeatCompareExtra="
+                primaryKeyAvoidRepeatCompareExtra
+              "
+              :primaryKeyAvoidRepeatCompareTarget="
+                primaryKeyAvoidRepeatCompareTarget
+              "
+              layout="inline"
+              :labelAlign="labelAlign"
+              :labelWrap="labelWrap"
+              :labelCol="labelCol"
+              :wrapperCol="wrapperCol"
+              :rules="rules"
+              :steps="steps"
+              :passPrimaryKeySpecialWordsVerify="
+                passPrimaryKeySpecialWordsVerify
+              "
+              :isPrimaryDisabled="isPrimaryDisabled"
+            ></KfConfigSettingsForm>
+            <a-divider
+              v-if="index !== formState[item.key].length - 1 && !item.noDivider"
+            ></a-divider>
+          </div>
+        </template>
       </div>
     </a-form-item>
   </a-form>
@@ -1122,22 +1567,6 @@ export default defineComponent({
     }
 
     &.instruments-csv__wrap {
-      .select-csv-button__wrap {
-        margin-top: 8px;
-
-        button {
-          width: fit-content;
-        }
-
-        .select-csv-tip {
-          display: block;
-          margin-top: 4px;
-          color: grey;
-          word-break: break-all;
-          user-select: text;
-        }
-      }
-
       .csv-resolved-desc {
         word-break: break-word;
         margin-top: 8px;
@@ -1152,13 +1581,50 @@ export default defineComponent({
           color: #faad14;
           cursor: pointer;
         }
+
+        .select-csv-button__wrap {
+          margin-top: 8px;
+        }
       }
     }
   }
 
+  .select-csv-button__wrap {
+    .select-csv-buttons {
+      display: flex;
+
+      button {
+        margin-right: 8px;
+        width: fit-content;
+      }
+    }
+
+    .select-csv-tip {
+      display: block;
+      margin: 4px 0;
+      color: grey;
+      word-break: break-word;
+      user-select: text;
+    }
+  }
+
   .table-in-config-setting-form {
+    .table-in-config-setting-form-head {
+      display: flex;
+      margin-bottom: 12px;
+
+      .table-in-config-setting-search {
+        width: 200px;
+        margin-right: 16px;
+
+        .ant-input {
+          height: 32px;
+        }
+      }
+    }
+
     .table-in-config-setting-row {
-      margin-top: 10px;
+      margin-top: 8px;
 
       > .ant-btn {
         float: right;
@@ -1170,13 +1636,16 @@ export default defineComponent({
 
         &.ant-form-inline {
           .ant-row.ant-form-item {
-            margin-bottom: 8px;
+            margin-bottom: 0;
+
+            .ant-select {
+              min-width: 120px;
+            }
           }
 
           .ant-form-item-label > label,
           .global-setting-item .label {
             font-size: 12px;
-            min-width: 100px;
           }
         }
       }

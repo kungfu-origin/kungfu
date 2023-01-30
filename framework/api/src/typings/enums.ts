@@ -48,8 +48,34 @@ export enum InstrumentTypeEnum {
   cryptofuture,
   multi,
 }
-
 export type InstrumentTypes = keyof typeof InstrumentTypeEnum;
+
+export enum BasketVolumeTypeEnum {
+  Unknown,
+  Quantity,
+  Proportion,
+}
+
+export type BasketVolumeTypes = keyof typeof BasketVolumeTypeEnum;
+
+export enum PriceLevelEnum {
+  Latest, // 最新价
+  Sell5,
+  Sell4,
+  Sell3,
+  Sell2,
+  Sell1,
+  Buy1,
+  Buy2,
+  Buy3,
+  Buy4,
+  Buy5,
+  UpperLimitPrice, // 涨停价
+  LowerLimitPrice, // 跌停价
+  Unknown,
+}
+
+export type PriceLevelTypes = keyof typeof PriceLevelEnum;
 
 export type StrategyExtTypes = 'trade' | 'default' | 'unknown';
 
@@ -156,6 +182,14 @@ export enum OrderStatusEnum {
 }
 
 export type OrderStatusTypes = keyof typeof OrderStatusEnum;
+
+export enum BasketOrderStatusEnum {
+  Unknown,
+  Pending,
+  PartialFilledNotActive, // 部分成交已结束
+  PartialFilledActive, // 部分成交未结束
+  Filled,
+}
 
 export enum KfCategoryEnum {
   md,

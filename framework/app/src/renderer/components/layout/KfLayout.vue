@@ -192,6 +192,7 @@ function handleToPage(pathname: string) {
           line-height: @layout-side-width;
           display: flex;
           justify-content: space-evenly;
+          align-items: center;
           flex-direction: column;
 
           > span {

@@ -151,7 +151,7 @@ const std::unordered_map<uint64_t, longfist::types::Channel> &hero::get_channels
 
 void hero::on_notify() {}
 
-void hero::on_exit() {}
+void hero::on_exit() { SPDLOG_INFO("default on_exit"); }
 
 location_ptr hero::get_ledger_home_location() { return ledger_home_location_; }
 
@@ -225,10 +225,10 @@ void hero::register_channel(int64_t trigger_time, const Channel &channel) {
   }
 }
 
-void hero::deregister_channel(uint32_t source_location_uid) {
+void hero::deregister_channel(uint32_t source_id) {
   auto channel_it = channels_.begin();
   while (channel_it != channels_.end()) {
-    if (channel_it->second.source_id == source_location_uid) {
+    if (channel_it->second.source_id == source_id) {
       const auto &channel_uid = channel_it->first;
       const auto &channel = channel_it->second;
       auto source_uname = get_location_uname(channel.source_id);
@@ -251,10 +251,10 @@ void hero::register_band(int64_t trigger_time, const Band &band) {
   }
 }
 
-void hero::deregister_band(uint32_t source_location_uid) {
+void hero::deregister_band(uint32_t source_id) {
   auto band_it = bands_.begin();
   while (band_it != bands_.end()) {
-    if (band_it->second.source_id == source_location_uid) {
+    if (band_it->second.source_id == source_id) {
       const auto &band_uid = band_it->first;
       const auto &band = band_it->second;
       auto source_uname = get_location_uname(band.source_id);
