@@ -99,7 +99,8 @@ void Runner::post_start() {
   events_ | is_own<Deregister>(context_->get_broker_client()) |
       $$(invoke(&Strategy::on_deregister, event->data<Deregister>(), get_location(event->source())));
   events_ | is_own<BrokerStateUpdate>(context_->get_broker_client()) |
-      $$(invoke(&Strategy::on_broker_state_change, event->data<BrokerStateUpdate>(), get_location(event->source())));
+      $$(invoke(&Strategy::on_broker_state_change, event->data<BrokerStateUpdate>(),
+                get_location(event->data<BrokerStateUpdate>().location_uid)));
 
   invoke(&Strategy::post_start);
   SPDLOG_INFO("strategy {} started", get_io_device()->get_home()->name);

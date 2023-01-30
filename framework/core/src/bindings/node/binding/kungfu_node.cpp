@@ -45,6 +45,8 @@ decltype(__pfnDliNotifyHook2) __pfnDliNotifyHook2 = load_exe_hook;
 #include <kungfu/yijinjing/io.h>
 #include <kungfu/yijinjing/util/util.h>
 
+#include "basket_instrument_store.h"
+#include "basket_store.h"
 #include "commission_store.h"
 #include "config_store.h"
 #include "data_table.h"
@@ -105,6 +107,8 @@ Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
   ConfigStore::Init(env, exports);
   RiskSettingStore::Init(env, exports);
   CommissionStore::Init(env, exports);
+  BasketStore::Init(env, exports);
+  BasketInstrumentStore::Init(env, exports);
   Frame::Init(env, exports);
   Reader::Init(env, exports);
   Assemble::Init(env, exports);

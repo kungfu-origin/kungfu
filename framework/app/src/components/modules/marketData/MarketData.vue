@@ -47,7 +47,7 @@ const columns = computed(() => {
 });
 
 const {
-  subscribedInstruments,
+  subscribedInstrumentsByLocal,
   subscribeAllInstrumentByAppStates,
   searchInstrumentResult,
   searchInstrumnetOptions,
@@ -59,14 +59,14 @@ const { mdExtTypeMap } = useExtConfigsRelated();
 
 const { getQuoteByInstrument, getPreClosePrice } = useQuote();
 const { customRow, triggerOrderBook, triggerMakeOrder } = useTriggerMakeOrder();
-const { setSubscribedInstruments } = useGlobalStore();
+const { setSubscribedInstrumentsByLocal } = useGlobalStore();
 
 function handleSubscribeAll(): void {
   subscribeAllInstrumentByAppStates(
     processStatusData.value,
     appStates.value,
     mdExtTypeMap.value,
-    subscribedInstruments.value,
+    subscribedInstrumentsByLocal.value,
   );
   success();
 }
@@ -80,7 +80,7 @@ function handleConfirmAddInstrumentCallback(val: string): Promise<void> {
     });
   }
 
-  const targetIndex = subscribedInstruments.value.findIndex((item) => {
+  const targetIndex = subscribedInstrumentsByLocal.value.findIndex((item) => {
     if (item.exchangeId === instrumentResolved.exchangeId) {
       if (item.instrumentId === instrumentResolved.instrumentId) {
         return true;
@@ -97,7 +97,7 @@ function handleConfirmAddInstrumentCallback(val: string): Promise<void> {
 
   return addSubscribeInstruments([instrumentResolved])
     .then(() => {
-      return setSubscribedInstruments();
+      return setSubscribedInstrumentsByLocal();
     })
     .then(() =>
       subscribeAllInstrumentByAppStates(
@@ -117,7 +117,7 @@ function handleConfirmRemoveInstrument(
 ) {
   return removeSubscribeInstruments(instrument)
     .then(() => {
-      return setSubscribedInstruments();
+      return setSubscribedInstrumentsByLocal();
     })
     .then(() => {
       success();
@@ -175,7 +175,7 @@ function handleClickRow(row: KungfuApi.InstrumentResolved) {
       <a-table
         class="kf-ant-table"
         :columns="columns"
-        :data-source="subscribedInstruments"
+        :data-source="subscribedInstrumentsByLocal"
         size="small"
         :pagination="false"
         :scroll="{ y: dashboardBodyHeight - 4 }"

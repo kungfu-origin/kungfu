@@ -67,6 +67,7 @@ export default defineComponent({
   overflow: hidden;
 
   .kf-dashboard__header {
+    height: 32px;
     line-height: 32px;
     margin-bottom: 4px;
     display: flex;

@@ -36,7 +36,6 @@ constexpr auto AllTypes = boost::hana::make_map( //
     TYPE_PAIR(PositionRequest),                  //
     TYPE_PAIR(KeepPositionsRequest),             //
     TYPE_PAIR(RebuildPositionsRequest),          //
-    TYPE_PAIR(InstrumentEnd),                    //
     TYPE_PAIR(AlgoOrderInput),                   //
     TYPE_PAIR(AlgoOrderReport),                  //
     TYPE_PAIR(AlgoOrderModify),                  //
@@ -58,6 +57,8 @@ constexpr auto AllTypes = boost::hana::make_map( //
     TYPE_PAIR(RequestWriteTo),                   //
     TYPE_PAIR(RequestWriteToBand),               //
     TYPE_PAIR(Band),                             //
+    TYPE_PAIR(Basket),                           //
+    TYPE_PAIR(BasketInstrument),                 //
     TYPE_PAIR(TradingDay),                       //
     TYPE_PAIR(Channel),                          //
     TYPE_PAIR(ChannelRequest),                   //
@@ -82,6 +83,7 @@ constexpr auto AllTypes = boost::hana::make_map( //
     TYPE_PAIR(Position),                         //
     TYPE_PAIR(PositionEnd),                      //
     TYPE_PAIR(OrderStat),                        //
+    TYPE_PAIR(BasketOrder),                      //
     TYPE_PAIR(RequestHistoryOrder),              //
     TYPE_PAIR(RequestHistoryOrderError),         //
     TYPE_PAIR(RequestHistoryTrade),              //
@@ -107,6 +109,8 @@ constexpr auto AllDataTypes = boost::hana::make_map( //
     TYPE_PAIR(RequestWriteTo),                       //
     TYPE_PAIR(RequestWriteToBand),                   //
     TYPE_PAIR(Band),                                 //
+    TYPE_PAIR(Basket),                               //
+    TYPE_PAIR(BasketInstrument),                     //
     TYPE_PAIR(TradingDay),                           //
     TYPE_PAIR(Channel),                              //
     TYPE_PAIR(ChannelRequest),                       //
@@ -130,7 +134,8 @@ constexpr auto AllDataTypes = boost::hana::make_map( //
     TYPE_PAIR(AssetMargin),                          //
     TYPE_PAIR(Position),                             //
     TYPE_PAIR(PositionEnd),                          //
-    TYPE_PAIR(OrderStat)                             //
+    TYPE_PAIR(OrderStat),                            //
+    TYPE_PAIR(BasketOrder)                           //
 );
 
 constexpr auto ProfileDataTypes = boost::hana::make_map( //
@@ -138,7 +143,9 @@ constexpr auto ProfileDataTypes = boost::hana::make_map( //
     TYPE_PAIR(RiskSetting),                              //
     TYPE_PAIR(Commission),                               //
     TYPE_PAIR(Instrument),                               //
-    TYPE_PAIR(Location)                                  //
+    TYPE_PAIR(Location),                                 //
+    TYPE_PAIR(Basket),                                   //
+    TYPE_PAIR(BasketInstrument)                          //
 );
 
 constexpr auto SessionDataTypes = boost::hana::make_map( //
@@ -153,6 +160,8 @@ constexpr auto StateDataTypes = boost::hana::make_map( //
     TYPE_PAIR(StrategyStateUpdate), //
     TYPE_PAIR(Commission),          //
     TYPE_PAIR(Instrument),          //
+    TYPE_PAIR(Basket),              //
+    TYPE_PAIR(BasketInstrument),    //
     TYPE_PAIR(Quote),               //
     TYPE_PAIR(OrderAction),         //
     TYPE_PAIR(BlockMessage),        //
@@ -162,7 +171,8 @@ constexpr auto StateDataTypes = boost::hana::make_map( //
     TYPE_PAIR(Asset),               //
     TYPE_PAIR(AssetMargin),         //
     TYPE_PAIR(Position),            //
-    TYPE_PAIR(OrderStat)            //
+    TYPE_PAIR(OrderStat),           //
+    TYPE_PAIR(BasketOrder)          //
 );
 
 constexpr auto TradingDataTypes = boost::hana::make_map( //
@@ -170,7 +180,8 @@ constexpr auto TradingDataTypes = boost::hana::make_map( //
     TYPE_PAIR(OrderInput),                               //
     TYPE_PAIR(Order),                                    //
     TYPE_PAIR(Trade),                                    //
-    TYPE_PAIR(OrderStat)                                 //
+    TYPE_PAIR(OrderStat),                                //
+    TYPE_PAIR(BasketOrder)                               //
 );
 
 constexpr auto build_data_map = [](auto types) {
