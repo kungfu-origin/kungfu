@@ -16,6 +16,7 @@ import {
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import {
   playSound,
+  useBasket,
   useDealExportHistoryTradingData,
   useDealInstruments,
   usePreStartAndQuitApp,
@@ -51,6 +52,7 @@ const {
 
 useDealInstruments();
 useSubscibeInstrumentAtEntry(window.watcher);
+useBasket();
 
 const { exportDateModalVisible, exportDataLoading, handleConfirmExportDate } =
   useDealExportHistoryTradingData();
@@ -85,8 +87,6 @@ store.setKfExtConfigs();
 store.setSubscribedInstrumentsByLocal();
 store.setRiskSettingList();
 store.setKfGlobalSetting();
-store.setBasketList();
-store.setBasketInstrumentList();
 
 const busSubscription = globalBus.subscribe((data: KfEvent.KfBusEvent) => {
   if (data.tag === 'main') {

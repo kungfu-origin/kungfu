@@ -2281,6 +2281,7 @@ export const useMakeOrderSubscribe = (
 
 export const useBasket = () => {
   const app = getCurrentInstance();
+  const store = useGlobalStore();
 
   const basketList = ref<KungfuApi.Basket[]>([]);
   const basketInstrumentList = ref<KungfuApi.BasketInstrument[]>([]);
@@ -2291,6 +2292,9 @@ export const useBasket = () => {
         (watcher: KungfuApi.Watcher) => {
           basketList.value = watcher.ledger.Basket.sort('id');
           basketInstrumentList.value = watcher.ledger.BasketInstrument.list();
+
+          store.setBasketList();
+          store.setBasketInstrumentList();
         },
       );
 
@@ -2316,7 +2320,7 @@ export const useBasket = () => {
     return {
       id: Number(id),
       name,
-      volume_type,
+      volume_type: Number(volume_type),
       total_amount: BigInt(total_amount),
     };
   }
