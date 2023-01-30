@@ -10,8 +10,8 @@ import {
 import { storeToRefs } from 'pinia';
 import { useSubscibeInstrumentAtEntry } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import { dealKfTime } from '@kungfu-trader/kungfu-js-api/kungfu';
-import { BasketOrderStatus } from '../components/modules/BasketOrder/config';
-import { BasketVolumeType } from '../components/modules/BasketSetting/config';
+import { BasketOrderStatus } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
+import { BasketVolumeType } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import { BASKET_CATEGORYS } from '../config';
 import {
   hashInstrumentUKey,

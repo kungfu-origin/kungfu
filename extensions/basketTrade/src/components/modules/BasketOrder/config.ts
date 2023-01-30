@@ -4,7 +4,6 @@ import {
 } from './../../../utils/index';
 import { useBasketTradeStore } from './../../../store';
 import { DealTradingDataGetter } from '@kungfu-trader/kungfu-js-api/hooks/dealTradingDataHook';
-import { BasketOrderStatusEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { getTradingDataSortKey } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { BASKET_CATEGORYS } from '../../../config';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
@@ -104,32 +103,6 @@ export const getColumns = buildConfigGetterWrapByComputed(
       },
     ] as KfTradingDataTableHeaderConfig[],
 );
-
-export const BasketOrderStatus: Record<
-  BasketOrderStatusEnum,
-  KungfuApi.KfTradeValueCommonData
-> = {
-  [BasketOrderStatusEnum.Unknown]: {
-    name: t('tradingConfig.unknown'),
-    color: 'default',
-  },
-  [BasketOrderStatusEnum.Pending]: {
-    name: t('tradingConfig.pending'),
-    color: 'default',
-  },
-  [BasketOrderStatusEnum.PartialFilledNotActive]: {
-    name: t('tradingConfig.partial_filled_not_active'),
-    color: 'green',
-  },
-  [BasketOrderStatusEnum.PartialFilledActive]: {
-    name: t('tradingConfig.partial_filled_active'),
-    color: 'default',
-  },
-  [BasketOrderStatusEnum.Filled]: {
-    name: t('tradingConfig.filled'),
-    color: 'green',
-  },
-};
 
 const { getBasketOrderByOrderLocation } = useBasketTradeStore();
 

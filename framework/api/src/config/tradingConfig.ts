@@ -21,6 +21,8 @@ import {
   UnderweightEnum,
   OrderInputKeyEnum,
   PriceLevelEnum,
+  BasketVolumeTypeEnum,
+  BasketOrderStatusEnum,
 } from '../typings/enums';
 
 import { Pm2ProcessStatusTypes } from '../utils/processUtils';
@@ -311,6 +313,32 @@ export const OrderStatus: Record<
   },
 };
 
+export const BasketOrderStatus: Record<
+  BasketOrderStatusEnum,
+  KungfuApi.KfTradeValueCommonData
+> = {
+  [BasketOrderStatusEnum.Unknown]: {
+    name: t('tradingConfig.unknown'),
+    color: 'default',
+  },
+  [BasketOrderStatusEnum.Pending]: {
+    name: t('tradingConfig.pending'),
+    color: 'default',
+  },
+  [BasketOrderStatusEnum.PartialFilledNotActive]: {
+    name: t('tradingConfig.partial_filled_not_active'),
+    color: 'green',
+  },
+  [BasketOrderStatusEnum.PartialFilledActive]: {
+    name: t('tradingConfig.partial_filled_active'),
+    color: 'default',
+  },
+  [BasketOrderStatusEnum.Filled]: {
+    name: t('tradingConfig.filled'),
+    color: 'green',
+  },
+};
+
 export const UnfinishedOrderStatus = [
   OrderStatusEnum.Submitted,
   OrderStatusEnum.Pending,
@@ -418,6 +446,24 @@ export const CommissionMode: Record<
 > = {
   [CommissionModeEnum.ByAmount]: { name: t('tradingConfig.by_amount') },
   [CommissionModeEnum.ByVolume]: { name: t('tradingConfig.by_volume') },
+};
+
+export const BasketVolumeType: Record<
+  BasketVolumeTypeEnum,
+  KungfuApi.KfTradeValueCommonData
+> = {
+  [BasketVolumeTypeEnum.Unknown]: {
+    name: t('tradingConfig.unknown'),
+    color: 'default',
+  },
+  [BasketVolumeTypeEnum.Quantity]: {
+    name: t('BasketTrade.by_quantity'),
+    color: 'cyan',
+  },
+  [BasketVolumeTypeEnum.Proportion]: {
+    name: t('BasketTrade.by_proportion'),
+    color: 'purple',
+  },
 };
 
 export const InstrumentType: Record<

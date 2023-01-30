@@ -46,6 +46,7 @@ import {
   isT0,
   getTradingDataSortKey,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import { BasketVolumeType } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import { writeCSV } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import {
   Pm2ProcessStatusData,
@@ -2270,7 +2271,7 @@ export const useBasket = () => {
   });
 
   function buildBasketOptionLabel(basket: KungfuApi.Basket) {
-    return `${basket.name} ${basket.volume_type}`;
+    return `${basket.name} ${BasketVolumeType[basket.volume_type].name}`;
   }
 
   function buildBasketOptionValue(basket: KungfuApi.Basket) {

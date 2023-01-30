@@ -1,4 +1,5 @@
 import { BasketVolumeTypeEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
+import { BasketVolumeType } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import { DealTradingDataGetter } from '@kungfu-trader/kungfu-js-api/hooks/dealTradingDataHook';
 import { getTradingDataSortKey } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
@@ -67,24 +68,6 @@ export const getColumns = buildConfigGetterWrapByComputed(
       },
     ] as AntTableColumns,
 );
-
-export const BasketVolumeType: Record<
-  BasketVolumeTypeEnum,
-  KungfuApi.KfTradeValueCommonData
-> = {
-  [BasketVolumeTypeEnum.Unknown]: {
-    name: t('tradingConfig.unknown'),
-    color: 'default',
-  },
-  [BasketVolumeTypeEnum.Quantity]: {
-    name: t('BasketTrade.by_quantity'),
-    color: 'cyan',
-  },
-  [BasketVolumeTypeEnum.Proportion]: {
-    name: t('BasketTrade.by_proportion'),
-    color: 'purple',
-  },
-};
 
 export const getBasketFormSettings = (volumeType: BasketVolumeTypeEnum) =>
   [
