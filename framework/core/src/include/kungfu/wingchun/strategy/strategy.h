@@ -67,11 +67,6 @@ public:
   virtual void on_order_action_error(Context_ptr &context, const longfist::types::OrderActionError &error,
                                      const kungfu::yijinjing::data::location_ptr &location){};
 
-  // 篮子单状态更新回调
-  // @param location          数据来源
-  virtual void on_basket_order(Context_ptr &context, const longfist::types::BasketOrder &basket_order,
-                               const kungfu::yijinjing::data::location_ptr &location){};
-
   // 订单成交回报回调
   // @param trade             订单成交数据
   // @param location          数据来源

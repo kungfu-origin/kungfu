@@ -80,9 +80,6 @@ void Runner::post_start() {
       $$(invoke(&Strategy::on_transaction, event->data<Transaction>(), get_location(event->source())));
 
   events_ | is(Order::tag) | $$(invoke(&Strategy::on_order, event->data<Order>(), get_location(event->source())));
-  events_ | is(BasketOrder::tag) |
-      $$(invoke(&Strategy::on_basket_order, event->data<BasketOrder>(),
-                get_location(event->data<BasketOrder>().dest_id)));
   events_ | is(Trade::tag) | $$(invoke(&Strategy::on_trade, event->data<Trade>(), get_location(event->source())));
   events_ | is(HistoryOrder::tag) |
       $$(invoke(&Strategy::on_history_order, event->data<HistoryOrder>(), get_location(event->source())));
