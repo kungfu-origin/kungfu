@@ -170,6 +170,7 @@ const makeOrderData = computed(() => {
     offset: getResolvedOffset(offset, side, instrumentType),
     hedge_flag: +(hedge_flag || 0),
     is_swap: !!is_swap,
+    parent_id: 0n,
   };
   return makeOrderInput;
 });
@@ -298,6 +299,7 @@ function initOrderInputData(): Promise<KungfuApi.MakeOrderInput> {
     offset: getResolvedOffset(offset, side, instrumentType),
     hedge_flag: +(hedge_flag || 0),
     is_swap: !!is_swap,
+    parent_id: 0n,
   };
 
   return Promise.resolve(makeOrderInput);

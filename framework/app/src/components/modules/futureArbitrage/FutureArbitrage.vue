@@ -159,6 +159,7 @@ function handleMakeOrder() {
         offset: +(offset !== undefined ? offset : +side === 0 ? 0 : 1),
         hedge_flag: +(hedge_flag || 0),
         is_swap: !!is_swap,
+        parent_id: 0n,
       };
 
       if (!currentGlobalKfLocation.value) {

@@ -540,7 +540,7 @@ export const makeOrderByBasketInstruments = (
   parentId: bigint,
   basketOrderInput: KungfuApi.BasketOrderInput,
   basketInstruments: KungfuApi.BasketInstrumentForOrder[],
-  kfLocation: KungfuApi.KfLocation,
+  tdLocation: KungfuApi.KfLocation,
 ) => {
   if (!watcher) {
     return Promise.reject(new Error(`Watcher is NULL`));
@@ -550,20 +550,17 @@ export const makeOrderByBasketInstruments = (
     return Promise.reject(new Error(`Watcher is not live`));
   }
 
-  if (!watcher.isReadyToInteract(kfLocation)) {
-    const accountId = getIdByKfLocation(kfLocation);
+  if (!watcher.isReadyToInteract(tdLocation)) {
+    const accountId = getIdByKfLocation(tdLocation);
     return Promise.reject(new Error(`Td ${accountId} not ready`));
   }
 
-  console.log(parentId, basketOrderInput, basketInstruments, kfLocation);
+  console.log(parentId, basketOrderInput, basketInstruments, tdLocation);
 
   const makeOrderTasks = basketInstruments.map((basketInstrument) => {
-    const now = watcher.now();
-
-    const orderInput: KungfuApi.OrderInput = {
+    const makeOrderInput: KungfuApi.MakeOrderInput = {
       ...longfist.OrderInput(),
       parent_id: parentId,
-      insert_time: now,
       instrument_id: `${basketInstrument.instrument_id}`,
       exchange_id: `${basketInstrument.exchange_id}`,
       instrument_type: +basketInstrument.instrument_type,
@@ -574,10 +571,15 @@ export const makeOrderByBasketInstruments = (
       ),
       price_type: +basketOrderInput.price_type,
       limit_price: +basketInstrument.priceResolved || 0,
-      frozen_price: +basketInstrument.priceResolved || 0,
-      volume: BigInt(basketInstrument.volumeResolved),
+      volume: basketInstrument.volumeResolved,
     };
-    return Promise.resolve(watcher.issueOrder(orderInput, kfLocation));
+
+    return kfMakeOrder(
+      watcher,
+      makeOrderInput,
+      tdLocation,
+      basketInstrument.strategyLocation,
+    );
   });
 
   return Promise.all(makeOrderTasks);

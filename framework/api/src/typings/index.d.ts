@@ -297,6 +297,7 @@ declare namespace KungfuApi {
     offset: OffsetEnum;
     hedge_flag: HedgeFlagEnum;
     is_swap: boolean;
+    parent_id: bigint;
   }
 
   export interface KfLogData {
@@ -805,6 +806,7 @@ declare namespace KungfuApi {
     isNoQuote: boolean;
     volumeResolved: number; // 最终下单量
     priceResolved: number; // 最终下单价
+    strategyLocation?: KfLocation;
   }
 
   export interface RiskSetting {
