@@ -297,6 +297,7 @@ declare namespace KungfuApi {
     offset: OffsetEnum;
     hedge_flag: HedgeFlagEnum;
     is_swap: boolean;
+    parent_id: bigint;
   }
 
   export interface KfLogData {

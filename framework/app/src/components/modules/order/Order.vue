@@ -384,6 +384,7 @@ function handleClickAdjustOrderMask(): void {
         offset: +order.offset,
         hedge_flag: +order.hedge_flag,
         is_swap: !!order.is_swap,
+        parent_id: 0n,
       };
 
       return makeOrderByOrderInput(
