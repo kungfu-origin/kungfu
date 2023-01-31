@@ -137,6 +137,9 @@ export default {
     close_today: '平今',
     close_yesterday: '平昨',
 
+    by_quantity: '按数量',
+    by_proportion: '按比例',
+
     latest: '最新价',
     sell5: '卖五价',
     sell4: '卖四价',

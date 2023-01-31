@@ -457,11 +457,11 @@ export const BasketVolumeType: Record<
     color: 'default',
   },
   [BasketVolumeTypeEnum.Quantity]: {
-    name: t('BasketTrade.by_quantity'),
+    name: t('tradingConfig.by_quantity'),
     color: 'cyan',
   },
   [BasketVolumeTypeEnum.Proportion]: {
-    name: t('BasketTrade.by_proportion'),
+    name: t('tradingConfig.by_proportion'),
     color: 'purple',
   },
 };
