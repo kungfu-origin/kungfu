@@ -806,6 +806,7 @@ declare namespace KungfuApi {
     isNoQuote: boolean;
     volumeResolved: number; // 最终下单量
     priceResolved: number; // 最终下单价
+    strategyLocation?: KfLocation;
   }
 
   export interface RiskSetting {
