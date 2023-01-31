@@ -2295,7 +2295,7 @@ export const useBasket = () => {
 
           // const basketInWatcher = watcher.ledger.Basket.sort('id')
           // const basketInstrumentInWatcher = watcher.ledger.BasketInstrument.list()
-
+          watcher;
           basketList.value = store.basketList;
           basketInstrumentList.value = store.basketInstrumentList;
         },
