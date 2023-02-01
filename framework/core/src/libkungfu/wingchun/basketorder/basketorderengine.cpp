@@ -59,6 +59,10 @@ void BasketOrderEngine::update_basket_order(int64_t trigger_time, const longfist
 
   auto basket_order_state = get_basket_order_state(order.parent_id);
   auto dest = basket_order_state->get_state().dest;
+  if (not app_.has_writer(dest)) {
+    SPDLOG_WARN("no writer for basket order dest {} {}", dest, app_.get_location_uname(dest));
+    return;
+  }
   app_.get_writer(dest)->write(app_.now(), basket_order_state->get_state().data);
 }
 

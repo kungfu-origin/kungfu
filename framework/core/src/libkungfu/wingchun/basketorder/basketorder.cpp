@@ -40,4 +40,6 @@ void BasketOrderState::update(const longfist::types::Order &order) {
 
 state<longfist::types::BasketOrder> &BasketOrderState::get_state() { return state_data; }
 
+OrderMap &BasketOrderState::get_orders() { return orders; }
+
 } // namespace kungfu::wingchun::basketorder
