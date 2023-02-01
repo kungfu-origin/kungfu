@@ -612,6 +612,7 @@ export const makeOrderByBasketTrade = (
     ...longfist.BasketOrder(),
     parent_id: BigInt(basket.id),
     insert_time: now,
+    side: +basketOrderInput.side,
     price_type: +basketOrderInput.price_type,
     price_level: +basketOrderInput.price_level,
     price_offset: +basketOrderInput.price_offset,
