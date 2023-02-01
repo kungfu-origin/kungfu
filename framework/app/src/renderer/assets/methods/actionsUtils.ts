@@ -2290,11 +2290,14 @@ export const useBasket = () => {
     if (app?.proxy) {
       const subscription = app.proxy.$tradingDataSubject.subscribe(
         (watcher: KungfuApi.Watcher) => {
-          basketList.value = watcher.ledger.Basket.sort('id');
-          basketInstrumentList.value = watcher.ledger.BasketInstrument.list();
-
           store.setBasketList();
           store.setBasketInstrumentList();
+
+          // const basketInWatcher = watcher.ledger.Basket.sort('id')
+          // const basketInstrumentInWatcher = watcher.ledger.BasketInstrument.list()
+          watcher;
+          basketList.value = store.basketList;
+          basketInstrumentList.value = store.basketInstrumentList;
         },
       );
 
