@@ -27,6 +27,8 @@
     "@kungfu-trader/kungfu-app": "^2.4.45-alpha.4",
     "@kungfu-trader/kungfu-cli": "^2.4.45-alpha.4",
     "@kungfu-trader/kungfu-core": "^2.4.45-alpha.4",
+    "@kungfu-trader/kfx-ui-db-sync": "~1.0.7-0",
+    "@kungfu-trader/kfx-ui-basket-trade": "~1.0.0-0",
     "@kungfu-trader/kungfu-sdk": "^2.4.45-alpha.4"
   }
 }
