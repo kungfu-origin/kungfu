@@ -21,10 +21,12 @@ const props = withDefaults(
   defineProps<{
     visible: boolean;
     extensionType: KfCategoryTypes;
+    extFilter: (extConfig: KungfuApi.KfExtConfig) => boolean;
   }>(),
   {
     visible: false,
     extensionType: 'td',
+    extFilter: () => true,
   },
 );
 
@@ -38,7 +40,9 @@ const app = getCurrentInstance();
 const { extConfigs } = useExtConfigsRelated();
 const selectedExtension = ref<string>('');
 const availExtensionList = computed(() => {
-  return getExtConfigList(extConfigs.value, props.extensionType);
+  return getExtConfigList(extConfigs.value, props.extensionType).filter(
+    (extConfig) => props.extFilter(extConfig),
+  );
 });
 
 const { modalVisible, closeModal } = useModalVisible(props.visible);
