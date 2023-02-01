@@ -16,7 +16,7 @@ export const useComponenets = (
   app: App<Element>,
   router: Router,
 ): Promise<void> => {
-  const components = [
+  const builtinComponents: BuiltinComponents[] = [
     'Pos',
     'PosGlobal',
     'Order',
@@ -30,7 +30,10 @@ export const useComponenets = (
     'MakeOrder',
     'FutureArbitrage',
     'BlockTrade',
-  ].filter((componentName) => getBoard(componentName, true, false));
+  ];
+  const components = builtinComponents.filter((componentName) =>
+    getBoard(componentName, true, false),
+  );
 
   components.forEach((componentName) => {
     app.component(
