@@ -48,7 +48,10 @@ void BasketOrderEngine::on_basket_order(int64_t trigger_time, const longfist::ty
 
 void BasketOrderEngine::insert_basket_order(int64_t trigger_time, const longfist::types::BasketOrder &basket_order) {
   auto basket_order_state = make_basket_order_state(trigger_time, basket_order);
-  app_.get_writer(basket_order.dest_id)->write(app_.now(), basket_order_state->get_state().data);
+
+  if (app_.get_home_uid() == basket_order.source_id) {
+    app_.get_writer(basket_order.dest_id)->write(app_.now(), basket_order_state->get_state().data);
+  }
 }
 
 void BasketOrderEngine::update_basket_order(int64_t trigger_time, const longfist::types::Order &order) {
@@ -58,8 +61,16 @@ void BasketOrderEngine::update_basket_order(int64_t trigger_time, const longfist
   }
 
   auto basket_order_state = get_basket_order_state(order.parent_id);
-  auto dest = basket_order_state->get_state().dest;
-  app_.get_writer(dest)->write(app_.now(), basket_order_state->get_state().data);
+  auto source_id = basket_order_state->get_state().data.source_id;
+  auto dest_id = basket_order_state->get_state().data.dest_id;
+
+  if (not app_.has_writer(dest_id)) {
+    SPDLOG_WARN("no writer for basket order dest_id {} {}", dest_id, app_.get_location_uname(dest_id));
+    return;
+  }
+  if (app_.get_home_uid() == source_id) {
+    app_.get_writer(dest_id)->write(app_.now(), basket_order_state->get_state().data);
+  }
 }
 
 bool BasketOrderEngine::try_update_basket_order(int64_t trigger_time, const longfist::types::Order &order) {
@@ -96,7 +107,7 @@ BasketOrderState_ptr BasketOrderEngine::make_basket_order_state(int64_t trigger_
   auto basket_order_state =
       std::make_shared<BasketOrderState>(basket_order.source_id, basket_order.dest_id, trigger_time, basket_order);
   basket_order_states_.insert_or_assign(basket_order.order_id, basket_order_state);
-  return basket_order_state;
+  return basket_order_states_.at(basket_order.order_id);
 }
 
 } // namespace kungfu::wingchun::basketorder

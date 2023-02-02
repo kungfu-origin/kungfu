@@ -555,8 +555,6 @@ export const makeOrderByBasketInstruments = (
     return Promise.reject(new Error(`Td ${accountId} not ready`));
   }
 
-  console.log(parentId, basketOrderInput, basketInstruments, tdLocation);
-
   const makeOrderTasks = basketInstruments.map((basketInstrument) => {
     const makeOrderInput: KungfuApi.MakeOrderInput = {
       ...longfist.OrderInput(),

@@ -7,6 +7,7 @@
       <KfRowColIter
         :board-id="childBoardId"
         :closable="closable"
+        :props-map-by-component="propsMapByComponent"
       ></KfRowColIter>
     </template>
     <template v-if="contents.length">
@@ -16,10 +17,10 @@
           [classNameForTabDrag]: true,
           'is-dragging': isBoardDragging,
         }"
-        :activeKey="boardInfo.current"
+        :active-key="boardInfo.current"
         style="height: 100%; width: 100%"
         :type="closable ? 'editable-card' : 'card'"
-        :tabBarStyle="{ margin: 0 }"
+        :tab-bar-style="{ margin: 0 }"
         @edit="(targetKey, action) => hanldeEdit(boardId, targetKey, action)"
         @tabClick="handleClickTab"
         @dragenter="handleDragEnter"
@@ -43,6 +44,7 @@
               v-if="hasComponent(content) && content === boardInfo.current"
               :is="content"
               :id="content"
+              :props-map-by-component="propsMapByComponent"
             ></component>
             <KfNoData
               v-else
@@ -63,6 +65,7 @@
       <KfRowColIter
         :board-id="childBoardId"
         :closable="closable"
+        :props-map-by-component="propsMapByComponent"
       ></KfRowColIter>
     </template>
     <template v-if="contents.length">
@@ -72,10 +75,10 @@
           [classNameForTabDrag]: true,
           'is-dragging': isBoardDragging,
         }"
-        :activeKey="boardInfo.current"
+        :active-key="boardInfo.current"
         style="height: 100%; width: 100%"
         :type="closable ? 'editable-card' : 'card'"
-        :tabBarStyle="{ margin: 0 }"
+        :tab-bar-style="{ margin: 0 }"
         @edit="(targetKey, action) => hanldeEdit(boardId, targetKey, action)"
         @tabClick="handleClickTab"
         @dragenter="handleDragEnter"
@@ -99,6 +102,7 @@
               v-if="hasComponent(content) && content === boardInfo.current"
               :is="content"
               :id="content"
+              :props-map-by-component="propsMapByComponent"
             ></component>
             <KfNoData
               v-else
@@ -158,6 +162,11 @@ export default defineComponent({
     closable: {
       type: Boolean as PropType<boolean>,
       default: false,
+    },
+
+    propsMapByComponent: {
+      type: Object as PropType<BuiltinComponentProps['propsMapByComponent']>,
+      default: () => ({}),
     },
   },
 
