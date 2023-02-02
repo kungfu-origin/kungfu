@@ -938,6 +938,12 @@ declare namespace KungfuApi {
     uidKey: string;
   }
 
+  export interface InstrumentForAccounting extends InstrumentResolved {
+    price: number;
+    volume: number;
+    direction: DirectionEnum;
+  }
+
   export interface KfLocationBase {
     group: string;
     name: string;
