@@ -1,12 +1,5 @@
 <script setup lang="ts">
-import {
-  computed,
-  getCurrentInstance,
-  nextTick,
-  reactive,
-  ref,
-  watch,
-} from 'vue';
+import { computed, nextTick, reactive, ref, watch } from 'vue';
 import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboardItem.vue';
 import KfConfigSettingsForm from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfConfigSettingsForm.vue';
@@ -60,7 +53,6 @@ import {
 const { t } = VueI18n.global;
 const { error } = messagePrompt();
 
-const app = getCurrentInstance();
 const { instrumentKeyAccountsMap, uiExtConfigs } = storeToRefs(
   useGlobalStore(),
 );
@@ -90,7 +82,7 @@ const {
   currentAvailMoney,
   currentAvailPosVolume,
   isAccountOrInstrumentConfirmed,
-} = useMakeOrderInfo(app, formState);
+} = useMakeOrderInfo(formState);
 useMakeOrderSubscribe(formState);
 
 const {
@@ -623,7 +615,7 @@ const handlePercentChange = (target: number) => {
   let targetVolume;
   if (curOffset === OffsetEnum.Open) {
     const availMoney = dealStringToNumber(currentAvailMoney.value);
-    const allVolume = availMoney / currentPrice.value;
+    const allVolume = currentPrice.value ? availMoney / currentPrice.value : 0;
     targetVolume = allVolume * targetPercent;
   } else if (curOffset === OffsetEnum.Close) {
     const availPosVolume = dealStringToNumber(currentAvailPosVolume.value);
