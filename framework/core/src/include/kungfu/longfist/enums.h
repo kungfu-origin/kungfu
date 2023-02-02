@@ -254,10 +254,6 @@ enum class BasketVolumeType : int8_t { Unknown, Quantity, Proportion };
 
 inline std::ostream &operator<<(std::ostream &os, BasketVolumeType t) { return os << int8_t(t); }
 
-enum class BasketOrderVolumeMode : int8_t { Static, Accumulation };
-
-inline std::ostream &operator<<(std::ostream &os, BasketOrderVolumeMode t) { return os << int8_t(t); }
-
 enum class BasketType : int8_t { Custom, ETF };
 
 inline std::ostream &operator<<(std::ostream &os, BasketType t) { return os << int8_t(t); }

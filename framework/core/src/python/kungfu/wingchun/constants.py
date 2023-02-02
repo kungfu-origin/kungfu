@@ -41,7 +41,6 @@ StrategyState = lf.enums.StrategyState
 HistoryDataType = lf.enums.HistoryDataType
 
 BasketVolumeType = lf.enums.BasketVolumeType
-BasketOrderVolumeMode = lf.enums.BasketOrderVolumeMode
 BasketType = lf.enums.BasketType
 
 AllFinalOrderStatus = [

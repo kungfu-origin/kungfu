@@ -169,7 +169,7 @@ void bind_strategy(pybind11::module &m) {
       .def("insert_array_orders", &strategy::Context::insert_array_orders)
       .def("insert_basket_order", &strategy::Context::insert_basket_order, py::arg("basket_id"), py::arg("source"),
            py::arg("account"), py::arg("price_type") = PriceType::Limit, py::arg("price_level") = PriceLevel::Lastest,
-           py::arg("price_offset") = 0, py::arg("volume_mode") = BasketOrderVolumeMode::Static)
+           py::arg("price_offset") = 0, py::arg("volume") = 0)
       .def("cancel_order", &strategy::Context::cancel_order)
       .def("req_history_order", &strategy::Context::req_history_order, py::arg("source"), py::arg("account"),
            py::arg("query_num") = 0)
