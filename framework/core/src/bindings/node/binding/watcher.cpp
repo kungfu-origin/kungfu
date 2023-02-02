@@ -405,17 +405,19 @@ void Watcher::on_start() {
   basketorder_engine_.on_start(events_);
   UpdateBasketOrders(); // refresh basketorders
 
-  if (not bypass_accounting_ and not bypass_trading_data_) {
-    bookkeeper_.on_start(events_);
-    bookkeeper_.guard_positions();
-    bookkeeper_.add_book_listener(std::make_shared<BookListener>(*this));
-
+  if (not bypass_trading_data_) {
     // for receive runtime data
     events_ | is(Quote::tag) | is_subscribed(subscribed_instruments_) | $$(feed_state_data(event, data_bank_));
     events_ | is(Instrument::tag) | $$(Feed(event, event->data<Instrument>()));
     events_ | skip_while(while_is(Quote::tag)) | is_trading_data() | $$(feed_trading_data(event, trading_bank_));
     events_ | skip_while(while_is(Quote::tag, Instrument::tag)) | skip_while(while_is_trading_data) |
         $$(feed_state_data(event, data_bank_));
+  }
+
+  if (not bypass_accounting_ and not bypass_trading_data_) {
+    bookkeeper_.on_start(events_);
+    bookkeeper_.guard_positions();
+    bookkeeper_.add_book_listener(std::make_shared<BookListener>(*this));
 
     events_ | is(Quote::tag) | is_subscribed(subscribed_instruments_) | $$(UpdateBook(event, event->data<Quote>()));
     events_ | is(OrderInput::tag) | $$(UpdateBook(event, event->data<OrderInput>()));
