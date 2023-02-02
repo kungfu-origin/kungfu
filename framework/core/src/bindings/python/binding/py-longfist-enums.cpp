@@ -178,12 +178,6 @@ void bind_enums(py::module &m) {
       .export_values()
       .def("__eq__", [](const BrokerState &a, int b) { return static_cast<int>(a) == b; });
 
-  py::enum_<BasketOrderVolumeMode>(m_enums, "BasketOrderVolumeMode", py::arithmetic())
-      .value("Static", BasketOrderVolumeMode::Static)
-      .value("Accumulation", BasketOrderVolumeMode::Accumulation)
-      .export_values()
-      .def("__eq__", [](const BrokerState &a, int b) { return static_cast<int>(a) == b; });
-
   py::enum_<BasketType>(m_enums, "BasketType", py::arithmetic())
       .value("Custom", BasketType::Custom)
       .value("ETF", BasketType::ETF)

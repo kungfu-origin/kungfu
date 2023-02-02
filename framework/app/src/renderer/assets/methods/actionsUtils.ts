@@ -56,7 +56,6 @@ import { message, Modal } from 'ant-design-vue';
 import path from 'path';
 import { Proc } from 'pm2';
 import {
-  ComponentInternalInstance,
   computed,
   ComputedRef,
   getCurrentInstance,
@@ -92,7 +91,7 @@ import { messagePrompt } from '@kungfu-trader/kungfu-app/src/renderer/assets/met
 import sound from 'sound-play';
 import { KUNGFU_RESOURCES_DIR } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 import { RuleObject } from 'ant-design-vue/lib/form';
-import { TradeAmountUsageMap } from './accounting';
+import { TradeAccountingUsageMap } from '@kungfu-trader/kungfu-js-api/utils/accounting';
 
 const { t } = VueI18n.global;
 const { success, error } = messagePrompt();
@@ -1815,14 +1814,12 @@ export const useCurrentPositionList = () => {
 };
 
 export const useMakeOrderInfo = (
-  app: ComponentInternalInstance | null,
   formState: Ref<Record<string, KungfuApi.KfConfigValue>>,
 ) => {
   const { currentGlobalKfLocation } = useCurrentGlobalKfLocation(
     window.watcher,
   );
   const { currentPositionList } = useCurrentPositionList();
-
   const { getAssetsByKfConfig } = useAssets();
 
   const instrumentResolved = computed(() => {
@@ -1994,9 +1991,9 @@ export const useMakeOrderInfo = (
     const { price_type, limit_price } = formState.value;
 
     if (price_type === PriceTypeEnum.Limit) {
-      return limit_price;
+      return limit_price as number;
     } else if (price_type === PriceTypeEnum.Market) {
-      return currentPosition.value?.last_price;
+      return currentPosition.value?.last_price ?? null;
     }
 
     return null;
@@ -2006,38 +2003,22 @@ export const useMakeOrderInfo = (
     const { volume } = formState.value;
 
     if (instrumentResolved.value) {
-      if (
-        instrumentResolved.value.instrumentType === InstrumentTypeEnum.future
-      ) {
-        if (currentFormDirection.value !== null) {
-          return dealTradeAmount(
-            TradeAmountUsageMap[InstrumentTypeEnum.future].getTradeAmount(
-              currentPrice.value,
-              volume,
-              currentFormDirection.value,
-              instrumentResolved.value,
-            ),
-          );
-        }
-      } else if (
-        instrumentResolved.value.instrumentType === InstrumentTypeEnum.stock
-      ) {
+      const instrumentForAccounting: KungfuApi.InstrumentForAccounting = {
+        ...instrumentResolved.value,
+        price: currentPrice.value ?? 0,
+        volume,
+        direction: currentFormDirection.value || DirectionEnum.Long,
+      };
+      if (instrumentResolved.value.instrumentType in TradeAccountingUsageMap) {
         return dealTradeAmount(
-          TradeAmountUsageMap[InstrumentTypeEnum.stock].getTradeAmount(
-            currentPrice.value,
-            volume,
-            instrumentResolved.value,
-          ),
+          TradeAccountingUsageMap[
+            instrumentResolved.value.instrumentType as InstrumentTypeEnum
+          ].getTradeAmount(window.watcher, instrumentForAccounting),
         );
       }
     }
 
-    return dealTradeAmount(
-      TradeAmountUsageMap[InstrumentTypeEnum.unknown].getTradeAmount(
-        currentPrice.value,
-        volume,
-      ),
-    );
+    return dealTradeAmount((currentPrice.value ?? 0) * volume);
   });
 
   const currentResidueMoney = computed(() => {

@@ -188,7 +188,7 @@ std::vector<uint64_t> RuntimeContext::insert_array_orders(const std::string &sou
 uint64_t RuntimeContext::insert_basket_order(uint64_t basket_id, const std::string &source, const std::string account,
                                              longfist::enums::PriceType price_type,
                                              longfist::enums::PriceLevel price_level, double price_offset,
-                                             longfist::enums::BasketOrderVolumeMode volume_mode) {
+                                             int64_t volume) {
   auto account_location_uid = get_td_location_uid(source, account);
   auto insert_time = time::now_in_nano();
   if (not broker_client_.is_ready(account_location_uid)) {
@@ -205,7 +205,7 @@ uint64_t RuntimeContext::insert_basket_order(uint64_t basket_id, const std::stri
   input.price_type = price_type;
   input.price_level = price_level;
   input.price_offset = price_offset;
-  input.mode = volume_mode;
+  input.volume = volume;
   input.insert_time = insert_time;
   writer->close_data();
   basketorder_engine_.insert_basket_order(app_.now(), input);

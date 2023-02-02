@@ -19,11 +19,8 @@ void BasketOrderState::update(const longfist::types::Order &order) {
   auto &basket_order = state_data.data;
 
   // after supplementing order, the total volume may be changed, bigger than the original volume
-  if (basket_order.mode == BasketOrderVolumeMode::Static) {
-    basket_order.volume = std::max(basket_order.volume, get_merged_total_volume(orders));
-  } else {
-    basket_order.volume = get_total_volume(orders);
-  }
+  // for algo trade, the volume is hard to be cacluated, required to be set at init;
+  basket_order.volume = std::max(basket_order.volume, get_merged_total_volume(orders));
   basket_order.volume_left = basket_order.volume - get_total_traded_volume(orders);
   auto is_all_order_end_val = is_all_order_end(orders);
   auto is_all_order_filled_val = basket_order.volume_left == 0;
