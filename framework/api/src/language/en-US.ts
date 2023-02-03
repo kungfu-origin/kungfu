@@ -139,6 +139,9 @@ export default {
     close_today: 'CloseToday',
     close_yesterday: 'CloseYest',
 
+    by_quantity: 'ByQuantity',
+    by_proportion: 'ByProportion',
+
     buy: 'Buy',
     sell: 'Sell',
     lock: 'Lock',
