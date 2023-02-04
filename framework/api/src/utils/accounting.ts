@@ -95,7 +95,7 @@ class StockAccountingUsage extends BaseAccountingUsage {
     instrumentForAccounting: KungfuApi.InstrumentForAccounting,
   ) {
     if (!instrumentForAccounting) return null;
-    console.log('stock');
+
     const { instrumentId, exchangeId } = instrumentForAccounting;
     return calcTradeAmountOnlyWithExchangeRate(
       instrumentForAccounting,
@@ -133,7 +133,6 @@ class FutureAccountingUsage extends BaseAccountingUsage {
     instrumentForAccounting: KungfuApi.InstrumentForAccounting,
   ) {
     if (!instrumentForAccounting) return null;
-    console.log('future');
 
     const { price, volume, direction, instrumentId, exchangeId } =
       instrumentForAccounting;
