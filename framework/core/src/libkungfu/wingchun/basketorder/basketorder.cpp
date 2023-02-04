@@ -13,64 +13,64 @@ BasketOrderState::BasketOrderState(uint32_t source, uint32_t dest, int64_t trigg
                                    const longfist::types::BasketOrder &basket_order)
     : state_data(state<BasketOrder>(source, dest, trigger_time, basket_order)){};
 
-void BasketOrderState::update_success_ordered_volume(const longfist::types::Order &order, int32_t instrument_key) {
+void BasketOrderState::update_success_ordered_volume(const longfist::types::Order &order) {
+  int32_t instrument_key = hash_instrument(order);
+  auto success_ordered_volume = get_success_ordered_volume(order);
+  bool is_final = is_final_status(order.status);
 
-  bool is_new_order = (orders.find(order.order_id) == orders.end());
-  int64_t success_ordered_volume;
-  auto it = success_ordered_volume_map.find(instrument_key);
-  if (it != success_ordered_volume_map.end()) {
-    success_ordered_volume = it->second;
-  } else {
-    success_ordered_volume = 0;
-  }
-  if (is_new_order) {
-    if (order.status == OrderStatus::Error) {
-      // do nothing
-    } else if (order.status == OrderStatus::PartialFilledNotActive || order.status == OrderStatus::Cancelled) {
+  if (orders.find(order.order_id) == orders.end()) {
+    if (is_final) {
       success_ordered_volume += order.volume - order.volume_left;
     } else {
       success_ordered_volume += order.volume;
     }
-  } else {
-    if (order.status == OrderStatus::Error || order.status == OrderStatus::PartialFilledNotActive ||
-        order.status == OrderStatus::Cancelled) {
-      success_ordered_volume -= order.volume_left;
-    }
+  } else if (is_final) {
+    success_ordered_volume -= order.volume_left;
   }
+
   success_ordered_volume_map.insert_or_assign(instrument_key, success_ordered_volume);
 }
 
-void BasketOrderState::update(const longfist::types::Order &order) {
-  int32_t instrument_key = hash_instrument(order.exchange_id, order.instrument_id);
-  auto direction = get_direction(order.instrument_type, order.side, order.offset);
-  if (direction == Direction::Short) {
-    instrument_key = instrument_key * (-1);
+void BasketOrderState::update_ordered_volume(const longfist::types::Order &order) {
+  if (orders.find(order.order_id) != orders.end()) {
+    return;
   }
-  auto &basket_order = state_data.data;
-  int64_t total_volume = 0;
-  // if it is a new order
-  if (orders.find(order.order_id) == orders.end()) {
-    int64_t ordered_volume = 0;
-    auto it = success_ordered_volume_map.find(instrument_key);
-    if (it != success_ordered_volume_map.end()) {
-      ordered_volume = it->second;
-    } else {
-      ordered_volume = 0;
-    }
-    ordered_volume += order.volume;
-    ordered_volume_map.insert_or_assign(instrument_key, ordered_volume);
-    for (auto &iter : ordered_volume_map) {
-      total_volume += iter.second;
-    }
-  } else {
-    total_volume = basket_order.volume;
-  }
-  update_success_ordered_volume(order, instrument_key);
-  orders.insert_or_assign(order.order_id, order);
 
-  // after supplementing order, the total volume may be changed, bigger than the original volume
-  // for algo trade, the volume is hard to be cacluated, required to be set at init;
-  basket_order.volume = total_volume;
+  int32_t instrument_key = hash_instrument(order);
+  int64_t ordered_volume = get_success_ordered_volume(order);
+  ordered_volume += order.volume;
+  ordered_volume_map.insert_or_assign(instrument_key, ordered_volume);
+}
+
+int64_t BasketOrderState::get_success_ordered_volume(const longfist::types::Order &order) {
+  int32_t instrument_key = hash_instrument(order);
+  return success_ordered_volume_map.find(instrument_key) != success_ordered_volume_map.end()
+             ? success_ordered_volume_map.at(instrument_key)
+             : 0;
+}
+
+int64_t BasketOrderState::get_total_volume(const longfist::types::Order &order) {
+  int32_t instrument_key = hash_instrument(order);
+  auto &basket_order = state_data.data;
+
+  // if it is a new order
+  if (orders.find(order.order_id) != orders.end()) {
+    return basket_order.volume;
+  }
+
+  int64_t total_volume = 0;
+  for (auto &iter : ordered_volume_map) {
+    total_volume += iter.second;
+  }
+  return total_volume;
+}
+
+void BasketOrderState::update(const longfist::types::Order &order) {
+  auto &basket_order = state_data.data;
+  update_ordered_volume(order);
+  basket_order.volume = get_total_volume(order);
+  update_success_ordered_volume(order);
+  orders.insert_or_assign(order.order_id, order);
   basket_order.volume_left = basket_order.volume - get_total_traded_volume(orders);
   auto is_all_order_end_val = is_all_order_end(orders);
   auto is_all_order_filled_val = basket_order.volume_left == 0;

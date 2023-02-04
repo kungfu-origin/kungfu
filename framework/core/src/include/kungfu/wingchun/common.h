@@ -495,6 +495,13 @@ inline uint32_t hash_instrument(const char *exchange_id, const char *instrument_
   return yijinjing::util::hash_str_32(instrument_id) ^ yijinjing::util::hash_str_32(exchange_id);
 }
 
+inline int32_t hash_instrument(const longfist::types::Order &order) {
+  int32_t flag =
+      get_direction(order.instrument_type, order.side, order.offset) == longfist::enums::Direction::Short ? -1 : 1;
+  int32_t instrument_key = hash_instrument(order.exchange_id, order.instrument_id) * flag;
+  return instrument_key;
+}
+
 inline uint32_t hash_basket_instrument(uint32_t basket_uid, const char *exchange_id, const char *instrument_id) {
   return basket_uid ^ yijinjing::util::hash_str_32(instrument_id) ^ yijinjing::util::hash_str_32(exchange_id);
 }

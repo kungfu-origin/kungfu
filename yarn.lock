@@ -1259,6 +1259,22 @@
     "@jridgewell/resolve-uri" "3.1.0"
     "@jridgewell/sourcemap-codec" "1.4.14"
 
+"@kungfu-trader/kfx-task-basket-twap@~1.0.6-0":
+  version "1.0.6-alpha.2"
+  resolved "https://npm.pkg.github.com/download/@kungfu-trader/kfx-task-basket-twap/1.0.6-alpha.2/241e4272c143b1a21e818d25a1f575fabe135f29#241e4272c143b1a21e818d25a1f575fabe135f29"
+  integrity sha512-ym9PTn1rkhZwTRLfFs9fgnGNaOl9lc/iRGB3Qvk/yogLk2Mdl9BaCQq3GYF4oAeix3e9PnYKEAESW5tPpYgwpw==
+  dependencies:
+    "@kungfu-trader/kungfu-core" "~2.4.0 || ~2.4.45-0"
+
+"@kungfu-trader/kfx-ui-basket-trade@~1.0.0-0":
+  version "1.0.0-alpha.6"
+  resolved "https://npm.pkg.github.com/download/@kungfu-trader/kfx-ui-basket-trade/1.0.0-alpha.6/e921000650590fff8508941c49746870bd06964f#e921000650590fff8508941c49746870bd06964f"
+  integrity sha512-Jf4oN+wXNXVujoihUe/aErwsbdru2aATz9pcxqY79hUJZdQzc/WJ3myKRRjHzx54GoT5IOsFYwOiuKg1GCGRBA==
+  dependencies:
+    "@kungfu-trader/kungfu-app" "~2.4.45-0"
+    "@kungfu-trader/kungfu-core" "~2.4.45-0"
+    "@kungfu-trader/kungfu-js-api" "~2.4.45-0"
+
 "@kungfu-trader/libnode@16.15.0":
   version "16.15.0"
   resolved "https://npm.pkg.github.com/download/@kungfu-trader/libnode/16.15.0/42c00ca0239b32034459993d917b0a29bb676b71#42c00ca0239b32034459993d917b0a29bb676b71"
