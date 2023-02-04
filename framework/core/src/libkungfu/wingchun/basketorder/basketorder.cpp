@@ -67,9 +67,11 @@ int64_t BasketOrderState::get_total_volume(const longfist::types::Order &order) 
 
 void BasketOrderState::update(const longfist::types::Order &order) {
   auto &basket_order = state_data.data;
+
   update_ordered_volume(order);
-  basket_order.volume = get_total_volume(order);
+  basket_order.volume = (std::max)(basket_order.volume, get_total_volume(order));
   update_success_ordered_volume(order);
+
   orders.insert_or_assign(order.order_id, order);
   basket_order.volume_left = basket_order.volume - get_total_traded_volume(orders);
   auto is_all_order_end_val = is_all_order_end(orders);
