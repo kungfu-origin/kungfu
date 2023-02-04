@@ -99,13 +99,17 @@ export default {
   },
 
   settingsFormConfig: {
-    add_csv: 'Add Csv',
-    add_csv_desc: "csv headers are 'instrument'_id and 'exchange_id'",
+    keyword: 'Keyword',
+    add_csv: 'Import Csv',
+    csv_template: 'Download Csv Template',
+    add_csv_desc: 'csv headers are {header}',
     clear: 'Clear',
   },
 
   tradingConfig: {
     unknown: 'Unknown',
+    quantity: 'Quantity',
+    proportion: 'Proportion',
     default: 'Default',
     order_task: 'Trade',
 
@@ -134,6 +138,9 @@ export default {
     close: 'Close',
     close_today: 'CloseToday',
     close_yesterday: 'CloseYest',
+
+    by_quantity: 'ByQuantity',
+    by_proportion: 'ByProportion',
 
     buy: 'Buy',
     sell: 'Sell',
@@ -254,6 +261,7 @@ export default {
     price_type: 'Price Type',
     side: 'Side',
     offset: 'Offset',
+    direction: 'Direction',
     limit_price: 'LimitPrice',
     algorithm: 'Algorithm',
 

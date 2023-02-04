@@ -188,14 +188,14 @@ function handleAddCommission() {
                 <div class="commission-setting-item">
                   <a-input
                     class="value product-id"
-                    v-model:value="item.product_id"
+                    v-model:value="item.data.product_id"
                     :placeholder="$t('globalSettingConfig.varieties')"
                   ></a-input>
                 </div>
                 <div class="commission-setting-item">
                   <a-select
                     class="value exchange-id"
-                    v-model:value="item.exchange_id"
+                    v-model:value="item.data.exchange_id"
                     :placeholder="$t('globalSettingConfig.exchange_id')"
                   >
                     <a-select-option
@@ -208,7 +208,7 @@ function handleAddCommission() {
                   </a-select>
                 </div>
                 <div class="commission-setting-item">
-                  <a-select class="value" v-model:value="item.mode">
+                  <a-select class="value" v-model:value="item.data.mode">
                     <a-select-option
                       v-for="key in Object.keys(CommissionMode)"
                       :key="key"
@@ -226,7 +226,7 @@ function handleAddCommission() {
                     class="value"
                     :precision="8"
                     step="0.00000001"
-                    v-model:value="item.open_ratio"
+                    v-model:value="item.data.open_ratio"
                   ></a-input-number>
                 </div>
                 <div class="commission-setting-item">
@@ -237,7 +237,7 @@ function handleAddCommission() {
                     class="value"
                     :precision="8"
                     step="0.00000001"
-                    v-model:value="item.close_ratio"
+                    v-model:value="item.data.close_ratio"
                   ></a-input-number>
                 </div>
                 <div class="commission-setting-item">
@@ -248,7 +248,7 @@ function handleAddCommission() {
                     class="value"
                     :precision="8"
                     step="0.00000001"
-                    v-model:value="item.close_today_ratio"
+                    v-model:value="item.data.close_today_ratio"
                   ></a-input-number>
                 </div>
                 <div class="commission-setting-item">
@@ -257,14 +257,14 @@ function handleAddCommission() {
                     class="value"
                     :precision="8"
                     step="0.00000001"
-                    v-model:value="item.min_commission"
+                    v-model:value="item.data.min_commission"
                   ></a-input-number>
                 </div>
                 <div class="commission-setting-item">
                   <DeleteOutlined
                     class="kf-hover"
                     style="font-size: 14px"
-                    @click="handleRemoveCommission(item)"
+                    @click="handleRemoveCommission(item.data)"
                   />
                 </div>
               </div>

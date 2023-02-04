@@ -135,11 +135,11 @@ protected:
 
   void register_channel(int64_t trigger_time, const longfist::types::Channel &channel);
 
-  void deregister_channel(uint32_t source_location_uid);
+  void deregister_channel(uint32_t source_id);
 
   void register_band(int64_t trigger_time, const longfist::types::Band &band);
 
-  void deregister_band(uint32_t source_location_uid);
+  void deregister_band(uint32_t source_id);
 
   void require_read_from(int64_t trigger_time, uint32_t dest_id, uint32_t source_id, int64_t from_time);
 

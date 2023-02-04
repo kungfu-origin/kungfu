@@ -118,6 +118,7 @@ function handleMakeOrder() {
         offset: +(offset !== undefined ? offset : +side === 0 ? 0 : 1),
         hedge_flag: HedgeFlagEnum.Speculation,
         is_swap: !!is_swap,
+        parent_id: 0n,
       };
 
       const blockMessage: KungfuApi.BlockMessage = {

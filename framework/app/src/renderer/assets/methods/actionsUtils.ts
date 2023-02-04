@@ -22,6 +22,7 @@ import {
   SideEnum,
   StrategyExtTypes,
   OrderInputKeyEnum,
+  LedgerCategoryEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
   getKfCategoryData,
@@ -45,6 +46,7 @@ import {
   isT0,
   getTradingDataSortKey,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import { BasketVolumeType } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import { writeCSV } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import {
   Pm2ProcessStatusData,
@@ -54,7 +56,6 @@ import { message, Modal } from 'ant-design-vue';
 import path from 'path';
 import { Proc } from 'pm2';
 import {
-  ComponentInternalInstance,
   computed,
   ComputedRef,
   getCurrentInstance,
@@ -90,7 +91,7 @@ import { messagePrompt } from '@kungfu-trader/kungfu-app/src/renderer/assets/met
 import sound from 'sound-play';
 import { KUNGFU_RESOURCES_DIR } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 import { RuleObject } from 'ant-design-vue/lib/form';
-import { TradeAmountUsageMap } from './accounting';
+import { TradeAccountingUsageMap } from '@kungfu-trader/kungfu-js-api/utils/accounting';
 
 const { t } = VueI18n.global;
 const { success, error } = messagePrompt();
@@ -587,7 +588,7 @@ export const showTradingDataDetail = (
 
 export const useInstruments = (): {
   instruments: Ref<KungfuApi.InstrumentResolved[]>;
-  subscribedInstruments: Ref<KungfuApi.InstrumentResolved[]>;
+  subscribedInstrumentsByLocal: Ref<KungfuApi.InstrumentResolved[]>;
   subscribeAllInstrumentByMdProcessId(
     processId: string,
     processStatus: Pm2ProcessStatusData,
@@ -626,15 +627,17 @@ export const useInstruments = (): {
     callback?: (value: string) => void,
   ) => void;
 } => {
-  const { instruments, subscribedInstruments } = storeToRefs(useGlobalStore());
+  const { instruments, subscribedInstrumentsByLocal } = storeToRefs(
+    useGlobalStore(),
+  );
 
   const subscribeAllInstrumentByMdProcessId = async (
     processId: string,
     processStatus: Pm2ProcessStatusData,
     appStates: Record<string, BrokerStateStatusTypes>,
     mdExtTypeMap: Record<string, InstrumentTypes>,
-    instrumentsForSubscribe: KungfuApi.InstrumentResolved[],
-  ): Promise<Array<KungfuApi.InstrumentResolved>> => {
+    instrumentsForSubscribe: KungfuApi.InstrumentForSub[],
+  ): Promise<Array<KungfuApi.InstrumentForSub>> => {
     if (isBrokerStateReady(appStates[processId])) {
       if (processStatus[processId] === 'online') {
         if (processId.indexOf('md_') === 0) {
@@ -674,8 +677,8 @@ export const useInstruments = (): {
     processStatus: Pm2ProcessStatusData,
     appStates: Record<string, BrokerStateStatusTypes>,
     mdExtTypeMap: Record<string, InstrumentTypes>,
-    instrumentsForSubscribe: KungfuApi.InstrumentResolved[],
-  ): Promise<Array<KungfuApi.InstrumentResolved>> => {
+    instrumentsForSubscribe: KungfuApi.InstrumentForSub[],
+  ): Promise<Array<KungfuApi.InstrumentForSub>> => {
     const subscribedSuccessInstruments = await Promise.all(
       Object.keys(appStates || {}).map((processId) =>
         subscribeAllInstrumentByMdProcessId(
@@ -773,7 +776,7 @@ export const useInstruments = (): {
 
   return {
     instruments,
-    subscribedInstruments,
+    subscribedInstrumentsByLocal,
     subscribeAllInstrumentByMdProcessId,
     subscribeAllInstrumentByAppStates,
 
@@ -915,18 +918,22 @@ export const usePreStartAndQuitApp = (): {
 
 export const useSubscibeInstrumentAtEntry = (
   watcher: KungfuApi.Watcher | null,
+  customInstrumentsForSubGetter?: (
+    watcher: KungfuApi.Watcher,
+  ) => KungfuApi.InstrumentForSub[],
 ): void => {
   const { currentGlobalKfLocation } = useCurrentGlobalKfLocation(watcher);
   const { appStates, processStatusData } = useProcessStatusDetailData();
   const { mdExtTypeMap } = useExtConfigsRelated();
-  const { subscribedInstruments } = useInstruments();
+  const { subscribedInstrumentsByLocal } = useInstruments();
   const { subscribeAllInstrumentByAppStates } = useInstruments();
+  const { curSubscribedInstruments, setCurSubscribedInstruments } =
+    useGlobalStore();
 
   const app = getCurrentInstance();
-  const subscribedInstrumentsForPos: Record<string, boolean> = {};
   const SUBSCRIBE_INSTRUMENTS_LIMIT = 50;
 
-  const getCurrentPositions = (watcher: KungfuApi.Watcher) => {
+  const getCurrentPositionsForSub = (watcher: KungfuApi.Watcher) => {
     if (!currentGlobalKfLocation.value) return [];
 
     const positions = globalThis.HookKeeper.getHooks().dealTradingData.trigger(
@@ -939,44 +946,48 @@ export const useSubscibeInstrumentAtEntry = (
     return positions
       .reverse()
       .slice(0, SUBSCRIBE_INSTRUMENTS_LIMIT)
-      .map(
-        (item: KungfuApi.Position): KungfuApi.InstrumentForSub => ({
-          uidKey: item.uid_key,
+      .map((item: KungfuApi.Position): KungfuApi.InstrumentForSub => {
+        const uidKey = hashInstrumentUKey(item.instrument_id, item.exchange_id);
+        return {
+          uidKey,
           exchangeId: item.exchange_id,
           instrumentId: item.instrument_id,
           instrumentType: item.instrument_type,
           instrumentName: '',
-          ukey: item.uid_key,
-          id: item.uid_key,
-        }),
-      );
+          ukey: uidKey,
+          id: uidKey,
+        };
+      });
   };
 
   const subscribeInstrumentsByCurPosAndProcessIds = (
-    positionsForSub: KungfuApi.InstrumentForSub[],
+    instrumentsForSub: KungfuApi.InstrumentForSub[],
     filterByCached = true,
   ) => {
-    const positionsForSubResolved = positionsForSub.filter((item) => {
+    const instrumentsForSubResolved = instrumentsForSub.filter((item) => {
       if (!filterByCached) return true;
-      if (filterByCached && !subscribedInstrumentsForPos[item.uidKey]) {
+      if (filterByCached && !curSubscribedInstruments[item.uidKey]) {
         return true;
       }
       return false;
     });
 
-    if (!positionsForSubResolved.length) return;
+    if (!instrumentsForSubResolved.length) return;
 
     subscribeAllInstrumentByAppStates(
       processStatusData.value,
       appStates.value,
       mdExtTypeMap.value,
-      positionsForSubResolved,
+      instrumentsForSubResolved,
     ).then((subscribedSuccessInstruments) => {
-      (subscribedSuccessInstruments as KungfuApi.InstrumentForSub[]).forEach(
-        (item) => {
-          filterByCached && (subscribedInstrumentsForPos[item.uidKey] = true);
-        },
-      );
+      const subscribedInstrumentsMap = (
+        subscribedSuccessInstruments as KungfuApi.InstrumentForSub[]
+      ).reduce((subscribedInstruments, item) => {
+        subscribedInstruments[item.uidKey] = true;
+        return subscribedInstruments;
+      }, {} as Record<string, boolean>);
+
+      setCurSubscribedInstruments(subscribedInstrumentsMap);
     });
   };
 
@@ -985,8 +996,10 @@ export const useSubscibeInstrumentAtEntry = (
       const subscription = app.proxy.$tradingDataSubject
         .pipe(throttleTime(3000))
         .subscribe((watcher: KungfuApi.Watcher) => {
-          const positionsForSub = getCurrentPositions(watcher);
-          subscribeInstrumentsByCurPosAndProcessIds(positionsForSub);
+          const instrumentsForSub = customInstrumentsForSubGetter
+            ? customInstrumentsForSubGetter(watcher)
+            : getCurrentPositionsForSub(watcher);
+          subscribeInstrumentsByCurPosAndProcessIds(instrumentsForSub);
         });
 
       onBeforeUnmount(() => {
@@ -1006,15 +1019,17 @@ export const useSubscibeInstrumentAtEntry = (
         processStatusData.value[processId] === 'online' &&
         processId.includes('md_')
       ) {
-        const positionsForSub = [
-          ...subscribedInstruments.value.map((instrument) => ({
-            ...instrument,
-            uidKey: instrument.ukey,
-          })),
-          ...getCurrentPositions(window.watcher),
-        ];
+        const instrumentsForSub = customInstrumentsForSubGetter
+          ? customInstrumentsForSubGetter(window.watcher)
+          : [
+              ...subscribedInstrumentsByLocal.value.map((instrument) => ({
+                ...instrument,
+                uidKey: instrument.ukey,
+              })),
+              ...getCurrentPositionsForSub(window.watcher),
+            ];
 
-        subscribeInstrumentsByCurPosAndProcessIds(positionsForSub, false);
+        subscribeInstrumentsByCurPosAndProcessIds(instrumentsForSub, false);
       }
     });
   });
@@ -1059,6 +1074,9 @@ export const useQuote = (): {
   getPreClosePrice(
     instrument: KungfuApi.InstrumentResolved | undefined,
   ): string;
+  isInstrumentUpLimit: (instrument: KungfuApi.InstrumentResolved) => boolean;
+  isInstrumentLowLimit: (instrument: KungfuApi.InstrumentResolved) => boolean;
+  isInstrumentSuspension: (instrument: KungfuApi.InstrumentResolved) => boolean;
 } => {
   const quotes = ref<Record<string, KungfuApi.Quote>>({});
   const app = getCurrentInstance();
@@ -1124,11 +1142,68 @@ export const useQuote = (): {
     return pre_close_price.toFixed(2);
   };
 
+  const isInstrumentUpLimit = (instrument: KungfuApi.InstrumentResolved) => {
+    const quote = getQuoteByInstrument(instrument);
+
+    if (!quote) {
+      return false;
+    }
+
+    const { last_price, upper_limit_price, pre_close_price } = quote;
+
+    if (!last_price || !upper_limit_price || !pre_close_price) return false;
+
+    return last_price > upper_limit_price || last_price > pre_close_price * 1.1;
+  };
+
+  const isInstrumentLowLimit = (instrument: KungfuApi.InstrumentResolved) => {
+    const quote = getQuoteByInstrument(instrument);
+
+    if (!quote) {
+      return false;
+    }
+
+    const { last_price, lower_limit_price, pre_close_price } = quote;
+
+    if (!last_price || !lower_limit_price || !pre_close_price) return false;
+
+    return last_price < lower_limit_price || last_price < pre_close_price * 0.9;
+  };
+
+  const isInstrumentSuspension = (instrument: KungfuApi.InstrumentResolved) => {
+    const quote = getQuoteByInstrument(instrument);
+
+    if (!quote) {
+      return false;
+    }
+
+    const { exchangeId } = instrument;
+    const { trading_phase_code } = quote;
+
+    if (!trading_phase_code) return false;
+
+    switch (exchangeId) {
+      case 'SSE':
+        return trading_phase_code[0] === 'P' || trading_phase_code[0] === 'N';
+      case 'SZE':
+        return (
+          trading_phase_code[0] === 'H' ||
+          trading_phase_code[0] === 'V' ||
+          trading_phase_code[1] === '1'
+        );
+      default:
+        return false;
+    }
+  };
+
   return {
     quotes,
     getQuoteByInstrument,
     getLastPricePercent,
     getPreClosePrice,
+    isInstrumentUpLimit,
+    isInstrumentLowLimit,
+    isInstrumentSuspension,
   };
 };
 
@@ -1192,6 +1267,41 @@ export const useDealInstruments = (): void => {
       useGlobalStore().setInstruments(instrumentsValue);
       useGlobalStore().setInstrumentsMap(instruments);
     }
+  };
+};
+
+export const useActiveInstruments = () => {
+  const { instrumentsMap } = useGlobalStore();
+
+  const getInstrumentByIds = (
+    instrumentId: string,
+    exchangeId: string,
+    forceConvert = false,
+  ) => {
+    const ukey = hashInstrumentUKey(instrumentId, exchangeId);
+    const instrumentResolved = instrumentsMap[ukey];
+
+    if (instrumentResolved) {
+      return instrumentResolved;
+    } else {
+      return forceConvert
+        ? {
+            instrumentId: instrumentId,
+            exchangeId: exchangeId,
+            instrumentType: window.watcher.getInstrumentType(
+              exchangeId,
+              instrumentId,
+            ),
+            ukey,
+            instrumentName: '',
+            id: `${instrumentId}_${''}_${exchangeId}`.toLowerCase(),
+          }
+        : null;
+    }
+  };
+
+  return {
+    getInstrumentByIds,
   };
 };
 
@@ -1321,6 +1431,7 @@ export const useCurrentGlobalKfLocation = (
       | KungfuApi.KfConfig
       | KungfuApi.KfExtraLocation,
   ): void;
+  resetCurrentGlobalKfLocation(): void;
   dealRowClassName(
     kfConfig:
       | KungfuApi.KfLocation
@@ -1348,6 +1459,11 @@ export const useCurrentGlobalKfLocation = (
       | KungfuApi.KfExtraLocation,
   ) => {
     useGlobalStore().setCurrentGlobalKfLocation(kfLocation);
+  };
+
+  const resetCurrentGlobalKfLocation = () => {
+    useGlobalStore().setCurrentGlobalKfLocation(null);
+    useGlobalStore().setDefaultCurrentGlobalKfLocation();
   };
 
   const dealRowClassName = (
@@ -1418,6 +1534,7 @@ export const useCurrentGlobalKfLocation = (
     currentCategoryData,
     currentUID,
     setCurrentGlobalKfLocation,
+    resetCurrentGlobalKfLocation,
     dealRowClassName,
     customRow,
     getCurrentGlobalKfLocationId,
@@ -1602,23 +1719,72 @@ export const playSound = (type: 'ding' | 'warn' = 'ding'): void => {
   }
 };
 
-export const useCurrentPositionList = (
-  app: ComponentInternalInstance | null,
-) => {
+export const useCurrentPositionList = () => {
+  const app = getCurrentInstance();
+  type PosStat = Record<string, KungfuApi.Position>;
+
   const { currentGlobalKfLocation } = useCurrentGlobalKfLocation(
     window.watcher,
   );
   const currentPositionList = ref<KungfuApi.PositionResolved[]>([]);
+  const allPositionMap = ref<PosStat>({});
+
+  function buildPrositionMapKey(
+    exchangeId: string,
+    instrumentId: string,
+    direction: DirectionEnum,
+  ) {
+    return `${exchangeId}_${instrumentId}_${direction}`;
+  }
+
+  function buildGlobalPositions(positions: KungfuApi.Position[]): PosStat {
+    return positions.reduce((posStat, pos) => {
+      const id = buildPrositionMapKey(
+        pos.exchange_id,
+        pos.instrument_id,
+        pos.direction,
+      );
+      if (!posStat[id]) {
+        posStat[id] = pos;
+      } else {
+        const prePosStat = posStat[id];
+        const { avg_open_price, volume, yesterday_volume, unrealized_pnl } =
+          prePosStat;
+        posStat[id] = {
+          ...prePosStat,
+          uid_key: pos.uid_key,
+          yesterday_volume: yesterday_volume + pos.yesterday_volume,
+          volume: volume + pos.volume,
+
+          avg_open_price:
+            (avg_open_price * Number(volume) +
+              pos.avg_open_price * Number(pos.volume)) /
+            (Number(pos.volume) + Number(pos.volume)),
+          unrealized_pnl: unrealized_pnl + pos.unrealized_pnl,
+        };
+      }
+      return posStat;
+    }, {} as PosStat);
+  }
 
   onMounted(() => {
     if (app?.proxy) {
       const subscription = app.proxy.$tradingDataSubject.subscribe(
         (watcher: KungfuApi.Watcher) => {
+          const allPositions = watcher.ledger.Position.nofilter(
+            'volume',
+            BigInt(0),
+          )
+            .filter('ledger_category', LedgerCategoryEnum.td)
+            .list();
+
+          allPositionMap.value = toRaw(buildGlobalPositions(allPositions));
+
           if (currentGlobalKfLocation.value === null) {
             return;
           }
 
-          const positions =
+          const currentPositions =
             globalThis.HookKeeper.getHooks().dealTradingData.trigger(
               window.watcher,
               currentGlobalKfLocation.value,
@@ -1627,7 +1793,9 @@ export const useCurrentPositionList = (
             ) as KungfuApi.Position[];
 
           currentPositionList.value = toRaw(
-            positions.reverse().map((item) => dealPosition(watcher, item)),
+            currentPositions
+              .reverse()
+              .map((item) => dealPosition(watcher, item)),
           );
         },
       );
@@ -1639,19 +1807,19 @@ export const useCurrentPositionList = (
   });
 
   return {
+    allPositionMap,
+    buildPrositionMapKey,
     currentPositionList,
   };
 };
 
 export const useMakeOrderInfo = (
-  app: ComponentInternalInstance | null,
   formState: Ref<Record<string, KungfuApi.KfConfigValue>>,
 ) => {
   const { currentGlobalKfLocation } = useCurrentGlobalKfLocation(
     window.watcher,
   );
-  const { currentPositionList } = useCurrentPositionList(app);
-
+  const { currentPositionList } = useCurrentPositionList();
   const { getAssetsByKfConfig } = useAssets();
 
   const instrumentResolved = computed(() => {
@@ -1823,9 +1991,9 @@ export const useMakeOrderInfo = (
     const { price_type, limit_price } = formState.value;
 
     if (price_type === PriceTypeEnum.Limit) {
-      return limit_price;
+      return limit_price as number;
     } else if (price_type === PriceTypeEnum.Market) {
-      return currentPosition.value?.last_price;
+      return currentPosition.value?.last_price ?? null;
     }
 
     return null;
@@ -1835,38 +2003,22 @@ export const useMakeOrderInfo = (
     const { volume } = formState.value;
 
     if (instrumentResolved.value) {
-      if (
-        instrumentResolved.value.instrumentType === InstrumentTypeEnum.future
-      ) {
-        if (currentFormDirection.value !== null) {
-          return dealTradeAmount(
-            TradeAmountUsageMap[InstrumentTypeEnum.future].getTradeAmount(
-              currentPrice.value,
-              volume,
-              currentFormDirection.value,
-              instrumentResolved.value,
-            ),
-          );
-        }
-      } else if (
-        instrumentResolved.value.instrumentType === InstrumentTypeEnum.stock
-      ) {
+      const instrumentForAccounting: KungfuApi.InstrumentForAccounting = {
+        ...instrumentResolved.value,
+        price: currentPrice.value ?? 0,
+        volume,
+        direction: currentFormDirection.value || DirectionEnum.Long,
+      };
+      if (instrumentResolved.value.instrumentType in TradeAccountingUsageMap) {
         return dealTradeAmount(
-          TradeAmountUsageMap[InstrumentTypeEnum.stock].getTradeAmount(
-            currentPrice.value,
-            volume,
-            instrumentResolved.value,
-          ),
+          TradeAccountingUsageMap[
+            instrumentResolved.value.instrumentType as InstrumentTypeEnum
+          ].getTradeAmount(window.watcher, instrumentForAccounting),
         );
       }
     }
 
-    return dealTradeAmount(
-      TradeAmountUsageMap[InstrumentTypeEnum.unknown].getTradeAmount(
-        currentPrice.value,
-        volume,
-      ),
-    );
+    return dealTradeAmount((currentPrice.value ?? 0) * volume);
   });
 
   const currentResidueMoney = computed(() => {
@@ -2106,4 +2258,62 @@ export const useMakeOrderSubscribe = (
       });
     }
   });
+};
+
+export const useBasket = () => {
+  const app = getCurrentInstance();
+  const store = useGlobalStore();
+
+  const basketList = ref<KungfuApi.Basket[]>([]);
+  const basketInstrumentList = ref<KungfuApi.BasketInstrument[]>([]);
+
+  onMounted(() => {
+    if (app?.proxy) {
+      const subscription = app.proxy.$tradingDataSubject.subscribe(
+        (watcher: KungfuApi.Watcher) => {
+          store.setBasketList();
+          store.setBasketInstrumentList();
+
+          // const basketInWatcher = watcher.ledger.Basket.sort('id')
+          // const basketInstrumentInWatcher = watcher.ledger.BasketInstrument.list()
+          watcher;
+          basketList.value = store.basketList;
+          basketInstrumentList.value = store.basketInstrumentList;
+        },
+      );
+
+      onBeforeUnmount(() => {
+        subscription.unsubscribe();
+      });
+    }
+  });
+
+  function buildBasketOptionLabel(basket: KungfuApi.Basket) {
+    return `${basket.name} ${BasketVolumeType[basket.volume_type].name}`;
+  }
+
+  function buildBasketOptionValue(basket: KungfuApi.Basket) {
+    return `${basket.id}_${basket.name}_${basket.volume_type}_${basket.total_amount}`;
+  }
+
+  function parseBasketOptionValue(val: string): KungfuApi.Basket | null {
+    const res = val.split('_');
+    if (res.length !== 4) return null;
+    const [id, name, volume_type, total_amount] = res;
+
+    return {
+      id: Number(id),
+      name,
+      volume_type: Number(volume_type),
+      total_amount: BigInt(total_amount),
+    };
+  }
+
+  return {
+    basketList,
+    basketInstrumentList,
+    buildBasketOptionLabel,
+    buildBasketOptionValue,
+    parseBasketOptionValue,
+  };
 };

@@ -8,6 +8,7 @@
 #define WINGCHUN_CONTEXT_H
 
 #include <kungfu/longfist/longfist.h>
+#include <kungfu/wingchun/basketorder/basketorderengine.h>
 #include <kungfu/wingchun/book/bookkeeper.h>
 #include <kungfu/wingchun/broker/client.h>
 #include <kungfu/wingchun/strategy/strategy.h>
@@ -93,7 +94,7 @@ public:
                                 int64_t volume, longfist::enums::PriceType type, longfist::enums::Side side,
                                 longfist::enums::Offset offset,
                                 longfist::enums::HedgeFlag hedge_flag = HedgeFlag::Speculation, bool is_swap = false,
-                                uint64_t block_id = 0) = 0;
+                                uint64_t block_id = 0, uint64_t parent_id = 0) = 0;
 
   /**
    * Insert Batch Orders
@@ -127,6 +128,21 @@ public:
    */
   virtual std::vector<uint64_t> insert_array_orders(const std::string &source, const std::string &account,
                                                     std::vector<longfist::types::OrderInput> order_inputs) = 0;
+
+  /**
+   * Insert Basket Orders
+   * @param basket_id
+   * @param source
+   * @param account
+   * @param price_type
+   * @param price_level
+   * @param price_offset
+   * @param volume_mode
+   * @param total_volume
+   */
+  virtual uint64_t insert_basket_order(uint64_t basket_id, const std::string &source, const std::string account,
+                                       longfist::enums::PriceType price_type, longfist::enums::PriceLevel price_level,
+                                       double price_offset = 0, int64_t volume = 0) = 0;
 
   /**
    * query history order

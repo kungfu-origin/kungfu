@@ -14,6 +14,7 @@
 #include "io.h"
 #include "journal.h"
 #include "operators.h"
+#include <kungfu/wingchun/basketorder/basketorderengine.h>
 #include <kungfu/wingchun/book/bookkeeper.h>
 #include <kungfu/wingchun/broker/client.h>
 #include <kungfu/yijinjing/cache/runtime.h>
@@ -56,12 +57,6 @@ public:
 
   Napi::Value GetInstrumentType(const Napi::CallbackInfo &info);
 
-  Napi::Value GetConfig(const Napi::CallbackInfo &info);
-
-  Napi::Value GetHistory(const Napi::CallbackInfo &info);
-
-  Napi::Value GetCommission(const Napi::CallbackInfo &info);
-
   Napi::Value GetState(const Napi::CallbackInfo &info);
 
   Napi::Value GetLedger(const Napi::CallbackInfo &info);
@@ -89,6 +84,8 @@ public:
   Napi::Value IssueBlockMessage(const Napi::CallbackInfo &info);
 
   Napi::Value IssueOrder(const Napi::CallbackInfo &info);
+
+  Napi::Value IssueBasketOrder(const Napi::CallbackInfo &info);
 
   Napi::Value CancelOrder(const Napi::CallbackInfo &info);
 
@@ -119,12 +116,11 @@ private:
   bool uv_work_live_ = false;
   WatcherAutoClient broker_client_;
   wingchun::book::Bookkeeper bookkeeper_;
+  wingchun::basketorder::BasketOrderEngine basketorder_engine_;
   Napi::ObjectReference state_ref_;
   Napi::ObjectReference ledger_ref_;
   Napi::ObjectReference app_states_ref_;
-  Napi::ObjectReference history_ref_;
   Napi::ObjectReference config_ref_;
-  Napi::ObjectReference commission_ref_;
   Napi::ObjectReference strategy_states_ref_;
   serialize::JsUpdateState update_state;
   serialize::JsUpdateState update_ledger;
@@ -253,6 +249,18 @@ private:
     update(event->dest(), event->source());
   }
 
+  void UpdateBasketOrder(int64_t trigger_time, const longfist::types::Order &order) {
+    if (basketorder_engine_.has_basket_order_state(order.parent_id)) {
+      trading_bank_ << basketorder_engine_.get_basket_order(order.parent_id);
+    }
+  }
+
+  void UpdateBasketOrders() {
+    for (auto &pair : basketorder_engine_.get_all_basket_order_states()) {
+      trading_bank_ << pair.second->get_state();
+    }
+  }
+
   template <typename TradingData>
   std::enable_if_t<std::is_same_v<TradingData, longfist::types::OrderInput>> UpdateBook(uint32_t source, uint32_t dest,
                                                                                         const TradingData &data) {
@@ -262,17 +270,30 @@ private:
   }
 
   template <typename TradingData>
-  std::enable_if_t<not std::is_same_v<TradingData, longfist::types::OrderInput>>
+  std::enable_if_t<std::is_same_v<TradingData, longfist::types::BasketOrder>> UpdateBook(uint32_t source, uint32_t dest,
+                                                                                         const TradingData &data) {
+    basketorder_engine_.insert_basket_order(now(), data);
+    state<kungfu::longfist::types::BasketOrder> cache_state_basket_order(source, dest, now(), data);
+    trading_bank_ << cache_state_basket_order;
+  }
+
+  template <typename TradingData>
+  std::enable_if_t<not std::is_same_v<TradingData, longfist::types::OrderInput> and
+                   not std::is_same_v<TradingData, longfist::types::BasketOrder>>
   UpdateBook(uint32_t source, uint32_t dest, const TradingData &data) {}
+
+  uint64_t MakeInstructionUID(yijinjing::journal::writer_ptr &writer, uint32_t dest, uint32_t client_id = 0) {
+    uint64_t id_left = (uint64_t)(client_id xor dest) << 32u;
+    uint64_t id_right = (ID_TRANC & writer->current_frame_uid()) | PAGE_ID_MASK;
+    return id_left | id_right;
+  }
 
   template <typename Instruction, typename IdPtrType = uint64_t Instruction::*>
   uint64_t WriteInstruction(int64_t trigger_time, Instruction instruction, IdPtrType id_ptr,
                             const yijinjing::data::location_ptr &account_location,
                             const yijinjing::data::location_ptr &strategy_location) {
     auto account_writer = get_writer(account_location->uid);
-    uint64_t id_left = (uint64_t)(strategy_location->uid xor account_location->uid) << 32u;
-    uint64_t id_right = (ID_TRANC & account_writer->current_frame_uid()) | PAGE_ID_MASK;
-    instruction.*id_ptr = id_left | id_right;
+    instruction.*id_ptr = MakeInstructionUID(account_writer, account_location->uid, strategy_location->uid);
     account_writer->write_as(trigger_time, instruction, strategy_location->uid, account_location->uid);
     UpdateBook(strategy_location->uid, account_location->uid, instruction);
     return instruction.*id_ptr;
@@ -300,7 +321,7 @@ private:
   }
 
   template <typename Instruction, typename IdPtrType = uint64_t Instruction::*>
-  Napi::Value InteractWithTD(const Napi::CallbackInfo &info, IdPtrType id_ptr) {
+  Napi::Value InteractWithTD(const Napi::CallbackInfo &info, const Napi::Object &instruction_object, IdPtrType id_ptr) {
     try {
       using namespace kungfu::rx;
       using namespace kungfu::longfist::types;
@@ -315,12 +336,11 @@ private:
       auto trigger_time = time::now_in_nano();
       auto account_writer = get_writer(account_location->uid);
       auto master_cmd_writer = get_writer(get_master_commands_uid());
-      auto instruction_object = info[0].ToObject();
       Instruction instruction = {};
       serialize::JsGet{}(instruction_object, instruction);
 
       if (info.Length() == 2) {
-        instruction.*id_ptr = account_writer->current_frame_uid();
+        instruction.*id_ptr = MakeInstructionUID(account_writer, account_location->uid);
         account_writer->write(trigger_time, instruction);
         UpdateBook(get_home_uid(), account_location->uid, instruction);
         return Napi::BigInt::New(info.Env(), instruction.*id_ptr);

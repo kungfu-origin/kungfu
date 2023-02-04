@@ -159,14 +159,17 @@ void bind_strategy(pybind11::module &m) {
       .def("subscribe_all", &strategy::Context::subscribe_all, py::arg("source"),
            py::arg("market_type") = MarketType::All, py::arg("instrument_type") = SubscribeInstrumentType::All,
            py::arg("data_type") = SubscribeDataType::All)
-      .def("insert_order", &strategy::Context::insert_order, py::arg("symbol"), py::arg("exchange"), py::arg("source"),
-           py::arg("account"), py::arg("limit_price"), py::arg("volume"), py::arg("type"), py::arg("side"),
-           py::arg("offset") = Offset::Open, py::arg("hedge_flag") = HedgeFlag::Speculation, py::arg("is_swap") = false,
-           py::arg("block_id") = 0)
+      .def("insert_order", &strategy::Context::insert_order, py::arg("instrument_id"), py::arg("exchange"),
+           py::arg("source"), py::arg("account"), py::arg("limit_price"), py::arg("volume"), py::arg("type"),
+           py::arg("side"), py::arg("offset") = Offset::Open, py::arg("hedge_flag") = HedgeFlag::Speculation,
+           py::arg("is_swap") = false, py::arg("block_id") = 0, py::arg("parent_id") = 0)
       .def("insert_block_message", &strategy::Context::insert_block_message, py::arg("source"), py::arg("account"),
            py::arg("opponent_seat"), py::arg("match_number"), py::arg("is_specific") = false)
       .def("insert_batch_orders", &strategy::Context::insert_batch_orders)
       .def("insert_array_orders", &strategy::Context::insert_array_orders)
+      .def("insert_basket_order", &strategy::Context::insert_basket_order, py::arg("basket_id"), py::arg("source"),
+           py::arg("account"), py::arg("price_type") = PriceType::Limit, py::arg("price_level") = PriceLevel::Lastest,
+           py::arg("price_offset") = 0, py::arg("volume") = 0)
       .def("cancel_order", &strategy::Context::cancel_order)
       .def("req_history_order", &strategy::Context::req_history_order, py::arg("source"), py::arg("account"),
            py::arg("query_num") = 0)
@@ -181,6 +184,8 @@ void bind_strategy(pybind11::module &m) {
 
   py::class_<strategy::RuntimeContext, strategy::Context, strategy::RuntimeContext_ptr>(m, "RuntimeContext")
       .def_property_readonly("bookkeeper", &strategy::RuntimeContext::get_bookkeeper,
+                             py::return_value_policy::reference)
+      .def_property_readonly("basketorder_engine", &strategy::RuntimeContext::get_basketorder_engine,
                              py::return_value_policy::reference);
 
   py::class_<strategy::Strategy, PyStrategy, strategy::Strategy_ptr>(m, "Strategy")
@@ -195,6 +200,7 @@ void bind_strategy(pybind11::module &m) {
       .def("on_entrust", &strategy::Strategy::on_entrust)
       .def("on_transaction", &strategy::Strategy::on_transaction)
       .def("on_order", &strategy::Strategy::on_order)
+      .def("on_order_action_error", &strategy::Strategy::on_order_action_error)
       .def("on_trade", &strategy::Strategy::on_trade)
       .def("on_position_sync_reset", &strategy::Strategy::on_position_sync_reset)
       .def("on_asset_sync_reset", &strategy::Strategy::on_asset_sync_reset)
@@ -205,6 +211,5 @@ void bind_strategy(pybind11::module &m) {
       .def("on_history_trade", &strategy::Strategy::on_history_trade)
       .def("on_req_history_order_error", &strategy::Strategy::on_req_history_order_error)
       .def("on_req_history_trade_error", &strategy::Strategy::on_req_history_trade_error);
-  ;
 }
 } // namespace kungfu::wingchun::pybind

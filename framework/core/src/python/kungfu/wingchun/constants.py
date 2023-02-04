@@ -27,6 +27,7 @@ BsFlag = lf.enums.BsFlag
 OrderStatus = lf.enums.OrderStatus
 Direction = lf.enums.Direction
 PriceType = lf.enums.PriceType
+PriceLevel = lf.enums.PriceLevel
 VolumeCondition = lf.enums.VolumeCondition
 TimeCondition = lf.enums.TimeCondition
 OrderActionFlag = lf.enums.OrderActionFlag
@@ -38,6 +39,9 @@ SubscribeDataType = lf.enums.SubscribeDataType
 SubscribeInstrumentType = lf.enums.SubscribeInstrumentType
 StrategyState = lf.enums.StrategyState
 HistoryDataType = lf.enums.HistoryDataType
+
+BasketVolumeType = lf.enums.BasketVolumeType
+BasketType = lf.enums.BasketType
 
 AllFinalOrderStatus = [
     int(OrderStatus.Filled),

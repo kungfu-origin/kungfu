@@ -24,7 +24,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onBeforeUnmount, ref } from 'vue';
+import { defineComponent, onBeforeUnmount, ref, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 
 import KfRowColIter from '@kungfu-trader/kungfu-app/src/renderer/components/layout/KfRowColIter.vue';
@@ -51,7 +51,11 @@ export default defineComponent({
 
   setup() {
     const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
-    const { initBoardsMap } = useGlobalStore();
+    const {
+      initBoardsMap,
+      setCurrentGlobalKfLocation,
+      setDefaultCurrentGlobalKfLocation,
+    } = useGlobalStore();
     const { boardsMap } = storeToRefs(useGlobalStore());
 
     const dealDefaultBoardsHook =
@@ -88,6 +92,11 @@ export default defineComponent({
       addBoardModalVisible.value = true;
       addBoardTargetBoardId.value = 0;
     };
+
+    onMounted(() => {
+      setCurrentGlobalKfLocation(null);
+      setDefaultCurrentGlobalKfLocation();
+    });
 
     onBeforeUnmount(() => {
       subscription.unsubscribe();

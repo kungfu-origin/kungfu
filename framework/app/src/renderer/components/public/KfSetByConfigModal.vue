@@ -24,6 +24,8 @@ const props = withDefaults(
     visible: boolean;
     payload: KungfuApi.SetKfConfigPayload;
     width?: number;
+    labelCol?: number;
+    wrapperCol?: number;
     isPrimaryDisabled?: boolean;
     passPrimaryKeySpecialWordsVerify?: boolean;
     primaryKeyAvoidRepeatCompareExtra?: string;
@@ -33,6 +35,8 @@ const props = withDefaults(
     visible: false,
     payload: () => ({} as KungfuApi.SetKfConfigPayload),
     width: 520,
+    labelCol: 6,
+    wrapperCol: 14,
     isPrimaryDisabled: false,
     passPrimaryKeySpecialWordsVerify: false,
     primaryKeyAvoidRepeatCompareTarget: () => [],
@@ -66,9 +70,13 @@ const formState = ref<Record<string, KungfuApi.KfConfigValue>>(
 );
 
 const titleResolved = computed(() => {
-  return `${props.payload.type === 'add' ? t('add') : t('set')} ${
-    props.payload.title
-  }`;
+  if (props.payload.type === 'add') {
+    return `${t('add')} ${props.payload.title}`;
+  } else if (props.payload.type === 'update') {
+    return `${t('set')} ${props.payload.title}`;
+  }
+
+  return `${props.payload.title}`;
 });
 
 watch(formState.value, (val) => {
@@ -148,26 +156,37 @@ function handleConfirm(): void {
       console.error(err);
     });
 }
+
+function handleCancel(): void {
+  app && app.emit('close');
+  closeModal();
+}
 </script>
 <template>
   <a-modal
+    v-model:visible="modalVisible"
     :width="width"
     class="kf-set-by-config-modal"
-    v-model:visible="modalVisible"
     :title="titleResolved"
-    :destroyOnClose="true"
-    @cancel="closeModal"
+    :destroy-on-close="true"
+    @cancel="handleCancel"
     @ok="handleConfirm"
   >
     <KfConfigSettingsForm
       ref="formRef"
       v-model:formState="formState"
-      :configSettings="configSettings"
-      :changeType="payload.type"
-      :isPrimaryDisabled="isPrimaryDisabled"
-      :passPrimaryKeySpecialWordsVerify="passPrimaryKeySpecialWordsVerify"
-      :primaryKeyAvoidRepeatCompareTarget="primaryKeyAvoidRepeatCompareTarget"
-      :primaryKeyAvoidRepeatCompareExtra="primaryKeyAvoidRepeatCompareExtra"
+      :config-settings="configSettings"
+      :change-type="payload.type"
+      :label-col="labelCol"
+      :wrapper-col="wrapperCol"
+      :is-primary-disabled="isPrimaryDisabled"
+      :pass-primary-key-special-words-verify="passPrimaryKeySpecialWordsVerify"
+      :primary-key-avoid-repeat-compare-target="
+        primaryKeyAvoidRepeatCompareTarget
+      "
+      :primary-key-avoid-repeat-compare-extra="
+        primaryKeyAvoidRepeatCompareExtra
+      "
     ></KfConfigSettingsForm>
   </a-modal>
 </template>

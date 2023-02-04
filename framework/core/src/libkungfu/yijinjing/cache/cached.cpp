@@ -20,7 +20,7 @@ using namespace kungfu::yijinjing::cache;
 namespace kungfu::yijinjing::cache {
 
 cached::cached(locator_ptr locator, mode m, bool low_latency)
-    : apprentice(location::make_shared(m, category::SYSTEM, "service", "cached", std::move(locator))),
+    : apprentice(location::make_shared(m, category::SYSTEM, "service", "cached", std::move(locator)), low_latency),
       profile_(get_locator()) {
   profile_.setup();
   profile_get_all(profile_, profile_bank_);

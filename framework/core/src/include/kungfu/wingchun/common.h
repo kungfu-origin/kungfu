@@ -128,6 +128,16 @@ inline bool is_final_status(const longfist::enums::OrderStatus &status) {
   }
 }
 
+inline bool is_final_basket_order_status(const longfist::enums::BasketOrderStatus &status) {
+  switch (status) {
+  case longfist::enums::BasketOrderStatus::Unknown:
+  case longfist::enums::BasketOrderStatus::Pending:
+    return false;
+  default:
+    return true;
+  }
+}
+
 inline bool is_convertible_bond(const std::string &instrument_id, const std::string &exchange_id) {
   return ((string_equals_n(instrument_id, "123", 3) || string_equals_n(instrument_id, "128", 3) ||
            string_equals_n(instrument_id, "117", 3) || string_equals_n(instrument_id, "127", 3) ||
@@ -485,6 +495,17 @@ inline uint32_t hash_instrument(const char *exchange_id, const char *instrument_
   return yijinjing::util::hash_str_32(instrument_id) ^ yijinjing::util::hash_str_32(exchange_id);
 }
 
+inline int32_t hash_instrument(const longfist::types::Order &order) {
+  int32_t flag =
+      get_direction(order.instrument_type, order.side, order.offset) == longfist::enums::Direction::Short ? -1 : 1;
+  int32_t instrument_key = hash_instrument(order.exchange_id, order.instrument_id) * flag;
+  return instrument_key;
+}
+
+inline uint32_t hash_basket_instrument(uint32_t basket_uid, const char *exchange_id, const char *instrument_id) {
+  return basket_uid ^ yijinjing::util::hash_str_32(instrument_id) ^ yijinjing::util::hash_str_32(exchange_id);
+}
+
 inline uint32_t hash_account(const std::string &source_name, const std::string &account_id) {
   return yijinjing::util::hash_str_32(source_name) ^ yijinjing::util::hash_str_32(account_id);
 }
@@ -513,6 +534,8 @@ inline void order_from_input(const longfist::types::OrderInput &input, longfist:
   order.price_type = input.price_type;
   order.volume_condition = input.volume_condition;
   order.time_condition = input.time_condition;
+
+  order.parent_id = input.parent_id;
 }
 
 } // namespace kungfu::wingchun

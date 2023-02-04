@@ -20,6 +20,9 @@ import {
   StrategyExtTypes,
   UnderweightEnum,
   OrderInputKeyEnum,
+  PriceLevelEnum,
+  BasketVolumeTypeEnum,
+  BasketOrderStatusEnum,
 } from '../typings/enums';
 
 import { Pm2ProcessStatusTypes } from '../utils/processUtils';
@@ -310,10 +313,43 @@ export const OrderStatus: Record<
   },
 };
 
+export const BasketOrderStatus: Record<
+  BasketOrderStatusEnum,
+  KungfuApi.KfTradeValueCommonData
+> = {
+  [BasketOrderStatusEnum.Unknown]: {
+    name: t('tradingConfig.unknown'),
+    color: 'default',
+  },
+  [BasketOrderStatusEnum.Pending]: {
+    name: t('tradingConfig.pending'),
+    color: 'default',
+  },
+  [BasketOrderStatusEnum.PartialFilledNotActive]: {
+    name: t('tradingConfig.partial_filled_not_active'),
+    color: 'green',
+  },
+  [BasketOrderStatusEnum.PartialFilledActive]: {
+    name: t('tradingConfig.partial_filled_active'),
+    color: 'default',
+  },
+  [BasketOrderStatusEnum.Filled]: {
+    name: t('tradingConfig.filled'),
+    color: 'green',
+  },
+};
+
 export const UnfinishedOrderStatus = [
+  OrderStatusEnum.Submitted,
   OrderStatusEnum.Pending,
   OrderStatusEnum.Submitted,
   OrderStatusEnum.PartialFilledActive,
+];
+
+export const NotTradeAllOrderStatus = [
+  OrderStatusEnum.Cancelled,
+  OrderStatusEnum.Error,
+  OrderStatusEnum.PartialFilledNotActive,
 ];
 
 export const WellFinishedOrderStatus = [
@@ -354,6 +390,28 @@ export const PriceType: Record<
   [PriceTypeEnum.Unknown]: { name: t('tradingConfig.unknown') },
 };
 
+export const PriceLevel: Record<
+  PriceLevelEnum,
+  KungfuApi.KfTradeValueCommonData
+> = {
+  [PriceLevelEnum.Latest]: { name: t('tradingConfig.latest') },
+  [PriceLevelEnum.Sell5]: { name: t('tradingConfig.sell5') },
+  [PriceLevelEnum.Sell4]: { name: t('tradingConfig.sell4') },
+  [PriceLevelEnum.Sell3]: { name: t('tradingConfig.sell3') },
+  [PriceLevelEnum.Sell2]: { name: t('tradingConfig.sell2') },
+  [PriceLevelEnum.Sell1]: { name: t('tradingConfig.sell1') },
+  [PriceLevelEnum.Buy1]: { name: t('tradingConfig.buy1') },
+  [PriceLevelEnum.Buy2]: { name: t('tradingConfig.buy2') },
+  [PriceLevelEnum.Buy3]: { name: t('tradingConfig.buy3') },
+  [PriceLevelEnum.Buy4]: { name: t('tradingConfig.buy4') },
+  [PriceLevelEnum.Buy5]: { name: t('tradingConfig.buy5') },
+  [PriceLevelEnum.UpperLimitPrice]: { name: t('tradingConfig.up_limit_price') },
+  [PriceLevelEnum.LowerLimitPrice]: {
+    name: t('tradingConfig.low_limit_price'),
+  },
+  [PriceLevelEnum.Unknown]: { name: t('tradingConfig.unknown') },
+};
+
 export const HedgeFlag: Record<
   HedgeFlagEnum,
   KungfuApi.KfTradeValueCommonData
@@ -388,6 +446,24 @@ export const CommissionMode: Record<
 > = {
   [CommissionModeEnum.ByAmount]: { name: t('tradingConfig.by_amount') },
   [CommissionModeEnum.ByVolume]: { name: t('tradingConfig.by_volume') },
+};
+
+export const BasketVolumeType: Record<
+  BasketVolumeTypeEnum,
+  KungfuApi.KfTradeValueCommonData
+> = {
+  [BasketVolumeTypeEnum.Unknown]: {
+    name: t('tradingConfig.unknown'),
+    color: 'default',
+  },
+  [BasketVolumeTypeEnum.Quantity]: {
+    name: t('tradingConfig.by_quantity'),
+    color: 'cyan',
+  },
+  [BasketVolumeTypeEnum.Proportion]: {
+    name: t('tradingConfig.by_proportion'),
+    color: 'purple',
+  },
 };
 
 export const InstrumentType: Record<

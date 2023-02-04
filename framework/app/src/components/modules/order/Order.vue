@@ -384,6 +384,7 @@ function handleClickAdjustOrderMask(): void {
         offset: +order.offset,
         hedge_flag: +order.hedge_flag,
         is_swap: !!order.is_swap,
+        parent_id: 0n,
       };
 
       return makeOrderByOrderInput(
@@ -555,7 +556,12 @@ function testOrderSourceIsOnline(order: KungfuApi.OrderResolved) {
               {{ dealKfPrice(item.limit_price) }}
             </template>
             <template v-else-if="column.dataIndex === 'volume_left'">
-              {{ item.volume - item.volume_left }} / {{ item.volume }}
+              <span
+                style="float: right"
+                :title="`${item.volume - item.volume_left} / ${item.volume}`"
+              >
+                {{ `${item.volume - item.volume_left} / ${item.volume}` }}
+              </span>
             </template>
             <template v-else-if="column.dataIndex === 'status_uname'">
               <span :class="`color-${item.status_color}`">

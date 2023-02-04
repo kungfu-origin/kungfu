@@ -3,12 +3,24 @@ import {
   getWatcherId,
   watcher,
 } from '@kungfu-trader/kungfu-js-api/kungfu/watcher';
-import { kf } from '@kungfu-trader/kungfu-js-api/kungfu';
+import {
+  basketInstrumentStore,
+  basketStore,
+  commissionStore,
+  configStore,
+  kf,
+  riskSettingStore,
+} from '@kungfu-trader/kungfu-js-api/kungfu';
 import { KF_RUNTIME_DIR } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 
 window.workers = workers;
 window.watcher = watcher;
 window.kungfu = kf;
+window.basketStore = basketStore;
+window.basketInstrumentStore = basketInstrumentStore;
+window.configStore = configStore;
+window.riskSettingStore = riskSettingStore;
+window.commissionStore = commissionStore;
 
 window.testCase = {};
 window.testCase.crashTheWatcher = () => {
