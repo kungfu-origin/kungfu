@@ -207,6 +207,9 @@ uint64_t RuntimeContext::insert_basket_order(uint64_t basket_id, const std::stri
   input.price_offset = price_offset;
   input.volume = volume;
   input.insert_time = insert_time;
+  input.calculation_mode =
+      input.volume == VOLUME_ZERO ? BasketOrderCalculationMode::Dynamic : BasketOrderCalculationMode::Static;
+
   writer->close_data();
   basketorder_engine_.insert_basket_order(app_.now(), input);
   return input.order_id;

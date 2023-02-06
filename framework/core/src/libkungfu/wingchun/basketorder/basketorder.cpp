@@ -13,66 +13,29 @@ BasketOrderState::BasketOrderState(uint32_t source, uint32_t dest, int64_t trigg
                                    const longfist::types::BasketOrder &basket_order)
     : state_data(state<BasketOrder>(source, dest, trigger_time, basket_order)){};
 
-void BasketOrderState::update_success_ordered_volume(const longfist::types::Order &order) {
-  int32_t instrument_key = hash_instrument(order);
-  auto success_ordered_volume = get_success_ordered_volume(order);
-  bool is_final = is_final_status(order.status);
+void BasketOrderState::update_lastst_order(const longfist::types::Order &order) {
+  orders.insert_or_assign(order.order_id, order);
 
-  if (orders.find(order.order_id) == orders.end()) {
-    if (is_final) {
-      success_ordered_volume += order.volume - order.volume_left;
-    } else {
-      success_ordered_volume += order.volume;
-    }
-  } else if (is_final) {
-    success_ordered_volume -= order.volume_left;
-  }
-
-  success_ordered_volume_map.insert_or_assign(instrument_key, success_ordered_volume);
-}
-
-void BasketOrderState::update_ordered_volume(const longfist::types::Order &order) {
-  if (orders.find(order.order_id) != orders.end()) {
+  auto hashed_key = hash_instrument(order);
+  if (lastest_order_map.find(hashed_key) == lastest_order_map.end()) {
+    lastest_order_map.emplace(hashed_key, order);
     return;
   }
 
-  int32_t instrument_key = hash_instrument(order);
-  int64_t ordered_volume = get_success_ordered_volume(order);
-  ordered_volume += order.volume;
-  ordered_volume_map.insert_or_assign(instrument_key, ordered_volume);
-}
-
-int64_t BasketOrderState::get_success_ordered_volume(const longfist::types::Order &order) {
-  int32_t instrument_key = hash_instrument(order);
-  return success_ordered_volume_map.find(instrument_key) != success_ordered_volume_map.end()
-             ? success_ordered_volume_map.at(instrument_key)
-             : 0;
-}
-
-int64_t BasketOrderState::get_total_volume(const longfist::types::Order &order) {
-  int32_t instrument_key = hash_instrument(order);
-  auto &basket_order = state_data.data;
-
-  // if it is a new order
-  if (orders.find(order.order_id) != orders.end()) {
-    return basket_order.volume;
+  auto &old_lastest_order = lastest_order_map.at(hashed_key);
+  if (old_lastest_order.insert_time > order.insert_time) {
+    return;
   }
 
-  int64_t total_volume = 0;
-  for (auto &iter : ordered_volume_map) {
-    total_volume += iter.second;
-  }
-  return total_volume;
+  lastest_order_map.insert_or_assign(hashed_key, order);
+  return;
 }
 
 void BasketOrderState::update(const longfist::types::Order &order) {
   auto &basket_order = state_data.data;
-
-  update_ordered_volume(order);
-  basket_order.volume = (basket_order.volume, get_total_volume(order));
-  update_success_ordered_volume(order);
-
-  orders.insert_or_assign(order.order_id, order);
+  update_lastst_order(order);
+  basket_order.volume =
+      basket_order.calculation_mode == BasketOrderCalculationMode::Static ? basket_order.volume : get_total_volume();
   basket_order.volume_left = basket_order.volume - get_total_traded_volume(orders);
   auto is_all_order_end_val = is_all_order_end(orders);
   auto is_all_order_filled_val = basket_order.volume_left == 0;
@@ -85,6 +48,21 @@ void BasketOrderState::update(const longfist::types::Order &order) {
   } else {
     basket_order.status = BasketOrderStatus::Pending;
   }
+}
+
+int64_t BasketOrderState::get_total_volume() {
+  int64_t total_volume = 0;
+  for (auto &iter : orders) {
+    auto &order = iter.second;
+    auto hashed_key = hash_instrument(order);
+    auto is_lastest_order = lastest_order_map.find(hashed_key) != lastest_order_map.end()
+                                ? lastest_order_map.at(hashed_key).order_id == order.order_id
+                                : false;
+    total_volume += is_lastest_order                ? order.volume
+                    : is_final_status(order.status) ? order.volume - order.volume_left
+                                                    : order.volume;
+  }
+  return total_volume;
 }
 
 state<longfist::types::BasketOrder> &BasketOrderState::get_state() { return state_data; }

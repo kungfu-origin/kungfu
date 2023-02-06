@@ -305,6 +305,12 @@ Napi::Value Watcher::IssueBasketOrder(const Napi::CallbackInfo &info) {
     basket_order_info.Set("source_id", Napi::Number::New(info.Env(), strategy_location->uid));
   }
 
+  if (GetBigInt(basket_order_info.Get("volume")) == VOLUME_ZERO) {
+    basket_order_info.Set("calculation_mode", Napi::Number::New(info.Env(), int(BasketOrderCalculationMode::Dynamic)));
+  } else {
+    basket_order_info.Set("calculation_mode", Napi::Number::New(info.Env(), int(BasketOrderCalculationMode::Static)));
+  }
+
   return InteractWithTD<BasketOrder>(info, info[0].ToObject(), &BasketOrder::order_id);
 }
 
