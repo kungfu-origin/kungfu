@@ -1153,7 +1153,9 @@ export const useQuote = (): {
 
     if (!last_price || !upper_limit_price || !pre_close_price) return false;
 
-    return last_price > upper_limit_price || last_price > pre_close_price * 1.1;
+    return (
+      last_price >= upper_limit_price || last_price >= pre_close_price * 1.1
+    );
   };
 
   const isInstrumentLowLimit = (instrument: KungfuApi.InstrumentResolved) => {
@@ -1167,7 +1169,9 @@ export const useQuote = (): {
 
     if (!last_price || !lower_limit_price || !pre_close_price) return false;
 
-    return last_price < lower_limit_price || last_price < pre_close_price * 0.9;
+    return (
+      last_price <= lower_limit_price || last_price <= pre_close_price * 0.9
+    );
   };
 
   const isInstrumentSuspension = (instrument: KungfuApi.InstrumentResolved) => {
