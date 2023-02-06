@@ -755,7 +755,9 @@ KF_DEFINE_PACK_TYPE(                                        //
     (BasketOrderStatus, status), // 订单状态
 
     (uint32_t, source_id), // 下单方
-    (uint32_t, dest_id)    //
+    (uint32_t, dest_id),   // 下单账户
+
+    (BasketOrderCalculationMode, calculation_mode) //计算方式
 );
 
 KF_DEFINE_PACK_TYPE(                                                       //

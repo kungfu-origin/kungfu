@@ -250,6 +250,10 @@ enum class BasketOrderStatus : int8_t { Unknown, Pending, PartialFilledNotActive
 
 inline std::ostream &operator<<(std::ostream &os, BasketOrderStatus t) { return os << int8_t(t); }
 
+enum class BasketOrderCalculationMode : int8_t { Static, Dynamic };
+
+inline std::ostream &operator<<(std::ostream &os, BasketOrderCalculationMode t) { return os << int8_t(t); }
+
 enum class BasketVolumeType : int8_t { Unknown, Quantity, Proportion };
 
 inline std::ostream &operator<<(std::ostream &os, BasketVolumeType t) { return os << int8_t(t); }
