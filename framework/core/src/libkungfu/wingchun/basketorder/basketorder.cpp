@@ -69,7 +69,7 @@ void BasketOrderState::update(const longfist::types::Order &order) {
   auto &basket_order = state_data.data;
 
   update_ordered_volume(order);
-  basket_order.volume = (std::max)(basket_order.volume, get_total_volume(order));
+  basket_order.volume = (basket_order.volume, get_total_volume(order));
   update_success_ordered_volume(order);
 
   orders.insert_or_assign(order.order_id, order);
