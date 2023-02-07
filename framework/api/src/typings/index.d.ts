@@ -123,6 +123,7 @@ declare namespace KungfuApi {
   export interface KfConfigItemHeader {
     title: string;
     description: string;
+    type?: 'str' | 'num' | 'precent' | 'bool';
     required?: boolean;
     default?: KfConfigValue;
   }
