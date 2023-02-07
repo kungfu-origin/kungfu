@@ -563,6 +563,8 @@ declare namespace KungfuApi {
   export interface BasketOrderResolved extends BasketOrder {
     basket_order_location: KfExtraLocation;
     primary_time_resolved: string;
+    source_uname: string;
+    source_resolved_data: KfTradeValueCommonData;
     dest_uname: string;
     dest_resolved_data: KfTradeValueCommonData;
     status_uname: string;
