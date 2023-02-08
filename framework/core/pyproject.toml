@@ -14,7 +14,6 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "~3.9"
-setuptools="~59.8.0"
 
 #### Compiler #############################################
 black = "~22.3.0"
