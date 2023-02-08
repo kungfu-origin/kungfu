@@ -406,56 +406,6 @@ KF_DEFINE_PACK_TYPE(                                                        //
 );
 
 KF_DEFINE_PACK_TYPE(                                                 //
-    Tree, 104, PK(instrument_id, exchange_id), PERPETUAL(), //
-    (kungfu::array<char, DATE_LEN>, trading_day),                    // 交易日
-
-    (int64_t, data_time), // 数据生成时间
-
-    (kungfu::array<char, INSTRUMENT_ID_LEN>, instrument_id), // 合约ID
-    (kungfu::array<char, EXCHANGE_ID_LEN>, exchange_id),     // 交易所代码
-
-    (InstrumentType, instrument_type), // 合约类型
-
-    (int64_t, trade_num), // 总成交笔数
-    (int64_t, volume),    // 总成交量
-    (double, turnover),   // 总成交金额
-
-    (double, bid_weighted_avg_price), // 加权平均委托买入价格
-    (int64_t, bid_volume),            // 委托买入数量
-    (double, ask_weighted_avg_price), // 加权平均委托卖出价格
-    (int64_t, ask_volume),            // 委托卖出数量
-
-    (int64_t, open_bid_volume), // 买边市价单挂单总量
-    (int64_t, open_ask_volume), // 卖边市价单挂单总量
-
-    (double, pre_close_price),      // 昨收价
-    (double, pre_settlement_price), // 昨结价
-
-    (double, last_price), // 最新价
-    (double, open_price), // 今开盘
-    (double, high_price), // 最高价
-    (double, low_price),  // 最低价
-
-    (double, upper_limit_price), // 涨停板价
-    (double, lower_limit_price), // 跌停板价
-
-    (double, close_price),      // 收盘价
-    (double, settlement_price), // 结算价
-
-    (int64_t, bid_depth), // 申买档位数
-    (int64_t, ask_depth), // 申卖档位数
-
-    (bool, lost_flag), // 之前是否丢包
-
-    (kungfu::array<double, 10>, bid_price),                           // 申买价
-    (kungfu::array<double, 10>, ask_price),                           // 申卖价
-    (kungfu::array<int64_t, 10>, bid_volume),                         // 申买量
-    (kungfu::array<int64_t, 10>, ask_volume),                         // 申卖量
-    (kungfu::array<char, TRAIDNG_PHASE_CODE_LEN>, trading_phase_code) // 标的状态, 上交所用四位, 深交所用两位,同quote
-
-);
-
-KF_DEFINE_PACK_TYPE(                                                 //
     Bar, 110, PK(instrument_id, exchange_id), TIMESTAMP(start_time), //
     (kungfu::array<char, DATE_LEN>, trading_day),                    // 交易日
     (kungfu::array<char, INSTRUMENT_ID_LEN>, instrument_id),         // 合约代码
