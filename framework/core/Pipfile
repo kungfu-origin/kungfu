@@ -4,7 +4,7 @@
 
 [packages]
 poetry = "==1.1.14"
-pip = "==21.3.1"
+pip = "==23.0"
 setuptools = "==67.2.0"
 virtualenv = "==20.14.1"
-wheel = "==0.37.1"
+wheel = "==0.38.4"
