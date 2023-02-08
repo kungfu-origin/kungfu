@@ -358,59 +358,6 @@ KF_DEFINE_PACK_TYPE(                                         //
     // 盘后交易‘V’=波动性中断 第 1位:‘0’= 正常状态 ‘1’= 全天停牌
 );
 
-KF_DEFINE_PACK_TYPE(                                        //
-    Tree, 104, PK(instrument_id, exchange_id), PERPETUAL(), //
-    (kungfu::array<char, DATE_LEN>, trading_day),           // 交易日
-
-    (int64_t, data_time), // 数据生成时间
-
-    (kungfu::array<char, INSTRUMENT_ID_LEN>, instrument_id), // 合约ID
-    (kungfu::array<char, EXCHANGE_ID_LEN>, exchange_id),     // 交易所ID
-
-    (InstrumentType, instrument_type), // 合约类型
-
-    (double, pre_close_price),      // 昨收价
-    (double, pre_settlement_price), // 昨结价
-
-    (double, last_price), // 最新价
-    (int64_t, volume),    // 数量
-    (double, turnover),   // 成交金额
-
-    (double, pre_open_interest), // 昨持仓量
-    (double, open_interest),     // 持仓量
-
-    (double, open_price), // 今开盘
-    (double, high_price), // 最高价
-    (double, low_price),  // 最低价
-
-    (double, upper_limit_price), // 涨停板价
-    (double, lower_limit_price), // 跌停板价
-
-    (double, close_price),      // 收盘价
-    (double, settlement_price), // 结算价
-    (double, iopv),             // 基金实时参考净值
-
-    (kungfu::array<double, 10>, bid_price),   // 申买价
-    (kungfu::array<double, 10>, ask_price),   // 申卖价
-    (kungfu::array<int64_t, 10>, bid_volume), // 申买量
-    (kungfu::array<int64_t, 10>, ask_volume), // 申卖量
-    (kungfu::array<char, TRAIDNG_PHASE_CODE_LEN>, trading_phase_code)
-    // 标的状态, 上交所用四位, 深交所用两位
-    //************************************上海现货行情交易状态***************************************************************
-    // 该字段为8位字符数组,左起每位表示特定的含义,无定义则填空格。
-    // 第0位:‘S’表示启动(开市前)时段,‘C’表示集合竞价时段,‘T’表示连续交易时段,
-    // ‘E’表示闭市时段 ,‘P’表示临时停牌,
-    // ‘M’表示可恢复交易的熔断(盘中集合竞价),‘N’表示不可恢复交易的熔断(暂停交易至闭市)
-    // ‘U’表示收盘集合竞价
-    // 第1位:‘0’表示此产品不可正常交易,‘1’表示此产品可正常交易。
-    // 第2位:‘0’表示未上市,‘1’表示已上市
-    // 第3位:‘0’表示此产品在当前时段不接受进行新订单申报,‘1’ 表示此产品在当前时段可接受进行新订单申报。
-
-    //************************************深圳现货行情交易状态***************************************************************
-    // 第 0位:‘S’= 启动(开市前)‘O’= 开盘集合竞价‘T’= 连续竞价‘B’= 休市‘C’= 收盘集合竞价‘E’= 已闭市‘H’= 临时停牌‘A’=
-    // 盘后交易‘V’=波动性中断 第 1位:‘0’= 正常状态 ‘1’= 全天停牌
-);
-
 KF_DEFINE_PACK_TYPE(                                                    //
     Entrust, 102, PK(instrument_id, exchange_id), TIMESTAMP(data_time), //
     (kungfu::array<char, DATE_LEN>, trading_day),                       // 交易日
@@ -458,9 +405,9 @@ KF_DEFINE_PACK_TYPE(                                                        //
     (int64_t, biz_index) // 业务序号
 );
 
-KF_DEFINE_PACK_TYPE(                                                 //
+KF_DEFINE_PACK_TYPE(                                        //
     Tree, 104, PK(instrument_id, exchange_id), PERPETUAL(), //
-    (kungfu::array<char, DATE_LEN>, trading_day),                    // 交易日
+    (kungfu::array<char, DATE_LEN>, trading_day),           // 交易日
 
     (int64_t, data_time), // 数据生成时间
 
