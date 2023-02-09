@@ -350,6 +350,7 @@ export const NotTradeAllOrderStatus = [
   OrderStatusEnum.Cancelled,
   OrderStatusEnum.Error,
   OrderStatusEnum.PartialFilledNotActive,
+  OrderStatusEnum.Lost,
 ];
 
 export const WellFinishedOrderStatus = [
