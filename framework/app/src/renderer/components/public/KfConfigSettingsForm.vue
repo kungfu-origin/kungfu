@@ -576,18 +576,43 @@ function buildCsvHeadersValidator(
   });
 
   return (row) => {
-    for (let header of requiredHeaders) {
-      if (
-        !(
-          header in row &&
-          row[header] !== null &&
-          row[header] !== undefined &&
-          row[header] !== ''
-        )
-      ) {
-        return false;
+    for (let header of headers) {
+      if (requiredHeaders.indexOf(header.title) !== -1) {
+        if (
+          !(
+            header.title in row &&
+            row[header.title] !== null &&
+            row[header.title] !== undefined &&
+            row[header.title] !== ''
+          )
+        ) {
+          return false;
+        }
+      }
+
+      const type = header.type ?? 'str';
+      let value = `${row[header.title]}`;
+
+      switch (type) {
+        case 'str':
+          if (!value) return false;
+          break;
+        case 'num':
+          if (Number.isNaN(Number(value))) return false;
+          break;
+        case 'precent':
+          if (
+            !value.endsWith('%') ||
+            Number.isNaN(Number(value.replace('%', '')))
+          )
+            return false;
+          break;
+        case 'bool':
+          value = value.toLowerCase();
+          if (value !== 'true' && value !== 'false') return false;
       }
     }
+
     return true;
   };
 }
@@ -599,21 +624,45 @@ function buildCsvHeadersTransformer(
 
   const headerWithDefault: Record<string, KungfuApi.KfConfigValue> = {};
   headers.forEach((header) => {
-    if (header.default) {
+    if (header.default !== undefined && header.default !== null) {
       headerWithDefault[header.title] = header.default;
     }
   });
 
   return (row) => {
-    for (let header in headerWithDefault) {
-      if (
-        row[header] === null ||
-        row[header] === undefined ||
-        row[header] === ''
-      ) {
-        row[header] = headerWithDefault[header];
+    for (let header of headers) {
+      if (header.title in headerWithDefault) {
+        if (
+          row[header.title] === null ||
+          row[header.title] === undefined ||
+          row[header.title] === ''
+        ) {
+          row[header.title] = headerWithDefault[header.title];
+        }
+      }
+
+      const type = header.type ?? 'str';
+      let value = `${row[header.title]}`;
+
+      switch (type) {
+        case 'str':
+          row[header.title] = value;
+          break;
+        case 'num':
+          row[header.title] = Number(value);
+          break;
+        case 'precent':
+          row[header.title] = Number(value.replace('%', ''));
+          console.log(row[header.title]);
+          break;
+        case 'bool':
+          value = value.toLowerCase();
+          row[header.title] =
+            value === 'false' ? false : value === 'true' ? true : !!value;
+          break;
       }
     }
+
     return row;
   };
 }
