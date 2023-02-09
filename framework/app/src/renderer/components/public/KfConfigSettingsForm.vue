@@ -653,7 +653,6 @@ function buildCsvHeadersTransformer(
           break;
         case 'precent':
           row[header.title] = Number(value.replace('%', ''));
-          console.log(row[header.title]);
           break;
         case 'bool':
           value = value.toLowerCase();
