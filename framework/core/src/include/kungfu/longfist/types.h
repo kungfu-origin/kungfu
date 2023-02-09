@@ -421,15 +421,14 @@ KF_DEFINE_PACK_TYPE(                                        //
     (double, turnover),   // 总成交金额
 
     (double, bid_weighted_avg_price), // 加权平均委托买入价格
-    (int64_t, bid_volume),            // 委托买入数量
+    (int64_t, total_bid_volume),      // 委托买入数量
     (double, ask_weighted_avg_price), // 加权平均委托卖出价格
-    (int64_t, ask_volume),            // 委托卖出数量
+    (int64_t, total_ask_volume),      // 委托卖出数量
 
     (int64_t, open_bid_volume), // 买边市价单挂单总量
     (int64_t, open_ask_volume), // 卖边市价单挂单总量
 
-    (double, pre_close_price),      // 昨收价
-    (double, pre_settlement_price), // 昨结价
+    (double, pre_close_price), // 昨收价
 
     (double, last_price), // 最新价
     (double, open_price), // 今开盘
@@ -439,13 +438,10 @@ KF_DEFINE_PACK_TYPE(                                        //
     (double, upper_limit_price), // 涨停板价
     (double, lower_limit_price), // 跌停板价
 
-    (double, close_price),      // 收盘价
-    (double, settlement_price), // 结算价
+    (double, close_price), // 收盘价
 
     (int64_t, bid_depth), // 申买档位数
     (int64_t, ask_depth), // 申卖档位数
-
-    (bool, lost_flag), // 之前是否丢包
 
     (kungfu::array<double, 10>, bid_price),                           // 申买价
     (kungfu::array<double, 10>, ask_price),                           // 申卖价
