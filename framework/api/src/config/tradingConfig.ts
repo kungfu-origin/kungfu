@@ -598,6 +598,7 @@ export const AbleSubscribeInstrumentTypesBySourceType: Record<
     InstrumentTypeEnum.repo,
     InstrumentTypeEnum.warrant,
     InstrumentTypeEnum.iopt,
+    InstrumentTypeEnum.stockoption,
   ],
 
   future: [InstrumentTypeEnum.future],
