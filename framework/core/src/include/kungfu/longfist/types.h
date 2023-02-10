@@ -425,9 +425,6 @@ KF_DEFINE_PACK_TYPE(                                        //
     (double, ask_weighted_avg_price), // 加权平均委托卖出价格
     (int64_t, total_ask_volume),      // 委托卖出数量
 
-    (int64_t, open_bid_volume), // 买边市价单挂单总量
-    (int64_t, open_ask_volume), // 卖边市价单挂单总量
-
     (double, pre_close_price), // 昨收价
 
     (double, last_price), // 最新价
