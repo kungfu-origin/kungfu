@@ -18,6 +18,7 @@ import {
   SideEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { useQuote } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
+import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
 
 const currentInstrument = ref<KungfuApi.InstrumentResolved | undefined>();
 const { getQuoteByInstrument, getLastPricePercent } = useQuote();
@@ -32,6 +33,8 @@ const quoteData = computed(() => {
 });
 
 onMounted(() => {
+  currentInstrument.value = useGlobalStore().orderBookCurrentInstrument;
+
   if (app?.proxy) {
     const subscription = app.proxy.$globalBus.subscribe(
       (data: KfEvent.KfBusEvent) => {

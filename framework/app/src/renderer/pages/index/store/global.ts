@@ -62,6 +62,8 @@ interface GlobalState {
     | KungfuApi.KfConfig
     | KungfuApi.KfExtraLocation
     | null;
+
+  orderBookCurrentInstrument: KungfuApi.InstrumentResolved | undefined;
 }
 
 export const useGlobalStore = defineStore('global', {
@@ -96,6 +98,7 @@ export const useGlobalStore = defineStore('global', {
       globalSetting: {},
 
       currentGlobalKfLocation: null,
+      orderBookCurrentInstrument: undefined,
     };
   },
 
@@ -138,6 +141,12 @@ export const useGlobalStore = defineStore('global', {
         | null,
     ) {
       this.currentGlobalKfLocation = kfLocation;
+    },
+
+    setOrderBookCurrentInstrument(
+      instrument: KungfuApi.InstrumentResolved | undefined,
+    ) {
+      this.orderBookCurrentInstrument = instrument;
     },
 
     setAppStates(appStates: Record<string, BrokerStateStatusTypes>) {
