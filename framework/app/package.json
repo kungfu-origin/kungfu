@@ -44,7 +44,7 @@
   "devDependencies": {
     "@kungfu-trader/kungfu-toolchain": "^2.4.48-alpha.0",
     "@types/markdown-it": "^12.2.3",
-    "electron": "19.0.8",
+    "electron": "19.1.8",
     "webpack-bundle-analyzer": "^4.6.1"
   }
 }
