@@ -1684,7 +1684,7 @@ export default defineComponent({
 
         &.ant-form-inline {
           .ant-row.ant-form-item {
-            margin-bottom: 0;
+            margin-bottom: 4px;
 
             .ant-select {
               min-width: 120px;
