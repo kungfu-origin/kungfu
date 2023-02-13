@@ -73,7 +73,7 @@
     "@kungfu-trader/kungfu-toolchain": "^2.4.48-alpha.0",
     "@kungfu-trader/libnode": "16.15.0",
     "cmake-js": "^7.0.0",
-    "electron": "19.0.8",
+    "electron": "19.1.8",
     "nan": "^2.15.0",
     "node-addon-api": "^5.0.0"
   }
