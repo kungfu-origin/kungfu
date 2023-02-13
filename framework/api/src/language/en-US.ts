@@ -259,6 +259,8 @@ export default {
     price: 'Price',
     protect_price: 'Protect Price',
     price_type: 'Price Type',
+    price_level: 'Price Level',
+    price_offset: 'Price Offset',
     side: 'Side',
     offset: 'Offset',
     direction: 'Direction',
