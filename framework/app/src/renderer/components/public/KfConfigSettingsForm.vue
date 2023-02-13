@@ -20,6 +20,7 @@ import {
   defineComponent,
 } from 'vue';
 import {
+  BasketVolumeType,
   PriceLevel,
   Side,
 } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
@@ -146,8 +147,7 @@ const formRef = ref();
 
 const formState = reactive(props.formState);
 const { td, md, strategy } = toRefs(useAllKfConfigData());
-const { basketList, buildBasketOptionLabel, buildBasketOptionValue } =
-  useBasket();
+const { basketList, buildBasketOptionValue } = useBasket();
 const { isLanguageKeyAvailable } = useLanguage();
 
 const primaryKeys = ref<string[]>(getPrimaryKeys(props.configSettings || []));
@@ -1267,7 +1267,15 @@ defineExpose({
           :key="basket.id"
           :value="buildBasketOptionValue(basket)"
         >
-          {{ buildBasketOptionLabel(basket) }}
+          <span>
+            {{ basket.name }}
+            <a-tag
+              style="margin-left: 4px"
+              :color="BasketVolumeType[basket.volume_type].color"
+            >
+              {{ BasketVolumeType[basket.volume_type].name }}
+            </a-tag>
+          </span>
         </a-select-option>
       </a-select>
       <a-switch
