@@ -1259,6 +1259,74 @@
     "@jridgewell/resolve-uri" "3.1.0"
     "@jridgewell/sourcemap-codec" "1.4.14"
 
+"@kungfu-trader/kfx-task-basket-twap@lastest":
+  version "1.0.9"
+  resolved "https://npm.pkg.github.com/download/@kungfu-trader/kfx-task-basket-twap/1.0.9/460a3b7084b894620305735cc57a66d1a26f63ac#460a3b7084b894620305735cc57a66d1a26f63ac"
+  integrity sha512-7Zr5xCkr6DLGMj8mwjG0S0Hf0G6i0bSUke2wiopoAuhfHL1uAU31WUWpE5+skS83fBrGkLcx8cKYrBmSBXDPcw==
+  dependencies:
+    "@kungfu-trader/kungfu-core" "=2.4.46 "
+
+"@kungfu-trader/kfx-ui-basket-trade@1.0.0":
+  version "1.0.0"
+  resolved "https://npm.pkg.github.com/download/@kungfu-trader/kfx-ui-basket-trade/1.0.0/0d8bcffe7af47f2e00c982bc81d2a4d25a258974#0d8bcffe7af47f2e00c982bc81d2a4d25a258974"
+  integrity sha512-CiXI62pXw3QsDHT2GKMNIl784XFcivwP2G1oSlpbPAg3Yv4Pif82QohqL+crEo/xCX+Wm0Ap7K3xbewR+RQO/w==
+  dependencies:
+    "@kungfu-trader/kungfu-app" "~2.4.45-0"
+    "@kungfu-trader/kungfu-core" "~2.4.45-0"
+    "@kungfu-trader/kungfu-js-api" "~2.4.45-0"
+
+"@kungfu-trader/kungfu-app@~2.4.45-0":
+  version "2.4.47"
+  resolved "https://npm.pkg.github.com/download/@kungfu-trader/kungfu-app/2.4.47/918dcdb2d573fbc9ebd9363c766a90f76d3942de#918dcdb2d573fbc9ebd9363c766a90f76d3942de"
+  integrity sha512-XaFhU2TddJq5xAQkel72kX2oQ1JLYjkU8nma+Xl9y9D7ep1sbb2n9p0TBq7vz4pPtL/y3wTE5I50IiufeodHDA==
+  dependencies:
+    "@kungfu-trader/kungfu-js-api" "^2.4.47"
+    ant-design-vue "^3.2.9"
+    core-js "^3.20.0"
+    iconv-lite "^0.6.3"
+    jschardet "^3.0.0"
+    markdown-it "^13.0.1"
+    pinia "^2.0.0"
+    sound-play "^1.1.0"
+    vue "^3.2.34"
+
+"@kungfu-trader/kungfu-core@=2.4.46 ":
+  version "2.4.46"
+  resolved "https://npm.pkg.github.com/download/@kungfu-trader/kungfu-core/2.4.46/5d7a685f7f7fca74c6311afbba38f58f1f599ab6#5d7a685f7f7fca74c6311afbba38f58f1f599ab6"
+  integrity sha512-TNCNlzL8a4tr8tkm6omM8sOjrAwuPXwVy+LmlLC2RrmOIxBNNZ+7OpvjMBiSz5SjusStRUm0KYisyqJ2qd7VPg==
+  dependencies:
+    "@mapbox/node-pre-gyp" "^1.0.0"
+    glob "^8.0.0"
+    sywac "^1.3.0"
+
+"@kungfu-trader/kungfu-core@^2.4.47", "@kungfu-trader/kungfu-core@~2.4.45-0":
+  version "2.4.47"
+  resolved "https://npm.pkg.github.com/download/@kungfu-trader/kungfu-core/2.4.47/5a9a2f85272d47a5ddd797f36d7b73ba446cd7aa#5a9a2f85272d47a5ddd797f36d7b73ba446cd7aa"
+  integrity sha512-Ii+q456GqxqSoq6RCF729EN9ftGCp8J/d39LOy21eiUlqXLUQ65ZmqVCXRzWkfu8fkS2c+1pEX5h+W3gfUhFEQ==
+  dependencies:
+    "@mapbox/node-pre-gyp" "^1.0.0"
+    glob "^8.0.0"
+    sywac "^1.3.0"
+
+"@kungfu-trader/kungfu-js-api@^2.4.47", "@kungfu-trader/kungfu-js-api@~2.4.45-0":
+  version "2.4.47"
+  resolved "https://npm.pkg.github.com/download/@kungfu-trader/kungfu-js-api/2.4.47/0eef35a78ab23f8ba4ab4b40efae8ef3f53731a6#0eef35a78ab23f8ba4ab4b40efae8ef3f53731a6"
+  integrity sha512-u665FKPugWryuFXewFtY5rGZ0vAkAN1yOGb38UcC2EzxFbD0qKep2m9LwHfjBmzGn6T090HKFujSBbC24gfMnQ==
+  dependencies:
+    "@kungfu-trader/kungfu-core" "^2.4.47"
+    cfonts "^2.10.0"
+    chalk "^4.1.0"
+    fast-csv "^4.3.5"
+    find-root "^1.1.0"
+    fkill "~7.2"
+    get-user-locale "^1.4.0"
+    glob "^8.0.3"
+    log4js "^6.4.0"
+    pm2 "^5.2.2"
+    ps-list "~7.2"
+    vue "^3.2.34"
+    vue-i18n "9.1.10"
+
 "@kungfu-trader/libnode@16.15.0":
   version "16.15.0"
   resolved "https://npm.pkg.github.com/download/@kungfu-trader/libnode/16.15.0/42c00ca0239b32034459993d917b0a29bb676b71#42c00ca0239b32034459993d917b0a29bb676b71"
