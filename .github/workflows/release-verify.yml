@@ -19,7 +19,7 @@ jobs:
       use-poetry: true
       build-timeout-minutes: 150
       max-build-attempts: 3
-      enable-linux: true
+      enable-linux: false
       enable-macos: true
       enable-windows: true
     secrets:
