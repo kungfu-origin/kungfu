@@ -1860,6 +1860,18 @@ export const KfConfigValueArrayType = [
   'csvTable',
 ];
 
+export const initFormTimePicker = (initValue?: string) => {
+  if (typeof initValue !== 'string') return null;
+
+  if (initValue === 'now') {
+    return dayjs(new Date().getTime()).format('YYYY-MM-DD HH:mm:ss');
+  } else if (/\d{2}:\d{2}:\d{2}/.test(initValue)) {
+    return dayjs(initValue).format('YYYY-MM-DD HH:mm:ss');
+  }
+
+  return null;
+};
+
 export const initFormStateByConfig = (
   configSettings: KungfuApi.KfConfigItem[],
   initValue?: Record<string, KungfuApi.KfConfigValue>,
@@ -1880,7 +1892,7 @@ export const initFormStateByConfig = (
         : isNumber
         ? 0
         : type === 'timePicker'
-        ? null
+        ? initFormTimePicker(item?.default)
         : isArray
         ? []
         : '';
