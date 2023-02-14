@@ -81,45 +81,55 @@ def loadPlugins():
     from nuitka.plugins.standard import (
         AntiBloatPlugin,
         ConsiderPyLintAnnotationsPlugin,
-        DataFileCollectorPlugin,
+        DataFilesPlugin,
+        DelvewheelPlugin,
         DillPlugin,
         EnumPlugin,
         EventletPlugin,
         GeventPlugin,
         GlfwPlugin,
         ImplicitImports,
+        KivyPlugin,
+        MatplotlibPlugin,
         MultiprocessingPlugin,
         NumpyPlugin,
+        OptionsNannyPlugin,
         PbrPlugin,
         PkgResourcesPlugin,
         PmwPlugin,
         PySidePyQtPlugin,
+        PywebViewPlugin,
         TensorflowPlugin,
         TkinterPlugin,
         TorchPlugin,
-        ZmqPlugin,
+        UpxPlugin,
     )
 
     for plugin_module in [
         AntiBloatPlugin,
         ConsiderPyLintAnnotationsPlugin,
-        DataFileCollectorPlugin,
+        DataFilesPlugin,
+        DelvewheelPlugin,
         DillPlugin,
         EnumPlugin,
         EventletPlugin,
         GeventPlugin,
         GlfwPlugin,
         ImplicitImports,
+        KivyPlugin,
+        MatplotlibPlugin,
         MultiprocessingPlugin,
         NumpyPlugin,
+        OptionsNannyPlugin,
         PbrPlugin,
         PkgResourcesPlugin,
         PmwPlugin,
         PySidePyQtPlugin,
+        PywebViewPlugin,
         TensorflowPlugin,
         TkinterPlugin,
         TorchPlugin,
-        ZmqPlugin,
+        UpxPlugin,
     ]:
         plugin_classes = set(
             obj
@@ -161,16 +171,19 @@ def loadPlugins():
 
 
 def patchImportHardNodes():
+    from nuitka.importing import Importing
     from nuitka.nodes import ImportHardNodes
+    from nuitka.nodes import ExpressionBases
+    from nuitka.utils import ModuleNames
 
     class ExpressionImportHardBase(ImportHardNodes.ExpressionBase):
         # pylint: disable=abstract-method
-        __slots__ = ("module_name", "finding", "module_filename")
+        __slots__ = ("module_name", "finding", "module_kind", "module_filename")
 
         def __init__(self, module_name, source_ref):
-            ImportHardNodes.ExpressionBase.__init__(self, source_ref=source_ref)
+            ExpressionBases.ExpressionBase.__init__(self, source_ref)
 
-            self.module_name = ImportHardNodes.ModuleName(module_name)
+            self.module_name = ModuleNames.ModuleName(module_name)
 
             self.finding = None
             self.module_filename = None
@@ -178,15 +191,23 @@ def patchImportHardNodes():
             (
                 _module_name,
                 self.module_filename,
+                self.module_kind,
                 self.finding,
-            ) = ImportHardNodes.locateModule(
+            ) = Importing.locateModule(
                 module_name=self.module_name,
                 parent_package=None,
                 level=0,
             )
 
-        def getUsedModule(self):
-            return self.module_name, self.module_filename, self.finding
+        def getUsedModules(self):
+            yield Importing.makeModuleUsageAttempt(
+                module_name=self.module_name,
+                filename=self.module_filename,
+                module_kind=self.module_kind,
+                finding=self.finding,
+                level=0,
+                source_ref=self.source_ref,
+            )
 
     ImportHardNodes.ExpressionImportHardBase = ExpressionImportHardBase
 
