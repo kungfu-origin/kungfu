@@ -135,11 +135,13 @@ kfc_a = Analysis(
     hiddenimports=extend_hiddenimports(
         modules=[
             "black",
+            "chardet",
             "pip._internal",
             "pip._vendor",
             "pkg_resources",
             "pdm",
             "pep517",
+            "pyproject_hooks",
             "shellingham",
             "nuitka",
             "ordered_set",
