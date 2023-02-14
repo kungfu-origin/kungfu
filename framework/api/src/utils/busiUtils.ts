@@ -1864,9 +1864,9 @@ export const initFormTimePicker = (initValue?: string) => {
   if (typeof initValue !== 'string') return null;
 
   if (initValue === 'now') {
-    return dayjs(new Date().getTime()).format('YYYY-MM-DD HH:mm:ss');
+    return dayjs().format('YYYY-MM-DD HH:mm:ss');
   } else if (/\d{2}:\d{2}:\d{2}/.test(initValue)) {
-    return dayjs(initValue).format('YYYY-MM-DD HH:mm:ss');
+    return dayjs(initValue, 'HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
   }
 
   return null;
@@ -1892,7 +1892,7 @@ export const initFormStateByConfig = (
         : isNumber
         ? 0
         : type === 'timePicker'
-        ? initFormTimePicker(item?.default)
+        ? null
         : isArray
         ? []
         : '';
@@ -1932,6 +1932,8 @@ export const initFormStateByConfig = (
           defaultValue = [];
         }
       }
+    } else if (item.type === 'timePicker') {
+      defaultValue = initFormTimePicker(item?.default);
     }
 
     formState[item.key] = defaultValue;
