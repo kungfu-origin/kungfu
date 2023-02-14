@@ -23,12 +23,6 @@ export const getConfigSettings = (
   priceType?: PriceTypeEnum,
 ): KungfuApi.KfConfigItem[] => {
   const defaultSettings: KungfuApi.KfConfigItem[] = [
-    {
-      key: 'basket',
-      name: t('tradingConfig.account'),
-      type: 'basket',
-      required: true,
-    },
     category === 'td'
       ? null
       : {
