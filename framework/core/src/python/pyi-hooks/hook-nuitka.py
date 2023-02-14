@@ -21,5 +21,3 @@ data_nuitka_inline_copy = make_path(nuitka_build_src_dir, "inline_copy")
 # https://pyinstaller.org/en/v5.1/hooks.html#hook-global-variables
 datas = collect_data_files("nuitka", excludes=[])
 datas.append((data_nuitka_inline_copy, make_path(nuitka_build_dst_dir, "inline_copy")))
-
-logger.debug("datas: %s", datas)
