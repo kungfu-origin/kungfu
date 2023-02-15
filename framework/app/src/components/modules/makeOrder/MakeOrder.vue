@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, reactive, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue';
 import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboardItem.vue';
 import KfConfigSettingsForm from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfConfigSettingsForm.vue';
@@ -256,6 +256,33 @@ watch(
     }
   },
 );
+
+watch(
+  () => formState.value,
+  (newVal) => {
+    const { account_id, instrument, volume, side, offset } = newVal;
+    useGlobalStore().setGlobalFormState({
+      account_id,
+      instrument,
+      volume,
+      side,
+      offset,
+    });
+  },
+  {
+    deep: true,
+  },
+);
+
+onMounted(() => {
+  if (currentGlobalKfLocation.value?.category === 'td') {
+    formState.value.account_id = getIdByKfLocation(
+      currentGlobalKfLocation.value,
+    );
+  } else {
+    formState.value.account_id = '';
+  }
+});
 
 // 下单操作
 function placeOrder(

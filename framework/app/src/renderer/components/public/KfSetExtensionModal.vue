@@ -85,7 +85,7 @@ function getKungfuTradeValueCommonDataByExtType(
 <template>
   <a-modal
     class="kf-set-source-modal"
-    :width="480"
+    :width="500"
     v-model:visible="modalVisible"
     :title="modalTitle"
     :destroyOnClose="true"
@@ -98,7 +98,7 @@ function getKungfuTradeValueCommonDataByExtType(
         :key="item.key"
         :value="item.key"
         :style="{
-          height: '36px',
+          'min-height': '36px',
           'line-height': '36px',
           'font-size': '16px',
           'min-width': '45%',

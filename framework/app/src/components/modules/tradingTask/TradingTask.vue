@@ -44,6 +44,8 @@ import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import { useTradingTask } from './utils';
 
 import { ProcessStatusTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
+import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
+import { storeToRefs } from 'pinia';
 
 // vue3.2.x 的 defineProps 目前不支持外部引入类型和全局类型作为泛型参数，将在 vue3.3.x 版本中修复
 // 因此这块的props类型需要手动从 app/src/typings/index.d.ts 中的 BuiltinComponentProps 中 copy
@@ -73,6 +75,7 @@ const { extConfigs } = useExtConfigsRelated();
 const { dashboardBodyHeight, handleBodySizeChange } = useDashboardBodySize();
 const { processStatusData, processStatusDetailData, getStrategyStatusName } =
   useProcessStatusDetailData();
+const { globalFormState } = storeToRefs(useGlobalStore());
 
 const { handleOpenSetTradingTaskModal } = useTradingTask();
 const { handleRemoveKfConfig } = useAddUpdateRemoveKfConfig();
@@ -396,7 +399,7 @@ function getProcessStatusName(
       v-model:visible="setExtensionModalVisible"
       extensionType="strategy"
       :ext-filter="propsMapByComponent.TradingTask?.strategyFilter"
-      @confirm="handleOpenSetTradingTaskModal('add', $event)"
+      @confirm="handleOpenSetTradingTaskModal('add', $event, globalFormState)"
     ></KfSetExtensionModal>
   </div>
 </template>
