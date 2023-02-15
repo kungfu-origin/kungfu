@@ -26,6 +26,10 @@ import {
   KfCategoryTypes,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import globalBus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
+import {
+  SideEnum,
+  OffsetEnum,
+} from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { getKfGlobalSettingsValue } from '@kungfu-trader/kungfu-js-api/config/globalSettings';
 
 interface GlobalState {
@@ -62,6 +66,16 @@ interface GlobalState {
     | KungfuApi.KfConfig
     | KungfuApi.KfExtraLocation
     | null;
+
+  orderBookCurrentInstrument: KungfuApi.InstrumentResolved | undefined;
+
+  globalFormState: {
+    account_id?: string;
+    instrument?: string;
+    volume?: number;
+    side?: SideEnum;
+    offset?: OffsetEnum;
+  };
 }
 
 export const useGlobalStore = defineStore('global', {
@@ -96,6 +110,9 @@ export const useGlobalStore = defineStore('global', {
       globalSetting: {},
 
       currentGlobalKfLocation: null,
+      orderBookCurrentInstrument: undefined,
+
+      globalFormState: {},
     };
   },
 
@@ -138,6 +155,16 @@ export const useGlobalStore = defineStore('global', {
         | null,
     ) {
       this.currentGlobalKfLocation = kfLocation;
+    },
+
+    setOrderBookCurrentInstrument(
+      instrument: KungfuApi.InstrumentResolved | undefined,
+    ) {
+      this.orderBookCurrentInstrument = instrument;
+    },
+
+    setGlobalFormState(formState: GlobalState['globalFormState']) {
+      Object.assign(this.globalFormState, formState);
     },
 
     setAppStates(appStates: Record<string, BrokerStateStatusTypes>) {

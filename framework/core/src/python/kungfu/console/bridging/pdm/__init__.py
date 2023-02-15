@@ -2,9 +2,9 @@
 
 import json
 import os
+import pathlib
 import pkgutil
 import sys
-
 
 from kungfu.console import variants
 
@@ -28,8 +28,8 @@ class MakeupCommand(BaseCommand):
     @staticmethod
     def pdm_config_table(pdm_project, name):
         pdm_config = pdm_project.pyproject
-        pdm_config[name] = pdm_config.get(name, tomlkit.table())
-        return MakeupCommand.trim(pdm_config[name])
+        pdm_config.metadata[name] = pdm_config.metadata.get(name, tomlkit.table())
+        return MakeupCommand.trim(pdm_config.metadata[name])
 
     def add_arguments(self, parser) -> None:
         parser.add_argument(
@@ -52,9 +52,9 @@ class MakeupCommand(BaseCommand):
         # PDM_PYTHON is not working perfectly, have to manipulate .pdm.toml
         # to enforce using kfc as interpreter.
         pdm_project.project_config["python.path"] = sys.executable
-        pdm_project.pyproject_file.touch()
+        pathlib.Path(pdm_project.root / pdm_project.PYPROJECT_FILENAME).touch()
 
-        project = self.pdm_config_table(pdm_project, "project")
+        project = pdm_project.pyproject.metadata
         project["name"] = package_json.get("name", "").split("/").pop()
         project["license"] = make_inline_table(
             {"text": package_json.get("license", "")}
@@ -73,11 +73,10 @@ class MakeupCommand(BaseCommand):
         ] = f"~={sys.version_info.major}.{sys.version_info.minor}"
         project["dependencies"] = project.get("dependencies", [])
 
-        tool = self.pdm_config_table(pdm_project, "tool")
-        tool["pdm"] = self.trim(tool.get("pdm", tomlkit.table()))
-        tool["pdm"]["version"] = make_inline_table({"use_scm": True})
+        settings = pdm_project.pyproject.settings
+        settings["version"] = make_inline_table({"use_scm": True})
 
-        build_system = self.pdm_config_table(pdm_project, "build-system")
+        build_system = pdm_project.pyproject._data.setdefault("build-system", {})
         build_system["requires"] = ["pdm-pep517"]
         build_system["build-backend"] = "pdm.pep517.api"
 
@@ -85,7 +84,7 @@ class MakeupCommand(BaseCommand):
             requirements={k: parse_requirement(k + v) for k, v in dependencies.items()},
             show_message=False,
         )
-        pdm_project.write_pyproject()
+        pdm_project.pyproject.write()
 
 
 class BridgingCore(Core):

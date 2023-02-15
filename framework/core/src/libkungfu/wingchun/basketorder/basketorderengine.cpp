@@ -104,6 +104,11 @@ BasketOrderState_ptr BasketOrderEngine::get_basket_order_state(uint64_t basket_o
 }
 
 BasketOrderState_ptr BasketOrderEngine::make_basket_order_state(int64_t trigger_time, const BasketOrder &basket_order) {
+  // for third process accept basket order by other process writer for updating;
+  if (has_basket_order_state(basket_order.order_id)) {
+    return basket_order_states_.at(basket_order.order_id);
+  }
+
   auto basket_order_state =
       std::make_shared<BasketOrderState>(basket_order.source_id, basket_order.dest_id, trigger_time, basket_order);
   basket_order_states_.insert_or_assign(basket_order.order_id, basket_order_state);
