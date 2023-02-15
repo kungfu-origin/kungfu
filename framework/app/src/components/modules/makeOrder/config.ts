@@ -105,6 +105,14 @@ export const makeOrderConfigKFTypes = [
   'pricetype',
 ];
 
+export const makeOrderConfigKFKeys = [
+  'account_id',
+  'instrument',
+  'side',
+  'offset',
+  'volume',
+];
+
 export const orderInputTrans: Record<string, string> = {
   account_id: t('tradingConfig.account'),
   instrument_id: `${t('tradingConfig.instrument')}ID`,

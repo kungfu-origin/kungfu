@@ -37,6 +37,12 @@ public:
   virtual void on_quote(Context_ptr &context, const longfist::types::Quote &quote,
                         const kungfu::yijinjing::data::location_ptr &location){};
 
+  // 行情数据更新回调
+  // @param tree              行情数据
+  // @param location          数据来源
+  virtual void on_tree(Context_ptr &context, const longfist::types::Tree &tree,
+                       const kungfu::yijinjing::data::location_ptr &location){};
+
   // bar 数据更新回调
   // @param bar               bar 数据
   // @param location          数据来源

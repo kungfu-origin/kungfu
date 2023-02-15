@@ -5,7 +5,11 @@ import {
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { dealOrderInputItem } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { h, VNode } from 'vue';
-import { makeOrderConfigKFTypes, orderInputTrans } from './config';
+import {
+  makeOrderConfigKFTypes,
+  makeOrderConfigKFKeys,
+  orderInputTrans,
+} from './config';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import { getFutureArbitrageOrderTrans } from '../futureArbitrage/config';
 const { t } = VueI18n.global;
@@ -104,11 +108,16 @@ export const transformOrderInputToExtConfigForm = (
     const type = configItem.type;
 
     if (type === 'td') {
+      pre[key] = orderInputFormState['account_id'];
       return pre;
     }
 
     const targetIndex = existedTypes.indexOf(type);
-    if (targetIndex !== -1 && makeOrderConfigKFTypes.includes(type)) {
+    if (
+      targetIndex !== -1 &&
+      (makeOrderConfigKFTypes.includes(type) ||
+        makeOrderConfigKFKeys.includes(key))
+    ) {
       const value = orderInputFormState[existedKeys[targetIndex]];
       pre[key] = value;
     }
