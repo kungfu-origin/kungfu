@@ -21,12 +21,14 @@ import {
   kfLogger,
   resolveAccountId,
   resolveClientId,
-  resolveOffsetBySideAndDirection,
 } from '../utils/busiUtils';
 import {
   HistoryDateEnum,
   LedgerCategoryEnum,
   InstrumentTypeEnum,
+  SideEnum,
+  DirectionEnum,
+  OffsetEnum,
 } from '../typings/enums';
 import { ExchangeIds } from '../config/tradingConfig';
 
@@ -556,17 +558,34 @@ export const makeOrderByBasketInstruments = (
   }
 
   const makeOrderTasks = basketInstruments.map((basketInstrument) => {
+    let side: SideEnum = +basketOrderInput.side;
+    let offset: OffsetEnum = OffsetEnum.Open;
+    if (+basketOrderInput.side === SideEnum.Buy) {
+      if (+basketInstrument.direction === DirectionEnum.Long) {
+        side = SideEnum.Buy;
+        offset = OffsetEnum.Open;
+      } else {
+        side = SideEnum.Sell;
+        offset = OffsetEnum.Open;
+      }
+    } else if (+basketOrderInput.side === SideEnum.Sell) {
+      if (+basketInstrument.direction === DirectionEnum.Long) {
+        side = SideEnum.Sell;
+        offset = OffsetEnum.Close;
+      } else {
+        side = SideEnum.Buy;
+        offset = OffsetEnum.Close;
+      }
+    }
+
     const makeOrderInput: KungfuApi.MakeOrderInput = {
       ...longfist.OrderInput(),
       parent_id: parentId,
       instrument_id: `${basketInstrument.instrument_id}`,
       exchange_id: `${basketInstrument.exchange_id}`,
       instrument_type: +basketInstrument.instrument_type,
-      side: +basketOrderInput.side,
-      offset: resolveOffsetBySideAndDirection(
-        +basketOrderInput.side,
-        +basketInstrument.direction,
-      ),
+      side,
+      offset,
       price_type: +basketOrderInput.price_type,
       limit_price: +basketInstrument.priceResolved || 0,
       volume: basketInstrument.volumeResolved,
