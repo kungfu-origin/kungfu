@@ -1340,23 +1340,6 @@ export const dealDirection = (
   return Direction[+direction as DirectionEnum];
 };
 
-export const resolveOffsetBySideAndDirection = (
-  side: SideEnum,
-  direction: DirectionEnum,
-): OffsetEnum => {
-  if (side === SideEnum.Buy) {
-    return direction === DirectionEnum.Long
-      ? OffsetEnum.Open
-      : OffsetEnum.Close;
-  } else if (side === SideEnum.Sell) {
-    return direction === DirectionEnum.Long
-      ? OffsetEnum.Close
-      : OffsetEnum.Open;
-  }
-
-  return OffsetEnum.Open;
-};
-
 export const resolveDirectionBySideAndOffset = (
   side: SideEnum,
   offset: OffsetEnum,

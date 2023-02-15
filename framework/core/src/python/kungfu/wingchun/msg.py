@@ -3,7 +3,6 @@
 Quote = 101
 Entrust = 102
 Transaction = 103
-Tree = 104
 Bar = 110
 OrderInput = 201
 OrderAction = 202

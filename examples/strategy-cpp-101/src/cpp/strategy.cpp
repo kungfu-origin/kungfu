@@ -33,8 +33,4 @@ public:
   void on_quote(Context_ptr & context, const Quote &quote, const location_ptr &location) override {
     SPDLOG_INFO("on quote: {}", quote.to_string());
   }
-
-  void on_tree(Context_ptr & context, const Tree &tree, const location_ptr &location) override {
-    SPDLOG_INFO("on tree: {}", tree.to_string());
-  }
 };
