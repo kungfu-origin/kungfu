@@ -807,6 +807,8 @@ declare namespace KungfuApi {
 
   export interface BasketInstrumentForOrder extends BasketInstrumentResolved {
     isNoQuote: boolean;
+    sideResolved: SideEnum;
+    offsetResolved: OffsetEnum;
     volumeResolved: number; // 最终下单量
     priceResolved: number; // 最终下单价
     strategyLocation?: KfLocation;
