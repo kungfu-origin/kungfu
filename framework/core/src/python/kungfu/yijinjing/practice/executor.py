@@ -297,12 +297,15 @@ def load_runner(ctx):
         sys.path.append(ctx.extension_path)
         module = importlib.import_module(ctx.vendor)
         runner_vendor = getattr(module, "Runner")
+        if ctx.arguments is None:
+            ctx.arguments = ""
         runner = runner_vendor(
             ctx.runtime_locator,
             ctx.group,
             ctx.name,
             kfj.MODES[ctx.mode],
             ctx.low_latency,
+            ctx.arguments,
         )
         return runner
     else:

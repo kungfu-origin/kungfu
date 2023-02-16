@@ -207,6 +207,12 @@ public:
    */
   virtual void update_strategy_state(longfist::types::StrategyStateUpdate &state_update) {}
 
+  /**
+   * Get arguments kfc run -a
+   * @return string of arguments
+   */
+  virtual std::string arguments() { return {}; }
+
 private:
   bool book_held_ = false;
   bool positions_mirrored_ = true;
