@@ -186,7 +186,7 @@ std::vector<uint64_t> RuntimeContext::insert_array_orders(const std::string &sou
 }
 
 uint64_t RuntimeContext::insert_basket_order(uint64_t basket_id, const std::string &source, const std::string account,
-                                             longfist::enums::PriceType price_type,
+                                             longfist::enums::Side side, longfist::enums::PriceType price_type,
                                              longfist::enums::PriceLevel price_level, double price_offset,
                                              int64_t volume) {
   auto account_location_uid = get_td_location_uid(source, account);
@@ -202,6 +202,7 @@ uint64_t RuntimeContext::insert_basket_order(uint64_t basket_id, const std::stri
   input.parent_id = basket_id;
   input.source_id = app_.get_home_uid();
   input.dest_id = account_location_uid;
+  input.side = side;
   input.price_type = price_type;
   input.price_level = price_level;
   input.price_offset = price_offset;

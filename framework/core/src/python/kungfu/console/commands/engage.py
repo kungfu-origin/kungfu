@@ -40,10 +40,7 @@ def engage(ctx):
 
 @engage.command(
     help="Format python files with [Black](https://github.com/psf/black)",
-    context_settings=dict(
-        ignore_unknown_options=True,
-        allow_extra_args=True,
-    ),
+    context_settings=dict(ignore_unknown_options=True, allow_extra_args=True,),
 )
 @engage_command_context()
 def black(ctx):
@@ -52,10 +49,7 @@ def black(ctx):
 
 @engage.command(
     help="Manage python packages with [pdm](https://pdm.fming.dev)",
-    context_settings=dict(
-        ignore_unknown_options=True,
-        allow_extra_args=True,
-    ),
+    context_settings=dict(ignore_unknown_options=True, allow_extra_args=True,),
 )
 @engage_command_context()
 def pdm(ctx):
@@ -64,10 +58,7 @@ def pdm(ctx):
 
 @engage.command(
     help="Build with [SCons](https://scons.org)",
-    context_settings=dict(
-        ignore_unknown_options=True,
-        allow_extra_args=True,
-    ),
+    context_settings=dict(ignore_unknown_options=True, allow_extra_args=True,),
 )
 @engage_command_context()
 def scons(ctx):
@@ -90,10 +81,7 @@ def engaged_nuitka_context():
 
 @engage.command(
     help="Compile and bundle python files with [Nuitka](https://nuitka.net)",
-    context_settings=dict(
-        ignore_unknown_options=True,
-        allow_extra_args=True,
-    ),
+    context_settings=dict(ignore_unknown_options=True, allow_extra_args=True,),
 )
 @engaged_nuitka_context()
 def nuitka(ctx):
@@ -101,10 +89,7 @@ def nuitka(ctx):
 
 
 @engage.command(
-    context_settings=dict(
-        ignore_unknown_options=True,
-        allow_extra_args=True,
-    ),
+    context_settings=dict(ignore_unknown_options=True, allow_extra_args=True,),
     help_priority=-1,
 )
 @engaged_nuitka_context()
