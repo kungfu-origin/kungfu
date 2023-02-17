@@ -58,6 +58,11 @@ public:
     PYBIND11_OVERLOAD(void, strategy::Strategy, on_quote, context, quote, location);
   }
 
+  void on_tree(strategy::Context_ptr &context, const Tree &tree,
+               const kungfu::yijinjing::data::location_ptr &location) override {
+    PYBIND11_OVERLOAD(void, strategy::Strategy, on_tree, context, tree, location);
+  }
+
   void on_bar(strategy::Context_ptr &context, const Bar &bar,
               const kungfu::yijinjing::data::location_ptr &location) override {
     PYBIND11_OVERLOAD(void, strategy::Strategy, on_bar, context, bar, location);
@@ -137,7 +142,7 @@ void bind_strategy(pybind11::module &m) {
   py::class_<strategy::Runner, PyRunner, kungfu::yijinjing::practice::apprentice, std::shared_ptr<strategy::Runner>>(
       m, "Runner")
       .def(py::init<kungfu::yijinjing::data::locator_ptr, const std::string &, const std::string &,
-                    longfist::enums::mode, bool, const std::string &>())
+                    longfist::enums::mode, bool>())
       .def_property_readonly("context", &strategy::Runner::get_context)
       .def("set_begin_time", &strategy::Runner::set_begin_time)
       .def("set_end_time", &strategy::Runner::set_end_time)
@@ -196,6 +201,7 @@ void bind_strategy(pybind11::module &m) {
       .def("post_stop", &strategy::Strategy::post_stop)
       .def("on_trading_day", &strategy::Strategy::on_trading_day)
       .def("on_quote", &strategy::Strategy::on_quote)
+      .def("on_tree", &strategy::Strategy::on_tree)
       .def("on_bar", &strategy::Strategy::on_bar)
       .def("on_entrust", &strategy::Strategy::on_entrust)
       .def("on_transaction", &strategy::Strategy::on_transaction)

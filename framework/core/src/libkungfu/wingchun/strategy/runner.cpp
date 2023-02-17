@@ -42,6 +42,8 @@ void Runner::react() {
   auto start_events = events_ | skip_until(events_ | filter([&](auto e) { return started_; }));
   start_events | is_own<Quote>(context_->get_broker_client()) |
       $$(invoke(&Strategy::on_quote, event->data<Quote>(), get_location(event->source())));
+  start_events | is_own<Tree>(context_->get_broker_client()) |
+      $$(invoke(&Strategy::on_tree, event->data<Tree>(), get_location(event->source())));
   start_events | is_own<Entrust>(context_->get_broker_client()) |
       $$(invoke(&Strategy::on_entrust, event->data<Entrust>(), get_location(event->source())));
   start_events | is_own<Transaction>(context_->get_broker_client()) |
