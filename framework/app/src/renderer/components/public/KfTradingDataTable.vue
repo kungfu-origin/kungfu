@@ -10,8 +10,6 @@ import {
   onBeforeMount,
   onMounted,
   ref,
-  shallowRef,
-  toRaw,
 } from 'vue';
 
 export interface API {
@@ -77,8 +75,8 @@ const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
 const kfScrollerTableBodyRef = ref();
 const kfScrollerTableWidth = ref(0);
 const dataSouceMap = ref<Record<string, KungfuApi.TradingDataItem>>({});
-const allRowKeyFieldTrue = shallowRef<Record<string, boolean>>({});
-const allRowKeyFieldFalse = shallowRef<Record<string, boolean>>({});
+let allRowKeyFieldTrue: Record<string, boolean> = {};
+let allRowKeyFieldFalse: Record<string, boolean> = {};
 const isSelectAll = ref(false);
 const selectAllIndeterminate = ref(false);
 const selectedRowKeyFieldValues = ref<Record<string, boolean>>({});
@@ -117,8 +115,8 @@ watch(
   () => props.dataSource,
   (newDataSource) => {
     dataSouceMap.value = {};
-    allRowKeyFieldTrue.value = {};
-    allRowKeyFieldFalse.value = {};
+    allRowKeyFieldTrue = {};
+    allRowKeyFieldFalse = {};
 
     const tempSelectedValues = {};
     const tempSelectedRows = {};
@@ -126,8 +124,8 @@ watch(
     newDataSource.forEach((item) => {
       const key = `${item[props.keyField]}`;
       dataSouceMap.value[key] = item;
-      allRowKeyFieldTrue.value[key] = true;
-      allRowKeyFieldFalse.value[key] = false;
+      allRowKeyFieldTrue[key] = true;
+      allRowKeyFieldFalse[key] = false;
 
       if (key in selectedRowKeyFieldValues.value) {
         tempSelectedValues[key] = selectedRowKeyFieldValues.value[key];
@@ -258,12 +256,11 @@ function handleSelectRow(isChecked: boolean, item: KungfuApi.TradingDataItem) {
 function handleSelectAll(isChecked: boolean) {
   if (!props.selectable) return;
 
-  const allSelected = Object.assign({}, toRaw(allRowKeyFieldTrue.value));
-  const allUnSelected = Object.assign({}, toRaw(allRowKeyFieldFalse.value));
+  const allSelected = Object.assign({}, allRowKeyFieldTrue);
+  const allUnSelected = Object.assign({}, allRowKeyFieldFalse);
 
   selectedRowKeyFieldValues.value = isChecked ? allSelected : allUnSelected;
   selectedRowsMap.value = isChecked ? dataSouceMap.value : {};
-  selectAllIndeterminate.value = false;
 }
 
 watch(
@@ -271,7 +268,7 @@ watch(
   (val) => {
     if (!props.selectable) return;
 
-    const allRowLength = Object.keys(allRowKeyFieldTrue.value).length;
+    const allRowLength = props.dataSource.length;
     if (!allRowLength) return;
 
     const selectedRowLength = Object.values(val).filter((item) => item).length;
