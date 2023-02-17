@@ -141,8 +141,9 @@ public:
    * @param total_volume
    */
   virtual uint64_t insert_basket_order(uint64_t basket_id, const std::string &source, const std::string account,
-                                       longfist::enums::PriceType price_type, longfist::enums::PriceLevel price_level,
-                                       double price_offset = 0, int64_t volume = 0) = 0;
+                                       longfist::enums::Side side, longfist::enums::PriceType price_type,
+                                       longfist::enums::PriceLevel price_level, double price_offset = 0,
+                                       int64_t volume = 0) = 0;
 
   /**
    * query history order
@@ -206,6 +207,12 @@ public:
    * @param infos vector<string>, info_a, info_b, info_c.
    */
   virtual void update_strategy_state(longfist::types::StrategyStateUpdate &state_update) {}
+
+  /**
+   * Get arguments kfc run -a
+   * @return string of arguments
+   */
+  virtual std::string arguments() { return {}; }
 
 private:
   bool book_held_ = false;

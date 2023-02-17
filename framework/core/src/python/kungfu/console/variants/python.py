@@ -31,10 +31,7 @@ from kungfu.console import bridging
     help="don't write .pyc files on import; also PYTHONDONTWRITEBYTECODE=x",
 )
 @click.option(
-    "-c",
-    "code",
-    type=str,
-    help="program passed in as string (terminates option list)",
+    "-c", "code", type=str, help="program passed in as string (terminates option list)",
 )
 @click.option(
     "-d",
