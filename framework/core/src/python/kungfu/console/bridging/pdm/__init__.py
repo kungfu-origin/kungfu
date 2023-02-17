@@ -164,6 +164,9 @@ class BridgingCore(Core):
 def main():
     variants.enable("python")
     os.environ.update(
-        {"PDM_CHECK_UPDATE": "false", "PDM_USE_VENV": "0",}
+        {
+            "PDM_CHECK_UPDATE": "false",
+            "PDM_USE_VENV": "0",
+        }
     )
     BridgingCore().main()
