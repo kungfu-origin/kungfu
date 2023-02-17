@@ -305,4 +305,6 @@ void RuntimeContext::update_strategy_state(StrategyStateUpdate &state_update) {
   writer->write(state_update.update_time, state_update);
 }
 
+std::string RuntimeContext::arguments() { return arguments_; }
+
 } // namespace kungfu::wingchun::strategy

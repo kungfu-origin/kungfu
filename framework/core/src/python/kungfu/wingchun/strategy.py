@@ -20,8 +20,16 @@ yjj = kungfu.__binding__.yijinjing
 
 class Runner(wc.Runner):
     def __init__(self, ctx, mode):
+        if ctx.arguments is None:
+            ctx.arguments = ""
         wc.Runner.__init__(
-            self, ctx.runtime_locator, ctx.group, ctx.name, mode, ctx.low_latency
+            self,
+            ctx.runtime_locator,
+            ctx.group,
+            ctx.name,
+            mode,
+            ctx.low_latency,
+            ctx.arguments,
         )
         self.ctx = ctx
 
@@ -53,6 +61,9 @@ class Strategy(wc.Strategy):
         self._on_bar = getattr(self._module, "on_bar", lambda ctx, bar, location: None)
         self._on_quote = getattr(
             self._module, "on_quote", lambda ctx, quote, location: None
+        )
+        self._on_tree = getattr(
+            self._module, "on_tree", lambda ctx, tree, location: None
         )
         self._on_entrust = getattr(
             self._module, "on_entrust", lambda ctx, entrust, location: None
@@ -224,6 +235,9 @@ class Strategy(wc.Strategy):
 
     def on_quote(self, wc_context, quote, location):
         self.__call_proxy(self._on_quote, self.ctx, quote, location)
+
+    def on_tree(self, wc_context, tree, location):
+        self.__call_proxy(self._on_tree, self.ctx, tree, location)
 
     def on_bar(self, wc_context, bar, location):
         self.__call_proxy(self._on_bar, self.ctx, bar, location)

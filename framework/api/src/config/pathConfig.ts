@@ -111,16 +111,20 @@ export const KFC_DIR = process.env.KFC_DIR || path.join(KFC_PARENT_DIR, 'kfc');
 process.env.KFC_DIR = KFC_DIR;
 
 export const KFC_EXECUTABLE = process.platform === 'win32' ? 'kfc.exe' : 'kfc';
-export const EXTENSION_DIRS: string[] = production
-  ? [
-      path.join(globalThis.__kfResourcesPath, 'app', 'kungfu-extensions'),
-      ...((process.env.EXTENSION_DIRS || '').split(path.delimiter) || []),
-    ]
-  : [
-      path.resolve(KFC_PARENT_DIR, '..', '..', '..', 'extensions'),
-      path.resolve('node_modules', '@kungfu-trader'),
-      path.resolve('dist'),
-      ...((process.env.EXTENSION_DIRS || '').split(path.delimiter) || []),
-    ];
+export const EXTENSION_DIRS: string[] = Array.from(
+  new Set(
+    production
+      ? [
+          path.join(globalThis.__kfResourcesPath, 'app', 'kungfu-extensions'),
+          ...((process.env.EXTENSION_DIRS || '').split(path.delimiter) || []),
+        ]
+      : [
+          path.resolve(KFC_PARENT_DIR, '..', '..', '..', 'extensions'),
+          path.resolve('node_modules', '@kungfu-trader'),
+          path.resolve('dist'),
+          ...((process.env.EXTENSION_DIRS || '').split(path.delimiter) || []),
+        ],
+  ),
+);
 
 //================== kfc end ======================================

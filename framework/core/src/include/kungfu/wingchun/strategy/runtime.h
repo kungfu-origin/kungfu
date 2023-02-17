@@ -204,6 +204,12 @@ public:
    */
   void update_strategy_state(longfist::types::StrategyStateUpdate &state_update) override;
 
+  /**
+   * Get arguments kfc run -a
+   * @return string of arguments
+   */
+  std::string arguments() override;
+
 protected:
   yijinjing::practice::apprentice &app_;
   const rx::connectable_observable<event_ptr> &events_;
@@ -224,8 +230,10 @@ private:
   yijinjing::data::location_map td_locations_ = {};
   std::unordered_map<uint32_t, uint32_t> account_location_ids_ = {};
   std::unordered_map<std::string, yijinjing::data::location_ptr> market_data_ = {};
+  std::string arguments_;
 
   friend void enable(RuntimeContext &context) { context.on_start(); }
+  friend class Runner;
 };
 
 DECLARE_PTR(RuntimeContext)
