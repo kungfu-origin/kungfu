@@ -200,7 +200,7 @@ def archive(ctx, format, mode):
 
     if mode == "delete":
         today_start = yjj.strptime(today_date, "%Y-%m-%d")
-        today_start_timestamp = today_start / 10 ** 9
+        today_start_timestamp = today_start / 10**9
         ctx.logger.info(
             f"pruning runtime logs before {yjj.strftime(today_start, '%Y-%m-%d %H:%M:%S')}"
         )
