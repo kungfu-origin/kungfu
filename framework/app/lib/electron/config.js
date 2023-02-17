@@ -205,7 +205,7 @@ module.exports = {
   mac: {
     icon: icnsLogoPathResolved,
     type: 'distribution',
-    target: ['dmg'],
+    target: ['dmg', 'zip'],
   },
   win: {
     icon: icoLogoPathResolved,
@@ -214,11 +214,15 @@ module.exports = {
         target: 'nsis',
         arch: ['x64'],
       },
+      {
+        target: 'zip',
+        arch: ['x64'],
+      },
     ],
   },
   linux: {
     icon: icnsLogoPathResolved,
-    target: ['rpm', 'appimage'],
+    target: ['rpm', 'appimage', 'zip'],
     executableName: 'Kungfu.app',
   },
   nsis: {
