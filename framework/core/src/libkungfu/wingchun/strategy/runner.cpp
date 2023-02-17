@@ -15,9 +15,10 @@ using namespace kungfu::yijinjing::data;
 using namespace kungfu::yijinjing::practice;
 
 namespace kungfu::wingchun::strategy {
-Runner::Runner(locator_ptr locator, const std::string &group, const std::string &name, mode m, bool low_latency)
+Runner::Runner(locator_ptr locator, const std::string &group, const std::string &name, mode m, bool low_latency,
+               const std::string &arguments)
     : apprentice(location::make_shared(m, category::STRATEGY, group, name, std::move(locator)), low_latency),
-      positions_set_(m == mode::BACKTEST), started_(m == mode::BACKTEST) {}
+      positions_set_(m == mode::BACKTEST), started_(m == mode::BACKTEST), arguments_(arguments) {}
 
 RuntimeContext_ptr Runner::get_context() const { return context_; }
 
@@ -36,10 +37,13 @@ void Runner::on_trading_day(const event_ptr &event, int64_t daytime) {
 
 void Runner::react() {
   context_ = make_context();
+  context_->arguments_ = arguments_;
 
   auto start_events = events_ | skip_until(events_ | filter([&](auto e) { return started_; }));
   start_events | is_own<Quote>(context_->get_broker_client()) |
       $$(invoke(&Strategy::on_quote, event->data<Quote>(), get_location(event->source())));
+  start_events | is_own<Tree>(context_->get_broker_client()) |
+      $$(invoke(&Strategy::on_tree, event->data<Tree>(), get_location(event->source())));
   start_events | is_own<Entrust>(context_->get_broker_client()) |
       $$(invoke(&Strategy::on_entrust, event->data<Entrust>(), get_location(event->source())));
   start_events | is_own<Transaction>(context_->get_broker_client()) |
