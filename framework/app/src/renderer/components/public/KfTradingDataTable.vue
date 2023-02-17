@@ -10,6 +10,7 @@ import {
   onBeforeMount,
   onMounted,
   ref,
+  toRaw,
 } from 'vue';
 
 export interface API {
@@ -247,7 +248,7 @@ function handleSelectRow(isChecked: boolean, item: KungfuApi.TradingDataItem) {
   selectedRowKeyFieldValues.value[key] = isChecked;
 
   if (isChecked) {
-    selectedRowsMap.value[key] = dataSouceMap.value[key];
+    selectedRowsMap.value[key] = toRaw(dataSouceMap.value[key]);
   } else {
     delete selectedRowsMap.value[key];
   }
@@ -258,9 +259,10 @@ function handleSelectAll(isChecked: boolean) {
 
   const allSelected = Object.assign({}, allRowKeyFieldTrue);
   const allUnSelected = Object.assign({}, allRowKeyFieldFalse);
+  const allRowsMap = Object.assign({}, toRaw(dataSouceMap.value));
 
   selectedRowKeyFieldValues.value = isChecked ? allSelected : allUnSelected;
-  selectedRowsMap.value = isChecked ? dataSouceMap.value : {};
+  selectedRowsMap.value = isChecked ? allRowsMap : {};
 }
 
 watch(
