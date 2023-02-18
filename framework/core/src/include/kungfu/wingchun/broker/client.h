@@ -246,7 +246,7 @@ private:
 template <typename DataType>
 static constexpr auto is_md_datatype_v =
     std::is_same_v<DataType, longfist::types::Quote> or std::is_same_v<DataType, longfist::types::Entrust> or
-    std::is_same_v<DataType, longfist::types::Transaction>;
+    std::is_same_v<DataType, longfist::types::Transaction> or std::is_same_v<DataType, longfist::types::Tree>;
 
 template <typename DataType, std::enable_if_t<is_md_datatype_v<DataType>>...>
 static constexpr auto is_own(const Client &broker_client) {
@@ -255,6 +255,10 @@ static constexpr auto is_own(const Client &broker_client) {
       const DataType &data = event->data<DataType>();
       if (broker_client.is_custom_subscribed(event->source())) {
         if ((std::is_same_v<DataType, longfist::types::Quote> &&
+             broker_client.is_custom_subscribed_all(event->source(),
+                                                    kungfu::longfist::enums::SubscribeDataType::Snapshot,
+                                                    data.exchange_id, data.instrument_type)) ||
+            (std::is_same_v<DataType, longfist::types::Tree> &&
              broker_client.is_custom_subscribed_all(event->source(),
                                                     kungfu::longfist::enums::SubscribeDataType::Snapshot,
                                                     data.exchange_id, data.instrument_type)) ||

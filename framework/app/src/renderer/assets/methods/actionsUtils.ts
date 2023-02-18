@@ -2297,7 +2297,7 @@ export const useBasket = () => {
   }
 
   function buildBasketOptionValue(basket: KungfuApi.Basket) {
-    return `${basket.id}_${basket.name}_${basket.volume_type}_${basket.total_amount}`;
+    return `${basket.id}_${basket.name}`;
   }
 
   function parseBasketOptionValue(val: string): KungfuApi.Basket | null {

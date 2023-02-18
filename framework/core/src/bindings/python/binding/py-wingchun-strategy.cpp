@@ -58,6 +58,11 @@ public:
     PYBIND11_OVERLOAD(void, strategy::Strategy, on_quote, context, quote, location);
   }
 
+  void on_tree(strategy::Context_ptr &context, const Tree &tree,
+               const kungfu::yijinjing::data::location_ptr &location) override {
+    PYBIND11_OVERLOAD(void, strategy::Strategy, on_tree, context, tree, location);
+  }
+
   void on_bar(strategy::Context_ptr &context, const Bar &bar,
               const kungfu::yijinjing::data::location_ptr &location) override {
     PYBIND11_OVERLOAD(void, strategy::Strategy, on_bar, context, bar, location);
@@ -168,8 +173,8 @@ void bind_strategy(pybind11::module &m) {
       .def("insert_batch_orders", &strategy::Context::insert_batch_orders)
       .def("insert_array_orders", &strategy::Context::insert_array_orders)
       .def("insert_basket_order", &strategy::Context::insert_basket_order, py::arg("basket_id"), py::arg("source"),
-           py::arg("account"), py::arg("price_type") = PriceType::Limit, py::arg("price_level") = PriceLevel::Lastest,
-           py::arg("price_offset") = 0, py::arg("volume") = 0)
+           py::arg("account"), py::arg("side"), py::arg("price_type") = PriceType::Limit,
+           py::arg("price_level") = PriceLevel::Lastest, py::arg("price_offset") = 0, py::arg("volume") = 0)
       .def("cancel_order", &strategy::Context::cancel_order)
       .def("req_history_order", &strategy::Context::req_history_order, py::arg("source"), py::arg("account"),
            py::arg("query_num") = 0)
@@ -196,6 +201,7 @@ void bind_strategy(pybind11::module &m) {
       .def("post_stop", &strategy::Strategy::post_stop)
       .def("on_trading_day", &strategy::Strategy::on_trading_day)
       .def("on_quote", &strategy::Strategy::on_quote)
+      .def("on_tree", &strategy::Strategy::on_tree)
       .def("on_bar", &strategy::Strategy::on_bar)
       .def("on_entrust", &strategy::Strategy::on_entrust)
       .def("on_transaction", &strategy::Strategy::on_transaction)

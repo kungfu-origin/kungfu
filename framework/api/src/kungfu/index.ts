@@ -21,7 +21,6 @@ import {
   kfLogger,
   resolveAccountId,
   resolveClientId,
-  resolveOffsetBySideAndDirection,
 } from '../utils/busiUtils';
 import {
   HistoryDateEnum,
@@ -562,11 +561,8 @@ export const makeOrderByBasketInstruments = (
       instrument_id: `${basketInstrument.instrument_id}`,
       exchange_id: `${basketInstrument.exchange_id}`,
       instrument_type: +basketInstrument.instrument_type,
-      side: +basketOrderInput.side,
-      offset: resolveOffsetBySideAndDirection(
-        +basketOrderInput.side,
-        +basketInstrument.direction,
-      ),
+      side: +basketInstrument.sideResolved,
+      offset: +basketInstrument.offsetResolved,
       price_type: +basketOrderInput.price_type,
       limit_price: +basketInstrument.priceResolved || 0,
       volume: basketInstrument.volumeResolved,

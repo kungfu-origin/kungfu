@@ -15,7 +15,7 @@ namespace kungfu::wingchun::strategy {
 class Runner : public yijinjing::practice::apprentice {
 public:
   Runner(yijinjing::data::locator_ptr locator, const std::string &group, const std::string &name,
-         longfist::enums::mode m, bool low_latency);
+         longfist::enums::mode m, bool low_latency, const std::string &arguments = "");
 
   ~Runner() override = default;
 
@@ -53,6 +53,7 @@ private:
   bool started_;
   std::vector<Strategy_ptr> strategies_ = {};
   RuntimeContext_ptr context_;
+  const std::string arguments_;
 
   void prepare(const event_ptr &event);
   void inspect_channel(const event_ptr &event);
