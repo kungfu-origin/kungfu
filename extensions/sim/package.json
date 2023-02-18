@@ -4,7 +4,7 @@
     "name": "Kungfu Trader",
     "email": "info@kungfu.link"
   },
-  "version": "2.4.49",
+  "version": "2.4.50-alpha.0",
   "description": "Kungfu Extension - SIM",
   "license": "Apache-2.0",
   "main": "package.json",
@@ -29,10 +29,10 @@
     "package": "kfs project package"
   },
   "dependencies": {
-    "@kungfu-trader/kungfu-core": "^2.4.49"
+    "@kungfu-trader/kungfu-core": "^2.4.50-alpha.0"
   },
   "devDependencies": {
-    "@kungfu-trader/kungfu-sdk": "^2.4.49"
+    "@kungfu-trader/kungfu-sdk": "^2.4.50-alpha.0"
   },
   "kungfuBuild": {
     "python": {
