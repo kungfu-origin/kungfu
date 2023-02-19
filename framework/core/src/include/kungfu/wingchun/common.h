@@ -446,46 +446,48 @@ inline std::string get_exchange_id_from_future_instrument_id(const std::string &
 }
 
 inline bool is_shortable(longfist::enums::InstrumentType instrument_type) {
-  using namespace longfist::enums;
-  return not(instrument_type == InstrumentType::Stock or instrument_type == InstrumentType::Bond or
-             instrument_type == InstrumentType::Fund or instrument_type == InstrumentType::TechStock or
-             instrument_type == InstrumentType::Index or instrument_type == InstrumentType::Repo);
+  return not(instrument_type == longfist::enums::InstrumentType::Stock or
+             instrument_type == longfist::enums::InstrumentType::Bond or
+             instrument_type == longfist::enums::InstrumentType::Fund or
+             instrument_type == longfist::enums::InstrumentType::TechStock or
+             instrument_type == longfist::enums::InstrumentType::Index or
+             instrument_type == longfist::enums::InstrumentType::Repo);
 }
 
 inline longfist::enums::Direction get_direction(longfist::enums::InstrumentType instrument_type,
                                                 longfist::enums::Side side, longfist::enums::Offset offset) {
-  using namespace longfist::enums;
-
-  if (side == Side::MarginTrade) {
-    return Direction::Long;
-  } else if (side == Side::ShortSell) {
-    return Direction::Short;
-  } else if (side == Side::RepayMargin) {
-    return Direction::Long;
-  } else if (side == Side::RepayStock) {
-    return Direction::Short;
+  if (side == longfist::enums::Side::MarginTrade) {
+    return longfist::enums::Direction::Long;
+  } else if (side == longfist::enums::Side::ShortSell) {
+    return longfist::enums::Direction::Short;
+  } else if (side == longfist::enums::Side::RepayMargin) {
+    return longfist::enums::Direction::Long;
+  } else if (side == longfist::enums::Side::RepayStock) {
+    return longfist::enums::Direction::Short;
   }
 
-  if (side == Side::Exec) {
-    return Direction::Long;
+  if (side == longfist::enums::Side::Exec) {
+    return longfist::enums::Direction::Long;
   }
 
   if (not is_shortable(instrument_type)) {
-    return Direction::Long;
+    return longfist::enums::Direction::Long;
   }
-  if (side == Side::Buy and offset == Offset::Open) {
-    return Direction::Long;
+  if (side == longfist::enums::Side::Buy and offset == longfist::enums::Offset::Open) {
+    return longfist::enums::Direction::Long;
   }
-  if (side == Side::Sell and
-      (offset == Offset::Close or offset == Offset::CloseToday or offset == Offset::CloseYesterday)) {
-    return Direction::Long;
+  if (side == longfist::enums::Side::Sell and
+      (offset == longfist::enums::Offset::Close or offset == longfist::enums::Offset::CloseToday or
+       offset == longfist::enums::Offset::CloseYesterday)) {
+    return longfist::enums::Direction::Long;
   }
-  if (side == Side::Sell and offset == Offset::Open) {
-    return Direction::Short;
+  if (side == longfist::enums::Side::Sell and offset == longfist::enums::Offset::Open) {
+    return longfist::enums::Direction::Short;
   }
-  if (side == Side::Buy and
-      (offset == Offset::Close or offset == Offset::CloseToday or offset == Offset::CloseYesterday)) {
-    return Direction::Short;
+  if (side == longfist::enums::Side::Buy and
+      (offset == longfist::enums::Offset::Close or offset == longfist::enums::Offset::CloseToday or
+       offset == longfist::enums::Offset::CloseYesterday)) {
+    return longfist::enums::Direction::Short;
   }
   throw wingchun_error(fmt::format("get_direction error: invalid direction args {} {} {}", (int)instrument_type,
                                    (int)side, (int)offset));
