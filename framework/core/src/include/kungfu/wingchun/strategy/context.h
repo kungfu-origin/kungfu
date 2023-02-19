@@ -97,6 +97,16 @@ public:
                                 uint64_t block_id = 0, uint64_t parent_id = 0) = 0;
 
   /**
+   * Insert Order
+   * @param source
+   * @param account
+   * @param order_input
+   * @return
+   */
+  virtual uint64_t insert_order_input(const std::string &source, const std::string &account,
+                                longfist::types::OrderInput &order_input) = 0;
+
+  /**
    * Insert Batch Orders
    * @param source
    * @param account
@@ -127,7 +137,7 @@ public:
    * @return
    */
   virtual std::vector<uint64_t> insert_array_orders(const std::string &source, const std::string &account,
-                                                    std::vector<longfist::types::OrderInput> order_inputs) = 0;
+                                                    std::vector<longfist::types::OrderInput> &order_inputs) = 0;
 
   /**
    * Insert Basket Orders
@@ -140,7 +150,7 @@ public:
    * @param volume_mode
    * @param total_volume
    */
-  virtual uint64_t insert_basket_order(uint64_t basket_id, const std::string &source, const std::string account,
+  virtual uint64_t insert_basket_order(uint64_t basket_id, const std::string &source, const std::string &account,
                                        longfist::enums::Side side, longfist::enums::PriceType price_type,
                                        longfist::enums::PriceLevel price_level, double price_offset = 0,
                                        int64_t volume = 0) = 0;

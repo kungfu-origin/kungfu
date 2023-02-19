@@ -90,6 +90,16 @@ public:
                         uint64_t block_id = 0, uint64_t parent_id = 0) override;
 
   /**
+   * Insert Order
+   * @param source
+   * @param account
+   * @param order_input
+   * @return
+   */
+  virtual uint64_t insert_order_input(const std::string &source, const std::string &account,
+                                longfist::types::OrderInput &order_input) override;
+
+  /**
    *
    * @param source
    * @param account
@@ -120,7 +130,7 @@ public:
    * @return
    */
   std::vector<uint64_t> insert_array_orders(const std::string &source, const std::string &account,
-                                            std::vector<longfist::types::OrderInput> order_inputs) override;
+                                            std::vector<longfist::types::OrderInput>& order_inputs) override;
 
   /**
    * Insert Basket Orders
@@ -133,7 +143,7 @@ public:
    * @param volume_mode
    * @param total_volume
    */
-  uint64_t insert_basket_order(uint64_t basket_id, const std::string &source, const std::string account,
+  uint64_t insert_basket_order(uint64_t basket_id, const std::string &source, const std::string &account,
                                longfist::enums::Side side, longfist::enums::PriceType price_type,
                                longfist::enums::PriceLevel price_level, double price_offset = 0,
                                int64_t volume = 0) override;

@@ -165,16 +165,16 @@ class Strategy(wc.Strategy):
         return self.ctx.wc_context.bookkeeper.get_book(location.uid)
 
     async def __async_insert_order(
-        self,
-        side,
-        instrument_id,
-        exchange_id,
-        source_id,
-        account_id,
-        price,
-        volume,
-        price_type=PriceType.Any,
-        status_set=None,
+            self,
+            side,
+            instrument_id,
+            exchange_id,
+            source_id,
+            account_id,
+            price,
+            volume,
+            price_type=PriceType.Any,
+            status_set=None,
     ):
         if status_set is None:
             status_set = [
@@ -206,6 +206,7 @@ class Strategy(wc.Strategy):
         self.ctx.add_account = self.__add_account
         self.ctx.insert_block_message = wc_context.insert_block_message
         self.ctx.insert_order = wc_context.insert_order
+        self.ctx.insert_order_input = wc_context.insert_order_input
         self.ctx.insert_basket_order = wc_context.insert_basket_order
         self.ctx.insert_batch_orders = wc_context.insert_batch_orders
         self.ctx.insert_array_orders = wc_context.insert_array_orders
@@ -288,7 +289,7 @@ class Strategy(wc.Strategy):
         self.__call_proxy(self._on_asset_sync_reset, self.ctx, old_asset, new_asset)
 
     def on_asset_margin_sync_reset(
-        self, wc_context, old_asset_margin, new_asset_margin
+            self, wc_context, old_asset_margin, new_asset_margin
     ):
         self.__call_proxy(
             self._on_asset_margin_sync_reset,
