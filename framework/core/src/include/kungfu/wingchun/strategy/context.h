@@ -224,6 +224,15 @@ public:
    */
   virtual std::string arguments() { return {}; }
 
+
+  /**
+   *
+   * @param source td source id
+   * @param account td account id
+   * @return writer to related td
+   */
+  virtual yijinjing::journal::writer_ptr get_writer(const std::string& source, const std::string &account) = 0;
+
 private:
   bool book_held_ = false;
   bool positions_mirrored_ = true;

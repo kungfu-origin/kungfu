@@ -97,7 +97,7 @@ public:
    * @return
    */
   virtual uint64_t insert_order_input(const std::string &source, const std::string &account,
-                                longfist::types::OrderInput &order_input) override;
+                                      longfist::types::OrderInput &order_input) override;
 
   /**
    *
@@ -130,7 +130,7 @@ public:
    * @return
    */
   std::vector<uint64_t> insert_array_orders(const std::string &source, const std::string &account,
-                                            std::vector<longfist::types::OrderInput>& order_inputs) override;
+                                            std::vector<longfist::types::OrderInput> &order_inputs) override;
 
   /**
    * Insert Basket Orders
@@ -219,6 +219,14 @@ public:
    * @return string of arguments
    */
   std::string arguments() override;
+
+  /**
+   *
+   * @param source td source id
+   * @param account td account id
+   * @return writer to related td
+   */
+  virtual yijinjing::journal::writer_ptr get_writer(const std::string &source, const std::string &account) override;
 
 protected:
   yijinjing::practice::apprentice &app_;
