@@ -92,10 +92,10 @@ class TraderSim(wc.Trader):
             order.trading_day = kft.strfnow("%Y%m%d")
             # 增加repo不可以买入的限制
             if (
-                    wc.utils.get_instrument_type(
-                        order_input.exchange_id, order_input.instrument_id
-                    )
-                    == lf.enums.InstrumentType.Repo
+                wc.utils.get_instrument_type(
+                    order_input.exchange_id, order_input.instrument_id
+                )
+                == lf.enums.InstrumentType.Repo
             ):
                 if order.side == lf.enums.Side.Buy:
                     order.status = lf.enums.OrderStatus.Error
@@ -107,7 +107,7 @@ class TraderSim(wc.Trader):
                 if wc.utils.get_instrument_type(
                     order_input.exchange_id, order_input.instrument_id
                 )
-                   == lf.enums.InstrumentType.Stock
+                == lf.enums.InstrumentType.Stock
                 else 1
             )
             if order_input.volume < min_vol:
