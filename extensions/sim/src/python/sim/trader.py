@@ -24,6 +24,7 @@ class MatchMode:
     PartialFill = "partialfill"
     Fill = "fill"
     Custom = "custom"
+    Multiple = "multiple_transactions"
 
 
 OrderRecord = namedtuple("OrderRecord", ["source", "dest", "order"])
@@ -134,6 +135,9 @@ class TraderSim(wc.Trader):
             elif self.match_mode == MatchMode.Fill:
                 volume_traded = order_input.volume
                 order.status = lf.enums.OrderStatus.Filled
+            elif self.match_mode == MatchMode.Multiple:
+                volume_traded = order_input.volume
+                order.status = lf.enums.OrderStatus.Filled
             else:
                 raise Exception("invalid match mode {}".format(self.match_mode))
             order.volume_left = order.volume - volume_traded
@@ -151,7 +155,7 @@ class TraderSim(wc.Trader):
             writer.write(event.gen_time, order)
             self.ctx.orders[order.order_id] = order
 
-            if volume_traded > 0:
+            if volume_traded > 0 and self.match_mode != MatchMode.Multiple:
                 trade = lf.types.Trade()
                 trade.trade_id = writer.current_frame_uid()
                 trade.order_id = order.order_id
@@ -165,6 +169,23 @@ class TraderSim(wc.Trader):
                 trade.trade_time = yjj.now_in_nano()
                 trade.trading_day = kft.strfnow("%Y%m%d")
                 writer.write(event.gen_time, trade)
+            elif volume_traded > 0 and self.match_mode == MatchMode.Multiple:
+                while volume_traded > 0:
+                    trade = lf.types.Trade()
+                    trade.trade_id = writer.current_frame_uid()
+                    trade.order_id = order.order_id
+                    trade.volume = min_vol
+                    trade.price = order.limit_price
+                    trade.side = order.side
+                    trade.offset = order.offset
+                    trade.instrument_id = order.instrument_id
+                    trade.instrument_type = order.instrument_type
+                    trade.exchange_id = order.exchange_id
+                    trade.trade_time = yjj.now_in_nano()
+                    trade.trading_day = kft.strfnow("%Y%m%d")
+                    writer.write(event.gen_time, trade)
+                    volume_traded -= trade.volume
+                    self.logger.debug(f"trade.trade_id: {trade.trade_id}")
 
             return True
 
