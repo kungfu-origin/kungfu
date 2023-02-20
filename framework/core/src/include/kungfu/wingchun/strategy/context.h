@@ -93,8 +93,8 @@ public:
                                 const std::string &source, const std::string &account, double limit_price,
                                 int64_t volume, longfist::enums::PriceType type, longfist::enums::Side side,
                                 longfist::enums::Offset offset,
-                                longfist::enums::HedgeFlag hedge_flag = longfist::enums::HedgeFlag::Speculation, bool is_swap = false,
-                                uint64_t block_id = 0, uint64_t parent_id = 0) = 0;
+                                longfist::enums::HedgeFlag hedge_flag = longfist::enums::HedgeFlag::Speculation,
+                                bool is_swap = false, uint64_t block_id = 0, uint64_t parent_id = 0) = 0;
 
   /**
    * Insert Order
@@ -104,7 +104,7 @@ public:
    * @return
    */
   virtual uint64_t insert_order_input(const std::string &source, const std::string &account,
-                                longfist::types::OrderInput &order_input) = 0;
+                                      longfist::types::OrderInput &order_input) = 0;
 
   /**
    * Insert Batch Orders
@@ -224,14 +224,13 @@ public:
    */
   virtual std::string arguments() { return {}; }
 
-
   /**
    *
    * @param source td source id
    * @param account td account id
    * @return writer to related td
    */
-  virtual yijinjing::journal::writer_ptr get_writer(const std::string& source, const std::string &account) = 0;
+  virtual yijinjing::journal::writer_ptr get_writer(const std::string &source, const std::string &account) = 0;
 
 private:
   bool book_held_ = false;

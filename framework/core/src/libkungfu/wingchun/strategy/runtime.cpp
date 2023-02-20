@@ -132,7 +132,7 @@ uint64_t RuntimeContext::insert_order(const std::string &instrument_id, const st
 }
 
 uint64_t RuntimeContext::insert_order_input(const std::string &source, const std::string &account,
-                                      longfist::types::OrderInput &order_input) {
+                                            longfist::types::OrderInput &order_input) {
 
   auto account_location_uid = get_td_location_uid(source, account);
   if (not broker_client_.is_ready(account_location_uid)) {
@@ -332,7 +332,8 @@ void RuntimeContext::update_strategy_state(StrategyStateUpdate &state_update) {
 std::string RuntimeContext::arguments() { return arguments_; }
 
 yijinjing::journal::writer_ptr RuntimeContext::get_writer(const std::string &source, const std::string &account) {
-  return app_.get_writer(get_td_location_uid(source,account));;
+  return app_.get_writer(get_td_location_uid(source, account));
+  ;
 }
 
 } // namespace kungfu::wingchun::strategy
