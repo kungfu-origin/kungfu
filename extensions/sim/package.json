@@ -4,7 +4,7 @@
     "name": "Kungfu Trader",
     "email": "info@kungfu.link"
   },
-  "version": "2.4.49",
+  "version": "2.4.50-alpha.0",
   "description": "Kungfu Extension - SIM",
   "license": "Apache-2.0",
   "main": "package.json",
@@ -29,10 +29,10 @@
     "package": "kfs project package"
   },
   "dependencies": {
-    "@kungfu-trader/kungfu-core": "^2.4.49"
+    "@kungfu-trader/kungfu-core": "^2.4.50-alpha.0"
   },
   "devDependencies": {
-    "@kungfu-trader/kungfu-sdk": "^2.4.49"
+    "@kungfu-trader/kungfu-sdk": "^2.4.50-alpha.0"
   },
   "kungfuBuild": {
     "python": {
@@ -86,6 +86,10 @@
               {
                 "value": "fill",
                 "label": "sim.fill"
+              },
+              {
+                "value": "multiple_transactions",
+                "label": "sim.multiple_transactions"
               }
             ],
             "errMsg": "sim.match_mode_error",
@@ -109,7 +113,8 @@
         "cancel": "撤单",
         "partialfillandcancel": "部分成交部分撤单",
         "partialfill": "部分成交部分等待",
-        "fill": "成交"
+        "fill": "成交",
+        "multiple_transactions": "多笔成交"
       },
       "en-US": {
         "sim": "SIM",
@@ -122,7 +127,8 @@
         "cancel": "Cancel",
         "partialfillandcancel": "PartialFillAndCancel",
         "partialfill": "PartialFillAndPending",
-        "fill": "Fill"
+        "fill": "Fill",
+        "multiple_transactions": "Multiple Transactions"
       }
     }
   }
