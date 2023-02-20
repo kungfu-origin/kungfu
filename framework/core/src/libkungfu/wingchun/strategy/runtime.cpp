@@ -151,7 +151,8 @@ uint64_t RuntimeContext::insert_order_input(const std::string &source, const std
   input.order_id = input.order_id == 0 ? writer->current_frame_uid() : input.order_id;
   input.insert_time = time::now_in_nano();
   writer->close_data();
-  return order_input.order_id;
+  bookkeeper_.on_order_input(app_.now(), app_.get_home_uid(), account_location_uid, input);
+  return input.order_id;
 }
 
 std::vector<uint64_t> RuntimeContext::insert_batch_orders(
