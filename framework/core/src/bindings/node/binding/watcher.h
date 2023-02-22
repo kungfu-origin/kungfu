@@ -323,17 +323,12 @@ private:
   template <typename Instruction, typename IdPtrType = uint64_t Instruction::*>
   Napi::Value InteractWithTD(const Napi::CallbackInfo &info, const Napi::Object &instruction_object, IdPtrType id_ptr) {
     try {
-      using namespace kungfu::rx;
-      using namespace kungfu::longfist::types;
-      using namespace kungfu::yijinjing;
-      using namespace kungfu::yijinjing::data;
-
       auto account_location = ExtractLocation(info, 1, get_locator());
       if (not is_location_live(account_location->uid) or not has_writer(account_location->uid)) {
         return Napi::BigInt::New(info.Env(), std::uint64_t(0));
       }
 
-      auto trigger_time = time::now_in_nano();
+      auto trigger_time = yijinjing::time::now_in_nano();
       auto account_writer = get_writer(account_location->uid);
       auto master_cmd_writer = get_writer(get_master_commands_uid());
       Instruction instruction = {};
@@ -354,7 +349,8 @@ private:
 
       if (not has_location(strategy_location->uid)) {
         add_location(trigger_time, strategy_location);
-        master_cmd_writer->write(trigger_time, *std::dynamic_pointer_cast<Location>(strategy_location));
+        master_cmd_writer->write(trigger_time,
+                                 *std::dynamic_pointer_cast<longfist::types::Location>(strategy_location));
       }
 
       if (has_channel(account_location->uid, strategy_location->uid)) {
@@ -362,18 +358,20 @@ private:
         return Napi::BigInt::New(info.Env(), id);
       }
 
-      ChannelRequest request = {};
+      longfist::types::ChannelRequest request = {};
       request.dest_id = strategy_location->uid;
       request.source_id = ledger_home_location_->uid;
       master_cmd_writer->write(trigger_time, request);
       request.source_id = account_location->uid;
       master_cmd_writer->write(trigger_time, request);
 
-      events_ | is(Channel::tag) | filter([account_location, strategy_location](const event_ptr &event) {
-        const Channel &channel = event->data<Channel>();
-        return channel.source_id == account_location->uid and channel.dest_id == strategy_location->uid;
-      }) | first() |
-          $([this, trigger_time, instruction, id_ptr, account_location, strategy_location](auto event) {
+      events_ | rx::is(longfist::types::Channel::tag) |
+          rx::filter([account_location, strategy_location](const event_ptr &event) {
+            const longfist::types::Channel &channel = event->data<longfist::types::Channel>();
+            return channel.source_id == account_location->uid and channel.dest_id == strategy_location->uid;
+          }) |
+          rx::first() |
+          rx::$([this, trigger_time, instruction, id_ptr, account_location, strategy_location](auto event) {
             // TODO: async make order / order action
             WriteInstruction(trigger_time, instruction, id_ptr, account_location, strategy_location);
           });

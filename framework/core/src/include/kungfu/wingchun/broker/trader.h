@@ -95,10 +95,13 @@ public:
 
   std::unordered_map<uint64_t, std::vector<longfist::types::OrderInput>> &get_order_inputs() { return order_inputs_; }
 
+  void set_self_detect(bool flag) { self_deal_detect_ = flag; }
+
 protected:
   OrderMap orders_ = {};
   OrderActionMap actions_ = {};
   TradeMap trades_ = {};
+  bool self_deal_detect_;
   std::unordered_map<uint64_t, kungfu::longfist::types::BlockMessage> block_messages_ = {}; // <block_id, batch_flag>
   /// <strategy_uid, OrderInput>, a batch OrderInputs for a strategy
   std::unordered_map<uint64_t, std::vector<longfist::types::OrderInput>> order_inputs_ = {};
@@ -114,6 +117,7 @@ private:
   void handle_position_sync();
   void handle_order_input(const event_ptr &event);
   void handle_batch_order_tag(const event_ptr &event);
+  bool has_self_deal_risk(const event_ptr &event);
 };
 } // namespace kungfu::wingchun::broker
 

@@ -27,14 +27,14 @@ public:
   }
 
   template <typename DataType> DataType get(const DataType &query) {
-    using namespace boost::hana;
-    auto pk_members = transform(DataType::primary_keys, [&](auto pk) {
-      auto pk_member = find_if(accessors<DataType>(), [&](auto it) { return pk == first(it); });
-      auto accessor = second(*pk_member);
+    auto pk_members = boost::hana::transform(DataType::primary_keys, [&](auto pk) {
+      auto pk_member = boost::hana::find_if(boost::hana::accessors<DataType>(),
+                                            [&](auto it) { return pk == boost::hana::first(it); });
+      auto accessor = boost::hana::second(*pk_member);
       return accessor(query);
     });
     auto operation = [&](auto... ids) { return get_storage()->get<DataType>(ids...); };
-    return unpack(pk_members, operation);
+    return boost::hana::unpack(pk_members, operation);
   }
 
   template <typename DataType> std::vector<DataType> get_all(const DataType &query) {
@@ -42,14 +42,14 @@ public:
   }
 
   template <typename DataType> void remove(const DataType &query) {
-    using namespace boost::hana;
-    auto pk_members = transform(DataType::primary_keys, [&](auto pk) {
-      auto just = find_if(accessors<DataType>(), [&](auto it) { return pk == first(it); });
-      auto accessor = second(*just);
+    auto pk_members = boost::hana::transform(DataType::primary_keys, [&](auto pk) {
+      auto just = boost::hana::find_if(boost::hana::accessors<DataType>(),
+                                       [&](auto it) { return pk == boost::hana::first(it); });
+      auto accessor = boost::hana::second(*just);
       return accessor(query);
     });
     auto operation = [&](auto... ids) { get_storage()->remove<DataType>(ids...); };
-    unpack(pk_members, operation);
+    boost::hana::unpack(pk_members, operation);
   }
 
   template <typename DataType> void remove_all() { get_storage()->remove_all<DataType>(); }

@@ -7,10 +7,7 @@
 #include <cstddef>
 #include <kungfu/common.h>
 #include <mutex>
-// #include <bitset>
-//  #include <iostream>
 
-// using namespace std;
 #if 0
 namespace kungfu::yijinjing::cache {
 template <typename T> class ringqueue {

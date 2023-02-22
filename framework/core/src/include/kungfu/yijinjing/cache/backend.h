@@ -28,43 +28,42 @@ std::enable_if_t<not is_numeric_v<ValueType> and not is_array_v<ValueType>, Valu
 }
 
 constexpr auto make_storage_ptr = [](const std::string &db_file, const auto &types) {
-  using namespace boost::hana;
-  using namespace sqlite_orm;
   constexpr auto make_tables = [](const auto &types) {
     return [&](auto key) {
       using DataType = typename decltype(+types[key])::type;
-      auto data_accessors = accessors<DataType>();
+      auto data_accessors = boost::hana::accessors<DataType>();
       DataType *image = {}; // workaround for visual studio 17.4 sake
-      auto columns = transform(data_accessors, [&](auto it) {
-        auto name = first(it);
-        auto accessor = second(it);
+      auto columns = boost::hana::transform(data_accessors, [&](auto it) {
+        auto name = boost::hana::first(it);
+        auto accessor = boost::hana::second(it);
         auto member_pointer = member_pointer_trait<decltype(accessor)>().pointer();
         using MemberType = std::decay_t<decltype(accessor(*image))>;
-        return make_column(name.c_str(), member_pointer, default_value(make_default<MemberType>()));
+        return sqlite_orm::make_column(name.c_str(), member_pointer,
+                                       sqlite_orm::default_value(make_default<MemberType>()));
       });
-      auto pk_members = transform(DataType::primary_keys, [&](auto pk) {
-        auto pk_member = find_if(data_accessors, hana::on(equal.to(pk), first));
-        auto accessor = second(*pk_member);
+      auto pk_members = boost::hana::transform(DataType::primary_keys, [&](auto pk) {
+        auto pk_member = boost::hana::find_if(data_accessors, hana::on(boost::hana::equal.to(pk), boost::hana::first));
+        auto accessor = boost::hana::second(*pk_member);
         return member_pointer_trait<decltype(accessor)>().pointer();
       });
-      auto make_primary_keys = [](auto... keys) { return primary_key(keys...); };
-      auto primary_keys = unpack(pk_members, make_primary_keys);
+      auto make_primary_keys = [](auto... keys) { return sqlite_orm::primary_key(keys...); };
+      auto primary_keys = boost::hana::unpack(pk_members, make_primary_keys);
       constexpr auto table_maker = [](const std::string &table_name, const auto &primary_keys) {
-        return [&](auto... columns) { return make_table(table_name, columns..., primary_keys); };
+        return [&](auto... columns) { return sqlite_orm::make_table(table_name, columns..., primary_keys); };
       };
-      return unpack(columns, table_maker(key.c_str(), primary_keys));
+      return boost::hana::unpack(columns, table_maker(key.c_str(), primary_keys));
     };
   };
   constexpr auto storage_ptr_maker = [](const std::string &db_file) {
     return [&](auto... tables) {
-      using storage_type = decltype(make_storage(db_file, tables...));
-      auto storage_ptr = std::make_shared<storage_type>(make_storage(db_file, tables...));
+      using storage_type = decltype(sqlite_orm::make_storage(db_file, tables...));
+      auto storage_ptr = std::make_shared<storage_type>(sqlite_orm::make_storage(db_file, tables...));
       storage_ptr->busy_timeout(time_unit::MILLISECONDS_PER_SECOND);
       return storage_ptr;
     };
   };
-  auto tables = transform(keys(types), make_tables(types));
-  return unpack(tables, storage_ptr_maker(db_file));
+  auto tables = boost::hana::transform(boost::hana::keys(types), make_tables(types));
+  return boost::hana::unpack(tables, storage_ptr_maker(db_file));
 };
 
 using ProfileStoragePtr = decltype(make_storage_ptr(std::string(), longfist::ProfileDataTypes));
@@ -81,13 +80,12 @@ template <typename DataType> struct time_spec<DataType, std::enable_if_t<not Dat
 
 template <typename DataType> struct time_spec<DataType, std::enable_if_t<DataType::has_timestamp>> {
   static std::vector<DataType> get_all(StateStoragePtr &storage, int64_t from, int64_t to) {
-    using namespace boost::hana;
-    using namespace sqlite_orm;
     auto comparator = [](auto it) { return DataType::timestamp_key.value() == boost::hana::first(it); };
-    auto just = find_if(accessors<DataType>(), comparator);
-    auto accessor = second(*just);
+    auto just = boost::hana::find_if(boost::hana::accessors<DataType>(), comparator);
+    auto accessor = boost::hana::second(*just);
     auto ts = member_pointer_trait<decltype(accessor)>().pointer();
-    return storage->get_all<DataType>(where(greater_or_equal(ts, from) and lesser_or_equal(ts, to)));
+    return storage->get_all<DataType>(sqlite_orm::where(
+        sqlite_orm::and_(sqlite_orm::greater_or_equal(ts, from), sqlite_orm::lesser_or_equal(ts, to))));
   };
 };
 

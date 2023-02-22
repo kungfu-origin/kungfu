@@ -10,6 +10,7 @@
 
 using namespace kungfu::longfist;
 using namespace kungfu::longfist::types;
+using namespace kungfu::longfist::enums;
 using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
 using namespace kungfu::yijinjing::journal;
@@ -128,7 +129,8 @@ void bind_broker(pybind11::module &m) {
       .def("insert_batch_orders", &Trader::insert_batch_orders)
       .def("cancel_order", &Trader::cancel_order)
       .def("req_history_order", &Trader::req_history_order)
-      .def("req_history_trade", &Trader::req_history_trade);
+      .def("req_history_trade", &Trader::req_history_trade)
+      .def("set_self_detect", &Trader::set_self_detect);
 
   py::class_<MarketDataVendor, BrokerVendor, std::shared_ptr<MarketDataVendor>>(m, "MarketDataVendor")
       .def(py::init<locator_ptr, const std::string &, const std::string &, bool>())
