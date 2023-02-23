@@ -37,6 +37,7 @@ class TraderSim(wc.Trader):
         self.match_mode = None
         self.logger = find_logger(self.home)
         self.map_block_msg = {}
+        self.set_self_detect(True)
 
     def on_start(self):
         config = json.loads(self.config)
