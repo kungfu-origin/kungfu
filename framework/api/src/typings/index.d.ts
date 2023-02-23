@@ -148,6 +148,7 @@ declare namespace KungfuApi {
     required?: boolean;
     max?: number;
     min?: number;
+    precision?: number;
     disabled?: boolean;
     primary?: boolean;
     options?: KfSelectOption[];
@@ -155,6 +156,7 @@ declare namespace KungfuApi {
     headers?: KfConfigItemHeader[];
     template?: KfConfigItemTemplate[];
     search?: KfConfigItemSearch;
+    importMode?: 'reset' | 'add';
 
     // ---- some ui releated ----;
     noDivider?: boolean;

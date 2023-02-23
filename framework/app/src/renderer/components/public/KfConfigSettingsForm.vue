@@ -15,6 +15,7 @@ import {
   toRaw,
   toRefs,
   watch,
+  watchEffect,
   computed,
   nextTick,
   defineComponent,
@@ -220,6 +221,12 @@ watch(instrumentsInFrom, (insts) => {
   });
 });
 
+watchEffect(() => {
+  for (const key in props.formState) {
+    formState[key] = props.formState[key];
+  }
+});
+
 watch(formState, (newVal) => {
   app && app.emit('update:formState', newVal);
 });
@@ -294,7 +301,7 @@ function getTablesSearchRelated(
   tableKeys: Record<string, KungfuApi.KfConfigItem>,
 ): TablesSearchRelated {
   return Object.keys(tableKeys).reduce((tablesSearchRelated, key) => {
-    const targetList = ref(formState[key]);
+    const targetList = computed(() => formState[key]);
     const keys =
       tableKeys[key].search?.keys ||
       tableKeys[key].headers?.map((header) => header.title) ||
@@ -506,7 +513,10 @@ function handleClearInstrumentsCsv(targetKey: string) {
   customerFormItemTips[targetKey] = '';
 }
 
-function csvTableCallback(columns: KungfuApi.KfConfigItem[]) {
+function csvTableCallback(
+  columns: KungfuApi.KfConfigItem[],
+  mode?: 'reset' | 'add',
+) {
   return function (
     data: Record<string, KungfuApi.KfConfigValue>[],
     errRows: {
@@ -518,7 +528,12 @@ function csvTableCallback(columns: KungfuApi.KfConfigItem[]) {
     if (errRows.length) {
       console.warn('Csv resolve error rows:', errRows);
     }
+
     if (data.length) {
+      if (mode === 'reset') {
+        formState[targetKey].length = 0;
+      }
+
       const headers = Object.keys(data[0]);
       const isInstrumentHeader =
         headers.includes('instrument_id') && headers.includes('exchange_id');
@@ -951,7 +966,7 @@ defineExpose({
         v-model:value="formState[item.key]"
         :max="item.max ?? Infinity"
         :min="item.min ?? -Infinity"
-        :precision="4"
+        :precision="item.precision ?? 4"
         :step="steps[item.key] || 0.0001"
         :disabled="
           (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
@@ -963,7 +978,7 @@ defineExpose({
         v-model:value="formState[item.key]"
         :max="item.max ?? Infinity"
         :min="item.min ?? -Infinity"
-        :precision="2"
+        :precision="item.precision ?? 2"
         :step="steps[item.key] || 0.01"
         :formatter="formatterPercentNumber"
         :parser="parserPercentString"
@@ -1434,7 +1449,7 @@ defineExpose({
                 handleSelectCsv<Record<string, KungfuApi.KfConfigValue>>(
                   item.key,
                   item.headers || [],
-                  csvTableCallback(item.columns || []),
+                  csvTableCallback(item.columns || [], item.importMode),
                 )
               "
             >
@@ -1511,9 +1526,7 @@ defineExpose({
               </template>
             </a-button>
             <KfConfigSettingsForm
-              v-model:formState="
-                tablesSearchRelated[item.key].tableData.value[index].data
-              "
+              v-model:formState="_item.data"
               :configSettings="item.columns || []"
               :changeType="changeType"
               :primaryKeyAvoidRepeatCompareExtra="
