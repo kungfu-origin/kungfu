@@ -15,7 +15,6 @@ import {
   toRaw,
   toRefs,
   watch,
-  watchEffect,
   computed,
   nextTick,
   defineComponent,
@@ -138,7 +137,11 @@ type TablesSearchRelated = Record<
   {
     searchKeyword: Ref<string>;
     tableData: Ref<
-      { data: Record<string, KungfuApi.KfConfigValue>; index: number }[]
+      {
+        data: Record<string, KungfuApi.KfConfigValue>;
+        index: number;
+        id: string;
+      }[]
     >;
   }
 >;
@@ -221,11 +224,13 @@ watch(instrumentsInFrom, (insts) => {
   });
 });
 
-watchEffect(() => {
-  for (const key in props.formState) {
-    formState[key] = props.formState[key];
-  }
-});
+watch(
+  () => props.formState,
+  (newVal) => {
+    if ('instrument' in formState && 'direction' in formState)
+      console.log(newVal);
+  },
+);
 
 watch(formState, (newVal) => {
   app && app.emit('update:formState', newVal);
@@ -832,6 +837,15 @@ function handleRemoveItemIntoTableRows(item, index) {
   }
 }
 
+function calcTableItemHeight(
+  layout: 'horizontal' | 'vertical' | 'inline',
+  noDivider: boolean,
+) {
+  const baseHeight = layout === 'vertical' ? 52 : 32;
+  const dividerHeight = noDivider ? 8 : 25;
+  return baseHeight + dividerHeight;
+}
+
 defineExpose({
   validate,
   clearValidate,
@@ -839,15 +853,15 @@ defineExpose({
 </script>
 <template>
   <a-form
-    class="kf-config-form"
     ref="formRef"
+    class="kf-config-form"
     :model="formState"
-    :labelCol="layout === 'inline' ? null : { span: labelCol }"
+    :label-col="layout === 'inline' ? null : { span: labelCol }"
     :label-wrap="labelWrap"
-    :wrapperCol="layout === 'inline' ? null : { span: wrapperCol }"
-    :labelAlign="labelAlign"
+    :wrapper-col="layout === 'inline' ? null : { span: wrapperCol }"
+    :label-align="labelAlign"
     :colon="false"
-    :scrollToFirstError="true"
+    :scroll-to-first-error="true"
     :layout="layout"
   >
     <a-form-item
@@ -1173,12 +1187,12 @@ defineExpose({
         v-else-if="item.type === 'instrument'"
         :ref="item.key"
         class="instrument-select"
+        v-model:value="formState[item.key]"
         :disabled="
           (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
           item.disabled
         "
         show-search
-        v-model:value="formState[item.key]"
         :filter-option="false"
         :options="instrumentOptionsReactiveData.data[item.key]"
         @search="instrumentsSearchRelated[item.key].handleSearchInstrument"
@@ -1294,9 +1308,9 @@ defineExpose({
         </a-select-option>
       </a-select>
       <a-switch
-        size="small"
         v-else-if="item.type === 'bool'"
         v-model:checked="formState[item.key]"
+        size="small"
         :disabled="
           (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
           item.disabled
@@ -1496,112 +1510,155 @@ defineExpose({
           </a-button>
         </div>
         <template v-if="!!item.search">
-          <div
-            v-for="(_item, index) in tablesSearchRelated[item.key].tableData
-              .value"
-            :key="`${index}_${
+          <RecycleScroller
+            v-if="
+              tablesSearchRelated[item.key].tableData.value &&
               tablesSearchRelated[item.key].tableData.value.length
-            }`"
+            "
+            :style="{
+              maxHeight: `${
+                calcTableItemHeight(layout, !!item.noDivider) * 10
+              }px`,
+              overflowY: 'overlay',
+            }"
+            :items="tablesSearchRelated[item.key].tableData.value"
+            :item-size="calcTableItemHeight(layout, !!item.noDivider)"
+            key-field="id"
+            :buffer="100"
+          >
+            <template
+              #default="{
+                item: _item,
+                index,
+              }: {
+                item: {
+                  data: Record<string, KungfuApi.KfConfigValue>,
+                  index: number,
+                  id: string,
+                },
+                index: number,
+              }"
+            >
+              <div
+                class="table-in-config-setting-row"
+                :style="{
+                  paddingBottom: item.noDivider ? '8px' : '',
+                }"
+              >
+                <div class="table-in-config-setting-row-from__wrap">
+                  <KfConfigSettingsForm
+                    v-model:formState="_item.data"
+                    :config-settings="item.columns || []"
+                    :change-type="changeType"
+                    :primary-key-avoid-repeat-compare-extra="
+                      primaryKeyAvoidRepeatCompareExtra
+                    "
+                    :primary-key-avoid-repeat-compare-target="
+                      primaryKeyAvoidRepeatCompareTarget
+                    "
+                    layout="inline"
+                    :label-align="labelAlign"
+                    :label-wrap="labelWrap"
+                    :label-col="labelCol"
+                    :wrapper-col="wrapperCol"
+                    :rules="rules"
+                    :steps="steps"
+                    :pass-primary-key-special-words-verify="
+                      passPrimaryKeySpecialWordsVerify
+                    "
+                    :is-primary-disabled="isPrimaryDisabled"
+                  ></KfConfigSettingsForm>
+                  <div class="table-in-config-setting-row-buttons__wrap">
+                    <a-button
+                      size="small"
+                      :disabled="
+                        (changeType === 'update' &&
+                          item.primary &&
+                          !isPrimaryDisabled) ||
+                        item.disabled
+                      "
+                    >
+                      <template #icon>
+                        <DeleteOutlined
+                          @click="
+                            handleRemoveItemIntoTableRows(item, _item.index)
+                          "
+                        />
+                      </template>
+                    </a-button>
+                  </div>
+                </div>
+                <div
+                  v-if="
+                    index !==
+                      tablesSearchRelated[item.key].tableData.value.length -
+                        1 && !item.noDivider
+                  "
+                  class="table-in-config-setting-row-divider"
+                >
+                  <a-divider></a-divider>
+                </div>
+              </div>
+            </template>
+          </RecycleScroller>
+        </template>
+        <template v-else>
+          <div
+            v-for="(_item, index) in formState[item.key]"
+            :key="`${index}_${formState[item.key].length}`"
             class="table-in-config-setting-row"
           >
-            <a-button
-              size="small"
-              :disabled="
-                (changeType === 'update' &&
-                  item.primary &&
-                  !isPrimaryDisabled) ||
-                item.disabled
-              "
-            >
-              <template #icon>
-                <DeleteOutlined
-                  @click="
-                    handleRemoveItemIntoTableRows(
-                      item,
-                      tablesSearchRelated[item.key].tableData.value[index]
-                        .index,
-                    )
+            <div class="table-in-config-setting-row-from__wrap">
+              <KfConfigSettingsForm
+                v-model:formState="formState[item.key][index]"
+                :config-settings="item.columns || []"
+                :change-type="changeType"
+                :primary-key-avoid-repeat-compare-extra="
+                  primaryKeyAvoidRepeatCompareExtra
+                "
+                :primary-key-avoid-repeat-compare-target="
+                  primaryKeyAvoidRepeatCompareTarget
+                "
+                layout="inline"
+                :label-align="labelAlign"
+                :label-wrap="labelWrap"
+                :label-col="labelCol"
+                :wrapper-col="wrapperCol"
+                :rules="rules"
+                :steps="steps"
+                :pass-primary-key-special-words-verify="
+                  passPrimaryKeySpecialWordsVerify
+                "
+                :is-primary-disabled="isPrimaryDisabled"
+              ></KfConfigSettingsForm>
+              <div class="table-in-config-setting-row-buttons__wrap">
+                <a-button
+                  size="small"
+                  :disabled="
+                    (changeType === 'update' &&
+                      item.primary &&
+                      !isPrimaryDisabled) ||
+                    item.disabled
                   "
-                />
-              </template>
-            </a-button>
-            <KfConfigSettingsForm
-              v-model:formState="_item.data"
-              :configSettings="item.columns || []"
-              :changeType="changeType"
-              :primaryKeyAvoidRepeatCompareExtra="
-                primaryKeyAvoidRepeatCompareExtra
-              "
-              :primaryKeyAvoidRepeatCompareTarget="
-                primaryKeyAvoidRepeatCompareTarget
-              "
-              layout="inline"
-              :labelAlign="labelAlign"
-              :labelWrap="labelWrap"
-              :labelCol="labelCol"
-              :wrapperCol="wrapperCol"
-              :rules="rules"
-              :steps="steps"
-              :passPrimaryKeySpecialWordsVerify="
-                passPrimaryKeySpecialWordsVerify
-              "
-              :isPrimaryDisabled="isPrimaryDisabled"
-            ></KfConfigSettingsForm>
-            <a-divider
+                >
+                  <template #icon>
+                    <DeleteOutlined
+                      @click="handleRemoveItemIntoTableRows(item, index)"
+                    />
+                  </template>
+                </a-button>
+              </div>
+            </div>
+            <div
               v-if="
                 index !==
                   tablesSearchRelated[item.key].tableData.value.length - 1 &&
                 !item.noDivider
               "
-            ></a-divider>
-          </div>
-        </template>
-        <template v-else>
-          <div
-            class="table-in-config-setting-row"
-            v-for="(_item, index) in formState[item.key]"
-            :key="`${index}_${formState[item.key].length}`"
-          >
-            <a-button
-              size="small"
-              :disabled="
-                (changeType === 'update' &&
-                  item.primary &&
-                  !isPrimaryDisabled) ||
-                item.disabled
-              "
+              class="table-in-config-setting-row-divider"
             >
-              <template #icon>
-                <DeleteOutlined
-                  @click="handleRemoveItemIntoTableRows(item, index)"
-                />
-              </template>
-            </a-button>
-            <KfConfigSettingsForm
-              v-model:formState="formState[item.key][index]"
-              :configSettings="item.columns || []"
-              :changeType="changeType"
-              :primaryKeyAvoidRepeatCompareExtra="
-                primaryKeyAvoidRepeatCompareExtra
-              "
-              :primaryKeyAvoidRepeatCompareTarget="
-                primaryKeyAvoidRepeatCompareTarget
-              "
-              layout="inline"
-              :labelAlign="labelAlign"
-              :labelWrap="labelWrap"
-              :labelCol="labelCol"
-              :wrapperCol="wrapperCol"
-              :rules="rules"
-              :steps="steps"
-              :passPrimaryKeySpecialWordsVerify="
-                passPrimaryKeySpecialWordsVerify
-              "
-              :isPrimaryDisabled="isPrimaryDisabled"
-            ></KfConfigSettingsForm>
-            <a-divider
-              v-if="index !== formState[item.key].length - 1 && !item.noDivider"
-            ></a-divider>
+              <a-divider></a-divider>
+            </div>
           </div>
         </template>
       </div>
@@ -1693,34 +1750,49 @@ export default defineComponent({
     }
 
     .table-in-config-setting-row {
-      margin-top: 8px;
+      padding-right: 12px;
 
-      > .ant-btn {
-        float: right;
-      }
+      .table-in-config-setting-row-from__wrap {
+        display: flex;
+        justify-content: space-between;
 
-      .ant-form {
-        padding-right: 60px;
-        box-sizing: border-box;
+        .ant-form {
+          box-sizing: border-box;
 
-        &.ant-form-inline {
-          .ant-row.ant-form-item {
-            margin-bottom: 4px;
+          &.ant-form-inline {
+            flex-wrap: nowrap;
+            overflow-x: overlay;
+            margin-right: 8px;
 
-            .ant-select {
-              min-width: 120px;
+            .ant-row.ant-form-item {
+              margin-bottom: 4px;
+
+              .ant-select {
+                min-width: 120px;
+              }
+            }
+
+            .ant-form-item-label > label,
+            .global-setting-item .label {
+              font-size: 12px;
             }
           }
+        }
 
-          .ant-form-item-label > label,
-          .global-setting-item .label {
-            font-size: 12px;
-          }
+        .table-in-config-setting-row-buttons__wrap {
+          display: flex;
+          padding-left: 24px;
         }
       }
 
-      .ant-divider-horizontal {
-        margin: 12px 0;
+      .table-in-config-setting-row-divider {
+        width: 100%;
+        min-width: 100%;
+        padding: 12px 0;
+
+        .ant-divider-horizontal {
+          margin: 0;
+        }
       }
     }
   }
