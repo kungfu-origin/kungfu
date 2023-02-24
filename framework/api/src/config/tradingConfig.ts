@@ -775,3 +775,9 @@ export const SystemProcessName: Record<
   cached: { name: t('tradingConfig.cached') },
   archive: { name: t('tradingConfig.archive') },
 };
+
+export const InstrumentMinOrderVolume = {
+  [InstrumentTypeEnum.stock]: 100,
+  [InstrumentTypeEnum.future]: 1,
+  [InstrumentTypeEnum.bond]: 1,
+};

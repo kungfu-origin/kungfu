@@ -238,11 +238,12 @@ export const useWritableTableSearchKeyword = <T>(
   keys: string[],
 ): {
   searchKeyword: Ref<string>;
-  tableData: Ref<{ data: T; index: number }[]>;
+  tableData: Ref<{ data: T; index: number; id: string }[]>;
 } => {
+  let id = 0;
   const searchKeyword = ref<string>('');
-  const tableData = ref<{ data: T; index: number }[]>([]) as Ref<
-    { data: T; index: number }[]
+  const tableData = ref<{ data: T; index: number; id: string }[]>([]) as Ref<
+    { data: T; index: number; id: string }[]
   >;
 
   watch(
@@ -251,7 +252,11 @@ export const useWritableTableSearchKeyword = <T>(
       const { keyword, list } = newValue;
       tableData.value =
         list
-          ?.map((item, index) => ({ data: toRaw(item), index }))
+          ?.map((item, index) => ({
+            data: toRaw(item),
+            index,
+            id: Object.values(item).join('_') + id++,
+          }))
           .filter((item: { data: T; index: number }) => {
             const combinedValue = keys
               .map(

@@ -492,6 +492,7 @@ defineExpose({
     justify-content: flex-start;
     cursor: pointer;
     list-style: none;
+    margin: 0;
   }
 
   .kf-table-row:hover {

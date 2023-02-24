@@ -2,6 +2,7 @@
 node_modules
 /dist
 /public/python
+!/public/devtools/*/build
 /lib/electron/package.json
 
 /tests/e2e/videos/

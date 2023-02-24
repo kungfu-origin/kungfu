@@ -18,7 +18,9 @@ public:
 
   ~TraderXTP() override;
 
-  [[nodiscard]] AccountType get_account_type() const override { return AccountType::Stock; }
+  [[nodiscard]] longfist::enums::AccountType get_account_type() const override {
+    return longfist::enums::AccountType::Stock;
+  }
 
   void on_trading_day(const event_ptr &event, int64_t daytime) override;
 
