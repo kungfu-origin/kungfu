@@ -95,7 +95,7 @@ public:
 
   std::unordered_map<uint64_t, std::vector<longfist::types::OrderInput>> &get_order_inputs() { return order_inputs_; }
 
-  void set_self_detect(bool flag) { self_deal_detect_ = flag; }
+  void enable_self_detect();
 
 protected:
   OrderMap orders_ = {};

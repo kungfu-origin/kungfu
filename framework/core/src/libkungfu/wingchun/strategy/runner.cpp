@@ -37,7 +37,7 @@ void Runner::on_trading_day(const event_ptr &event, int64_t daytime) {
 
 void Runner::react() {
   context_ = make_context();
-  context_->arguments_ = arguments_;
+  context_->set_arguments(arguments_);
 
   auto start_events = events_ | skip_until(events_ | filter([&](auto e) { return started_; }));
   start_events | is_own<Quote>(context_->get_broker_client()) |
