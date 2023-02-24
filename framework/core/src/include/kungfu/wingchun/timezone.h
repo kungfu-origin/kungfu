@@ -84,6 +84,7 @@ inline std::string translate_GMTime_to_localdate_by_exchange_id(time_t lTime, co
       {EXCHANGE_SGX_FUTURE, LocationTimeType::Beijing},  //
       {EXCHANGE_GLFX, LocationTimeType::Beijing},        //
       {EXCHANGE_IPE, LocationTimeType::London},          //
+      {EXCHANGE_US_FUTURE, LocationTimeType::AmericaEastern}, //
       {EXCHANGE_CBOT, LocationTimeType::AmericaEastern}, //
       {EXCHANGE_CEC, LocationTimeType::AmericaEastern},  //
       {EXCHANGE_LIFE, LocationTimeType::AmericaEastern}, //
