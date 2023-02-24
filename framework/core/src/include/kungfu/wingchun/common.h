@@ -318,8 +318,8 @@ inline longfist::enums::InstrumentType get_instrument_type(const std::string &ex
     return longfist::enums::InstrumentType::Crypto;
   } else if (string_equals(exchange_id, EXCHANGE_HK)) {
     return get_instrument_type_by_exchange_hk(instrument_id);
-  } else if (string_equals(exchange_id, EXCHANGE_HK_FUTURE) || string_equals(exchange_id, EXCHANGE_US_FUTURE) || 
-              string_equals(exchange_id, EXCHANGE_SGX_FUTURE)) {
+  } else if (string_equals(exchange_id, EXCHANGE_HK_FUTURE) || string_equals(exchange_id, EXCHANGE_US_FUTURE) ||
+             string_equals(exchange_id, EXCHANGE_SGX_FUTURE)) {
     return longfist::enums::InstrumentType::Future;
   } else if (string_equals(exchange_id, EXCHANGE_US) || string_equals(exchange_id, EXCHANGE_SGX)) {
     return longfist::enums::InstrumentType::Stock;

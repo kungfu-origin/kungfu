@@ -73,31 +73,31 @@ inline std::string translate_GMTime_to_localdate_by_exchange_id(time_t lTime, co
                                                                 const std::string strformat = "%Y%m%d") {
   // ExchangeId LocationTime
   static const std::unordered_map<std::string, LocationTimeType> location_time_exchange_id_map = {
-      {EXCHANGE_US, LocationTimeType::AmericaEastern},   //
-      {EXCHANGE_HK, LocationTimeType::Beijing},          //
-      {EXCHANGE_SSE, LocationTimeType::Beijing},         //
-      {EXCHANGE_SZE, LocationTimeType::Beijing},         //
-      {EXCHANGE_BSE, LocationTimeType::Beijing},         //
-      {EXCHANGE_SHFE, LocationTimeType::Beijing},        //
-      {EXCHANGE_HK_FUTURE, LocationTimeType::Beijing},   //
-      {EXCHANGE_SGX, LocationTimeType::Beijing},         //
-      {EXCHANGE_SGX_FUTURE, LocationTimeType::Beijing},  //
-      {EXCHANGE_GLFX, LocationTimeType::Beijing},        //
-      {EXCHANGE_IPE, LocationTimeType::London},          //
+      {EXCHANGE_US, LocationTimeType::AmericaEastern},        //
+      {EXCHANGE_HK, LocationTimeType::Beijing},               //
+      {EXCHANGE_SSE, LocationTimeType::Beijing},              //
+      {EXCHANGE_SZE, LocationTimeType::Beijing},              //
+      {EXCHANGE_BSE, LocationTimeType::Beijing},              //
+      {EXCHANGE_SHFE, LocationTimeType::Beijing},             //
+      {EXCHANGE_HK_FUTURE, LocationTimeType::Beijing},        //
+      {EXCHANGE_SGX, LocationTimeType::Beijing},              //
+      {EXCHANGE_SGX_FUTURE, LocationTimeType::Beijing},       //
+      {EXCHANGE_GLFX, LocationTimeType::Beijing},             //
+      {EXCHANGE_IPE, LocationTimeType::London},               //
       {EXCHANGE_US_FUTURE, LocationTimeType::AmericaEastern}, //
-      {EXCHANGE_CBOT, LocationTimeType::AmericaEastern}, //
-      {EXCHANGE_CEC, LocationTimeType::AmericaEastern},  //
-      {EXCHANGE_LIFE, LocationTimeType::AmericaEastern}, //
-      {EXCHANGE_MTIF, LocationTimeType::AmericaEastern}, //
-      {EXCHANGE_NYCE, LocationTimeType::AmericaEastern}, //
-      {EXCHANGE_CMX, LocationTimeType::AmericaEastern},  //
-      {EXCHANGE_SIME, LocationTimeType::AmericaEastern}, //
-      {EXCHANGE_CME, LocationTimeType::AmericaEastern},  //
-      {EXCHANGE_IMM, LocationTimeType::AmericaEastern},  //
-      {EXCHANGE_WIDX, LocationTimeType::AmericaEastern}, //
-      {EXCHANGE_FREX, LocationTimeType::AmericaEastern}, //
-      {EXCHANGE_METL, LocationTimeType::AmericaEastern}, //
-      {EXCHANGE_IPM, LocationTimeType::London}           //
+      {EXCHANGE_CBOT, LocationTimeType::AmericaEastern},      //
+      {EXCHANGE_CEC, LocationTimeType::AmericaEastern},       //
+      {EXCHANGE_LIFE, LocationTimeType::AmericaEastern},      //
+      {EXCHANGE_MTIF, LocationTimeType::AmericaEastern},      //
+      {EXCHANGE_NYCE, LocationTimeType::AmericaEastern},      //
+      {EXCHANGE_CMX, LocationTimeType::AmericaEastern},       //
+      {EXCHANGE_SIME, LocationTimeType::AmericaEastern},      //
+      {EXCHANGE_CME, LocationTimeType::AmericaEastern},       //
+      {EXCHANGE_IMM, LocationTimeType::AmericaEastern},       //
+      {EXCHANGE_WIDX, LocationTimeType::AmericaEastern},      //
+      {EXCHANGE_FREX, LocationTimeType::AmericaEastern},      //
+      {EXCHANGE_METL, LocationTimeType::AmericaEastern},      //
+      {EXCHANGE_IPM, LocationTimeType::London}                //
   };
   LocationTimeType type = LocationTimeType::Beijing;
   auto it = location_time_exchange_id_map.find(exchangeId);
