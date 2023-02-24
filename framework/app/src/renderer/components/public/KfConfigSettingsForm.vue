@@ -149,7 +149,7 @@ type TablesSearchRelated = Record<
 const app = getCurrentInstance();
 const formRef = ref();
 
-const formState = reactive(props.formState);
+const formState = ref(props.formState);
 const { td, md, strategy } = toRefs(useAllKfConfigData());
 const { basketList, buildBasketOptionValue } = useBasket();
 const { isLanguageKeyAvailable } = useLanguage();
@@ -176,7 +176,7 @@ watch(
 
     const rowFormState = toRaw(props.formState);
     Object.keys(rowFormState).forEach(
-      (key) => (formState[key] = rowFormState[key]),
+      (key) => (formState.value[key] = rowFormState[key]),
     );
   },
 );
@@ -205,7 +205,7 @@ const instrumentOptionsReactiveData = reactive<{
 const instrumentsInFrom = computed(() =>
   Object.keys(instrumentKeys.value).map((key) => ({
     key,
-    value: formState[key],
+    value: formState.value[key],
   })),
 );
 watch(instrumentsInFrom, (insts) => {
@@ -227,18 +227,17 @@ watch(instrumentsInFrom, (insts) => {
 watch(
   () => props.formState,
   (newVal) => {
-    if ('instrument' in formState && 'direction' in formState)
-      console.log(newVal);
+    formState.value = newVal;
   },
 );
 
-watch(formState, (newVal) => {
+watch(formState.value, (newVal) => {
   app && app.emit('update:formState', newVal);
 });
 
-if ('instrument' in formState && 'side' in formState) {
+if ('instrument' in formState.value && 'side' in formState.value) {
   watch(
-    () => formState.instrument,
+    () => formState.value.instrument,
     (newInstrument: string) => {
       if (newInstrument) {
         const instrumentResolved =
@@ -273,11 +272,12 @@ function getInstrumentsSearchRelated(
         updateSearchInstrumnetOptions,
       } = useInstruments();
 
-      updateSearchInstrumnetOptions(instrumentKeys[key], formState[key]).then(
-        (options) => {
-          instrumentOptionsReactiveData.data[key] = options;
-        },
-      );
+      updateSearchInstrumnetOptions(
+        instrumentKeys[key],
+        formState.value[key],
+      ).then((options) => {
+        instrumentOptionsReactiveData.data[key] = options;
+      });
 
       item1[key] = {
         searchInstrumnetOptions,
@@ -290,7 +290,7 @@ function getInstrumentsSearchRelated(
         handleSearchInstrumentBlur: () => {
           updateSearchInstrumnetOptions(
             instrumentKeys[key],
-            formState[key],
+            formState.value[key],
           ).then((options) => {
             instrumentOptionsReactiveData.data[key] = options;
           });
@@ -306,7 +306,7 @@ function getTablesSearchRelated(
   tableKeys: Record<string, KungfuApi.KfConfigItem>,
 ): TablesSearchRelated {
   return Object.keys(tableKeys).reduce((tablesSearchRelated, key) => {
-    const targetList = computed(() => formState[key]);
+    const targetList = computed(() => formState.value[key]);
     const keys =
       tableKeys[key].search?.keys ||
       tableKeys[key].headers?.map((header) => header.title) ||
@@ -377,7 +377,7 @@ const SpecialWordsReg = new RegExp(
 function primaryKeyValidator(_rule: RuleObject, value: string): Promise<void> {
   const combineValue: string = getCombineValueByPrimaryKeys(
     primaryKeys.value,
-    formState,
+    formState.value,
     props.primaryKeyAvoidRepeatCompareExtra,
   );
 
@@ -508,13 +508,13 @@ function instrumentsCsvCallback(
     fail: `${failedLength}`,
     value: t('tradingConfig.instrument'),
   });
-  formState[targetKey] = resolvedInstruments.map((item) =>
+  formState.value[targetKey] = resolvedInstruments.map((item) =>
     buildInstrumentSelectOptionValue(item),
   );
 }
 
 function handleClearInstrumentsCsv(targetKey: string) {
-  formState[targetKey] = [];
+  formState.value[targetKey] = [];
   customerFormItemTips[targetKey] = '';
 }
 
@@ -536,7 +536,7 @@ function csvTableCallback(
 
     if (data.length) {
       if (mode === 'reset') {
-        formState[targetKey].length = 0;
+        formState.value[targetKey].length = 0;
       }
 
       const headers = Object.keys(data[0]);
@@ -557,14 +557,14 @@ function csvTableCallback(
             true,
           ) as KungfuApi.InstrumentResolved;
 
-          formState[targetKey].push({
+          formState.value[targetKey].push({
             ...item,
             [instrumentColumnConfig.key]:
               buildInstrumentSelectOptionValue(instrument),
           });
         });
       } else {
-        formState[targetKey].push(...data);
+        formState.value[targetKey].push(...data);
       }
     }
   };
@@ -757,7 +757,7 @@ function handleSelectFile(targetKey: string): void {
     .then((res) => {
       const { filePaths } = res;
       if (filePaths.length) {
-        formState[targetKey] = filePaths[0];
+        formState.value[targetKey] = filePaths[0];
         formRef.value.validateFields([targetKey]); //手动进行再次验证, 因数据放在span中, 改变数据后无法触发验证
       }
     });
@@ -771,37 +771,37 @@ function handleSelectFiles(targetKey: string): void {
     .then((res) => {
       const { filePaths } = res;
       if (filePaths.length) {
-        (formState[targetKey] as string[]).push(filePaths[0]);
+        (formState.value[targetKey] as string[]).push(filePaths[0]);
         formRef.value.validateFields([targetKey]); //手动进行再次验证, 因数据放在span中, 改变数据后无法触发验证
       }
     });
 }
 
 function handleRemoveFile(key: string, filename: string): void {
-  const index = (formState[key] as string[]).indexOf(filename);
+  const index = (formState.value[key] as string[]).indexOf(filename);
   if (index !== -1) {
-    (formState[key] as string[]).splice(index, 1);
+    (formState.value[key] as string[]).splice(index, 1);
   }
 }
 
 function handleTimePickerChange(date: Dayjs, key: string) {
-  formState[key] =
+  formState.value[key] =
     dayjs(date).toString() === 'Invalid Date'
       ? null
       : dayjs(date).format('YYYY-MM-DD HH:mm:ss');
 }
 
 function handleInstrumentSelected(val: string, key: string) {
-  if (!formState[key].includes(val)) {
-    formState[key].push(val);
+  if (!formState.value[key].includes(val)) {
+    formState.value[key].push(val);
     formRef.value.validateFields([key]); //手动进行再次验证, 因数据放在span中, 改变数据后无法触发验证
   }
 }
 
 function handleInstrumentDeselected(val: string, key: string) {
-  const index = formState[key].indexOf(val);
+  const index = formState.value[key].indexOf(val);
   if (index !== -1) {
-    formState[key].splice(index, 1);
+    formState.value[key].splice(index, 1);
     formRef.value.validateFields([key]); //手动进行再次验证, 因数据放在span中, 改变数据后无法触发验证
   }
 }
@@ -823,7 +823,7 @@ function parserPercentString(value: string): number {
 }
 
 function handleAddItemIntoTableRows(item: KungfuApi.KfConfigItem) {
-  const targetState = formState[item.key];
+  const targetState = formState.value[item.key];
   const tmp = initFormStateByConfig(item.columns || [], {});
   if (targetState instanceof Array) {
     targetState.push(tmp);
@@ -831,7 +831,7 @@ function handleAddItemIntoTableRows(item: KungfuApi.KfConfigItem) {
 }
 
 function handleRemoveItemIntoTableRows(item, index) {
-  const targetState = formState[item.key];
+  const targetState = formState.value[item.key];
   if (targetState instanceof Array) {
     targetState.splice(index, 1);
   }
@@ -1756,13 +1756,16 @@ export default defineComponent({
         display: flex;
         justify-content: space-between;
 
+        .ant-form::-webkit-scrollbar {
+          height: 4px;
+        }
+
         .ant-form {
           box-sizing: border-box;
 
           &.ant-form-inline {
             flex-wrap: nowrap;
             overflow-x: overlay;
-            margin-right: 8px;
 
             .ant-row.ant-form-item {
               margin-bottom: 4px;
