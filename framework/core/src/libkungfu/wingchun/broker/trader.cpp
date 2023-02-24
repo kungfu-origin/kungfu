@@ -199,6 +199,7 @@ void Trader::handle_batch_order_tag(const event_ptr &event) {
   } else if (event->msg_type() == BatchOrderEnd::tag) {
     batch_status_.insert_or_assign(event->source(), false);
     insert_batch_orders(event);
+    clear_order_inputs(event->source());
   }
 }
 
@@ -206,5 +207,7 @@ bool Trader::insert_block_message(const event_ptr &event) {
   const BlockMessage &msg = event->data<BlockMessage>();
   return block_messages_.try_emplace(msg.block_id, msg).second;
 }
+
+void Trader::enable_self_detect() { self_deal_detect_ = true; }
 
 } // namespace kungfu::wingchun::broker

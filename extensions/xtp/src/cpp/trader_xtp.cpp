@@ -53,7 +53,9 @@ void TraderXTP::on_start() {
   api_->SetSoftwareKey(config.software_key.c_str());
   session_id_ = api_->Login(config.td_ip.c_str(), config.td_port, config.account_id.c_str(), config.password.c_str(),
                             XTP_PROTOCOL_TCP);
-  set_self_detect(config.self_deal_detect);
+  if (config.self_deal_detect) {
+    enable_self_detect();
+  }
   if (session_id_ > 0) {
     update_broker_state(BrokerState::Ready);
     SPDLOG_INFO("Login successfully");
