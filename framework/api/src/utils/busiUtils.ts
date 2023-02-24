@@ -1846,11 +1846,17 @@ export const KfConfigValueArrayType = [
 export const initFormTimePicker = (initValue?: string) => {
   if (typeof initValue !== 'string') return null;
 
+  let parsedValue: dayjs.Dayjs | null = null;
+
   if (initValue === 'now') {
-    return dayjs().format('YYYY-MM-DD HH:mm:ss');
+    parsedValue = dayjs();
   } else if (/\d{2}:\d{2}:\d{2}/.test(initValue)) {
-    return dayjs(initValue, 'HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
+    parsedValue = dayjs(initValue, 'HH:mm:ss');
+  } else if (/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/.test(initValue)) {
+    parsedValue = dayjs(initValue, 'YYYY-MM-DD HH:mm:ss');
   }
+
+  if (parsedValue) return parsedValue.format('YYYY-MM-DD HH:mm:ss');
 
   return null;
 };
@@ -2062,6 +2068,8 @@ export const dealByConfigItemType = (
       return dealDirection(+value as DirectionEnum).name;
     case 'priceType':
       return dealPriceType(+value as PriceTypeEnum).name;
+    case 'priceLevel':
+      return dealPriceLevel(+value as PriceLevelEnum).name;
     case 'hedgeFlag':
       return dealHedgeFlag(+value as HedgeFlagEnum).name;
     case 'volumeCondition':
