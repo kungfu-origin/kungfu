@@ -32,6 +32,7 @@ import {
   T0InstrumentTypes,
   T0ExchangeIds,
   PriceLevel,
+  InstrumentMinOrderVolume,
 } from '../config/tradingConfig';
 import {
   KfCategoryEnum,
@@ -1320,6 +1321,15 @@ export const dealAssetPrice = (
 export const sum = (list: number[]): number => {
   if (!list.length) return 0;
   return list.reduce((accumlator, a) => accumlator + +a);
+};
+
+export const dealVolumeByInstrumentType = (
+  volume: number,
+  instrumentType: InstrumentTypeEnum,
+) => {
+  const minOrderVolume = InstrumentMinOrderVolume[instrumentType] || 1;
+  const orderVolume = Math.max(volume, minOrderVolume);
+  return ~~(orderVolume / minOrderVolume) * minOrderVolume;
 };
 
 export const dealSide = (
