@@ -236,6 +236,8 @@ export default {
     HK: 'HK',
     HKFUT: 'HKFUT',
     US: 'US',
+    SGX: 'SGX',
+    SGXFUT: 'SGXFUT',
     GLFX: 'GLFX',
     IPE: 'IPE',
     CBOT: 'CBOT',

@@ -235,6 +235,8 @@ export default {
     HK: '港股',
     HKFUT: '港期',
     US: '美股',
+    SGX: '新股',
+    SGXFUT: '新期',
     GLFX: '全球外汇',
     IPE: 'IPE',
     CBOT: 'CBOT',

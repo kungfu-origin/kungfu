@@ -682,6 +682,14 @@ export const ExchangeIds: Record<string, KungfuApi.KfTradeValueCommonData> = {
     name: t('tradingConfig.US'),
     color: InstrumentType[InstrumentTypeEnum.stock].color,
   },
+  SGX: {
+    name: t('tradingConfig.SGX'),
+    color: InstrumentType[InstrumentTypeEnum.stock].color,
+  },
+  SGXFUT: {
+    name: t('tradingConfig.SGXFUT'),
+    color: InstrumentType[InstrumentTypeEnum.stockoption].color,
+  },
   GLFX: {
     name: t('tradingConfig.GLFX'),
     color: InstrumentType[InstrumentTypeEnum.stock].color,

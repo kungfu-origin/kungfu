@@ -65,13 +65,13 @@ time_t TranslateLocalTimeToGMTime(time_t local_seconds, LocationTimeType loc_typ
 std::shared_ptr<LocalTimeInfo> TranslateGMTimeToLocalTime(time_t gmt, LocationTimeType loc_type);
 } // namespace TimeUtil
 
-// ���ݱ�׼ʱ���ת���ɽ��������������ʱ��
-// param1:ʱ���(��ȷ����)
-// param2:������id��exchangeid
-// params3: ����ʱ���ʽYYYYMMDD
+//
+// param1: local time
+// param2: exchangeid
+// params3:  YYYYMMDD
 inline std::string translate_GMTime_to_localdate_by_exchange_id(time_t lTime, const std::string &exchangeId,
                                                                 const std::string strformat = "%Y%m%d") {
-  // ExchangeId���Ӧ��LocationTime����
+  // ExchangeId LocationTime
   static const std::unordered_map<std::string, LocationTimeType> location_time_exchange_id_map = {
       {EXCHANGE_US, LocationTimeType::AmericaEastern},   //
       {EXCHANGE_HK, LocationTimeType::Beijing},          //
@@ -80,6 +80,8 @@ inline std::string translate_GMTime_to_localdate_by_exchange_id(time_t lTime, co
       {EXCHANGE_BSE, LocationTimeType::Beijing},         //
       {EXCHANGE_SHFE, LocationTimeType::Beijing},        //
       {EXCHANGE_HK_FUTURE, LocationTimeType::Beijing},   //
+      {EXCHANGE_SGX, LocationTimeType::Beijing},         //
+      {EXCHANGE_SGX_FUTURE, LocationTimeType::Beijing},  //
       {EXCHANGE_GLFX, LocationTimeType::Beijing},        //
       {EXCHANGE_IPE, LocationTimeType::London},          //
       {EXCHANGE_CBOT, LocationTimeType::AmericaEastern}, //
