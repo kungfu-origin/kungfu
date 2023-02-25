@@ -682,6 +682,14 @@ export const ExchangeIds: Record<string, KungfuApi.KfTradeValueCommonData> = {
     name: t('tradingConfig.US'),
     color: InstrumentType[InstrumentTypeEnum.stock].color,
   },
+  SGX: {
+    name: t('tradingConfig.SGX'),
+    color: InstrumentType[InstrumentTypeEnum.stock].color,
+  },
+  SGXFUT: {
+    name: t('tradingConfig.SGXFUT'),
+    color: InstrumentType[InstrumentTypeEnum.stockoption].color,
+  },
   GLFX: {
     name: t('tradingConfig.GLFX'),
     color: InstrumentType[InstrumentTypeEnum.stock].color,
@@ -774,4 +782,10 @@ export const SystemProcessName: Record<
   ledger: { name: t('tradingConfig.ledger') },
   cached: { name: t('tradingConfig.cached') },
   archive: { name: t('tradingConfig.archive') },
+};
+
+export const InstrumentMinOrderVolume = {
+  [InstrumentTypeEnum.stock]: 100,
+  [InstrumentTypeEnum.future]: 1,
+  [InstrumentTypeEnum.bond]: 1,
 };

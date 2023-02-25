@@ -4,7 +4,7 @@
     "name": "Kungfu Trader",
     "email": "info@kungfu.link"
   },
-  "version": "2.4.50",
+  "version": "2.4.51-alpha.1",
   "description": "Kungfu Extension - XTP Demo",
   "license": "Apache-2.0",
   "main": "package.json",
@@ -29,10 +29,10 @@
     "package": "kfs project package"
   },
   "dependencies": {
-    "@kungfu-trader/kungfu-core": "^2.4.50"
+    "@kungfu-trader/kungfu-core": "^2.4.51-alpha.1"
   },
   "devDependencies": {
-    "@kungfu-trader/kungfu-sdk": "^2.4.50"
+    "@kungfu-trader/kungfu-sdk": "^2.4.51-alpha.1"
   },
   "kungfuDependencies": {
     "xtp": "v2.2.32.2"
@@ -75,6 +75,8 @@
         "td_port_tip": "请填写交易端口, 例如:8601",
         "client_id": "客户ID",
         "client_id_tip": "请填写自定义多点登录ID 1-99整数,不同节点之间不要重复",
+        "self_deal_detect": "自成交检测",
+        "self_deal_detect_tip": "是否开启自成交检测拦截",
         "md_ip": "行情IP",
         "md_ip_tip": "请填写行情IP, 例如:61.152.102.110",
         "md_port": "行情端口",
@@ -99,6 +101,8 @@
         "td_port_tip": "Please enter td port, for example:8601",
         "client_id": "client id",
         "client_id_tip": "Please enter t user-defined multipoint client ID, which is an integer ranging from 1 to 99. The value must be unique on different nodes",
+        "self_deal_detect": "self deal detect",
+        "self_deal_detect_tip": "weather detect self deal risk and intercept",
         "md_ip": "md IP",
         "md_ip_tip": "Please enter md IP, for example :61.152.102.110",
         "md_port": "md port",
@@ -163,6 +167,14 @@
             "type": "int",
             "required": true,
             "tip": "xtp.client_id_tip"
+          },
+          {
+            "key": "self_deal_detect",
+            "name": "xtp.self_deal_detect",
+            "type": "bool",
+            "required": true,
+            "default": false,
+            "tip": "xtp.self_deal_detect_tip"
           }
         ]
       },

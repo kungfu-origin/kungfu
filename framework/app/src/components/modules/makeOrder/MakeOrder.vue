@@ -34,6 +34,7 @@ import {
   useTradeLimit,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import {
+  dealVolumeByInstrumentType,
   getExtConfigList,
   getIdByKfLocation,
   getProcessIdByKfLocation,
@@ -655,10 +656,13 @@ const handlePercentChange = (target: number) => {
     targetVolume = Number(availPosVolume) * targetPercent;
   }
 
-  formState.value.volume = ~~targetVolume;
-  if (targetVolume) {
+  formState.value.volume = dealVolumeByInstrumentType(
+    ~~targetVolume,
+    instrumentResolved.value?.instrumentType,
+  );
+  if (formState.value.volume) {
     currentPercent.value = target;
-    lastPercentSetVolume = ~~targetVolume;
+    lastPercentSetVolume = formState.value.volume;
   }
 };
 

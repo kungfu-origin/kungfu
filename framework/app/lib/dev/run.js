@@ -66,7 +66,7 @@ function startMain(argv) {
   const mainConfig = require('../webpack/webpack.main.config')(argv);
   const appDir = utils.getAppDir();
   const indexJs = path.resolve(appDir, 'src', 'main', 'index.dev.ts');
-  mainConfig.entry.main = [indexJs].concat(mainConfig.entry.main);
+  mainConfig.entry.main = indexJs;
 
   return new Promise((resolve, reject) => {
     const compiler = webpack(mainConfig);

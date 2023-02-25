@@ -14,6 +14,7 @@ using namespace kungfu::yijinjing::practice;
 using namespace kungfu::rx;
 using namespace kungfu::longfist;
 using namespace kungfu::longfist::types;
+using namespace kungfu::longfist::enums;
 using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
 using namespace kungfu::yijinjing::util;
@@ -130,6 +131,30 @@ uint64_t RuntimeContext::insert_order(const std::string &instrument_id, const st
   return input.order_id;
 }
 
+uint64_t RuntimeContext::insert_order_input(const std::string &source, const std::string &account,
+                                            longfist::types::OrderInput &order_input) {
+
+  auto account_location_uid = get_td_location_uid(source, account);
+  if (not broker_client_.is_ready(account_location_uid)) {
+    SPDLOG_ERROR("account {} not ready", td_locations_.at(account_location_uid)->uname);
+    return 0;
+  }
+  order_input.instrument_type = get_instrument_type(order_input.exchange_id, order_input.instrument_id);
+  if (order_input.instrument_type == InstrumentType::Unknown) {
+    SPDLOG_ERROR("unsupported instrument type {} of {}.{}", str_from_instrument_type(order_input.instrument_type),
+                 order_input.instrument_id, order_input.exchange_id);
+    return 0;
+  }
+  auto writer = app_.get_writer(account_location_uid);
+  OrderInput &input = writer->open_data<OrderInput>(app_.now());
+  memcpy(&input, &order_input, sizeof(input));
+  input.order_id = input.order_id == 0 ? writer->current_frame_uid() : input.order_id;
+  input.insert_time = time::now_in_nano();
+  writer->close_data();
+  bookkeeper_.on_order_input(app_.now(), app_.get_home_uid(), account_location_uid, input);
+  return input.order_id;
+}
+
 std::vector<uint64_t> RuntimeContext::insert_batch_orders(
     const std::string &source, const std::string &account, const std::vector<std::string> &instrument_ids,
     const std::vector<std::string> &exchange_ids, std::vector<double> limit_prices, std::vector<int64_t> volumes,
@@ -167,7 +192,7 @@ std::vector<uint64_t> RuntimeContext::insert_batch_orders(
 }
 
 std::vector<uint64_t> RuntimeContext::insert_array_orders(const std::string &source, const std::string &account,
-                                                          std::vector<longfist::types::OrderInput> order_inputs) {
+                                                          std::vector<longfist::types::OrderInput> &order_inputs) {
   std::vector<uint64_t> order_ids{};
   auto account_location_uid = get_td_location_uid(source, account);
   auto writer = app_.get_writer(account_location_uid);
@@ -185,7 +210,7 @@ std::vector<uint64_t> RuntimeContext::insert_array_orders(const std::string &sou
   return order_ids;
 }
 
-uint64_t RuntimeContext::insert_basket_order(uint64_t basket_id, const std::string &source, const std::string account,
+uint64_t RuntimeContext::insert_basket_order(uint64_t basket_id, const std::string &source, const std::string &account,
                                              longfist::enums::Side side, longfist::enums::PriceType price_type,
                                              longfist::enums::PriceLevel price_level, double price_offset,
                                              int64_t volume) {
@@ -306,5 +331,10 @@ void RuntimeContext::update_strategy_state(StrategyStateUpdate &state_update) {
 }
 
 std::string RuntimeContext::arguments() { return arguments_; }
+
+yijinjing::journal::writer_ptr RuntimeContext::get_writer(const std::string &source, const std::string &account) {
+  return app_.get_writer(get_td_location_uid(source, account));
+  ;
+}
 
 } // namespace kungfu::wingchun::strategy

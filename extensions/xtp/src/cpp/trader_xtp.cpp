@@ -16,6 +16,7 @@ struct TDConfiguration {
   std::string software_key;
   std::string td_ip;
   int td_port;
+  bool self_deal_detect;
 };
 
 void from_json(const nlohmann::json &j, TDConfiguration &c) {
@@ -25,6 +26,7 @@ void from_json(const nlohmann::json &j, TDConfiguration &c) {
   j.at("software_key").get_to(c.software_key);
   j.at("td_ip").get_to(c.td_ip);
   j.at("td_port").get_to(c.td_port);
+  j.at("self_deal_detect").get_to(c.self_deal_detect);
 }
 
 TraderXTP::TraderXTP(broker::BrokerVendor &vendor) : Trader(vendor), session_id_(0), request_id_(0), trading_day_("") {
@@ -51,6 +53,9 @@ void TraderXTP::on_start() {
   api_->SetSoftwareKey(config.software_key.c_str());
   session_id_ = api_->Login(config.td_ip.c_str(), config.td_port, config.account_id.c_str(), config.password.c_str(),
                             XTP_PROTOCOL_TCP);
+  if (config.self_deal_detect) {
+    enable_self_detect();
+  }
   if (session_id_ > 0) {
     update_broker_state(BrokerState::Ready);
     SPDLOG_INFO("Login successfully");
@@ -114,7 +119,7 @@ bool TraderXTP::cancel_order(const event_ptr &event) {
     return false;
   }
   uint64_t xtp_order_id = outbound_orders_.at(action.order_id);
-  auto order_state = orders_.at(action.order_id);
+  auto &order_state = orders_.at(action.order_id);
   auto xtp_action_id = api_->CancelOrder(xtp_order_id, session_id_);
   auto success = xtp_action_id != 0;
   if (not success) {
@@ -149,17 +154,15 @@ void TraderXTP::OnOrderEvent(XTPOrderInfo *order_info, XTPRI *error_info, uint64
   }
   auto is_error = error_info != nullptr and error_info->error_id != 0;
   auto order_id = inbound_orders_.at(order_info->order_xtp_id);
-  auto order_state = orders_.at(order_id);
+  auto &order_state = orders_.at(order_id);
   auto writer = get_writer(order_state.dest);
-  Order &order = writer->open_data<Order>(0);
-  memcpy(&order, &(order_state.data), sizeof(order));
-  from_xtp(*order_info, order);
-  order.update_time = yijinjing::time::now_in_nano();
+  from_xtp(*order_info, order_state.data);
+  order_state.data.update_time = yijinjing::time::now_in_nano();
   if (is_error) {
-    order.error_id = error_info->error_id;
-    strncpy(order.error_msg, error_info->error_msg, ERROR_MSG_LEN);
+    order_state.data.error_id = error_info->error_id;
+    strncpy(order_state.data.error_msg, error_info->error_msg, ERROR_MSG_LEN);
   }
-  writer->close_data();
+  writer->write(now(), order_state.data);
 }
 
 void TraderXTP::OnTradeEvent(XTPTradeReport *trade_info, uint64_t session_id) {
@@ -182,6 +185,7 @@ void TraderXTP::OnTradeEvent(XTPTradeReport *trade_info, uint64_t session_id) {
   if (order_state.data.volume_left > 0) {
     order_state.data.status = OrderStatus::PartialFilledActive;
   }
+  order_state.data.update_time = now();
   writer->write(now(), order_state.data);
 }
 

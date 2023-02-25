@@ -10,6 +10,7 @@
 
 using namespace kungfu::rx;
 using namespace kungfu::longfist::types;
+using namespace kungfu::longfist::enums;
 using namespace kungfu::yijinjing::practice;
 using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
@@ -136,7 +137,53 @@ void Trader::handle_position_sync() {
   }
 }
 
+bool Trader::has_self_deal_risk(const event_ptr &event) {
+  if (not self_deal_detect_) {
+    return false;
+  }
+  const OrderInput &input = event->data<OrderInput>();
+
+  auto fun_has_self_deal_risk = [&](const Order &order) -> bool {
+    if (strcmp(order.instrument_id, input.instrument_id) or strcmp(order.exchange_id, input.exchange_id)) {
+      return false;
+    }
+    if (order.side == input.side or is_final_status(order.status)) {
+      return false;
+    } else {
+      if (input.price_type != PriceType::Limit) {
+        return true;
+      } else {
+        if (input.side == Side::Buy and input.limit_price < order.limit_price) {
+          return false;
+        } else if (input.side == Side::Sell and input.limit_price > order.limit_price) {
+          return false;
+        } else {
+          return true;
+        }
+      }
+    }
+  };
+
+  for (const auto pair : orders_) {
+    if (fun_has_self_deal_risk(pair.second.data)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 void Trader::handle_order_input(const event_ptr &event) {
+  if (has_self_deal_risk(event)) {
+    Order &order = get_writer(event->source())->open_data<Order>();
+    order_from_input(event->data<OrderInput>(), order);
+    order.status = OrderStatus::Error;
+    strncpy(order.error_msg, "该委托存在自成交风险,已拒绝下单", ERROR_MSG_LEN);
+    order.insert_time = event->gen_time();
+    order.update_time = event->gen_time();
+    get_writer(event->source())->close_data();
+    return;
+  }
+
   /// try_emplace default insert false to map, means not batch mode
   if (batch_status_.try_emplace(event->source()).first->second) {
     const OrderInput &input = event->data<OrderInput>();
@@ -152,6 +199,7 @@ void Trader::handle_batch_order_tag(const event_ptr &event) {
   } else if (event->msg_type() == BatchOrderEnd::tag) {
     batch_status_.insert_or_assign(event->source(), false);
     insert_batch_orders(event);
+    clear_order_inputs(event->source());
   }
 }
 
@@ -159,5 +207,7 @@ bool Trader::insert_block_message(const event_ptr &event) {
   const BlockMessage &msg = event->data<BlockMessage>();
   return block_messages_.try_emplace(msg.block_id, msg).second;
 }
+
+void Trader::enable_self_detect() { self_deal_detect_ = true; }
 
 } // namespace kungfu::wingchun::broker
