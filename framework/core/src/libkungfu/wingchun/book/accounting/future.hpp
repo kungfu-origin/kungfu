@@ -366,7 +366,8 @@ private:
   }
 
   static bool able_long_short_position_merge(const char *exchange_id) {
-    if (strcmp(exchange_id, EXCHANGE_US_FUTURE) == 0 || strcmp(exchange_id, EXCHANGE_HK_FUTURE) == 0) {
+    if (strcmp(exchange_id, EXCHANGE_US_FUTURE) == 0 || strcmp(exchange_id, EXCHANGE_HK_FUTURE) == 0 ||
+        strcmp(exchange_id, EXCHANGE_SGX_FUTURE) == 0) {
       return true;
     }
 
