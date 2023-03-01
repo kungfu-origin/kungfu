@@ -6,7 +6,8 @@ export const getColumns = (): AntTableColumns => [
     title: t('mdConfig.counter_name'),
     dataIndex: 'name',
     align: 'left',
-    width: 60,
+    width: 160,
+    minWidth: 160,
   },
   {
     title: t('mdConfig.state_status'),

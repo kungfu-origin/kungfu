@@ -241,10 +241,16 @@ export const useWritableTableSearchKeyword = <T>(
   tableData: Ref<{ data: T; index: number; id: string }[]>;
 } => {
   let id = 0;
+  const idCachedMap = new WeakMap();
   const searchKeyword = ref<string>('');
   const tableData = ref<{ data: T; index: number; id: string }[]>([]) as Ref<
     { data: T; index: number; id: string }[]
   >;
+
+  const generateItemId = (item: object) => {
+    if (!idCachedMap.has(item)) idCachedMap.set(item, `${id++}`);
+    return idCachedMap.get(item) as string;
+  };
 
   watch(
     () => ({ keyword: searchKeyword.value, list: targetList.value }),
@@ -255,7 +261,7 @@ export const useWritableTableSearchKeyword = <T>(
           ?.map((item, index) => ({
             data: toRaw(item),
             index,
-            id: Object.values(item).join('_') + id++,
+            id: generateItemId(item as unknown as object),
           }))
           .filter((item: { data: T; index: number }) => {
             const combinedValue = keys
