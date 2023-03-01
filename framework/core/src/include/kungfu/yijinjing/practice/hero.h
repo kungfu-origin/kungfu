@@ -155,6 +155,8 @@ protected:
 
   virtual void on_active() = 0;
 
+  virtual void on_frame() = 0;
+
   static constexpr auto feed_profile_data = [](const event_ptr &event, auto &receiver) {
     boost::hana::for_each(longfist::ProfileDataTypes, [&](auto it) {
       using DataType = typename decltype(+boost::hana::second(it))::type;

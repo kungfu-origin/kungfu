@@ -306,7 +306,7 @@ function getTablesSearchRelated(
   tableKeys: Record<string, KungfuApi.KfConfigItem>,
 ): TablesSearchRelated {
   return Object.keys(tableKeys).reduce((tablesSearchRelated, key) => {
-    const targetList = computed(() => formState.value[key]);
+    const targetList = ref(formState.value[key]);
     const keys =
       tableKeys[key].search?.keys ||
       tableKeys[key].headers?.map((header) => header.title) ||
@@ -826,7 +826,7 @@ function handleAddItemIntoTableRows(item: KungfuApi.KfConfigItem) {
   const targetState = formState.value[item.key];
   const tmp = initFormStateByConfig(item.columns || [], {});
   if (targetState instanceof Array) {
-    targetState.push(tmp);
+    targetState.unshift(tmp);
   }
 }
 

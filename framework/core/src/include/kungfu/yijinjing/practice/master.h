@@ -52,6 +52,8 @@ protected:
 
   void on_active() final;
 
+  void on_frame() final;
+
 private:
   int64_t start_time_;
   int64_t last_check_;

@@ -68,6 +68,8 @@ protected:
 
   void on_active() override;
 
+  void on_frame() override;
+
   virtual void on_react();
 
   virtual void on_start();
