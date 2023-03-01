@@ -459,7 +459,9 @@ inline void from_xtp(const XTPTradeReport &ori, Trade &des) {
     des.instrument_type = InstrumentType::Stock;
   }
   des.trade_time = nsec_from_xtp_timestamp(ori.trade_time);
-  des.external_id = ori.order_xtp_id;
+  //  des.external_order_id = ori.order_xtp_id;
+  strncpy(des.external_order_id, std::to_string(ori.order_xtp_id).c_str(), EXTERNAL_ID_LEN);
+  strncpy(des.external_trade_id, ori.exec_id, XTP_EXEC_ID_LEN);
 }
 
 inline void from_xtp(const XTPQueryTradeRsp &ori, HistoryTrade &des) {
