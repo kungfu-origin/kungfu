@@ -41,8 +41,8 @@
     "glob": "^8.0.3",
     "log4js": "^6.4.0",
     "pm2": "^5.2.2",
-    "ps-list": "~7.2",
     "vue": "^3.2.34",
+    "find-process": "^1.4.7",
     "vue-i18n": "9.1.10"
   },
   "devDependencies": {

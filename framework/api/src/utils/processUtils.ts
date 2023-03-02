@@ -5,7 +5,7 @@ import fkill from 'fkill';
 import { Proc, ProcessDescription, StartOptions } from 'pm2';
 import pm2 from './pm2Custom';
 import { getUserLocale } from 'get-user-locale';
-import psList, { ProcessDescriptor } from 'ps-list';
+const find = require('find-process');
 
 import {
   kfLogger,
@@ -37,34 +37,50 @@ const isWin = os.platform() === 'win32';
 const isLinux = os.platform() === 'linux';
 const locale = getUserLocale().replace(/-/g, '_');
 
-export const findProcessByKeywords = (tasks: string[]): Promise<number[]> => {
-  return psList().then((processes: ProcessDescriptor[]) => {
-    return processes
-      .filter((item) => {
-        const name = item.name;
-        const afterFiler = tasks.filter((task) =>
-          name.toLowerCase().includes(task.toLowerCase()),
-        );
-        return afterFiler.length;
-      })
-      .map((item) => item.pid);
-  });
+interface FindProcessResult {
+  pid: number;
+  ppid?: number;
+  uid?: number;
+  gid?: number;
+  name: string;
+  cmd: string;
+}
+
+export const findProcessByKeyword = (
+  processName: string,
+): Promise<FindProcessResult[]> => {
+  return find('name', processName, true);
 };
 
 export const forceKill = (tasks: string[]): Promise<void> => {
-  return findProcessByKeywords(tasks).then((pids) => {
-    return fkill(pids, {
-      force: true,
-      tree: isWin ? true : false,
-      ignoreCase: true,
-      silent: process.env.NODE_ENV === 'development' ? true : false,
-    }).catch((err) => {
-      console.warn((<Error>err).message);
+  return Promise.all(tasks.map((key) => findProcessByKeyword(key)))
+    .then((results) => {
+      return results.reduce((pre, processList) => {
+        pre = [...pre, ...processList];
+        return pre;
+      }, []);
+    })
+    .then((processList) => {
+      const userid = os.userInfo().uid;
+      const processListResolved = processList.filter((item) => {
+        return item.uid ? item.uid == userid : true;
+      });
+
+      const pids = processListResolved.map((item) => item.pid);
+
+      console.log('Target to force kill processList ', processListResolved);
+      return fkill(pids, {
+        force: true,
+        tree: isWin ? true : false,
+        ignoreCase: true,
+        silent: process.env.NODE_ENV === 'development' ? true : false,
+      }).catch((err) => {
+        console.warn((<Error>err).message);
+      });
     });
-  });
 };
 
-const kfcName = isWin ? 'kfc.exe' : 'kfc';
+const kfcName = 'kfc';
 
 export const killKfc = (): Promise<void> =>
   new Promise((resolve) => {

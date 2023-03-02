@@ -4553,7 +4553,7 @@ commander@^2.20.0:
   resolved "https://registry.npmmirror.com/commander/-/commander-2.20.3.tgz#fd485e84c03eb4881c20722ba48035e8531aeb33"
   integrity sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==
 
-commander@^5.0.0:
+commander@^5.0.0, commander@^5.1.0:
   version "5.1.0"
   resolved "https://registry.npmmirror.com/commander/-/commander-5.1.0.tgz#46abbd1652f8e059bddaef99bbdcb2ad9cf179ae"
   integrity sha512-P0CysNDQ7rtVw4QIQtm+MRxV66vKFSvlsQvGYXZWR3qFU0jlMKHZZZgw8e+8DSah4UDKMqnknRDQz+xuQXQ/Zg==
@@ -5464,7 +5464,6 @@ electron-to-chromium@^1.4.284:
   resolved "https://registry.npmmirror.com/electron-to-chromium/-/electron-to-chromium-1.4.290.tgz#62ddde1ea2db0dc31b6fe5898911fc85b83977fb"
   integrity sha512-3uIkNYprKqAixFqANvs7K3zacGz6iVIMcGG1M/7hMn6Gvzxe52Xg//wRUds7GPv2uouF7EZ4Sh51fLDw+aBkHw==
 
-
 electron@19.1.8:
   version "19.1.8"
   resolved "https://registry.npmmirror.com/electron/-/electron-19.1.8.tgz#3ce19c270ca86d05bbf0df5ceeaea2d23edc7083"
@@ -5473,7 +5472,7 @@ electron@19.1.8:
     "@electron/get" "^1.14.1"
     "@types/node" "^16.11.26"
     extract-zip "^1.0.3"
-    
+
 emitter-listener@^1.1.1:
   version "1.1.2"
   resolved "https://registry.npmmirror.com/emitter-listener/-/emitter-listener-1.1.2.tgz#56b140e8f6992375b3d7cb2cab1cc7432d9632e8"
@@ -6101,6 +6100,15 @@ find-cache-dir@^3.3.1:
     commondir "^1.0.1"
     make-dir "^3.0.2"
     pkg-dir "^4.1.0"
+
+find-process@^1.4.7:
+  version "1.4.7"
+  resolved "https://registry.npmmirror.com/find-process/-/find-process-1.4.7.tgz#8c76962259216c381ef1099371465b5b439ea121"
+  integrity sha512-/U4CYp1214Xrp3u3Fqr9yNynUrr5Le4y0SsJh2lMDDSbpwYSz3M2SMWQC+wqcx79cN8PQtHQIL8KnuY9M66fdg==
+  dependencies:
+    chalk "^4.0.0"
+    commander "^5.1.0"
+    debug "^4.1.1"
 
 find-root@^1.1.0:
   version "1.1.0"
@@ -9858,7 +9866,7 @@ ps-list@^6.3.0:
   resolved "https://registry.npmmirror.com/ps-list/-/ps-list-6.3.0.tgz#a2b775c2db7d547a28fbaa3a05e4c281771259be"
   integrity sha512-qau0czUSB0fzSlBOQt0bo+I2v6R+xiQdj78e1BR/Qjfl5OHWJ/urXi8+ilw1eHe+5hSeDI1wrwVTgDp2wst4oA==
 
-ps-list@^7.2.0, ps-list@~7.2:
+ps-list@^7.2.0:
   version "7.2.0"
   resolved "https://registry.npmmirror.com/ps-list/-/ps-list-7.2.0.tgz#3d110e1de8249a4b178c9b1cf2a215d1e4e42fc0"
   integrity sha512-v4Bl6I3f2kJfr5o80ShABNHAokIgY+wFDTQfE+X3zWYgSGQOCBeYptLZUpoOALBqO5EawmDN/tjTldJesd0ujQ==
