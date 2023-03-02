@@ -542,6 +542,15 @@ NLOHMANN_JSON_SERIALIZE_ENUM(StrategyState, {
 
 inline std::ostream &operator<<(std::ostream &os, StrategyState t) { return os << int8_t(t); }
 
+class AssembleMode {
+public:
+  inline static const uint32_t Channel = 0b00000001; // read only journal of location to dest_id
+  inline static const uint32_t Write = 0b00000010;   // read all journal from this location
+  inline static const uint32_t Read = 0b00000100;    // read all journal to this dest_id
+  inline static const uint32_t Public = 0b00001000;  // read all journal to location::PUBLIC
+  inline static const uint32_t All = 0b00010000;     // read all journal
+};
+
 template <typename T, typename U> inline T sub_data_bitwise(const T &a, const T &b) {
   return static_cast<T>(static_cast<U>(a) | static_cast<U>(b));
 }
