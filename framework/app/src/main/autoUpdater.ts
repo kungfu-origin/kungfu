@@ -1,28 +1,44 @@
-import { app, dialog } from 'electron';
+// import path from 'path';
+// import os from 'os';
+import { app, ipcMain, BrowserWindow } from 'electron';
 import { autoUpdater } from 'electron-updater';
-import { kfLogger } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import {
+  kfLogger,
+  removeJournal,
+} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { readRootPackageJsonSync } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
+import {
+  downloadProcessUpdate,
+  foundNewVersion,
+  readyToStartAll,
+  startDownloadNewVersion,
+} from './events';
+import { KF_HOME } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 
 autoUpdater.logger = kfLogger;
 
-function handleUpdateKungfu() {
+function handleUpdateKungfu(MainWindows: BrowserWindow | null) {
   kfLogger.info('Kungfu client version', app.getVersion());
-  if (!app.isPackaged) return;
+  // if (!app.isPackaged) return;
 
   const rootPackageJson = readRootPackageJsonSync();
-  const updaterOption = rootPackageJson?.kungfuAutoUpdate?.update;
-
-  // const server = 'https://your-deployment-url.com';
-  // const url = `${server}/update/${process.platform}/${app.getVersion()}`;
+  const updaterOption = rootPackageJson?.kungfuCraft?.autoUpdate?.update;
 
   if (!updaterOption) return;
+
+  // 之后可以有更详细的目录划分
+  // if (updaterOption.provider === 'generic') {
+  //   updaterOption.url = path.resolve(
+  //     updaterOption.url,
+  //     `/update/${os.platform}/${app.getVersion()}`,
+  //   );
+  // }
 
   autoUpdater.autoDownload = false;
   autoUpdater.setFeedURL(updaterOption);
 
   autoUpdater.on('error', (error) => {
-    dialog.showErrorBox(
-      'Error: ',
+    kfLogger.error(
       error == null ? 'unknown' : (error.stack || error).toString(),
     );
   });
@@ -32,36 +48,37 @@ function handleUpdateKungfu() {
   });
 
   autoUpdater.on('update-available', (info) => {
-    kfLogger.info(
-      'Got a new kungfu client version, will auto download it',
-      JSON.stringify(info),
-    );
-    autoUpdater.downloadUpdate();
+    kfLogger.info('Got a new kungfu client version', JSON.stringify(info));
+    kfLogger.info('MainWindows', MainWindows);
+    if (MainWindows) {
+      foundNewVersion(MainWindows, info.version);
+
+      ipcMain.once('auto-update-confirm-result', (result) => {
+        if (result) {
+          autoUpdater.downloadUpdate();
+          startDownloadNewVersion(MainWindows);
+        } else {
+          readyToStartAll(MainWindows);
+        }
+      });
+    }
   });
 
   autoUpdater.on('update-not-available', (info) => {
     kfLogger.info('Current version is up-to-date', JSON.stringify(info));
+    MainWindows && readyToStartAll(MainWindows);
   });
 
   autoUpdater.on('update-downloaded', (info) => {
     kfLogger.info(JSON.stringify(info));
-    dialog
-      .showMessageBox({
-        type: 'info',
-        title: '软件升级',
-        message: '发现新版本，是否立即升级？',
-        buttons: ['是的', '稍后'],
-      })
-      .then((resp) => {
-        if (resp.response === 0) {
-          kfLogger.info('Begin to install new version ...');
-          autoUpdater.quitAndInstall(false, true);
-        }
-      });
+    removeJournal(KF_HOME).then(() => {
+      autoUpdater.quitAndInstall(false, true);
+    });
   });
 
-  autoUpdater.on('download-progress', function (progressObj) {
-    kfLogger.info('Download progress: ', JSON.stringify(progressObj));
+  autoUpdater.on('download-progress', function (progressInfo) {
+    kfLogger.info('Download progress: ', JSON.stringify(progressInfo));
+    MainWindows && downloadProcessUpdate(MainWindows, progressInfo.percent);
   });
 
   autoUpdater.checkForUpdates();

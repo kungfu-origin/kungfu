@@ -103,6 +103,8 @@ async function createWindow(
     if (reloadBySchedule) {
       SecheduleReloading = false;
     }
+
+    handleUpdateKungfu(MainWindow);
   });
 
   MainWindow.on('close', (e) => {
@@ -191,8 +193,6 @@ app.on('ready', () => {
       focusedWin.webContents.openDevTools();
     }
   });
-
-  handleUpdateKungfu();
 });
 
 //一上来先把所有之前意外没关掉的 pm2/kfc 进程kill掉

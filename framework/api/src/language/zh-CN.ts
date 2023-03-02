@@ -569,6 +569,11 @@ export default {
     close_today: '平今',
     close_yesterday: '平昨',
     min: '最小',
+
+    update: '版本更新',
+    is_check_version: '检测更新',
+    is_check_version_desc: '启动功夫时, 是否检测更新',
+    find_new_version: '发现新版本: {version}\n是否现在更新?',
   },
 
   风控: '风控',

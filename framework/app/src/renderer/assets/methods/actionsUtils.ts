@@ -45,6 +45,7 @@ import {
   isShotable,
   isT0,
   getTradingDataSortKey,
+  isUpdateVersionLogicEnable,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { BasketVolumeType } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import { writeCSV } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
@@ -95,6 +96,49 @@ import { TradeAccountingUsageMap } from '@kungfu-trader/kungfu-js-api/utils/acco
 
 const { t } = VueI18n.global;
 const { success, error } = messagePrompt();
+
+export const useUpdateVersion = () => {
+  const vueInstance = getCurrentInstance();
+  const downloading = ref<boolean>(false);
+  const process = ref<number>();
+
+  const handleToConfirmStartUpdate = (newVersion: string) => {
+    confirmModal(
+      t('globalSettingConfig.update'),
+      t('globalSettingConfig.find_new_version', {
+        version: newVersion,
+      }),
+    ).then((flag) => {
+      ipcRenderer.send('auto-update-confirm-result', flag);
+    });
+  };
+
+  onMounted(() => {
+    if (!isUpdateVersionLogicEnable()) return;
+
+    vueInstance?.proxy?.$globalBus.subscribe((data) => {
+      if (data.tag === 'main') {
+        console.log(data);
+        if (data.name === 'auto-update-find-new-version') {
+          handleToConfirmStartUpdate(data.payload.newVersion);
+        }
+
+        if (data.name === 'auto-update-start-download') {
+          downloading.value = true;
+        }
+
+        if (data.name === 'auto-update-download-process') {
+          process.value = +data.payload.process;
+        }
+      }
+    });
+  });
+
+  return {
+    downloading,
+    process,
+  };
+};
 
 export const handleSwitchProcessStatusGenerator = (): ((
   checked: boolean,
@@ -797,6 +841,9 @@ export const usePreStartAndQuitApp = (): {
   saveBoardsMap: () => Promise<void>;
 } => {
   const app = getCurrentInstance();
+
+  const readyToStartAll = ref<boolean>(!isUpdateVersionLogicEnable());
+
   const preStartSystemLoadingData = reactive<
     Record<string, 'loading' | 'done'>
   >({
@@ -814,6 +861,7 @@ export const usePreStartAndQuitApp = (): {
 
   const preStartSystemLoading = computed(() => {
     return (
+      readyToStartAll.value &&
       Object.values(preStartSystemLoadingData).filter(
         (item: string) => item !== 'done',
       ).length > 0
@@ -880,6 +928,9 @@ export const usePreStartAndQuitApp = (): {
 
           if (data.tag === 'main') {
             switch (data.name) {
+              case 'ready-to-start-all':
+                readyToStartAll.value = true;
+                break;
               case 'record-before-quit':
                 preQuitSystemLoadingData.record = 'loading';
                 preQuitTasks([

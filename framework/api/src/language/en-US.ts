@@ -577,6 +577,11 @@ export default {
     close_today: 'Close Today',
     close_yesterday: 'Close Yesterday',
     min: 'Min',
+
+    update: 'Upgrade Version',
+    is_check_version: 'Check Version',
+    is_check_version_desc: 'Check the client version when start kungfu',
+    find_new_version: 'Found new version: {version}\nIf you want upgrade now?',
   },
 
   风控: 'Risk Setting',

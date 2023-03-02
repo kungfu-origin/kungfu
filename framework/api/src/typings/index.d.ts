@@ -1083,6 +1083,7 @@ declare namespace KfEvent {
   export interface MainProcessEvent {
     tag: 'main';
     name: string;
+    payload?: object;
   }
 
   export interface TradingDataUpdateEvent {

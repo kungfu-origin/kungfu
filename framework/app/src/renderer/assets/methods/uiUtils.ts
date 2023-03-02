@@ -456,11 +456,12 @@ export const parseURIParams = (): Record<string, string> => {
 export const useIpcListener = (): void => {
   const app = getCurrentInstance();
   ipcRenderer.removeAllListeners('main-process-messages');
-  ipcRenderer.on('main-process-messages', (_event, args) => {
+  ipcRenderer.on('main-process-messages', (_event, name, payload) => {
     if (app?.proxy) {
       app?.proxy.$globalBus.next({
         tag: 'main',
-        name: args,
+        name,
+        payload,
       } as KfEvent.MainProcessEvent);
     }
   });

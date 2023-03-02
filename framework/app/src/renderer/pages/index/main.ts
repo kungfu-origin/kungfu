@@ -2,6 +2,7 @@ import './setEnv';
 import './injectGlobal';
 import './injectWindow';
 import { createApp } from 'vue';
+import { ipcRenderer } from 'electron';
 import App from '@kungfu-trader/kungfu-app/src/renderer/pages/index/App.vue';
 import router from '@kungfu-trader/kungfu-app/src/renderer/pages/index/router';
 import store from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store';
@@ -46,6 +47,7 @@ import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/ind
 import {
   booleanProcessEnv,
   delayMilliSeconds,
+  isUpdateVersionLogicEnable,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
   Pm2ProcessStatusDetailData,
@@ -127,7 +129,7 @@ mergeExtLanguages().then(() =>
 const globalStore = useGlobalStore();
 const __BYPASS_ARCHIVE__ = false;
 
-if (!booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED)) {
+const initStartAll = () => {
   preStartAll()
     .then(async () => {
       if (__BYPASS_ARCHIVE__) {
@@ -182,6 +184,20 @@ if (!booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED)) {
         })
         .catch((err) => console.error(err.message));
     });
+};
+
+if (!booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED)) {
+  if (isUpdateVersionLogicEnable()) {
+    ipcRenderer.once('ready-to-start-all', () => {
+      console.log('ready-to-start-all');
+      initStartAll();
+      triggerStartStep(1000);
+    });
+  } else {
+    console.log('init start');
+    initStartAll();
+    triggerStartStep(1000);
+  }
 } else {
   startGetProcessStatus(
     (res: {
@@ -193,6 +209,6 @@ if (!booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED)) {
       globalStore.setProcessStatusWithDetail(processStatusWithDetail);
     },
   );
-}
 
-triggerStartStep(1000);
+  triggerStartStep(1000);
+}

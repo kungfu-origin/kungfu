@@ -12,7 +12,7 @@ const run = (distDir, andPublish) => {
     productName: packageJson?.kungfuCraft?.productName || 'Kungfu',
     ...(andPublish
       ? {
-          publish: packageJson?.kungfuAutoUpdate?.publish,
+          publish: packageJson?.kungfuCraft?.autoUpdate?.publish,
         }
       : {}),
   };
