@@ -1,5 +1,6 @@
 import { StartOptions } from 'pm2';
 import { I18n } from 'vue-i18n';
+import { AllPublishOptions } from 'builder-util-runtime';
 import { KfHookKeeper } from '../hooks';
 import { InstrumentTypeEnum, InstrumentTypes } from './enums';
 
@@ -84,6 +85,10 @@ export interface RootConfigJSON {
   kungfuCraft?: {
     appTitle?: string;
     productName?: string;
+  };
+  kungfuAutoUpdate?: {
+    publish?: AllPublishOptions;
+    update?: AllPublishOptions;
   };
   boardFilter?: Record<string, boolean>;
   appConfig?: {

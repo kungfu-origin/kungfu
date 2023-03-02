@@ -5,13 +5,20 @@
     "name": "Kungfu Trader",
     "email": "info@kungfu.link"
   },
-  "version": "2.4.53-alpha.0",
+  "version": "2.4.53-alpha.2",
   "description": "Kungfu Trader Artifact",
   "license": "Apache-2.0",
   "private": true,
   "main": "dist/app/main.js",
   "kungfuCraft": {
     "productName": "Kungfu"
+  },
+  "kungfuAutoUpdate": {
+    "publish": {
+      "provider": "generic",
+      "url": "http://127.0.0.1:8080/kungfu/",
+      "channel": "latest"
+    }
   },
   "scripts": {
     "build": "yarn kfs craft build",

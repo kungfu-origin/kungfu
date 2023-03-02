@@ -37,6 +37,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/config';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import { readRootPackageJsonSync } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
+import { handleUpdateKungfu } from './autoUpdater';
 const { t } = VueI18n.global;
 
 let MainWindow: BrowserWindow | null = null;
@@ -190,6 +191,8 @@ app.on('ready', () => {
       focusedWin.webContents.openDevTools();
     }
   });
+
+  handleUpdateKungfu();
 });
 
 //一上来先把所有之前意外没关掉的 pm2/kfc 进程kill掉
