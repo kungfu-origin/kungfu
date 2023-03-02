@@ -40,6 +40,8 @@ public:
 
   bool req_history_trade(const event_ptr &event) override;
 
+  void on_restore() override;
+
   /// 当客户端的某个连接与交易后台通信连接断开时，该方法被调用。
   ///@param reason 错误原因，请与错误代码表对应
   ///@param session_id 资金账户对应的session_id，登录时得到

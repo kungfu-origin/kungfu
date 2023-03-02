@@ -327,4 +327,15 @@ void TraderXTP::OnQueryTrade(XTPQueryTradeRsp *trade_info, XTPRI *error_info, in
   writer->close_data();
 }
 
+void TraderXTP::on_restore() {
+  for (auto &pair : external_order_id_to_order_id_) {
+    if (not pair.first.empty()) {
+      uint64_t order_id = pair.second;
+      uint64_t xtp_order_id = std::stoull(pair.first);
+      inbound_orders_.emplace(xtp_order_id, order_id);
+      outbound_orders_.emplace(order_id, xtp_order_id);
+    }
+  }
+}
+
 } // namespace kungfu::wingchun::xtp
