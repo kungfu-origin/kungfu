@@ -75,11 +75,11 @@ export const findProcessByKeywordsByFindProcess = (
 export const findProcessByKeywordsByTaskList = (
   tasks: string[],
 ): Promise<FindProcessResult[]> => {
-  const username = os.userInfo.name;
+  const username = os.userInfo().username;
   return tasklist({ verbose: true }).then((processList) => {
     return processList
       .filter((item) => tasks.indexOf(item.imageName) !== -1)
-      .filter((item) => item.username == username.split('\\')[1])
+      .filter((item) => (item.username || '').split('\\')[1] == username)
       .map((item) => {
         return {
           pid: item.pid,
