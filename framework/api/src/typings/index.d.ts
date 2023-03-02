@@ -15,8 +15,6 @@ declare module 'tasklist' {
   export = tasklist;
 }
 
-
-
 declare namespace KungfuApi {
   import {
     BrokerStateStatusEnum,
