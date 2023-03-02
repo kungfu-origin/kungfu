@@ -57,6 +57,7 @@ void TraderXTP::on_start() {
     enable_self_detect();
   }
   if (session_id_ > 0) {
+    query_not_finished_order();
     update_broker_state(BrokerState::Ready);
     SPDLOG_INFO("Login successfully");
   } else {
@@ -81,22 +82,22 @@ bool TraderXTP::insert_order(const event_ptr &event) {
   XTPOrderInsertInfo xtp_input = {};
   to_xtp(xtp_input, input);
 
-  uint64_t xtp_order_id = api_->InsertOrder(&xtp_input, session_id_);
-  auto success = xtp_order_id != 0;
+  uint64_t order_xtp_id = api_->InsertOrder(&xtp_input, session_id_);
+  auto success = order_xtp_id != 0;
 
   auto nano = yijinjing::time::now_in_nano();
   auto writer = get_writer(event->source());
   Order &order = writer->open_data<Order>(event->gen_time());
   order_from_input(input, order);
   strncpy(order.trading_day, trading_day_.c_str(), DATE_LEN);
-  //  order.external_order_id = xtp_order_id;
-  strncpy(order.external_order_id, std::to_string(xtp_order_id).c_str(), EXTERNAL_ID_LEN);
+  //  order.external_order_id = order_xtp_id;
+  strncpy(order.external_order_id, std::to_string(order_xtp_id).c_str(), EXTERNAL_ID_LEN);
   order.insert_time = nano;
   order.update_time = nano;
 
   if (success) {
-    outbound_orders_.emplace(input.order_id, xtp_order_id);
-    inbound_orders_.emplace(xtp_order_id, input.order_id);
+    map_kf_to_xtp_order_id_.emplace(input.order_id, order_xtp_id);
+    map_xtp_to_kf_order_id_.emplace(order_xtp_id, input.order_id);
   } else {
     auto error_info = api_->GetApiLastError();
     order.error_id = error_info->error_id;
@@ -115,18 +116,18 @@ bool TraderXTP::insert_order(const event_ptr &event) {
 
 bool TraderXTP::cancel_order(const event_ptr &event) {
   const OrderAction &action = event->data<OrderAction>();
-  if (outbound_orders_.find(action.order_id) == outbound_orders_.end()) {
+  if (map_kf_to_xtp_order_id_.find(action.order_id) == map_kf_to_xtp_order_id_.end()) {
     SPDLOG_ERROR("failed to cancel order {}, can't find related xtp order id", action.order_id);
     return false;
   }
-  uint64_t xtp_order_id = outbound_orders_.at(action.order_id);
+  uint64_t order_xtp_id = map_kf_to_xtp_order_id_.at(action.order_id);
   auto &order_state = orders_.at(action.order_id);
-  auto xtp_action_id = api_->CancelOrder(xtp_order_id, session_id_);
+  auto xtp_action_id = api_->CancelOrder(order_xtp_id, session_id_);
   auto success = xtp_action_id != 0;
   if (not success) {
     XTPRI *error_info = api_->GetApiLastError();
     SPDLOG_ERROR("failed to cancel order {}, order_xtp_id: {} session_id: {} error_id: {} error_msg: {}",
-                 action.order_id, xtp_order_id, session_id_, error_info->error_id, error_info->error_msg);
+                 action.order_id, order_xtp_id, session_id_, error_info->error_id, error_info->error_msg);
   }
   return success;
 }
@@ -149,12 +150,12 @@ void TraderXTP::OnDisconnected(uint64_t session_id, int reason) {
 }
 
 void TraderXTP::OnOrderEvent(XTPOrderInfo *order_info, XTPRI *error_info, uint64_t session_id) {
-  if (inbound_orders_.find(order_info->order_xtp_id) == inbound_orders_.end()) {
-    SPDLOG_ERROR("unrecognized xtp_order_id {}@{}", order_info->order_xtp_id, trading_day_);
+  if (map_xtp_to_kf_order_id_.find(order_info->order_xtp_id) == map_xtp_to_kf_order_id_.end()) {
+    SPDLOG_ERROR("unrecognized order_xtp_id {}@{}", order_info->order_xtp_id, trading_day_);
     return;
   }
   auto is_error = error_info != nullptr and error_info->error_id != 0;
-  auto order_id = inbound_orders_.at(order_info->order_xtp_id);
+  auto order_id = map_xtp_to_kf_order_id_.at(order_info->order_xtp_id);
   auto &order_state = orders_.at(order_id);
   auto writer = get_writer(order_state.dest);
   from_xtp(*order_info, order_state.data);
@@ -167,11 +168,27 @@ void TraderXTP::OnOrderEvent(XTPOrderInfo *order_info, XTPRI *error_info, uint64
 }
 
 void TraderXTP::OnTradeEvent(XTPTradeReport *trade_info, uint64_t session_id) {
-  if (inbound_orders_.find(trade_info->order_xtp_id) == inbound_orders_.end()) {
-    SPDLOG_ERROR("unrecognized xtp_order_id {}", trade_info->order_xtp_id);
+  if (nullptr == trade_info) {
+    SPDLOG_ERROR("trade_info is nullptr");
     return;
   }
-  auto order_id = inbound_orders_.at(trade_info->order_xtp_id);
+
+  SPDLOG_DEBUG("trade_info: order_xtp_id: {}, exec_id: {}", trade_info->order_xtp_id, trade_info->exec_id);
+  if (map_xtp_to_kf_order_id_.find(trade_info->order_xtp_id) == map_xtp_to_kf_order_id_.end()) {
+    SPDLOG_ERROR("unrecognized order_xtp_id {}", trade_info->order_xtp_id);
+    return;
+  }
+
+  std::set<std::string> &exec_ids =
+      map_xtp_order_id_to_xtp_trader_ids_.try_emplace(trade_info->order_xtp_id).first->second;
+  if (exec_ids.find(trade_info->exec_id) != exec_ids.end()) {
+    SPDLOG_DEBUG("已经处理过的成交. order_xtp_id:{}, exec_id: {}, 不再重新处理", trade_info->order_xtp_id,
+                 trade_info->exec_id);
+    return;
+  }
+
+  exec_ids.emplace(trade_info->exec_id);
+  auto order_id = map_xtp_to_kf_order_id_.at(trade_info->order_xtp_id);
   auto &order_state = orders_.at(order_id);
   auto writer = get_writer(order_state.dest);
   Trade &trade = writer->open_data<Trade>(now());
@@ -267,6 +284,10 @@ bool TraderXTP::req_history_trade(const event_ptr &event) {
 
 void TraderXTP::OnQueryOrder(XTPQueryOrderRsp *order_info, XTPRI *error_info, int request_id, bool is_last,
                              uint64_t session_id) {
+  if (map_request_location_.find(request_id) == map_request_location_.end()) {
+    return OnOrderEvent(order_info, error_info, request_id);
+  }
+
   auto writer = get_history_writer(request_id);
   HistoryOrder &history_order = writer->open_data<HistoryOrder>();
 
@@ -300,6 +321,10 @@ yijinjing::journal::writer_ptr TraderXTP::get_history_writer(uint64_t request_id
 
 void TraderXTP::OnQueryTrade(XTPQueryTradeRsp *trade_info, XTPRI *error_info, int request_id, bool is_last,
                              uint64_t session_id) {
+  if (map_request_location_.find(request_id) == map_request_location_.end()) {
+    return OnTradeEvent(trade_info, session_id);
+  }
+
   auto writer = get_history_writer(request_id);
   HistoryTrade &history_trade = writer->open_data<HistoryTrade>(now());
 
@@ -331,9 +356,35 @@ void TraderXTP::on_restore() {
   for (auto &pair : external_order_id_to_order_id_) {
     if (not pair.first.empty()) {
       uint64_t order_id = pair.second;
-      uint64_t xtp_order_id = std::stoull(pair.first);
-      inbound_orders_.emplace(xtp_order_id, order_id);
-      outbound_orders_.emplace(order_id, xtp_order_id);
+      uint64_t order_xtp_id = std::stoull(pair.first);
+      map_xtp_to_kf_order_id_.emplace(order_xtp_id, order_id);
+      map_kf_to_xtp_order_id_.emplace(order_id, order_xtp_id);
+    }
+  }
+  for (auto &pair : trades_) {
+    SPDLOG_DEBUG("trade: {}", pair.second.data.to_string());
+    uint64_t order_xtp_id = std::stoull(pair.second.data.external_order_id);
+    map_xtp_order_id_to_xtp_trader_ids_.try_emplace(order_xtp_id)
+        .first->second.emplace(pair.second.data.external_trade_id.to_string());
+  }
+}
+
+void TraderXTP::query_not_finished_order() {
+  for (auto &pair : orders_) {
+    SPDLOG_DEBUG("order: {}", pair.second.data.to_string());
+    if (not is_final_status(pair.second.data.status)) {
+      uint64_t order_id = pair.first;
+      uint64_t order_xtp_id = map_kf_to_xtp_order_id_.at(order_id);
+      int ret = api_->QueryOrderByXTPID(order_xtp_id, session_id_, ++request_id_);
+      if (ret != 0) {
+        SPDLOG_ERROR("查询上次关闭前未完成委托的 委托状态 order_id: {}, order_xtp_id: {} 失败, 错误信息为 [{}]:{}",
+                     order_id, order_xtp_id, api_->GetApiLastError()->error_id, api_->GetApiLastError()->error_msg);
+      }
+      ret = api_->QueryTradesByXTPID(order_xtp_id, session_id_, ++request_id_);
+      if (ret != 0) {
+        SPDLOG_ERROR("查询上次关闭前未完成委托的 成交信息 order_id: {}, order_xtp_id: {} 失败,  错误信息为 [{}]:{}",
+                     order_id, order_xtp_id, api_->GetApiLastError()->error_id, api_->GetApiLastError()->error_msg);
+      }
     }
   }
 }

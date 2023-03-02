@@ -206,11 +206,14 @@ private:
   uint64_t session_id_;
   int request_id_;
   std::string trading_day_;
-  std::unordered_map<uint64_t, uint64_t> inbound_orders_;
-  std::unordered_map<uint64_t, uint64_t> outbound_orders_;
+  std::unordered_map<uint64_t, uint64_t> map_kf_to_xtp_order_id_;
+  std::unordered_map<uint64_t, uint64_t> map_xtp_to_kf_order_id_;
   std::unordered_map<uint64_t, uint64_t> map_request_location_;
+  std::unordered_map<uint64_t, std::set<std::string>> map_xtp_order_id_to_xtp_trader_ids_;
 
   yijinjing::journal::writer_ptr get_history_writer(uint64_t request_id);
+
+  void query_not_finished_order();
 };
 } // namespace kungfu::wingchun::xtp
 #endif // KUNGFU_XTP_EXT_TRADER_H
