@@ -47,5 +47,8 @@
   },
   "devDependencies": {
     "@types/find-root": "^1.1.2"
+  },
+  "optionalDependencies": {
+    "tasklist": "~4.0.0"
   }
 }

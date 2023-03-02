@@ -5,7 +5,7 @@ import fkill from 'fkill';
 import { Proc, ProcessDescription, StartOptions } from 'pm2';
 import pm2 from './pm2Custom';
 import { getUserLocale } from 'get-user-locale';
-const find = require('find-process');
+import find from 'find-process';
 
 import {
   kfLogger,
@@ -29,6 +29,7 @@ import { getKfGlobalSettingsValue } from '../config/globalSettings';
 import { Observable } from 'rxjs';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import { Pm2StartOptions } from '../typings/global';
+import tasklist from 'tasklist';
 const { t } = VueI18n.global;
 
 process.env.PM2_HOME = path.resolve(os.homedir(), '.pm2');
@@ -43,44 +44,77 @@ interface FindProcessResult {
   uid?: number;
   gid?: number;
   name: string;
-  cmd: string;
+  cmd?: string;
+  username?: string;
 }
 
 export const findProcessByKeyword = (
   processName: string,
 ): Promise<FindProcessResult[]> => {
-  return find('name', processName, true);
+  const userid = os.userInfo().uid;
+  return find('name', processName, true).then((processList) => {
+    return processList.filter((item) => {
+      return item.uid ? item.uid == userid : true;
+    });
+  });
 };
 
-export const forceKill = (tasks: string[]): Promise<void> => {
-  return Promise.all(tasks.map((key) => findProcessByKeyword(key)))
-    .then((results) => {
+export const findProcessByKeywordsByFindProcess = (
+  tasks: string[],
+): Promise<FindProcessResult[]> => {
+  return Promise.all(tasks.map((key) => findProcessByKeyword(key))).then(
+    (results) => {
       return results.reduce((pre, processList) => {
         pre = [...pre, ...processList];
         return pre;
       }, []);
-    })
-    .then((processList) => {
-      const userid = os.userInfo().uid;
-      const processListResolved = processList.filter((item) => {
-        return item.uid ? item.uid == userid : true;
-      });
-
-      const pids = processListResolved.map((item) => item.pid);
-
-      console.log('Target to force kill processList ', processListResolved);
-      return fkill(pids, {
-        force: true,
-        tree: isWin ? true : false,
-        ignoreCase: true,
-        silent: process.env.NODE_ENV === 'development' ? true : false,
-      }).catch((err) => {
-        console.warn((<Error>err).message);
-      });
-    });
+    },
+  );
 };
 
-const kfcName = 'kfc';
+export const findProcessByKeywordsByTaskList = (
+  tasks: string[],
+): Promise<FindProcessResult[]> => {
+  const username = os.userInfo.name;
+  return tasklist({ verbose: true }).then((processList) => {
+    return processList
+      .filter((item) => tasks.indexOf(item.imageName) !== -1)
+      .filter((item) => item.username == username.split('\\')[1])
+      .map((item) => {
+        return {
+          pid: item.pid,
+          name: item.imageName,
+          username: item.username,
+        };
+      });
+  });
+};
+
+export const findProcessByKeywords = (
+  tasks: string[],
+): Promise<FindProcessResult[]> => {
+  return isWin
+    ? findProcessByKeywordsByTaskList(tasks)
+    : findProcessByKeywordsByFindProcess(tasks);
+};
+
+export const forceKill = (tasks: string[]): Promise<void> => {
+  return findProcessByKeywords(tasks).then((processList) => {
+    const pids = processList.map((item) => item.pid);
+
+    console.log('Target to force kill processList ', processList);
+    return fkill(pids, {
+      force: true,
+      tree: isWin ? true : false,
+      ignoreCase: true,
+      silent: process.env.NODE_ENV === 'development' ? true : false,
+    }).catch((err) => {
+      console.warn((<Error>err).message);
+    });
+  });
+};
+
+const kfcName = isWin ? 'kfc.exe' : 'kfc';
 
 export const killKfc = (): Promise<void> =>
   new Promise((resolve) => {

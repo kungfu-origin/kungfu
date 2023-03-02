@@ -7,6 +7,16 @@ declare const __resources: string;
 type AnyFunction = (...args: unknown[]) => unknown;
 type AnyPromiseFunction = (...args: unknown[]) => Promise<unknown>;
 
+declare module 'tasklist' {
+  function tasklist(options: {
+    verbose: boolean;
+  }): Promise<{ pid: number; imageName: string; username: string }[]>;
+
+  export = tasklist;
+}
+
+
+
 declare namespace KungfuApi {
   import {
     BrokerStateStatusEnum,
