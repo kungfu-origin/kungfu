@@ -157,6 +157,10 @@ void TraderXTP::OnOrderEvent(XTPOrderInfo *order_info, XTPRI *error_info, uint64
   auto is_error = error_info != nullptr and error_info->error_id != 0;
   auto order_id = map_xtp_to_kf_order_id_.at(order_info->order_xtp_id);
   auto &order_state = orders_.at(order_id);
+  if (not has_writer(order_state.dest)) {
+    SPDLOG_DEBUG("order dest: {} is not live, do not write data", get_vendor().get_location_uname(order_state.dest));
+    return;
+  }
   auto writer = get_writer(order_state.dest);
   from_xtp(*order_info, order_state.data);
   order_state.data.update_time = yijinjing::time::now_in_nano();
@@ -187,9 +191,13 @@ void TraderXTP::OnTradeEvent(XTPTradeReport *trade_info, uint64_t session_id) {
     return;
   }
 
-  exec_ids.emplace(trade_info->exec_id);
   auto order_id = map_xtp_to_kf_order_id_.at(trade_info->order_xtp_id);
   auto &order_state = orders_.at(order_id);
+  if (not has_writer(order_state.dest)) {
+    SPDLOG_DEBUG("order dest: {} is not live, do not write data", get_vendor().get_location_uname(order_state.dest));
+    return;
+  }
+  exec_ids.emplace(trade_info->exec_id);
   auto writer = get_writer(order_state.dest);
   Trade &trade = writer->open_data<Trade>(now());
   from_xtp(*trade_info, trade);

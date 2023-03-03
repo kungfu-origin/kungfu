@@ -39,6 +39,9 @@ class TraderSim(wc.Trader):
         self.map_block_msg = {}
         self.enable_self_detect()
 
+    def on_restore(self):
+        pass
+
     def on_start(self):
         config = json.loads(self.config)
         self.match_mode = config.get("match_mode", MatchMode.Custom)
