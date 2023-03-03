@@ -826,7 +826,7 @@ function handleAddItemIntoTableRows(item: KungfuApi.KfConfigItem) {
   const targetState = formState.value[item.key];
   const tmp = initFormStateByConfig(item.columns || [], {});
   if (targetState instanceof Array) {
-    targetState.push(tmp);
+    targetState.unshift(tmp);
   }
 }
 

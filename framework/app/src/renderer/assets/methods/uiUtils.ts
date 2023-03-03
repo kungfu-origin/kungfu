@@ -48,7 +48,6 @@ const { t } = VueI18n.global;
 import fse from 'fs-extra';
 import md from 'markdown-it';
 import { Router } from 'vue-router';
-import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
 
 // this utils file is only for ui components
 
@@ -665,7 +664,6 @@ export const useTriggerMakeOrder = (): {
         tag: 'orderbook',
         instrument,
       });
-      useGlobalStore().setOrderBookCurrentInstrument(instrument);
     }
   };
 

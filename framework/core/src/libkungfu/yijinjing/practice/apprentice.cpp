@@ -224,6 +224,8 @@ void apprentice::react() {
 
 void apprentice::on_active() {}
 
+void apprentice::on_frame() {}
+
 void apprentice::on_react() {}
 
 void apprentice::on_start() {}

@@ -178,6 +178,7 @@ def check_enableusersite():
 #
 # See https://bugs.python.org/issue29585
 
+
 # Copy of sysconfig._getuserbase()
 def _getuserbase():
     env_base = os.environ.get("PYTHONUSERBASE", None)
