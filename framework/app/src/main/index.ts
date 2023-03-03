@@ -16,7 +16,10 @@ import {
   showKungfuInfo,
   openUrl,
 } from '@kungfu-trader/kungfu-app/src/main/utils';
-import { kfLogger } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import {
+  kfLogger,
+  isUpdateVersionLogicEnable,
+} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { killExtra } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import {
   clearDB,
@@ -104,7 +107,7 @@ async function createWindow(
       SecheduleReloading = false;
     }
 
-    handleUpdateKungfu(MainWindow);
+    isUpdateVersionLogicEnable() && handleUpdateKungfu(MainWindow);
   });
 
   MainWindow.on('close', (e) => {

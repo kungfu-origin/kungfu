@@ -2,7 +2,6 @@ import './setEnv';
 import './injectGlobal';
 import './injectWindow';
 import { createApp } from 'vue';
-import { ipcRenderer } from 'electron';
 import App from '@kungfu-trader/kungfu-app/src/renderer/pages/index/App.vue';
 import router from '@kungfu-trader/kungfu-app/src/renderer/pages/index/router';
 import store from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store';
@@ -188,10 +187,14 @@ const initStartAll = () => {
 
 if (!booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED)) {
   if (isUpdateVersionLogicEnable()) {
-    ipcRenderer.once('ready-to-start-all', () => {
-      console.log('ready-to-start-all');
-      initStartAll();
-      triggerStartStep(1000);
+    console.log('checked version');
+    const subscription = globalBus.subscribe((data) => {
+      if (data.name === 'ready-to-start-all') {
+        console.log('ready-to-start-all');
+        initStartAll();
+        triggerStartStep(1000);
+        subscription.unsubscribe();
+      }
     });
   } else {
     console.log('init start');

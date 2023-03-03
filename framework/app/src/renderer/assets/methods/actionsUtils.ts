@@ -109,12 +109,14 @@ export const useUpdateVersion = () => {
         version: newVersion,
       }),
     ).then((flag) => {
+      console.log(flag);
       ipcRenderer.send('auto-update-confirm-result', flag);
     });
   };
 
   onMounted(() => {
     if (!isUpdateVersionLogicEnable()) return;
+    ipcRenderer.send('auto-update-renderer-ready');
 
     vueInstance?.proxy?.$globalBus.subscribe((data) => {
       if (data.tag === 'main') {
@@ -128,6 +130,7 @@ export const useUpdateVersion = () => {
         }
 
         if (data.name === 'auto-update-download-process') {
+          console.log(data.payload);
           process.value = +data.payload.process;
         }
       }

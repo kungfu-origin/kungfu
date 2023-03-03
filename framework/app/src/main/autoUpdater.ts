@@ -53,7 +53,8 @@ function handleUpdateKungfu(MainWindows: BrowserWindow | null) {
     if (MainWindows) {
       foundNewVersion(MainWindows, info.version);
 
-      ipcMain.once('auto-update-confirm-result', (result) => {
+      ipcMain.once('auto-update-confirm-result', (_, result) => {
+        kfLogger.info(result);
         if (result) {
           autoUpdater.downloadUpdate();
           startDownloadNewVersion(MainWindows);
@@ -71,9 +72,15 @@ function handleUpdateKungfu(MainWindows: BrowserWindow | null) {
 
   autoUpdater.on('update-downloaded', (info) => {
     kfLogger.info(JSON.stringify(info));
-    removeJournal(KF_HOME).then(() => {
-      autoUpdater.quitAndInstall(false, true);
-    });
+    MainWindows && downloadProcessUpdate(MainWindows, 100);
+
+    setTimeout(() => {
+      // app.exit();
+      MainWindows?.destroy();
+      removeJournal(KF_HOME).then(() => {
+        autoUpdater.quitAndInstall(false, true);
+      });
+    }, 1000);
   });
 
   autoUpdater.on('download-progress', function (progressInfo) {
@@ -81,7 +88,10 @@ function handleUpdateKungfu(MainWindows: BrowserWindow | null) {
     MainWindows && downloadProcessUpdate(MainWindows, progressInfo.percent);
   });
 
-  autoUpdater.checkForUpdates();
+  ipcMain.on('auto-update-renderer-ready', () => {
+    kfLogger.info('auto-update-renderer-ready');
+    autoUpdater.checkForUpdates();
+  });
 }
 
 export { handleUpdateKungfu };

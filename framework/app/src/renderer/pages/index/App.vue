@@ -168,7 +168,10 @@ onBeforeUnmount(() => {
       :keyboard="false"
       :footer="null"
     >
-      <a-progress :process="process"></a-progress>
+      <a-progress :percent="process"></a-progress>
+      <p v-if="process === 100" style="margin-top: 16px">
+        {{ $t('globalSettingConfig.downloaded_wait_to_install') }}
+      </p>
     </a-modal>
 
     <KfSystemPrepareModal
