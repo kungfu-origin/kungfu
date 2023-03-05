@@ -26,6 +26,7 @@ module.exports = {
     'no-control-regex': 'off',
     'no-case-declarations': 'off',
     '@typescript-eslint/no-this-alias': 'off',
+    "@typescript-eslint/no-var-requires": 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'vue/multi-word-component-names': 'off',
   },
