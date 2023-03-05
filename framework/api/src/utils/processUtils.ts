@@ -29,7 +29,6 @@ import { getKfGlobalSettingsValue } from '../config/globalSettings';
 import { Observable } from 'rxjs';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import { Pm2StartOptions } from '../typings/global';
-import tasklist from 'tasklist';
 const { t } = VueI18n.global;
 
 process.env.PM2_HOME = path.resolve(os.homedir(), '.pm2');
@@ -76,6 +75,7 @@ export const findProcessByKeywordsByTaskList = (
   tasks: string[],
 ): Promise<FindProcessResult[]> => {
   const username = os.userInfo().username;
+  const tasklist = require('tasklist');
   return tasklist({ verbose: true }).then((processList) => {
     return processList
       .filter((item) => tasks.indexOf(item.imageName) !== -1)

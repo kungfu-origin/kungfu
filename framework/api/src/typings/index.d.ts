@@ -168,6 +168,7 @@ declare namespace KungfuApi {
 
     // ---- some ui releated ----;
     noDivider?: boolean;
+    wrap?: boolean;
   }
 
   export interface KfExhibitConfigItem {
@@ -544,6 +545,7 @@ declare namespace KungfuApi {
     match_number: bigint; // 成交约定号
     is_specific: boolean; // 是否受限股份
     insert_time: bigint;
+    block_id: bigint;
   }
 
   export interface BasketOrderInput {
