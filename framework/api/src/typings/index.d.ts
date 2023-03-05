@@ -168,7 +168,7 @@ declare namespace KungfuApi {
 
     // ---- some ui releated ----;
     noDivider?: boolean;
-    wrap?: boolean;
+    wrap?: string;
   }
 
   export interface KfExhibitConfigItem {
