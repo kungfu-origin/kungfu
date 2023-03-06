@@ -92,12 +92,14 @@ function handleUpdateKungfu(MainWindow: BrowserWindow | null) {
         killAllBeforeQuit(MainWindow),
       ]).finally(() => {
         delayMilliSeconds(1000).then(() => {
-          removeTargetFilesInFolder(KF_HOME, ['.db', '.journal'], ['etc']).then(
-            () => {
-              autoUpdater.quitAndInstall(false, true);
-              MainWindow.destroy();
-            },
-          );
+          removeTargetFilesInFolder(
+            KF_HOME,
+            ['.db', '.journal'],
+            ['etc', 'config.db'],
+          ).then(() => {
+            autoUpdater.quitAndInstall(false, true);
+            MainWindow.destroy();
+          });
         });
       });
     });
