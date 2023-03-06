@@ -139,10 +139,14 @@ function handleToPage(pathname: string) {
       </a-layout>
     </a-layout>
     <a-layout-footer>
+      <div class="kf-"></div>
+      <KfProcessStatusController
+        class="kf-footer-box__warp"
+      ></KfProcessStatusController>
       <KfUpdateController
         v-if="isUpdateVersionLogicEnable()"
+        class="kf-footer-box__warp"
       ></KfUpdateController>
-      <KfProcessStatusController></KfProcessStatusController>
       <div
         v-for="config in footerComponentConfigs"
         :key="config.key"
@@ -239,7 +243,16 @@ function handleToPage(pathname: string) {
     .kf-footer-box__warp {
       float: right;
       height: 100%;
-      margin-right: 8px;
+      padding: 0 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: bold;
+      font-size: 12px;
+      color: @primary-color;
+
+      &:hover {
+        background: @item-active-bg;
+      }
     }
   }
 }

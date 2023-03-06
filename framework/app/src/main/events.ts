@@ -86,6 +86,13 @@ export function updateNotAvailable(mainWindow: BrowserWindow): void {
   sendMsgToMainWindow(mainWindow, 'auto-update-up-to-date');
 }
 
+export function sendUpdatingError(
+  mainWindow: BrowserWindow,
+  error: Error,
+): void {
+  sendMsgToMainWindow(mainWindow, 'auto-update-error', { error });
+}
+
 function sendMsgToMainWindow(
   mainWindow: BrowserWindow,
   msg: string,

@@ -84,7 +84,7 @@ import {
   makeSearchOptionFormInstruments,
 } from './uiUtils';
 import { storeToRefs } from 'pinia';
-import { app, ipcRenderer } from 'electron';
+import { ipcRenderer } from 'electron';
 import { throttleTime } from 'rxjs';
 import { useGlobalStore } from '../../pages/index/store/global';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
@@ -93,20 +93,23 @@ import sound from 'sound-play';
 import { KUNGFU_RESOURCES_DIR } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 import { RuleObject } from 'ant-design-vue/lib/form';
 import { TradeAccountingUsageMap } from '@kungfu-trader/kungfu-js-api/utils/accounting';
+import { readRootPackageJsonSync } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 
 const { t } = VueI18n.global;
 const { success, error } = messagePrompt();
 
 export const useUpdateVersion = () => {
   const vueInstance = getCurrentInstance();
-  const currentVersion = ref(app.getVersion());
+  const packageJson = readRootPackageJsonSync();
+  const currentVersion = ref(packageJson?.version);
   const newVersion = ref('');
   const popoverVisible = ref(false);
   const hasNewVersion = ref(false);
   const downloadStarted = ref<boolean>(false);
-  const prograssStatus = ref<'success' | 'active' | 'exception' | 'normal'>(
+  const progressStatus = ref<'success' | 'active' | 'exception' | 'normal'>(
     'normal',
   );
+  const errorMessage = ref('');
   const process = ref<number>();
 
   const handleToConfirmStartUpdate = (newVersion: string) => {
@@ -137,11 +140,9 @@ export const useUpdateVersion = () => {
 
   onMounted(() => {
     if (!isUpdateVersionLogicEnable()) return;
-    ipcRenderer.send('auto-update-renderer-ready');
 
     vueInstance?.proxy?.$globalBus.subscribe((data) => {
       if (data.tag === 'main') {
-        console.log(data);
         if (data.name === 'auto-update-find-new-version') {
           hasNewVersion.value = true;
           newVersion.value = data.payload.newVersion;
@@ -154,15 +155,22 @@ export const useUpdateVersion = () => {
 
         if (data.name === 'auto-update-start-download') {
           downloadStarted.value = true;
-          prograssStatus.value = 'active';
+          progressStatus.value = 'active';
           popoverVisible.value = true;
         }
 
         if (data.name === 'auto-update-download-process') {
           process.value = +data.payload.process;
           if (process.value === 100) {
-            prograssStatus.value = 'success';
+            progressStatus.value = 'success';
+          } else {
+            progressStatus.value = 'active';
           }
+        }
+
+        if (data.name === 'auto-update-error') {
+          errorMessage.value = (data.payload.error as Error).message;
+          progressStatus.value = 'exception';
         }
       }
     });
@@ -175,6 +183,8 @@ export const useUpdateVersion = () => {
     hasNewVersion,
     downloadStarted,
     process,
+    progressStatus,
+    errorMessage,
     handleToStartDownload,
     handleQuitAndInstall,
   };
@@ -882,8 +892,6 @@ export const usePreStartAndQuitApp = (): {
 } => {
   const app = getCurrentInstance();
 
-  const readyToStartAll = ref<boolean>(!isUpdateVersionLogicEnable());
-
   const preStartSystemLoadingData = reactive<
     Record<string, 'loading' | 'done'>
   >({
@@ -901,12 +909,21 @@ export const usePreStartAndQuitApp = (): {
 
   const preStartSystemLoading = computed(() => {
     return (
-      readyToStartAll.value &&
       Object.values(preStartSystemLoadingData).filter(
         (item: string) => item !== 'done',
       ).length > 0
     );
   });
+
+  const watchStopHandle = watch(
+    () => preStartSystemLoading.value,
+    (newVal) => {
+      if (!newVal) {
+        ipcRenderer.send('auto-update-renderer-ready');
+        watchStopHandle();
+      }
+    },
+  );
 
   const preQuitSystemLoading = computed(() => {
     return (
@@ -968,9 +985,6 @@ export const usePreStartAndQuitApp = (): {
 
           if (data.tag === 'main') {
             switch (data.name) {
-              case 'ready-to-start-all':
-                readyToStartAll.value = true;
-                break;
               case 'record-before-quit':
                 preQuitSystemLoadingData.record = 'loading';
                 preQuitTasks([

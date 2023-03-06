@@ -35,6 +35,7 @@ import {
   Divider,
   Dropdown,
   Progress,
+  Popover,
 } from 'ant-design-vue';
 
 import {
@@ -107,6 +108,7 @@ app
   .use(Divider)
   .use(Dropdown)
   .use(Progress)
+  .use(Popover)
   .use(VueVirtualScroller);
 
 app.config.globalProperties.$antLocalesMap = {

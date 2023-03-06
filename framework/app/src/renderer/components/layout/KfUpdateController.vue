@@ -1,7 +1,8 @@
 <template>
   <a-popover
     v-model:visible="popoverVisible"
-    :overlayStyle="{ width: '200px' }"
+    :overlay-style="{ width: '400px' }"
+    placement="topRight"
     trigger="click"
   >
     <template #title>
@@ -10,10 +11,14 @@
         <CloseOutlined @click="popoverVisible = false" />
       </div>
     </template>
-    <template #contents>
+    <template #content>
       <template v-if="hasNewVersion">
         <template v-if="downloadStarted">
-          <a-progress :precent="process" strokeColor="#FAAD14"></a-progress>
+          <a-progress
+            :percent="process"
+            :status="progressStatus"
+            stroke-color="#FAAD14"
+          ></a-progress>
           <div v-if="process === 100">
             <span>{{ $t('globalSettingConfig.downloaded') }}</span>
             <a-button
@@ -23,6 +28,9 @@
             >
               {{ $t('globalSettingConfig.to_install') }}
             </a-button>
+          </div>
+          <div v-else-if="errorMessage">
+            <span class="color-red">{{ errorMessage }}</span>
           </div>
         </template>
         <template v-else>
@@ -36,21 +44,22 @@
       </template>
       <template v-else>
         <div>
-          {{ $t('globalSettingConfig.current_version') + ':' }}
-        </div>
-        <div>
           {{
+            $t('globalSettingConfig.current_version') +
+            ': ' +
             currentVersion +
-            ' (' +
+            ' ( ' +
             $t('globalSettingConfig.already_latest_version') +
-            ')'
+            ' )'
           }}
         </div>
       </template>
     </template>
-    <div>
+    <div class="kf-update-controller-entry__wrap">
       <interaction-outlined />
-      <span>{{ $t('globalSettingConfig.update') }}</span>
+      <span style="margin-left: 4px">
+        {{ $t('globalSettingConfig.update') }}
+      </span>
     </div>
   </a-popover>
 </template>
@@ -66,6 +75,8 @@ const {
   hasNewVersion,
   downloadStarted,
   process,
+  progressStatus,
+  errorMessage,
   handleToStartDownload,
   handleQuitAndInstall,
 } = useUpdateVersion();
@@ -76,6 +87,6 @@ const {
   width: 100%;
   display: flex;
   justify-content: space-between;
-  padding: 0 4px;
+  align-items: center;
 }
 </style>

@@ -457,7 +457,6 @@ export const useIpcListener = (): void => {
   const app = getCurrentInstance();
   ipcRenderer.removeAllListeners('main-process-messages');
   ipcRenderer.on('main-process-messages', (_event, name, payload) => {
-    console.log('name, payload');
     if (app?.proxy) {
       app?.proxy.$globalBus.next({
         tag: 'main',

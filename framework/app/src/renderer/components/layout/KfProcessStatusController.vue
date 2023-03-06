@@ -321,12 +321,8 @@ onMounted(() => {
 @import '@kungfu-trader/kungfu-app/src/renderer/assets/less/variables.less';
 
 .kf-process-status-controller__warp {
-  float: right;
-  height: 100%;
-  padding: 0 8px;
   display: flex;
   align-items: center;
-  cursor: pointer;
 
   &.some-process-error {
     .title {
@@ -337,21 +333,6 @@ onMounted(() => {
     .anticon {
       color: lighten(@red2-base, 10%);
     }
-  }
-
-  &:hover {
-    background: @item-active-bg;
-    color: @primary-color;
-  }
-
-  .title {
-    font-size: 12px;
-    font-weight: bold;
-    color: @primary-color;
-  }
-
-  .anticon {
-    color: @primary-color;
   }
 }
 

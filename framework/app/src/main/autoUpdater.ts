@@ -11,9 +11,10 @@ import { readRootPackageJsonSync } from '@kungfu-trader/kungfu-js-api/utils/file
 import {
   downloadProcessUpdate,
   foundNewVersion,
-  readyToStartAll,
   reqRecordBeforeQuit,
+  sendUpdatingError,
   startDownloadNewVersion,
+  updateNotAvailable,
 } from './events';
 import { KF_HOME } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 import { killAllBeforeQuit } from './utils';
@@ -38,12 +39,15 @@ function handleUpdateKungfu(MainWindow: BrowserWindow | null) {
   // }
 
   autoUpdater.autoDownload = false;
+  autoUpdater.autoInstallOnAppQuit = false;
+  autoUpdater.autoRunAppAfterInstall = true;
   autoUpdater.setFeedURL(updaterOption);
 
   autoUpdater.on('error', (error) => {
     kfLogger.error(
       error == null ? 'unknown' : (error.stack || error).toString(),
     );
+    MainWindow && sendUpdatingError(MainWindow, error);
   });
 
   autoUpdater.on('checking-for-update', () => {
@@ -73,7 +77,7 @@ function handleUpdateKungfu(MainWindow: BrowserWindow | null) {
 
   autoUpdater.on('update-not-available', (info) => {
     kfLogger.info('Current version is up-to-date', JSON.stringify(info));
-    MainWindow && readyToStartAll(MainWindow);
+    MainWindow && updateNotAvailable(MainWindow);
   });
 
   autoUpdater.on('update-downloaded', (info) => {
@@ -89,9 +93,9 @@ function handleUpdateKungfu(MainWindow: BrowserWindow | null) {
         killAllBeforeQuit(MainWindow),
       ]).finally(() => {
         delayMilliSeconds(1000).then(() => {
-          MainWindow?.destroy();
           removeJournal(KF_HOME).then(() => {
             autoUpdater.quitAndInstall(false, true);
+            MainWindow.destroy();
           });
         });
       });
