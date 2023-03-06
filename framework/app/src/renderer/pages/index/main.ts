@@ -57,6 +57,7 @@ import {
   startLedger,
   startCacheD,
   startMaster,
+  isAllMainProcessRunning,
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 
 import {
@@ -72,6 +73,8 @@ import globalBus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import zhCN from 'ant-design-vue/es/locale/zh_CN';
 import enUS from 'ant-design-vue/es/locale/en_US';
+import { killAllBeforeQuit } from '../../../main/utils';
+import { pm2Kill, KillAll } from '../../../../../api/src/utils/processUtils';
 
 const app = createApp(App);
 
@@ -129,7 +132,7 @@ mergeExtLanguages().then(() =>
 const globalStore = useGlobalStore();
 const __BYPASS_ARCHIVE__ = false;
 
-if (!booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED)) {
+const initStartAll = () => {
   preStartAll()
     .then(async () => {
       if (__BYPASS_ARCHIVE__) {
@@ -184,17 +187,29 @@ if (!booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED)) {
         })
         .catch((err) => console.error(err.message));
     });
+};
+
+if (!booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED)) {
+  initStartAll();
 } else {
-  startGetProcessStatus(
-    (res: {
-      processStatus: Pm2ProcessStatusData;
-      processStatusWithDetail: Pm2ProcessStatusDetailData;
-    }) => {
-      const { processStatus, processStatusWithDetail } = res;
-      globalStore.setProcessStatus(processStatus);
-      globalStore.setProcessStatusWithDetail(processStatusWithDetail);
-    },
-  );
+  isAllMainProcessRunning().then((res) => {
+    if (res) {
+      startGetProcessStatus(
+        (res: {
+          processStatus: Pm2ProcessStatusData;
+          processStatusWithDetail: Pm2ProcessStatusDetailData;
+        }) => {
+          const { processStatus, processStatusWithDetail } = res;
+          globalStore.setProcessStatus(processStatus);
+          globalStore.setProcessStatusWithDetail(processStatusWithDetail);
+        },
+      );
+    } else {
+      KillAll().finally(() => {
+        initStartAll();
+      });
+    }
+  });
 }
 
 triggerStartStep(1000);

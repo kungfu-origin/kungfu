@@ -17,6 +17,7 @@ import {
   getIfProcessDeleted,
   delayMilliSeconds,
   isTdMdStrategy,
+  deleteNNFiles,
 } from '../utils/busiUtils';
 import {
   buildProcessLogPath,
@@ -130,6 +131,33 @@ export const killKungfu = () => {
 };
 
 export const killExtra = () => forceKill([kfcName, 'pm2']);
+
+export function KillAll(): Promise<void> {
+  //不需要加killdaemon
+  return new Promise((resolve) => {
+    pm2Kill()
+      .catch((err) => kfLogger.error(err))
+      .finally(() => {
+        killKfc()
+          .catch((err) => kfLogger.error(err))
+          .finally(() => {
+            killKungfu()
+              .catch((err) => kfLogger.error(err))
+              .finally(() => {
+                killExtra()
+                  .catch((err) => kfLogger.error(err))
+                  .finally(() => {
+                    deleteNNFiles()
+                      .catch((err) => kfLogger.error(err))
+                      .finally(() => {
+                        resolve();
+                      });
+                  });
+              });
+          });
+      });
+  });
+}
 
 //===================== pm2 start =======================
 
@@ -659,6 +687,16 @@ function startGetProcessStatusByName(
 //===================== utils end =======================
 
 //================ business related start ===============
+
+export async function isAllMainProcessRunning() {
+  const { processStatus } = await listProcessStatus();
+
+  return (
+    getIfProcessRunning(processStatus, 'master') &&
+    getIfProcessRunning(processStatus, 'ledger') &&
+    getIfProcessRunning(processStatus, 'cached')
+  );
+}
 
 export function startArchiveMakeTask(
   cb?: (processStatus: Pm2ProcessStatusTypes) => void,

@@ -5,7 +5,6 @@ import { autoUpdater } from 'electron-updater';
 import {
   delayMilliSeconds,
   kfLogger,
-  removeJournal,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { readRootPackageJsonSync } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import {
@@ -18,6 +17,7 @@ import {
 } from './events';
 import { KF_HOME } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 import { killAllBeforeQuit } from './utils';
+import { removeTargetFilesInFolder } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 
 autoUpdater.logger = kfLogger;
 
@@ -86,17 +86,18 @@ function handleUpdateKungfu(MainWindow: BrowserWindow | null) {
 
     ipcMain.on('auto-update-quit-and-install', () => {
       if (!MainWindow) return;
-      console.log('auto-update-quit-and-install');
 
       Promise.all([
         reqRecordBeforeQuit(MainWindow),
         killAllBeforeQuit(MainWindow),
       ]).finally(() => {
         delayMilliSeconds(1000).then(() => {
-          removeJournal(KF_HOME).then(() => {
-            autoUpdater.quitAndInstall(false, true);
-            MainWindow.destroy();
-          });
+          removeTargetFilesInFolder(KF_HOME, ['.db', '.journal'], ['etc']).then(
+            () => {
+              autoUpdater.quitAndInstall(false, true);
+              MainWindow.destroy();
+            },
+          );
         });
       });
     });
