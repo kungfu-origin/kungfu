@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { SlidersOutlined, SettingOutlined } from '@ant-design/icons-vue';
 import KfProcessStatusController from '@kungfu-trader/kungfu-app/src/renderer/components/layout/KfProcessStatusController.vue';
+import KfUpdateController from '@kungfu-trader/kungfu-app/src/renderer/components/layout/KfUpdateController.vue';
 import { computed, getCurrentInstance, onBeforeUnmount, ref } from 'vue';
 import { useExtConfigsRelated } from '../../assets/methods/actionsUtils';
+import { isUpdateVersionLogicEnable } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import globalBus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 import KfGlobalSettingModal from '../public/KfGlobalSettingModal.vue';
 import { useLanguage } from '@kungfu-trader/kungfu-js-api/language';
@@ -137,6 +139,9 @@ function handleToPage(pathname: string) {
       </a-layout>
     </a-layout>
     <a-layout-footer>
+      <KfUpdateController
+        v-if="isUpdateVersionLogicEnable()"
+      ></KfUpdateController>
       <KfProcessStatusController></KfProcessStatusController>
       <div
         v-for="config in footerComponentConfigs"

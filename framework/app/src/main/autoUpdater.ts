@@ -3,6 +3,7 @@
 import { app, ipcMain, BrowserWindow } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import {
+  delayMilliSeconds,
   kfLogger,
   removeJournal,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
@@ -11,13 +12,15 @@ import {
   downloadProcessUpdate,
   foundNewVersion,
   readyToStartAll,
+  reqRecordBeforeQuit,
   startDownloadNewVersion,
 } from './events';
 import { KF_HOME } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
+import { killAllBeforeQuit } from './utils';
 
 autoUpdater.logger = kfLogger;
 
-function handleUpdateKungfu(MainWindows: BrowserWindow | null) {
+function handleUpdateKungfu(MainWindow: BrowserWindow | null) {
   kfLogger.info('Kungfu client version', app.getVersion());
   // if (!app.isPackaged) return;
 
@@ -49,17 +52,20 @@ function handleUpdateKungfu(MainWindows: BrowserWindow | null) {
 
   autoUpdater.on('update-available', (info) => {
     kfLogger.info('Got a new kungfu client version', JSON.stringify(info));
-    kfLogger.info('MainWindows', MainWindows);
-    if (MainWindows) {
-      foundNewVersion(MainWindows, info.version);
+    kfLogger.info('MainWindow', MainWindow);
+    if (MainWindow) {
+      foundNewVersion(MainWindow, info.version);
 
       ipcMain.once('auto-update-confirm-result', (_, result) => {
         kfLogger.info(result);
         if (result) {
           autoUpdater.downloadUpdate();
-          startDownloadNewVersion(MainWindows);
+          startDownloadNewVersion(MainWindow);
         } else {
-          readyToStartAll(MainWindows);
+          ipcMain.on('auto-update-to-start-download', () => {
+            autoUpdater.downloadUpdate();
+            startDownloadNewVersion(MainWindow);
+          });
         }
       });
     }
@@ -67,25 +73,34 @@ function handleUpdateKungfu(MainWindows: BrowserWindow | null) {
 
   autoUpdater.on('update-not-available', (info) => {
     kfLogger.info('Current version is up-to-date', JSON.stringify(info));
-    MainWindows && readyToStartAll(MainWindows);
+    MainWindow && readyToStartAll(MainWindow);
   });
 
   autoUpdater.on('update-downloaded', (info) => {
-    kfLogger.info(JSON.stringify(info));
-    MainWindows && downloadProcessUpdate(MainWindows, 100);
+    kfLogger.info('update-downloaded', JSON.stringify(info));
+    MainWindow && downloadProcessUpdate(MainWindow, 100);
 
-    setTimeout(() => {
-      // app.exit();
-      MainWindows?.destroy();
-      removeJournal(KF_HOME).then(() => {
-        autoUpdater.quitAndInstall(false, true);
+    ipcMain.on('auto-update-quit-and-install', () => {
+      if (!MainWindow) return;
+      console.log('auto-update-quit-and-install');
+
+      Promise.all([
+        reqRecordBeforeQuit(MainWindow),
+        killAllBeforeQuit(MainWindow),
+      ]).finally(() => {
+        delayMilliSeconds(1000).then(() => {
+          MainWindow?.destroy();
+          removeJournal(KF_HOME).then(() => {
+            autoUpdater.quitAndInstall(false, true);
+          });
+        });
       });
-    }, 1000);
+    });
   });
 
   autoUpdater.on('download-progress', function (progressInfo) {
     kfLogger.info('Download progress: ', JSON.stringify(progressInfo));
-    MainWindows && downloadProcessUpdate(MainWindows, progressInfo.percent);
+    MainWindow && downloadProcessUpdate(MainWindow, progressInfo.percent);
   });
 
   ipcMain.on('auto-update-renderer-ready', () => {

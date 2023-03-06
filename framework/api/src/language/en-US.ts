@@ -581,10 +581,14 @@ export default {
     update: 'Upgrade Version',
     is_check_version: 'Check Version',
     is_check_version_desc: 'Check the client version when start kungfu',
-    find_new_version:
-      'Found new version: {version}\nIf you want upgrade now? (Upgrade will exit the system)',
-    downloaded_wait_to_install:
-      'Download finished, prepare exit system and install new version...',
+    current_version: 'Current version',
+    already_latest_version: 'Already latest version',
+    new_version: 'New version',
+    start_download: 'Start Download',
+    find_new_version: 'Found new version: {version}\nIf you want download now?',
+    downloaded: 'Download finished, wait to install',
+    to_install: 'To install',
+    warning_before_install: '安装会退出功夫, 确定现在安装吗? ',
   },
 
   风控: 'Risk Setting',

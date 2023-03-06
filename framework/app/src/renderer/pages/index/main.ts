@@ -46,7 +46,6 @@ import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/ind
 import {
   booleanProcessEnv,
   delayMilliSeconds,
-  isUpdateVersionLogicEnable,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
   Pm2ProcessStatusDetailData,
@@ -128,7 +127,7 @@ mergeExtLanguages().then(() =>
 const globalStore = useGlobalStore();
 const __BYPASS_ARCHIVE__ = false;
 
-const initStartAll = () => {
+if (!booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED)) {
   preStartAll()
     .then(async () => {
       if (__BYPASS_ARCHIVE__) {
@@ -183,24 +182,6 @@ const initStartAll = () => {
         })
         .catch((err) => console.error(err.message));
     });
-};
-
-if (!booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED)) {
-  if (isUpdateVersionLogicEnable()) {
-    console.log('checked version');
-    const subscription = globalBus.subscribe((data) => {
-      if (data.name === 'ready-to-start-all') {
-        console.log('ready-to-start-all');
-        initStartAll();
-        triggerStartStep(1000);
-        subscription.unsubscribe();
-      }
-    });
-  } else {
-    console.log('init start');
-    initStartAll();
-    triggerStartStep(1000);
-  }
 } else {
   startGetProcessStatus(
     (res: {
@@ -212,6 +193,6 @@ if (!booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED)) {
       globalStore.setProcessStatusWithDetail(processStatusWithDetail);
     },
   );
-
-  triggerStartStep(1000);
 }
+
+triggerStartStep(1000);

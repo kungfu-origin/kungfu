@@ -573,9 +573,14 @@ export default {
     update: '版本更新',
     is_check_version: '检测更新',
     is_check_version_desc: '启动功夫时, 是否检测更新',
-    find_new_version:
-      '发现新版本: {version}\n是否现在更新? (更新会强制退出程序)',
-    downloaded_wait_to_install: '下载完成, 准备退出并安装...',
+    current_version: '当前版本',
+    already_latest_version: '已是最新版本',
+    new_version: '新版本',
+    start_download: '开始下载',
+    find_new_version: '发现新版本: {version}\n是否现在下载安装包? ',
+    downloaded: '下载完成, 等待安装',
+    to_install: '现在安装',
+    warning_before_install: '安装会退出功夫, 确定现在安装吗? ',
   },
 
   风控: '风控',

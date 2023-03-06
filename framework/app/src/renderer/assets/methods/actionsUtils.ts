@@ -84,7 +84,7 @@ import {
   makeSearchOptionFormInstruments,
 } from './uiUtils';
 import { storeToRefs } from 'pinia';
-import { ipcRenderer } from 'electron';
+import { app, ipcRenderer } from 'electron';
 import { throttleTime } from 'rxjs';
 import { useGlobalStore } from '../../pages/index/store/global';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
@@ -99,7 +99,14 @@ const { success, error } = messagePrompt();
 
 export const useUpdateVersion = () => {
   const vueInstance = getCurrentInstance();
-  const downloading = ref<boolean>(false);
+  const currentVersion = ref(app.getVersion());
+  const newVersion = ref('');
+  const popoverVisible = ref(false);
+  const hasNewVersion = ref(false);
+  const downloadStarted = ref<boolean>(false);
+  const prograssStatus = ref<'success' | 'active' | 'exception' | 'normal'>(
+    'normal',
+  );
   const process = ref<number>();
 
   const handleToConfirmStartUpdate = (newVersion: string) => {
@@ -109,8 +116,22 @@ export const useUpdateVersion = () => {
         version: newVersion,
       }),
     ).then((flag) => {
-      console.log(flag);
       ipcRenderer.send('auto-update-confirm-result', flag);
+    });
+  };
+
+  const handleToStartDownload = () => {
+    ipcRenderer.send('auto-update-to-start-download');
+  };
+
+  const handleQuitAndInstall = () => {
+    confirmModal(
+      t('globalSettingConfig.update'),
+      t('globalSettingConfig.warning_before_install'),
+    ).then((flag) => {
+      if (flag) {
+        ipcRenderer.send('auto-update-quit-and-install');
+      }
     });
   };
 
@@ -122,24 +143,40 @@ export const useUpdateVersion = () => {
       if (data.tag === 'main') {
         console.log(data);
         if (data.name === 'auto-update-find-new-version') {
+          hasNewVersion.value = true;
+          newVersion.value = data.payload.newVersion;
           handleToConfirmStartUpdate(data.payload.newVersion);
         }
 
+        if (data.tag === 'auto-update-up-to-date') {
+          hasNewVersion.value = false;
+        }
+
         if (data.name === 'auto-update-start-download') {
-          downloading.value = true;
+          downloadStarted.value = true;
+          prograssStatus.value = 'active';
+          popoverVisible.value = true;
         }
 
         if (data.name === 'auto-update-download-process') {
-          console.log(data.payload);
           process.value = +data.payload.process;
+          if (process.value === 100) {
+            prograssStatus.value = 'success';
+          }
         }
       }
     });
   });
 
   return {
-    downloading,
+    popoverVisible,
+    newVersion,
+    currentVersion,
+    hasNewVersion,
+    downloadStarted,
     process,
+    handleToStartDownload,
+    handleQuitAndInstall,
   };
 };
 

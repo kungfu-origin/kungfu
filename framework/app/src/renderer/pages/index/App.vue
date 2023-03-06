@@ -17,7 +17,6 @@ import {
 import {
   playSound,
   useBasket,
-  useUpdateVersion,
   useDealExportHistoryTradingData,
   useDealInstruments,
   usePreStartAndQuitApp,
@@ -43,8 +42,6 @@ setHtmlTitle();
 const app = getCurrentInstance();
 const store = useGlobalStore();
 const locale = ref<Locale>();
-
-const { downloading, process } = useUpdateVersion();
 
 const {
   preStartSystemLoadingData,
@@ -157,22 +154,6 @@ onBeforeUnmount(() => {
         <router-view />
       </KfLayoutVue>
     </div>
-
-    <!-- auto update modal -->
-
-    <a-modal
-      v-model:visible="downloading"
-      :title="$t('globalSettingConfig.update')"
-      :closable="false"
-      :mask-closable="false"
-      :keyboard="false"
-      :footer="null"
-    >
-      <a-progress :percent="process"></a-progress>
-      <p v-if="process === 100" style="margin-top: 16px">
-        {{ $t('globalSettingConfig.downloaded_wait_to_install') }}
-      </p>
-    </a-modal>
 
     <KfSystemPrepareModal
       :title="$t('system_prompt')"

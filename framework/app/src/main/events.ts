@@ -82,8 +82,8 @@ export function downloadProcessUpdate(
   sendMsgToMainWindow(mainWindow, 'auto-update-download-process', { process });
 }
 
-export function readyToStartAll(mainWindow: BrowserWindow): void {
-  sendMsgToMainWindow(mainWindow, 'ready-to-start-all');
+export function updateNotAvailable(mainWindow: BrowserWindow): void {
+  sendMsgToMainWindow(mainWindow, 'auto-update-up-to-date');
 }
 
 function sendMsgToMainWindow(
