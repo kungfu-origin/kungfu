@@ -187,7 +187,9 @@ void master::react() {
   events_ | instanceof <journal::frame>() | $$(feed(event));
 }
 
-void master::on_active() {
+void master::on_active() {}
+
+void master::on_frame() {
   auto now = time::now_in_nano();
   if (last_check_ + time_unit::NANOSECONDS_PER_SECOND < now) {
     on_interval_check(now);

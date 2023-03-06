@@ -115,6 +115,9 @@ const busSubscription = globalBus.subscribe((data: KfEvent.KfBusEvent) => {
   if (data.tag === 'play:tradingError') {
     playSound();
   }
+  if (data.tag === 'orderbook') {
+    store.setOrderBookCurrentInstrument(data.instrument);
+  }
 });
 
 const {

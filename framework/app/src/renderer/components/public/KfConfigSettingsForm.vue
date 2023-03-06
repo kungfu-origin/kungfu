@@ -306,7 +306,7 @@ function getTablesSearchRelated(
   tableKeys: Record<string, KungfuApi.KfConfigItem>,
 ): TablesSearchRelated {
   return Object.keys(tableKeys).reduce((tablesSearchRelated, key) => {
-    const targetList = computed(() => formState.value[key]);
+    const targetList = ref(formState.value[key]);
     const keys =
       tableKeys[key].search?.keys ||
       tableKeys[key].headers?.map((header) => header.title) ||
@@ -826,7 +826,7 @@ function handleAddItemIntoTableRows(item: KungfuApi.KfConfigItem) {
   const targetState = formState.value[item.key];
   const tmp = initFormStateByConfig(item.columns || [], {});
   if (targetState instanceof Array) {
-    targetState.push(tmp);
+    targetState.unshift(tmp);
   }
 }
 
@@ -1548,6 +1548,7 @@ defineExpose({
                 <div class="table-in-config-setting-row-from__wrap">
                   <KfConfigSettingsForm
                     v-model:formState="_item.data"
+                    :style="{ flexWrap: item.wrap || '' }"
                     :config-settings="item.columns || []"
                     :change-type="changeType"
                     :primary-key-avoid-repeat-compare-extra="
@@ -1764,7 +1765,6 @@ export default defineComponent({
           box-sizing: border-box;
 
           &.ant-form-inline {
-            flex-wrap: nowrap;
             overflow-x: overlay;
 
             .ant-row.ant-form-item {

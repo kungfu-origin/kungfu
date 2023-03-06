@@ -358,17 +358,19 @@ function setMenu() {
               },
               {
                 label: t('user_manual'),
-                click: () => openUrl('https://www.kungfu-trader.com/manual/'),
+                click: () =>
+                  openUrl('https://docs.kungfu-trader.com/latest/index.html'),
               },
               {
                 label: t('API_documentation'),
-                click: () => openUrl('https://www.kungfu-trader.com/api-doc/'),
-              },
-              {
-                label: t('Kungfu_forum'),
                 click: () =>
-                  openUrl('https://www.kungfu-trader.com/community/'),
+                  openUrl('https://docs.kungfu-trader.com/latest/07-api.html'),
               },
+              // {
+              //   label: t('Kungfu_forum'),
+              //   click: () =>
+              //     openUrl('https://www.kungfu-trader.com/community/'),
+              // },
             ],
           },
         ]
