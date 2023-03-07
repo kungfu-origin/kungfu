@@ -139,7 +139,6 @@ function handleToPage(pathname: string) {
       </a-layout>
     </a-layout>
     <a-layout-footer>
-      <div class="kf-"></div>
       <KfProcessStatusController
         class="kf-footer-box__warp"
       ></KfProcessStatusController>
