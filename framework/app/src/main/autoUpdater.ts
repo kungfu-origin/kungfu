@@ -22,8 +22,9 @@ import { removeTargetFilesInFolder } from '@kungfu-trader/kungfu-js-api/utils/fi
 autoUpdater.logger = kfLogger;
 
 function handleUpdateKungfu(MainWindow: BrowserWindow | null) {
-  kfLogger.info('Kungfu client version', app.getVersion());
-  // if (!app.isPackaged) return;
+  kfLogger.info('Kungfu client version: ', app.getVersion());
+  kfLogger.info('Kungfu client isPacked: ', app.isPackaged);
+  if (!app.isPackaged) return;
 
   const rootPackageJson = readRootPackageJsonSync();
   const updaterOption = rootPackageJson?.kungfuCraft?.autoUpdate?.update;
