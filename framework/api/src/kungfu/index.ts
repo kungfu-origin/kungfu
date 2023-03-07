@@ -32,7 +32,6 @@ import { ExchangeIds } from '../config/tradingConfig';
 export const kf = kungfu();
 
 kfLogger.info('Load kungfu node');
-console.error(new Error('custom error'));
 
 export const configStore = kf.ConfigStore(KF_RUNTIME_DIR);
 export const riskSettingStore = kf.RiskSettingStore(KF_RUNTIME_DIR);
