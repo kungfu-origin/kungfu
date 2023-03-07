@@ -1,6 +1,14 @@
 const { parseByCli } = require('../utils');
 
-const subcommands = ['build', 'clean', 'cli', 'dev', 'package', 'upgrade'];
+const subcommands = [
+  'build',
+  'clean',
+  'cli',
+  'dev',
+  'package',
+  'publish',
+  'upgrade',
+];
 
 module.exports = {
   aliases: 'c',

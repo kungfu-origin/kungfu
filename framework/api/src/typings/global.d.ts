@@ -1,5 +1,10 @@
 import { StartOptions } from 'pm2';
 import { I18n } from 'vue-i18n';
+import {
+  GithubOptions,
+  S3Options,
+  GenericServerOptions,
+} from 'builder-util-runtime';
 import { KfHookKeeper } from '../hooks';
 import { InstrumentTypeEnum, InstrumentTypes } from './enums';
 
@@ -80,10 +85,22 @@ export interface T0T1Config {
   };
 }
 
+export type AllPublishOptions =
+  | GithubOptions
+  | S3Options
+  | GenericServerOptions;
+
+type Writeable<T> = { -readonly [P in keyof T]: T[P] };
+
 export interface RootConfigJSON {
+  version?: string;
   kungfuCraft?: {
     appTitle?: string;
     productName?: string;
+    autoUpdate?: {
+      publish?: Writeable<AllPublishOptions>;
+      update?: Writeable<AllPublishOptions>;
+    };
   };
   boardFilter?: Record<string, boolean>;
   appConfig?: {

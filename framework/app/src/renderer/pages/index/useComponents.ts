@@ -12,7 +12,7 @@ import { useBoardFilter } from '@kungfu-trader/kungfu-app/src/renderer/assets/me
 
 const { getBoard } = useBoardFilter();
 
-export const useComponenets = (
+export const useComponents = (
   app: App<Element>,
   router: Router,
 ): Promise<void> => {
