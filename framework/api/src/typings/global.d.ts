@@ -39,7 +39,7 @@ declare global {
       BY_PASS_TRADINGDATA: boolean;
       REFRESH_LEDGER_BEFORE_SYNC: boolean;
       MILLISECONDS_SLEEP_AFTER_STEP: number;
-      PM2_DEBUG: boolean
+      PM2_DEBUG: boolean;
     }
 
     interface Process {
