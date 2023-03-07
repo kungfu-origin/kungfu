@@ -5,17 +5,8 @@ import {
   clearProcessBeforeQuitStart,
   clearProcessBeforeQuitEnd,
 } from './events';
-import {
-  killKfc,
-  killKungfu,
-  killExtra,
-  pm2Kill,
-} from '@kungfu-trader/kungfu-js-api/utils/processUtils';
-import {
-  delayMilliSeconds,
-  deleteNNFiles,
-  kfLogger,
-} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import { KillAll } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
+import { delayMilliSeconds } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
   KFC_DIR,
   KFC_PARENT_DIR,
@@ -56,33 +47,6 @@ export function showKungfuInfo(): void {
     detail: info,
     buttons: [t('ok')],
     icon: nativeImage.createFromPath(getDialogLogoPath()),
-  });
-}
-
-function KillAll(): Promise<void> {
-  //不需要加killdaemon
-  return new Promise((resolve) => {
-    pm2Kill()
-      .catch((err) => kfLogger.error(err))
-      .finally(() => {
-        killKfc()
-          .catch((err) => kfLogger.error(err))
-          .finally(() => {
-            killKungfu()
-              .catch((err) => kfLogger.error(err))
-              .finally(() => {
-                killExtra()
-                  .catch((err) => kfLogger.error(err))
-                  .finally(() => {
-                    deleteNNFiles()
-                      .catch((err) => kfLogger.error(err))
-                      .finally(() => {
-                        resolve();
-                      });
-                  });
-              });
-          });
-      });
   });
 }
 

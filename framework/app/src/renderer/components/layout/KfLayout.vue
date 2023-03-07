@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { SlidersOutlined, SettingOutlined } from '@ant-design/icons-vue';
 import KfProcessStatusController from '@kungfu-trader/kungfu-app/src/renderer/components/layout/KfProcessStatusController.vue';
+import KfUpdateController from '@kungfu-trader/kungfu-app/src/renderer/components/layout/KfUpdateController.vue';
 import { computed, getCurrentInstance, onBeforeUnmount, ref } from 'vue';
 import { useExtConfigsRelated } from '../../assets/methods/actionsUtils';
+import { isUpdateVersionLogicEnable } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import globalBus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 import KfGlobalSettingModal from '../public/KfGlobalSettingModal.vue';
 import { useLanguage } from '@kungfu-trader/kungfu-js-api/language';
@@ -137,7 +139,13 @@ function handleToPage(pathname: string) {
       </a-layout>
     </a-layout>
     <a-layout-footer>
-      <KfProcessStatusController></KfProcessStatusController>
+      <KfProcessStatusController
+        class="kf-footer-box__warp"
+      ></KfProcessStatusController>
+      <KfUpdateController
+        v-if="isUpdateVersionLogicEnable()"
+        class="kf-footer-box__warp"
+      ></KfUpdateController>
       <div
         v-for="config in footerComponentConfigs"
         :key="config.key"
@@ -234,7 +242,16 @@ function handleToPage(pathname: string) {
     .kf-footer-box__warp {
       float: right;
       height: 100%;
-      margin-right: 8px;
+      padding: 0 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: bold;
+      font-size: 12px;
+      color: @primary-color;
+
+      &:hover {
+        background: @item-active-bg;
+      }
     }
   }
 }
