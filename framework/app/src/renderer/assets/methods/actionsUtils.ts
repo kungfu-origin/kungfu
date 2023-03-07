@@ -23,6 +23,7 @@ import {
   StrategyExtTypes,
   OrderInputKeyEnum,
   LedgerCategoryEnum,
+  CurrencyEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
   getKfCategoryData,
@@ -1304,8 +1305,29 @@ export const useActiveInstruments = () => {
     }
   };
 
+  const getInstrumentByIdsWithWatcher = (
+    instrumentId: string,
+    exchangeId: string,
+  ) => {
+    const ukey = hashInstrumentUKey(instrumentId, exchangeId);
+    return (window.watcher as KungfuApi.Watcher).ledger.Instrument[
+      ukey
+    ] as KungfuApi.Instrument | null;
+  };
+
+  const getInstrumentCurrency = (instrumentId: string, exchangeId: string) => {
+    const instrument = getInstrumentByIdsWithWatcher(instrumentId, exchangeId);
+    if (instrument) {
+      return instrument.currency;
+    }
+
+    return CurrencyEnum.Unknown;
+  };
+
   return {
     getInstrumentByIds,
+    getInstrumentByIdsWithWatcher,
+    getInstrumentCurrency,
   };
 };
 

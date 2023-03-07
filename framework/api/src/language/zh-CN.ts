@@ -259,6 +259,16 @@ export default {
     SPD: '大商所 跨期 SPD',
     IPS: '大商所 跨品种 IPS',
 
+    CNY: '人民币',
+    HKD: '港币',
+    USD: '美元',
+    JPY: '日元',
+    GBP: '英镑',
+    EUR: '欧元',
+    CNH: '离岸人民币',
+    SGD: '新加坡元',
+    MYR: '马来西亚吉特',
+
     master: '主控进程',
     ledger: '计算服务',
     cached: '存储服务',

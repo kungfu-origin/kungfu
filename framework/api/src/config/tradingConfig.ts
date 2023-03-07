@@ -23,6 +23,7 @@ import {
   PriceLevelEnum,
   BasketVolumeTypeEnum,
   BasketOrderStatusEnum,
+  CurrencyEnum,
 } from '../typings/enums';
 
 import { Pm2ProcessStatusTypes } from '../utils/processUtils';
@@ -789,3 +790,17 @@ export const InstrumentMinOrderVolume = {
   [InstrumentTypeEnum.future]: 1,
   [InstrumentTypeEnum.bond]: 1,
 };
+
+export const Currency: Record<CurrencyEnum, KungfuApi.KfTradeValueCommonData> =
+  {
+    [CurrencyEnum.Unknown]: { name: '' },
+    [CurrencyEnum.CNY]: { name: t('tradingConfig.CNY') },
+    [CurrencyEnum.HKD]: { name: t('tradingConfig.HKD') },
+    [CurrencyEnum.USD]: { name: t('tradingConfig.USD') },
+    [CurrencyEnum.JPY]: { name: t('tradingConfig.JPY') },
+    [CurrencyEnum.GBP]: { name: t('tradingConfig.GBP') },
+    [CurrencyEnum.EUR]: { name: t('tradingConfig.EUR') },
+    [CurrencyEnum.CNH]: { name: t('tradingConfig.CNH') },
+    [CurrencyEnum.SGD]: { name: t('tradingConfig.SGD') },
+    [CurrencyEnum.MYR]: { name: t('tradingConfig.MYR') },
+  };

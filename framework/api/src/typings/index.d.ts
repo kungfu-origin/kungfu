@@ -44,6 +44,7 @@ declare namespace KungfuApi {
     BasketVolumeTypeEnum,
     PriceLevelEnum,
     BasketOrderStatusEnum,
+    CurrencyEnum,
   } from './enums';
   import { Dayjs } from 'dayjs';
   import { Row } from 'fast-csv';
@@ -452,6 +453,7 @@ declare namespace KungfuApi {
     short_margin_ratio: number; //空头保证金率
 
     exchange_rate: number; // 利率
+    currency: CurrencyEnum; // 币种
 
     uid_key: string;
     ukey: string;

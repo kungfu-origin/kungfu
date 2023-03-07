@@ -260,6 +260,16 @@ export default {
     SPD: 'SPD',
     IPS: 'IPS',
 
+    CNY: 'CNY',
+    HKD: 'HKD',
+    USD: 'USD',
+    JPY: 'JPY',
+    GBP: 'GBP',
+    EUR: 'EUR',
+    CNH: 'CNH',
+    SGD: 'SGD',
+    MYR: 'MYR',
+
     master: 'master',
     ledger: 'ledger',
     cached: 'cached',
