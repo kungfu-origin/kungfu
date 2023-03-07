@@ -580,7 +580,7 @@ export default {
     find_new_version: '发现新版本: {version}\n是否现在下载安装包? ',
     downloaded: '下载完成, 等待安装',
     to_install: '现在安装',
-    warning_before_install: '安装会退出功夫, 确定现在安装吗? ',
+    warning_before_install: '安装会退出功夫, 确定现在安装吗? (建议盘后进行)',
   },
 
   风控: '风控',

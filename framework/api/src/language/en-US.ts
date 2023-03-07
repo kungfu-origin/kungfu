@@ -588,7 +588,8 @@ export default {
     find_new_version: 'Found new version: {version}\nIf you want download now?',
     downloaded: 'Download finished, wait to install',
     to_install: 'To install',
-    warning_before_install: '安装会退出功夫, 确定现在安装吗? ',
+    warning_before_install:
+      "Installing will quit Kungfu, sure install now? (suggest install when today's trade end)",
   },
 
   风控: 'Risk Setting',
