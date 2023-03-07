@@ -50,6 +50,7 @@ import {
 import { BasketVolumeType } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import { writeCSV } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import {
+  isAllMainProcessRunning,
   Pm2ProcessStatusData,
   Pm2ProcessStatusDetailData,
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
@@ -956,7 +957,10 @@ export const usePreStartAndQuitApp = (): {
   };
 
   onMounted(() => {
-    if (booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED)) {
+    if (
+      booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED) &&
+      isAllMainProcessRunning()
+    ) {
       preStartSystemLoadingData.archive = 'done';
       preStartSystemLoadingData.extraResourcesLoading = 'done';
     }
