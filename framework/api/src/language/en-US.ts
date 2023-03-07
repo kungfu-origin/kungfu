@@ -589,7 +589,7 @@ export default {
     downloaded: 'Download finished, wait to install',
     to_install: 'To install',
     warning_before_install:
-      "Installing will quit Kungfu, sure install now? (suggest install when today's trade end)",
+      "Installing will clean today's trading data and quit Kungfu (If you need, make a backup at first), sure install now? (suggest install when today's trade end)",
   },
 
   风控: 'Risk Setting',
