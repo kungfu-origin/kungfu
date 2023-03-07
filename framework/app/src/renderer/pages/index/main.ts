@@ -67,14 +67,13 @@ import {
 
 import VueVirtualScroller from 'vue-virtual-scroller';
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
-import { useComponenets } from './useComponents';
+import { useComponents } from './useComponents';
 import globalBus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import zhCN from 'ant-design-vue/es/locale/zh_CN';
 import enUS from 'ant-design-vue/es/locale/en_US';
-import { killAllBeforeQuit } from '../../../main/utils';
-import { pm2Kill, KillAll } from '../../../../../api/src/utils/processUtils';
+import { KillAll } from '../../../../../api/src/utils/processUtils';
 
 const app = createApp(App);
 
@@ -124,7 +123,7 @@ app.config.globalProperties.$tradingDataSubject = tradingDataSubject;
 app.use(VueI18n);
 
 mergeExtLanguages().then(() =>
-  useComponenets(app, router).then(() => {
+  useComponents(app, router).then(() => {
     app.mount('#app');
   }),
 );
