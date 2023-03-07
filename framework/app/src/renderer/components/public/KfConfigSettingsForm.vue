@@ -1548,7 +1548,10 @@ defineExpose({
                 <div class="table-in-config-setting-row-from__wrap">
                   <KfConfigSettingsForm
                     v-model:formState="_item.data"
-                    :style="{ flexWrap: item.wrap || '' }"
+                    :style="{
+                      flexWrap: item.wrap || '',
+                      overflowX: item.wrap === 'nowrap' ? 'overlay' : '',
+                    }"
                     :config-settings="item.columns || []"
                     :change-type="changeType"
                     :primary-key-avoid-repeat-compare-extra="
@@ -1765,8 +1768,6 @@ export default defineComponent({
           box-sizing: border-box;
 
           &.ant-form-inline {
-            overflow-x: overlay;
-
             .ant-row.ant-form-item {
               margin-bottom: 4px;
 
