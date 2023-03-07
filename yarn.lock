@@ -5010,14 +5010,6 @@ csstype@^2.6.8:
   resolved "https://registry.npmmirror.com/csstype/-/csstype-2.6.21.tgz#2efb85b7cc55c80017c66a5ad7cbd931fda3a90e"
   integrity sha512-Z1PhmomIfypOpoMjRQB70jfvy/wxT50qW08YXO5lMIJkrdq4yOTR+AW7FqutScmB9NkLwxo+jU+kZLbofZZq/w==
 
-csv-parser@^2.3.2:
-  version "2.3.5"
-  resolved "https://registry.npmmirror.com/csv-parser/-/csv-parser-2.3.5.tgz#6b3bf0907684914ff2c5abfbadab111a69eae5db"
-  integrity sha512-LCHolC4AlNwL+5EuD5LH2VVNKpD8QixZW2zzK1XmrVYUaslFY4c5BooERHOCIubG9iv/DAyFjs4x0HvWNZuyWg==
-  dependencies:
-    minimist "^1.2.0"
-    through2 "^3.0.1"
-
 culvert@^0.1.2:
   version "0.1.2"
   resolved "https://registry.npmmirror.com/culvert/-/culvert-0.1.2.tgz#9502f5f0154a2d5a22a023e79f71cc936fa6ef6f"
@@ -8502,15 +8494,6 @@ natural-compare@^1.4.0:
   resolved "https://registry.npmmirror.com/natural-compare/-/natural-compare-1.4.0.tgz#4abebfeed7541f2c27acfb29bdbbd15c8d5ba4f7"
   integrity sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==
 
-neat-csv@^5.0.0:
-  version "5.2.0"
-  resolved "https://registry.npmmirror.com/neat-csv/-/neat-csv-5.2.0.tgz#7c93c7d98dea8e29971bd9c52e0435cf9fdd939e"
-  integrity sha512-JMbn4RPKo1heWhDihK9kbffxkDdd2uFSk30t3YOz1u3gsbIGhGUNlmGGa5H9yySLie3qU4lsLwrxQyirExD71A==
-  dependencies:
-    csv-parser "^2.3.2"
-    get-stream "^5.1.0"
-    to-readable-stream "^2.1.0"
-
 needle@2.4.0:
   version "2.4.0"
   resolved "https://registry.npmmirror.com/needle/-/needle-2.4.0.tgz#6833e74975c444642590e15a750288c5f939b57c"
@@ -10097,15 +10080,6 @@ readable-stream@1.1.x:
     isarray "0.0.1"
     string_decoder "~0.10.x"
 
-"readable-stream@2 || 3":
-  version "3.6.1"
-  resolved "https://registry.npmmirror.com/readable-stream/-/readable-stream-3.6.1.tgz#f9f9b5f536920253b3d26e7660e7da4ccff9bb62"
-  integrity sha512-+rQmrWMYGA90yenhTYsLWAsLsqVC8osOw6PKE1HDYiO0gdPeKe/xDHNzIAIn4C91YQ6oenEhfYqqc1883qHbjQ==
-  dependencies:
-    inherits "^2.0.3"
-    string_decoder "^1.1.1"
-    util-deprecate "^1.0.1"
-
 readable-stream@3, readable-stream@^3.0.0, readable-stream@^3.0.2, readable-stream@^3.0.6, readable-stream@^3.1.1, readable-stream@^3.4.0, readable-stream@^3.6.0:
   version "3.6.0"
   resolved "https://registry.npmmirror.com/readable-stream/-/readable-stream-3.6.0.tgz#337bbda3adc0706bd3e024426a286d4b4b2c9198"
@@ -10458,11 +10432,6 @@ scroll-into-view-if-needed@^2.2.25:
   integrity sha512-dGCXy99wZQivjmjIqihaBQNjryrz5rueJY7eHfTdyWEiR4ttYpsajb14rn9s5d4DY4EcY6+4+U/maARBXJedkA==
   dependencies:
     compute-scroll-into-view "^1.0.20"
-
-sec@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.npmmirror.com/sec/-/sec-1.0.0.tgz#033d60a3ad20ecf2e00940d14f97823465774335"
-  integrity sha512-rVnXtdy9keLxyssT6xung9WwtdB+kha3De93w50RNzwOslyLaDGhqoOqrh4InPoOhhqUZ4JOnovGd3BvLZ+f7A==
 
 select-hose@^2.0.0:
   version "2.0.0"
@@ -11128,14 +11097,6 @@ taskkill@^3.1.0:
     arrify "^2.0.1"
     execa "^3.3.0"
 
-tasklist@~4.0.0:
-  version "4.0.1"
-  resolved "https://registry.npmmirror.com/tasklist/-/tasklist-4.0.1.tgz#5b43a1f8cb42df630b62e035facf97dcd7b0a50c"
-  integrity sha512-7LJMIp/Q1MjXCeyVmhccCL5+hIfFeH6uL8PqJZ/TmF4RuWnj8wYpXW5lDRLKkIjm93pMtFV6ERd5I0c3NJ82yQ==
-  dependencies:
-    neat-csv "^5.0.0"
-    sec "^1.0.0"
-
 temp-dir@^1.0.0:
   version "1.0.0"
   resolved "https://registry.npmmirror.com/temp-dir/-/temp-dir-1.0.0.tgz#0a7c0ea26d3a39afa7e0ebea9c1fc0bc4daa011d"
@@ -11218,14 +11179,6 @@ through2@^2.0.0:
     readable-stream "~2.3.6"
     xtend "~4.0.1"
 
-through2@^3.0.1:
-  version "3.0.2"
-  resolved "https://registry.npmmirror.com/through2/-/through2-3.0.2.tgz#99f88931cfc761ec7678b41d5d7336b5b6a07bf4"
-  integrity sha512-enaDQ4MUyP2W6ZyT6EsMzqBPZaM/avg8iuo+l2d3QCs0J+6RaqkHV/2/lOwDTueBHeJ/2LG9lrLW3d5rWPucuQ==
-  dependencies:
-    inherits "^2.0.4"
-    readable-stream "2 || 3"
-
 through2@^4.0.0:
   version "4.0.2"
   resolved "https://registry.npmmirror.com/through2/-/through2-4.0.2.tgz#a7ce3ac2a7a8b0b966c80e7c49f0484c3b239764"
@@ -11273,11 +11226,6 @@ to-readable-stream@^1.0.0:
   version "1.0.0"
   resolved "https://registry.npmmirror.com/to-readable-stream/-/to-readable-stream-1.0.0.tgz#ce0aa0c2f3df6adf852efb404a783e77c0475771"
   integrity sha512-Iq25XBt6zD5npPhlLVXGFN3/gyR2/qODcKNNyTMd4vbm39HUaOiAM4PMq0eMVC/Tkxz+Zjdsc55g9yyz+Yq00Q==
-
-to-readable-stream@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.npmmirror.com/to-readable-stream/-/to-readable-stream-2.1.0.tgz#82880316121bea662cdc226adb30addb50cb06e8"
-  integrity sha512-o3Qa6DGg1CEXshSdvWNX2sN4QHqg03SPq7U6jPXRahlQdl5dK8oXjkU/2/sGrnOZKeGV1zLSO8qPwyKklPPE7w==
 
 to-regex-range@^5.0.1:
   version "5.0.1"
