@@ -98,7 +98,8 @@ function handleUpdateKungfu(MainWindow: BrowserWindow | null) {
             ['etc', 'config.db'],
           ).then(() => {
             autoUpdater.quitAndInstall(false, true);
-            MainWindow.destroy();
+            // MainWindow.destroy();
+            app.exit();
           });
         });
       });
