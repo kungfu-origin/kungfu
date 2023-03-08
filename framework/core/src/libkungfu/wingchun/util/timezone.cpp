@@ -93,14 +93,14 @@ public:
 };
 
 const std::unordered_map<LocationTimeType, LocationTimeData> g_locationTimeMap = {
-    {LocationTimeType::Beijing, LocationTimeData(8, ZoneTimeType::BeijingTime)},
+    {LocationTimeType::Beijing, LocationTimeData(8, ZoneTimeType::BJ)},
     {LocationTimeType::Singapore, LocationTimeData(8, ZoneTimeType::SGT)},
     {LocationTimeType::Tokyo, LocationTimeData(9, ZoneTimeType::JST)},
     {LocationTimeType::Amsterdam, LocationTimeData(9, ZoneTimeType::CET)},
     {LocationTimeType::Finland, LocationTimeData(9, ZoneTimeType::CEST)},
     {LocationTimeType::Jakarta, LocationTimeData(9, ZoneTimeType::KRAT)},
     {LocationTimeType::Korea, LocationTimeData(9, ZoneTimeType::KST)},
-    {LocationTimeType::Malaysia, LocationTimeData(9, ZoneTimeType::BeijingTime)},
+    {LocationTimeType::Malaysia, LocationTimeData(9, ZoneTimeType::BJ)},
     {LocationTimeType::Paris, LocationTimeData(9, ZoneTimeType::CET)},
     {LocationTimeType::Switzerland, LocationTimeData(9, ZoneTimeType::CET)},
     {LocationTimeType::Thailand, LocationTimeData(9, ZoneTimeType::KRAT)},
