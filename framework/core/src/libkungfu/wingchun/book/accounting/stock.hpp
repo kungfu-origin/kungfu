@@ -513,7 +513,7 @@ protected:
     // position.unrealized_pnl *= trade.price / position.last_price;
     position.unrealized_pnl -= unrealized_pnl_change;
 
-    double prev_position_market_value = (position.volume + trade.volume) * position.last_price * cd_mr.exchange_rate;
+    // double prev_position_market_value = (position.volume + trade.volume) * position.last_price * cd_mr.exchange_rate;
     // double prev_actual_position_margin = prev_position_market_value * cd_mr.long_margin_ratio;
     // Update position last_price with trade.price --- mark the price at the trading time for delta change calculation
     // as don't know the exact last_price at present
