@@ -175,13 +175,13 @@ const priceVolumeStats = computed(() => {
       </a-col>
       <a-col :span="8">
         <a-statistic
-          :title="$t('tradeConfig.max_trade_latency')"
+          :title="$t('tradeConfig.min_trade_latency')"
           :value="tradeLatencyStats.min"
         ></a-statistic>
       </a-col>
       <a-col :span="8">
         <a-statistic
-          :title="$t('tradeConfig.min_trade_latency')"
+          :title="$t('tradeConfig.max_trade_latency')"
           :value="tradeLatencyStats.max"
         ></a-statistic>
       </a-col>
