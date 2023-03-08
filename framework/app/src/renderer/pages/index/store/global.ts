@@ -451,8 +451,12 @@ export const useGlobalStore = defineStore('global', {
       this.removeBoardByContentId(boardId, contentId);
 
       if (directionClassName === KfLayoutTargetDirectionClassName.center) {
-        destBoard.contents?.push(contentId);
-        destBoard.current = contentId;
+        if (destBoard.contents) {
+          if (!destBoard.contents.includes(contentId)) {
+            destBoard.contents.push(contentId);
+          }
+          destBoard.current = contentId;
+        }
       } else if (directionClassName != KfLayoutTargetDirectionClassName.unset) {
         this.dragMakeNewBoard_(contentId, destBoardId, directionClassName);
       }
