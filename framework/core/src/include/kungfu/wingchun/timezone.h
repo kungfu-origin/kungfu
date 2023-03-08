@@ -24,15 +24,15 @@ enum class LocationTimeType : char {
   AmericaCentral,   //
   AustraliaEastern, //
   Berlin,           //
-  Amsterdam,        //阿姆斯特�? UTC/GMT +1
+  Amsterdam,        // 阿姆斯特�? UTC/GMT +1
   Finland,          // 芬兰 UTC/CMT +2
   Jakarta,          // 雅加�? 印尼首都 UTC/GMT +7
   Korea,            // 韩国UTC/GMT +9 KST
   Malaysia,         // Kuala Lumpur 吉隆�? UTC/GMT +8 马来西亚
   Paris,            // 巴黎UTC/GMT +1
-  Switzerland,      //瑞士(Switzerland) 瑞士 Europe/Zurich UTC+1
-  Thailand,         //泰国 UTC/CMT +7
-  Toronto           //多伦�? UTC/GMT -5
+  Switzerland,      // 瑞士(Switzerland) 瑞士 Europe/Zurich UTC+1
+  Thailand,         // 泰国 UTC/CMT +7
+  Toronto           // 多伦�? UTC/GMT -5
 };
 
 /*
