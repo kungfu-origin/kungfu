@@ -196,8 +196,8 @@ public:
         auto &commission = book->commissions.at(product_key);
         auto close_today_volume = double(position.volume - position.yesterday_volume);
         if (commission.mode == CommissionRateMode::ByAmount) {
-          cost = (position.last_price * cm_mr.exchange_rate * position.yesterday_volume * commission.close_ratio) +
-                 (position.last_price * cm_mr.exchange_rate * close_today_volume * commission.close_today_ratio);
+          cost = (position.last_price /** cm_mr.exchange_rate*/ * position.yesterday_volume * commission.close_ratio) +
+                 (position.last_price /** cm_mr.exchange_rate*/ * close_today_volume * commission.close_today_ratio);
         } else {
           cost = (position.yesterday_volume * commission.close_ratio) +
                  (close_today_volume * commission.close_today_ratio);
@@ -207,7 +207,8 @@ public:
 
       auto multiplier = contract_multiplier * (position.direction == Direction::Long ? 1 : -1);
       auto price_diff = position.last_price - position.avg_open_price;
-      position.unrealized_pnl = (price_diff * position.volume) * cm_mr.exchange_rate * multiplier - cost;
+      // 浮动盈亏
+      position.unrealized_pnl = (price_diff * position.volume) /** cm_mr.exchange_rate*/ * multiplier - cost;
     }
   }
 
@@ -259,13 +260,13 @@ private:
 
     auto commission = calculate_commission(book, trade, position, close_today_volume);
     auto realized_pnl =
-        (trade.price - position.avg_open_price) * cm_mr.exchange_rate * trade.volume * contract_multiplier;
+        (trade.price - position.avg_open_price) /** cm_mr.exchange_rate*/ * trade.volume * contract_multiplier;
     if (position.direction == Direction::Short) {
       realized_pnl = -realized_pnl;
     }
     position.realized_pnl += realized_pnl;
     update_position(book, position);
-    book->asset.realized_pnl += realized_pnl;
+    book->asset.realized_pnl += realized_pnl * cm_mr.exchange_rate;
     book->asset.avail += delta_margin;
     book->asset.avail -= commission;
     book->asset.accumulated_fee += commission;
