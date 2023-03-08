@@ -236,7 +236,7 @@ function tiggerOrderBookAndMakeOrder(record: KungfuApi.Position) {
               {{ ExchangeIds[item.exchange_id].name }}
               <span
                 v-if="globalSetting?.currency?.instrumentCurrency"
-                style="margin-left: 4px; color: #faad14"
+                style="color: #faad14"
               >
                 {{
                   dealCurrency(

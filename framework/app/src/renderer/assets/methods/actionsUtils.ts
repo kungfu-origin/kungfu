@@ -1421,9 +1421,19 @@ export const useActiveInstruments = () => {
     exchangeId: string,
   ) => {
     const ukey = hashInstrumentUKey(instrumentId, exchangeId);
-    return (window.watcher as KungfuApi.Watcher).ledger.Instrument[
-      ukey
-    ] as KungfuApi.Instrument | null;
+    const watcher = window.watcher as KungfuApi.Watcher;
+    const instrument = watcher.ledger.Instrument[ukey];
+    if (instrument) return instrument;
+
+    const instruments = watcher.ledger.Instrument.filter(
+      'instrument_id',
+      instrumentId,
+    )
+      .filter('exchange_id', exchangeId)
+      .list();
+    if (instruments.length) return instruments[0];
+
+    return null;
   };
 
   const getInstrumentCurrencyByIds = (
