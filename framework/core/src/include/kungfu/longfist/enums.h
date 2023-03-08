@@ -245,7 +245,7 @@ enum class OrderStatus : int8_t {
 };
 
 // 币种枚举
-enum class CurrencyType : int8_t { Normal = 0, CNY, HKD, USD, JPY, GBP, EUR, CNH, SGD, MYR };
+enum class CurrencyType : int8_t { Unknown = 0, CNY, HKD, USD, JPY, GBP, EUR, CNH, SGD, MYR };
 
 inline std::ostream &operator<<(std::ostream &os, OrderStatus t) { return os << int8_t(t); }
 
