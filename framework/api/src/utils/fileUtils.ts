@@ -163,7 +163,7 @@ export const removeTargetFilesInFolder = (
     const folders = items.filter((f: string) => {
       const stat = fse.statSync(path.join(folder, f));
 
-      if (stat.isDirectory()) return true;
+      if (stat.isDirectory() && !filters.includes(f)) return true;
       return false;
     });
 

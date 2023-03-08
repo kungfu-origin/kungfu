@@ -1,13 +1,11 @@
 import pm2 from 'pm2';
 import os from 'os';
+import path from 'path';
 
-const pm2Custom = new pm2['custom']();
-
-if (process.platform === 'win32') {
-  const USERNAME = os.userInfo().username;
-  pm2Custom._conf.DAEMON_RPC_PORT = `\\\\.\\pipe\\${USERNAME}\\rpc.sock`;
-  pm2Custom._conf.DAEMON_PUB_PORT = `\\\\.\\pipe\\${USERNAME}\\pub.sock`;
-  pm2Custom._conf.INTERACTOR_RPC_PORT = `\\\\.\\pipe\\${USERNAME}\\interactor.sock`;
+process.env.OVER_HOME = path.resolve(path.join(os.homedir(), '.pm2'));
+if (process.env.NODE_ENV === 'development') {
+  process.env.PM2_DEBUG = true;
 }
+const pm2Custom = new pm2['custom']();
 
 export default pm2Custom;

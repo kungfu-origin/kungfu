@@ -17,6 +17,7 @@ import {
   getIfProcessDeleted,
   delayMilliSeconds,
   isTdMdStrategy,
+  deleteNNFiles,
 } from '../utils/busiUtils';
 import {
   buildProcessLogPath,
@@ -71,31 +72,34 @@ export const findProcessByKeywordsByFindProcess = (
   );
 };
 
-export const findProcessByKeywordsByTaskList = (
-  tasks: string[],
-): Promise<FindProcessResult[]> => {
-  const username = os.userInfo().username;
-  const tasklist = require('tasklist');
-  return tasklist({ verbose: true }).then((processList) => {
-    return processList
-      .filter((item) => tasks.indexOf(item.imageName) !== -1)
-      .filter((item) => (item.username || '').split('\\')[1] == username)
-      .map((item) => {
-        return {
-          pid: item.pid,
-          name: item.imageName,
-          username: item.username,
-        };
-      });
-  });
-};
+/***
+ * tasklist is only used on windows, and working for find process by current user
+ * but the performance of tasklist actually is a issue
+ *  ***/
+
+// export const findProcessByKeywordsByTaskList = (
+//   tasks: string[],
+// ): Promise<FindProcessResult[]> => {
+//   const username = os.userInfo().username;
+//   const tasklist = require('tasklist');
+//   return tasklist({ verbose: true }).then((processList) => {
+//     return processList
+//       .filter((item) => tasks.indexOf(item.imageName) !== -1)
+//       .filter((item) => (item.username || '').split('\\')[1] == username)
+//       .map((item) => {
+//         return {
+//           pid: item.pid,
+//           name: item.imageName,
+//           username: item.username,
+//         };
+//       });
+//   });
+// };
 
 export const findProcessByKeywords = (
   tasks: string[],
 ): Promise<FindProcessResult[]> => {
-  return isWin
-    ? findProcessByKeywordsByTaskList(tasks)
-    : findProcessByKeywordsByFindProcess(tasks);
+  return findProcessByKeywordsByFindProcess(tasks);
 };
 
 export const forceKill = (tasks: string[]): Promise<void> => {
@@ -130,6 +134,33 @@ export const killKungfu = () => {
 };
 
 export const killExtra = () => forceKill([kfcName, 'pm2']);
+
+export function KillAll(): Promise<void> {
+  //不需要加killdaemon
+  return new Promise((resolve) => {
+    pm2Kill()
+      .catch((err) => kfLogger.error(err))
+      .finally(() => {
+        killKfc()
+          .catch((err) => kfLogger.error(err))
+          .finally(() => {
+            killKungfu()
+              .catch((err) => kfLogger.error(err))
+              .finally(() => {
+                killExtra()
+                  .catch((err) => kfLogger.error(err))
+                  .finally(() => {
+                    deleteNNFiles()
+                      .catch((err) => kfLogger.error(err))
+                      .finally(() => {
+                        resolve();
+                      });
+                  });
+              });
+          });
+      });
+  });
+}
 
 //===================== pm2 start =======================
 
@@ -659,6 +690,16 @@ function startGetProcessStatusByName(
 //===================== utils end =======================
 
 //================ business related start ===============
+
+export async function isAllMainProcessRunning() {
+  const { processStatus } = await listProcessStatus();
+
+  return (
+    getIfProcessRunning(processStatus, 'master') &&
+    getIfProcessRunning(processStatus, 'ledger') &&
+    getIfProcessRunning(processStatus, 'cached')
+  );
+}
 
 export function startArchiveMakeTask(
   cb?: (processStatus: Pm2ProcessStatusTypes) => void,
