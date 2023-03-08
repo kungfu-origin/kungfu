@@ -520,10 +520,11 @@ KF_DEFINE_PACK_TYPE(                                               //
 KF_DEFINE_PACK_TYPE(                                                    //
     OrderActionError, 216, PK(order_action_id), TIMESTAMP(insert_time), //
     (uint64_t, order_id),                                               // 订单ID
-    (uint64_t, order_action_id),                                        // 订单操作ID
-    (int32_t, error_id),                                                // 错误ID
-    (kungfu::array<char, ERROR_MSG_LEN>, error_msg),                    // 错误信息
-    (int64_t, insert_time)                                              // 写入时间
+    (kungfu::array<char, EXTERNAL_ID_LEN>, external_order_id), // 撤单原委托柜台订单id, 新生成撤单委托编号不记录
+    (uint64_t, order_action_id),                               // 订单操作ID
+    (int32_t, error_id),                                       // 错误ID
+    (kungfu::array<char, ERROR_MSG_LEN>, error_msg), // 错误信息
+    (int64_t, insert_time)                           // 写入时间
 );
 
 KF_DEFINE_PACK_TYPE(                                           //

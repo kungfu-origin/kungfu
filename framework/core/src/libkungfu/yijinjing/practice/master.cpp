@@ -187,7 +187,7 @@ void master::react() {
   events_ | instanceof <journal::frame>() | $$(feed(event));
 }
 
-void master::on_active() {}
+void master::on_active() { on_frame(); }
 
 void master::on_frame() {
   auto now = time::now_in_nano();
