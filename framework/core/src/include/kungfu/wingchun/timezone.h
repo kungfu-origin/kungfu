@@ -40,21 +40,21 @@ enum class LocationTimeType : char {
  * http://zh.thetimenow.com/time-zones-abbreviations.php
  */
 enum class ZoneTimeType : char {
-  BST,         //
-  BDT,         //
-  BeijingTime, // UTC +8:00
-  JST,         //
-  SGT,         //
-  EST,         // EST - Eastern Standard Time	UTC -5:00
-  EDT,         //
-  CST,         //
-  CDT,         //
-  AEST,        //
-  AEDT,        //
-  CET,         // CET - Central European Time	UTC +1:00
-  CEST,        // CEST - Central European Summer Time	UTC +2:00
-  KRAT,        // KRAT - Krasnoyarsk Time	UTC +7:00
-  KST          // KST - Korea Standard Time	UTC +9:00
+  BST,  //
+  BDT,  //
+  BJ,   // UTC +8:00
+  JST,  //
+  SGT,  //
+  EST,  // EST - Eastern Standard Time	UTC -5:00
+  EDT,  //
+  CST,  //
+  CDT,  //
+  AEST, //
+  AEDT, //
+  CET,  // CET - Central European Time	UTC +1:00
+  CEST, // CEST - Central European Summer Time	UTC +2:00
+  KRAT, // KRAT - Krasnoyarsk Time	UTC +7:00
+  KST   // KST - Korea Standard Time	UTC +9:00
 };
 
 struct LocalTimeInfo {
