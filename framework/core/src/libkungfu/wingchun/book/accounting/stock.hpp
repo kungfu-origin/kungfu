@@ -305,16 +305,17 @@ protected:
   virtual void apply_buy(Book_ptr &book, const Trade &trade) {
     auto &position = book->get_position_for(trade);
     auto cd_mr = get_instr_conversion_margin_rate(book, position);
-    double trade_amt = trade.price * trade.volume /** cd_mr.exchange_rate*/;
+    double trade_amt = trade.price * trade.volume * cd_mr.exchange_rate;
     auto &asset_margin = book->asset_margin;
     double commission = calculate_commission(trade);
     double tax = calculate_tax(trade);
     position.last_price = position.last_price > 0 ? position.last_price : trade.price;
     if (position.volume + trade.volume > 0 && trade.price > 0) {
-      position.avg_open_price =
-          (position.avg_open_price * position.volume + trade_amt) / (double)(position.volume + trade.volume);
-      position.position_cost_price = (position.position_cost_price * position.volume + trade_amt + commission + tax) /
-                                     (double)(position.volume + trade.volume);
+      position.avg_open_price = (position.avg_open_price * position.volume + trade_amt / cd_mr.exchange_rate) /
+                                (double)(position.volume + trade.volume);
+      position.position_cost_price =
+          (position.position_cost_price * position.volume + trade_amt / cd_mr.exchange_rate + commission + tax) /
+          (double)(position.volume + trade.volume);
     }
     double unrealized_pnl_change = (position.last_price - trade.price) /** cd_mr.exchange_rate*/ * trade.volume;
     position.volume += trade.volume;
@@ -348,16 +349,17 @@ protected:
   virtual void apply_shortsell(Book_ptr &book, const Trade &trade) {
     auto &position = book->get_position_for(trade);
     auto cd_mr = get_instr_conversion_margin_rate(book, position);
-    double trade_amt = trade.price * trade.volume /** cd_mr.exchange_rate*/;
+    double trade_amt = trade.price * trade.volume * cd_mr.exchange_rate;
     // TODO: margin_commission requires a dedicate calculate_margin_commission(Trade&);
     auto &asset_margin = book->asset_margin;
     double commission = calculate_commission(trade);
     auto tax = calculate_tax(trade);
     if (position.volume + trade.volume > 0 && trade.price > 0) {
-      position.avg_open_price =
-          (position.avg_open_price * position.volume + trade_amt) / (double)(position.volume + trade.volume);
-      position.position_cost_price = (position.position_cost_price * position.volume + trade_amt - commission - tax) /
-                                     (double)(position.volume + trade.volume);
+      position.avg_open_price = (position.avg_open_price * position.volume + trade_amt / cd_mr.exchange_rate) /
+                                (double)(position.volume + trade.volume);
+      position.position_cost_price =
+          (position.position_cost_price * position.volume + trade_amt / cd_mr.exchange_rate - commission - tax) /
+          (double)(position.volume + trade.volume);
     }
     double original_volume = position.volume;
     position.volume += trade.volume;
@@ -585,7 +587,7 @@ protected:
     position.last_price = position.last_price > 0 ? position.last_price : trade.price;
 
     auto realized_pnl = (position.avg_open_price - trade.price) /** cd_mr.exchange_rate*/ * trade.volume;
-    double trade_amt = trade.price /** cd_mr.exchange_rate*/ * trade.volume;
+    double trade_amt = trade.price * cd_mr.exchange_rate * trade.volume;
     double repay_debt_mrkt_value = position.last_price * cd_mr.exchange_rate * trade.volume;
     double frozen_cash_to_release = book->get_frozen_price(trade.order_id) * cd_mr.exchange_rate * trade.volume;
 
