@@ -42,7 +42,7 @@ enum class LocationTimeType : char {
 enum class ZoneTimeType : char {
   BST,  //
   BDT,  //
-  BJ,   // UTC +8:00
+  BJ,   //  UTC +8:00
   JST,  //
   SGT,  //
   EST,  // EST - Eastern Standard Time	UTC -5:00
