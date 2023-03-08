@@ -25,15 +25,15 @@ enum class LocationTimeType : char {
   AmericaCentral,   //
   AustraliaEastern, //
   Berlin,           //
-  Amsterdam,        //°¢Ä·Ë¹ÌØµ¤ UTC/GMT +1
-  Finland,          // ·ÒÀ¼ UTC/CMT +2
-  Jakarta,          // ÑÅ¼Ó´ï Ó¡ÄáÊ×¶¼ UTC/GMT +7
-  Korea,            // º«¹úUTC/GMT +9 KST
-  Malaysia,         // Kuala Lumpur ¼ªÂ¡ÆÂ UTC/GMT +8 ÂíÀ´Î÷ÑÇ
-  Paris,            // °ÍÀèUTC/GMT +1
-  Switzerland,      //ÈğÊ¿(Switzerland) ÈğÊ¿ Europe/Zurich UTC+1
-  Thailand,         //Ì©¹ú UTC/CMT +7
-  Toronto           //¶àÂ×¶à UTC/GMT -5
+  Amsterdam,        //é˜¿å§†æ–¯ç‰¹ä¸¹ UTC/GMT +1
+  Finland,          // èŠ¬å…° UTC/CMT +2
+  Jakarta,          // é›…åŠ è¾¾ å°å°¼é¦–éƒ½ UTC/GMT +7
+  Korea,            // éŸ©å›½UTC/GMT +9 KST
+  Malaysia,         // Kuala Lumpur å‰éš†å¡ UTC/GMT +8 é©¬æ¥è¥¿äºš
+  Paris,            // å·´é»UTC/GMT +1
+  Switzerland,      //ç‘å£«(Switzerland) ç‘å£« Europe/Zurich UTC+1
+  Thailand,         //æ³°å›½ UTC/CMT +7
+  Toronto           //å¤šä¼¦å¤š UTC/GMT -5
 };
 
 /*
