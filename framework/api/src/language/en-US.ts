@@ -583,6 +583,11 @@ export default {
     python_path_desc:
       'local python path is required to be selected, and kungfu*.whl should be installed in this path',
 
+    currency: 'Currency',
+    instrument_currency: 'Instrument Currency',
+    instrument_currency_desc:
+      'If open, will show the instrument currency type after instrument name in Position board',
+
     trade: 'Trade',
     sound: 'Traded Sound',
     use_sound: 'Enable the system traded prompt sound',

@@ -577,6 +577,10 @@ export default {
     python_path_desc:
       '功夫将会以选择的python路径运行策略, 同时需要保证 kungfu*.whl 已经通过 pip安装',
 
+    currency: '币种',
+    instrument_currency: '标的币种',
+    instrument_currency_desc: '打开时，会在持仓面板的标的列展示标的币种',
+
     trade: '交易',
     sound: '成交提示音',
     use_sound: '启用成交提示音',
