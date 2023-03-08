@@ -1321,7 +1321,7 @@ export const useActiveInstruments = () => {
   ) => {
     const instrument = getInstrumentByIdsWithWatcher(instrumentId, exchangeId);
     if (instrument) {
-      return instrument.currency;
+      return instrument.currency_type;
     }
 
     return CurrencyEnum.Unknown;
