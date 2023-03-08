@@ -202,7 +202,7 @@ function dealLocationUIDResolved(holderUID: number): string {
             <span>
               {{ item.instrument_id_resolved }}
               <span
-                v-if="globalSetting.value?.currency?.instrumentCurrency"
+                v-if="globalSetting?.currency?.instrumentCurrency"
                 style="margin-left: 4px; color: #faad14"
               >
                 {{
