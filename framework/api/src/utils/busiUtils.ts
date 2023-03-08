@@ -2225,8 +2225,11 @@ export const dealCmdPath = (pathname: string) => {
 
 export const isUpdateVersionLogicEnable = () => {
   const packageJson = readRootPackageJsonSync();
-  if (!packageJson?.kungfuCraft?.autoUpdate?.update) return false;
+  return !!packageJson?.kungfuCraft?.autoUpdate?.update;
+};
+
+export const isCheckVersionLogicEnable = () => {
+  const updateVersionLogicEnable = isUpdateVersionLogicEnable();
   const globalSetting = getKfGlobalSettingsValue();
-  if (!globalSetting?.update?.isCheckVersion) return false;
-  return true;
+  return updateVersionLogicEnable && !!globalSetting?.update?.isCheckVersion;
 };

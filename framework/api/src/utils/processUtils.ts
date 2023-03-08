@@ -72,31 +72,34 @@ export const findProcessByKeywordsByFindProcess = (
   );
 };
 
-export const findProcessByKeywordsByTaskList = (
-  tasks: string[],
-): Promise<FindProcessResult[]> => {
-  const username = os.userInfo().username;
-  const tasklist = require('tasklist');
-  return tasklist({ verbose: true }).then((processList) => {
-    return processList
-      .filter((item) => tasks.indexOf(item.imageName) !== -1)
-      .filter((item) => (item.username || '').split('\\')[1] == username)
-      .map((item) => {
-        return {
-          pid: item.pid,
-          name: item.imageName,
-          username: item.username,
-        };
-      });
-  });
-};
+/***
+ * tasklist is only used on windows, and working for find process by current user
+ * but the performance of tasklist actually is a issue
+ *  ***/
+
+// export const findProcessByKeywordsByTaskList = (
+//   tasks: string[],
+// ): Promise<FindProcessResult[]> => {
+//   const username = os.userInfo().username;
+//   const tasklist = require('tasklist');
+//   return tasklist({ verbose: true }).then((processList) => {
+//     return processList
+//       .filter((item) => tasks.indexOf(item.imageName) !== -1)
+//       .filter((item) => (item.username || '').split('\\')[1] == username)
+//       .map((item) => {
+//         return {
+//           pid: item.pid,
+//           name: item.imageName,
+//           username: item.username,
+//         };
+//       });
+//   });
+// };
 
 export const findProcessByKeywords = (
   tasks: string[],
 ): Promise<FindProcessResult[]> => {
-  return isWin
-    ? findProcessByKeywordsByTaskList(tasks)
-    : findProcessByKeywordsByFindProcess(tasks);
+  return findProcessByKeywordsByFindProcess(tasks);
 };
 
 export const forceKill = (tasks: string[]): Promise<void> => {

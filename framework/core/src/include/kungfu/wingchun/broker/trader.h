@@ -97,7 +97,7 @@ public:
 
   void enable_self_detect();
 
-  virtual void on_restore() = 0;
+  virtual void on_restore(){};
 
 protected:
   OrderMap orders_ = {};
