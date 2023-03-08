@@ -83,6 +83,7 @@ import minimist from 'minimist';
 import VueI18n, { useLanguage } from '../language';
 import { unlinkSync } from 'fs-extra';
 import { T0T1Config } from '../typings/global';
+import { getKfGlobalSettingsValue } from '../config/globalSettings';
 import { Currency } from '../config/tradingConfig';
 const { t } = VueI18n.global;
 interface SourceAccountId {
@@ -2226,4 +2227,15 @@ export const dealCmdPath = (pathname: string) => {
       .join('/');
   }
   return pathname;
+};
+
+export const isUpdateVersionLogicEnable = () => {
+  const packageJson = readRootPackageJsonSync();
+  return !!packageJson?.kungfuCraft?.autoUpdate?.update;
+};
+
+export const isCheckVersionLogicEnable = () => {
+  const updateVersionLogicEnable = isUpdateVersionLogicEnable();
+  const globalSetting = getKfGlobalSettingsValue();
+  return updateVersionLogicEnable && !!globalSetting?.update?.isCheckVersion;
 };

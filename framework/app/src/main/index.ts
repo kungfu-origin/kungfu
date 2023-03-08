@@ -16,7 +16,10 @@ import {
   showKungfuInfo,
   openUrl,
 } from '@kungfu-trader/kungfu-app/src/main/utils';
-import { kfLogger } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import {
+  kfLogger,
+  isUpdateVersionLogicEnable,
+} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { killExtra } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import {
   clearDB,
@@ -37,6 +40,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/config';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import { readRootPackageJsonSync } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
+import { handleUpdateKungfu } from './autoUpdater';
 const { t } = VueI18n.global;
 
 let MainWindow: BrowserWindow | null = null;
@@ -102,6 +106,8 @@ async function createWindow(
     if (reloadBySchedule) {
       SecheduleReloading = false;
     }
+
+    isUpdateVersionLogicEnable() && handleUpdateKungfu(MainWindow);
   });
 
   MainWindow.on('close', (e) => {

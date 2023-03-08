@@ -619,6 +619,19 @@ export default {
     close_today: 'Close Today',
     close_yesterday: 'Close Yesterday',
     min: 'Min',
+
+    update: 'Upgrade Version',
+    is_check_version: 'Check Version',
+    is_check_version_desc: 'Check the client version when start kungfu',
+    current_version: 'Current version',
+    already_latest_version: 'Already latest version',
+    new_version: 'New version',
+    start_download: 'Start Download',
+    find_new_version: 'Found new version: {version}\nIf you want download now?',
+    downloaded: 'Download finished, wait to install',
+    to_install: 'To install',
+    warning_before_install:
+      "Installing will clean today's trading data and quit Kungfu (If you need, make a backup at first), sure install now? (suggest install when today's trade end)",
   },
 
   风控: 'Risk Setting',

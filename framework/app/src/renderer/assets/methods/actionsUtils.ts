@@ -46,10 +46,13 @@ import {
   isShotable,
   isT0,
   getTradingDataSortKey,
+  isUpdateVersionLogicEnable,
+  isCheckVersionLogicEnable,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { BasketVolumeType } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import { writeCSV } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import {
+  isAllMainProcessRunning,
   Pm2ProcessStatusData,
   Pm2ProcessStatusDetailData,
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
@@ -93,9 +96,103 @@ import sound from 'sound-play';
 import { KUNGFU_RESOURCES_DIR } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 import { RuleObject } from 'ant-design-vue/lib/form';
 import { TradeAccountingUsageMap } from '@kungfu-trader/kungfu-js-api/utils/accounting';
+import { readRootPackageJsonSync } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 
 const { t } = VueI18n.global;
 const { success, error } = messagePrompt();
+
+export const useUpdateVersion = () => {
+  const vueInstance = getCurrentInstance();
+  const packageJson = readRootPackageJsonSync();
+  const currentVersion = ref(packageJson?.version);
+  const newVersion = ref('');
+  const popoverVisible = ref(false);
+  const hasNewVersion = ref(false);
+  const downloadStarted = ref<boolean>(false);
+  const progressStatus = ref<'success' | 'active' | 'exception' | 'normal'>(
+    'normal',
+  );
+  const errorMessage = ref('');
+  const process = ref<number>();
+
+  const handleToConfirmStartUpdate = (newVersion: string) => {
+    confirmModal(
+      t('globalSettingConfig.update'),
+      t('globalSettingConfig.find_new_version', {
+        version: newVersion,
+      }),
+    ).then((flag) => {
+      ipcRenderer.send('auto-update-confirm-result', flag);
+    });
+  };
+
+  const handleToStartDownload = () => {
+    ipcRenderer.send('auto-update-to-start-download');
+  };
+
+  const handleQuitAndInstall = () => {
+    confirmModal(
+      t('globalSettingConfig.update'),
+      t('globalSettingConfig.warning_before_install'),
+    ).then((flag) => {
+      if (flag) {
+        ipcRenderer.send('auto-update-quit-and-install');
+      }
+    });
+  };
+
+  onMounted(() => {
+    if (!isUpdateVersionLogicEnable()) return;
+
+    vueInstance?.proxy?.$globalBus.subscribe((data) => {
+      if (data.tag === 'main') {
+        if (data.name === 'auto-update-find-new-version') {
+          hasNewVersion.value = true;
+          newVersion.value = data.payload.newVersion;
+          isCheckVersionLogicEnable() &&
+            handleToConfirmStartUpdate(data.payload.newVersion);
+        }
+
+        if (data.tag === 'auto-update-up-to-date') {
+          hasNewVersion.value = false;
+        }
+
+        if (data.name === 'auto-update-start-download') {
+          downloadStarted.value = true;
+          progressStatus.value = 'active';
+          popoverVisible.value = true;
+        }
+
+        if (data.name === 'auto-update-download-process') {
+          process.value = +data.payload.process;
+          if (process.value === 100) {
+            progressStatus.value = 'success';
+          } else {
+            progressStatus.value = 'active';
+          }
+        }
+
+        if (data.name === 'auto-update-error') {
+          errorMessage.value = (data.payload.error as Error).message;
+          progressStatus.value = 'exception';
+        }
+      }
+    });
+  });
+
+  return {
+    popoverVisible,
+    newVersion,
+    currentVersion,
+    hasNewVersion,
+    downloadStarted,
+    process,
+    progressStatus,
+    errorMessage,
+    handleToStartDownload,
+    handleQuitAndInstall,
+  };
+};
 
 export const handleSwitchProcessStatusGenerator = (): ((
   checked: boolean,
@@ -798,6 +895,7 @@ export const usePreStartAndQuitApp = (): {
   saveBoardsMap: () => Promise<void>;
 } => {
   const app = getCurrentInstance();
+
   const preStartSystemLoadingData = reactive<
     Record<string, 'loading' | 'done'>
   >({
@@ -820,6 +918,16 @@ export const usePreStartAndQuitApp = (): {
       ).length > 0
     );
   });
+
+  const watchStopHandle = watch(
+    () => preStartSystemLoading.value,
+    (newVal) => {
+      if (!newVal) {
+        ipcRenderer.send('auto-update-renderer-ready');
+        watchStopHandle();
+      }
+    },
+  );
 
   const preQuitSystemLoading = computed(() => {
     return (
@@ -852,7 +960,10 @@ export const usePreStartAndQuitApp = (): {
   };
 
   onMounted(() => {
-    if (booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED)) {
+    if (
+      booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED) &&
+      isAllMainProcessRunning()
+    ) {
       preStartSystemLoadingData.archive = 'done';
       preStartSystemLoadingData.extraResourcesLoading = 'done';
     }

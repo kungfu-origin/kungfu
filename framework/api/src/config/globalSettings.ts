@@ -16,6 +16,7 @@ import {
   langDefault,
 } from '@kungfu-trader/kungfu-js-api/language';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
+import { readRootPackageJsonSync } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 const { t } = VueI18n.global;
 const numCPUs = os.cpus() ? os.cpus().length : 1;
 
@@ -28,6 +29,8 @@ export interface KfSystemConfig {
 const __python_version_resolved = __python_version
   ? [...__python_version.split('.').slice(0, 2), 'x'].join('.')
   : '3.9.x';
+
+const packageJson = readRootPackageJsonSync();
 
 export const getKfGlobalSettings = (): KfSystemConfig[] => [
   {
@@ -248,6 +251,23 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
       },
     ],
   },
+  ...(packageJson?.kungfuCraft?.autoUpdate?.update
+    ? [
+        {
+          key: 'update',
+          name: t('globalSettingConfig.update'),
+          config: [
+            {
+              key: 'isCheckVersion',
+              name: t('globalSettingConfig.is_check_version'),
+              tip: t('globalSettingConfig.is_check_version_desc'),
+              default: true,
+              type: 'bool' as KungfuApi.KfConfigItemSupportedTypes,
+            },
+          ],
+        },
+      ]
+    : []),
 ];
 
 export const getKfGlobalSettingsValue = (): Record<
