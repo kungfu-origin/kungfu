@@ -1315,7 +1315,10 @@ export const useActiveInstruments = () => {
     ] as KungfuApi.Instrument | null;
   };
 
-  const getInstrumentCurrency = (instrumentId: string, exchangeId: string) => {
+  const getInstrumentCurrencyByIds = (
+    instrumentId: string,
+    exchangeId: string,
+  ) => {
     const instrument = getInstrumentByIdsWithWatcher(instrumentId, exchangeId);
     if (instrument) {
       return instrument.currency;
@@ -1327,7 +1330,7 @@ export const useActiveInstruments = () => {
   return {
     getInstrumentByIds,
     getInstrumentByIdsWithWatcher,
-    getInstrumentCurrency,
+    getInstrumentCurrencyByIds,
   };
 };
 

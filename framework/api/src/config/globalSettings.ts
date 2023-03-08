@@ -125,6 +125,19 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
     ],
   },
   {
+    key: 'currency',
+    name: t('globalSettingConfig.currency'),
+    config: [
+      {
+        key: 'instrumentCurrency',
+        name: t('globalSettingConfig.instrument_currency'),
+        tip: t('globalSettingConfig.instrument_currency_desc'),
+        default: true,
+        type: 'bool',
+      },
+    ],
+  },
+  {
     key: 'trade',
     name: t('globalSettingConfig.trade'),
     config: [
