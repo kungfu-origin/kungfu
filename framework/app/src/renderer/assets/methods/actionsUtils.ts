@@ -46,6 +46,7 @@ import {
   isT0,
   getTradingDataSortKey,
   isUpdateVersionLogicEnable,
+  isCheckVersionLogicEnable,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { BasketVolumeType } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import { writeCSV } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
@@ -147,7 +148,8 @@ export const useUpdateVersion = () => {
         if (data.name === 'auto-update-find-new-version') {
           hasNewVersion.value = true;
           newVersion.value = data.payload.newVersion;
-          handleToConfirmStartUpdate(data.payload.newVersion);
+          isCheckVersionLogicEnable() &&
+            handleToConfirmStartUpdate(data.payload.newVersion);
         }
 
         if (data.tag === 'auto-update-up-to-date') {

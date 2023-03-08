@@ -57,21 +57,19 @@ function handleUpdateKungfu(MainWindow: BrowserWindow | null) {
 
   autoUpdater.on('update-available', (info) => {
     kfLogger.info('Got a new kungfu client version', JSON.stringify(info));
-    kfLogger.info('MainWindow', MainWindow);
     if (MainWindow) {
       foundNewVersion(MainWindow, info.version);
 
-      ipcMain.once('auto-update-confirm-result', (_, result) => {
-        kfLogger.info(result);
+      ipcMain.on('auto-update-confirm-result', (_, result) => {
         if (result) {
           autoUpdater.downloadUpdate();
           startDownloadNewVersion(MainWindow);
-        } else {
-          ipcMain.on('auto-update-to-start-download', () => {
-            autoUpdater.downloadUpdate();
-            startDownloadNewVersion(MainWindow);
-          });
         }
+      });
+
+      ipcMain.on('auto-update-to-start-download', () => {
+        autoUpdater.downloadUpdate();
+        startDownloadNewVersion(MainWindow);
       });
     }
   });
