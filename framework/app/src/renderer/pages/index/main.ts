@@ -35,6 +35,7 @@ import {
   Divider,
   Dropdown,
   Progress,
+  Popover,
 } from 'ant-design-vue';
 
 import {
@@ -56,6 +57,7 @@ import {
   startLedger,
   startCacheD,
   startMaster,
+  isAllMainProcessRunning,
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 
 import {
@@ -65,12 +67,13 @@ import {
 
 import VueVirtualScroller from 'vue-virtual-scroller';
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
-import { useComponenets } from './useComponents';
+import { useComponents } from './useComponents';
 import globalBus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import zhCN from 'ant-design-vue/es/locale/zh_CN';
 import enUS from 'ant-design-vue/es/locale/en_US';
+import { KillAll } from '../../../../../api/src/utils/processUtils';
 
 const app = createApp(App);
 
@@ -107,6 +110,7 @@ app
   .use(Divider)
   .use(Dropdown)
   .use(Progress)
+  .use(Popover)
   .use(VueVirtualScroller);
 
 app.config.globalProperties.$antLocalesMap = {
@@ -119,7 +123,7 @@ app.config.globalProperties.$tradingDataSubject = tradingDataSubject;
 app.use(VueI18n);
 
 mergeExtLanguages().then(() =>
-  useComponenets(app, router).then(() => {
+  useComponents(app, router).then(() => {
     app.mount('#app');
   }),
 );
@@ -127,7 +131,7 @@ mergeExtLanguages().then(() =>
 const globalStore = useGlobalStore();
 const __BYPASS_ARCHIVE__ = false;
 
-if (!booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED)) {
+const initStartAll = () => {
   preStartAll()
     .then(async () => {
       if (__BYPASS_ARCHIVE__) {
@@ -182,17 +186,29 @@ if (!booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED)) {
         })
         .catch((err) => console.error(err.message));
     });
+};
+
+if (!booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED)) {
+  initStartAll();
 } else {
-  startGetProcessStatus(
-    (res: {
-      processStatus: Pm2ProcessStatusData;
-      processStatusWithDetail: Pm2ProcessStatusDetailData;
-    }) => {
-      const { processStatus, processStatusWithDetail } = res;
-      globalStore.setProcessStatus(processStatus);
-      globalStore.setProcessStatusWithDetail(processStatusWithDetail);
-    },
-  );
+  isAllMainProcessRunning().then((res) => {
+    if (res) {
+      startGetProcessStatus(
+        (res: {
+          processStatus: Pm2ProcessStatusData;
+          processStatusWithDetail: Pm2ProcessStatusDetailData;
+        }) => {
+          const { processStatus, processStatusWithDetail } = res;
+          globalStore.setProcessStatus(processStatus);
+          globalStore.setProcessStatusWithDetail(processStatusWithDetail);
+        },
+      );
+    } else {
+      KillAll().finally(() => {
+        initStartAll();
+      });
+    }
+  });
 }
 
 triggerStartStep(1000);

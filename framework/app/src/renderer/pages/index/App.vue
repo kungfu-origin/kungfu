@@ -157,6 +157,7 @@ onBeforeUnmount(() => {
         <router-view />
       </KfLayoutVue>
     </div>
+
     <KfSystemPrepareModal
       :title="$t('system_prompt')"
       :visible="preStartSystemLoading"

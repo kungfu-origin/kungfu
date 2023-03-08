@@ -82,6 +82,7 @@ import minimist from 'minimist';
 import VueI18n, { useLanguage } from '../language';
 import { unlinkSync } from 'fs-extra';
 import { T0T1Config } from '../typings/global';
+import { getKfGlobalSettingsValue } from '../config/globalSettings';
 const { t } = VueI18n.global;
 interface SourceAccountId {
   source: string;
@@ -2220,4 +2221,12 @@ export const dealCmdPath = (pathname: string) => {
       .join('/');
   }
   return pathname;
+};
+
+export const isUpdateVersionLogicEnable = () => {
+  const packageJson = readRootPackageJsonSync();
+  if (!packageJson?.kungfuCraft?.autoUpdate?.update) return false;
+  const globalSetting = getKfGlobalSettingsValue();
+  if (!globalSetting?.update?.isCheckVersion) return false;
+  return true;
 };

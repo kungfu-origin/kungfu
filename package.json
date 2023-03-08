@@ -18,6 +18,7 @@
     ]
   },
   "scripts": {
+    "postinstall": "patch-package",
     "foreach": "wsrun --serial --exclude-missing --fast-exit",
     "format": "wsrun --serial --exclude-missing format",
     "prebuild": "node .prebuild.js",
