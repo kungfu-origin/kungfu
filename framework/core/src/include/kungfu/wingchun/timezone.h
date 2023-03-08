@@ -17,8 +17,9 @@ namespace kungfu::wingchun {
  *  @date     : 2022/06/06 11:15
  *****************************************************************************/
 enum class LocationTimeType : char {
-  London,           //
-  Beijing,          //
+  London,  //
+  Beijing, //
+  Singapore,
   Tokyo,            //
   AmericaEastern,   //
   AmericaCentral,   //
