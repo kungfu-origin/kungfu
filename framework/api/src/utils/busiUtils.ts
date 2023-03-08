@@ -58,6 +58,7 @@ import {
   StrategyStateStatusEnum,
   UnderweightEnum,
   PriceLevelEnum,
+  CurrencyEnum,
 } from '../typings/enums';
 import {
   graceDeleteProcess,
@@ -83,6 +84,7 @@ import VueI18n, { useLanguage } from '../language';
 import { unlinkSync } from 'fs-extra';
 import { T0T1Config } from '../typings/global';
 import { getKfGlobalSettingsValue } from '../config/globalSettings';
+import { Currency } from '../config/tradingConfig';
 const { t } = VueI18n.global;
 interface SourceAccountId {
   source: string;
@@ -1432,6 +1434,10 @@ export const dealUnderweightType = (underweightType: UnderweightEnum) => {
   return UnderweightType[+underweightType as UnderweightEnum];
 };
 
+export const dealCurrency = (currency: CurrencyEnum | number) => {
+  return Currency[+currency as CurrencyEnum];
+};
+
 export const getKfCategoryData = (
   category: KfCategoryTypes,
 ): KungfuApi.KfTradeValueCommonData => {
@@ -2225,8 +2231,11 @@ export const dealCmdPath = (pathname: string) => {
 
 export const isUpdateVersionLogicEnable = () => {
   const packageJson = readRootPackageJsonSync();
-  if (!packageJson?.kungfuCraft?.autoUpdate?.update) return false;
+  return !!packageJson?.kungfuCraft?.autoUpdate?.update;
+};
+
+export const isCheckVersionLogicEnable = () => {
+  const updateVersionLogicEnable = isUpdateVersionLogicEnable();
   const globalSetting = getKfGlobalSettingsValue();
-  if (!globalSetting?.update?.isCheckVersion) return false;
-  return true;
+  return updateVersionLogicEnable && !!globalSetting?.update?.isCheckVersion;
 };
