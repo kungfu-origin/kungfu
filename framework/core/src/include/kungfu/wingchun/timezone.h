@@ -33,7 +33,7 @@ enum class LocationTimeType : char {
   Paris,            // 巴黎UTC/GMT +1
   Switzerland,      //瑞士(Switzerland) 瑞士 Europe/Zurich UTC+1
   Thailand,         //泰国 UTC/CMT +7
-  Toronto,          //多伦多 UTC/GMT -5
+  Toronto           //多伦多 UTC/GMT -5
 };
 
 /*
