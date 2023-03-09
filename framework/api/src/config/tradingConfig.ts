@@ -887,6 +887,7 @@ export const SystemProcessName: Record<
 
 export const InstrumentMinOrderVolume = {
   [InstrumentTypeEnum.stock]: 100,
+  [InstrumentTypeEnum.techstock]: 200,
   [InstrumentTypeEnum.future]: 1,
   [InstrumentTypeEnum.bond]: 1,
 };
