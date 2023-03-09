@@ -58,6 +58,7 @@ import {
   startCacheD,
   startMaster,
   isAllMainProcessRunning,
+  KillAll,
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 
 import {
@@ -73,7 +74,6 @@ import globalBus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import zhCN from 'ant-design-vue/es/locale/zh_CN';
 import enUS from 'ant-design-vue/es/locale/en_US';
-import { KillAll } from '../../../../../api/src/utils/processUtils';
 
 const app = createApp(App);
 

@@ -282,10 +282,11 @@ KF_DEFINE_PACK_TYPE(                                              //
     (bool, is_trading),         // 当前是否交易
     (bool, force_update_ratio), // 两融柜台折算率及保证金率
 
-    (double, long_margin_ratio),  // 多头保证金率
-    (double, short_margin_ratio), // 空头保证金率
-    (double, conversion_rate),    // 担保品折扣率
-    (double, exchange_rate)       // 汇率
+    (double, long_margin_ratio),         // 多头保证金率
+    (double, short_margin_ratio),        // 空头保证金率
+    (double, conversion_rate),           // 担保品折扣率
+    (double, exchange_rate),             // 汇率
+    (enums::CurrencyType, currency_type) // 币种
 );
 
 KF_DEFINE_PACK_TYPE(                                         //

@@ -419,6 +419,24 @@ NLOHMANN_JSON_SERIALIZE_ENUM(OrderStatus, {
 
 inline std::ostream &operator<<(std::ostream &os, OrderStatus t) { return os << int8_t(t); }
 
+// 币种枚举
+enum class CurrencyType : int8_t { Unknown = 0, CNY, HKD, USD, JPY, GBP, EUR, CNH, SGD, MYR };
+
+NLOHMANN_JSON_SERIALIZE_ENUM(CurrencyType, {
+                                               {CurrencyType::Unknown, "Unknown"},
+                                               {CurrencyType::CNY, "CNY"},
+                                               {CurrencyType::HKD, "HKD"},
+                                               {CurrencyType::USD, "USD"},
+                                               {CurrencyType::JPY, "JPY"},
+                                               {CurrencyType::GBP, "GBP"},
+                                               {CurrencyType::EUR, "EUR"},
+                                               {CurrencyType::CNH, "CNH"},
+                                               {CurrencyType::SGD, "SGD"},
+                                               {CurrencyType::MYR, "MYR"},
+                                           })
+
+inline std::ostream &operator<<(std::ostream &os, CurrencyType t) { return os << int8_t(t); }
+
 enum class BasketOrderStatus : int8_t { Unknown, Pending, PartialFilledNotActive, PartialFilledActive, Filled };
 
 NLOHMANN_JSON_SERIALIZE_ENUM(BasketOrderStatus,

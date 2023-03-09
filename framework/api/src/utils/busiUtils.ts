@@ -58,6 +58,7 @@ import {
   StrategyStateStatusEnum,
   UnderweightEnum,
   PriceLevelEnum,
+  CurrencyEnum,
 } from '../typings/enums';
 import {
   graceDeleteProcess,
@@ -83,6 +84,7 @@ import VueI18n, { useLanguage } from '../language';
 import { unlinkSync } from 'fs-extra';
 import { T0T1Config } from '../typings/global';
 import { getKfGlobalSettingsValue } from '../config/globalSettings';
+import { Currency } from '../config/tradingConfig';
 const { t } = VueI18n.global;
 interface SourceAccountId {
   source: string;
@@ -1430,6 +1432,10 @@ export const dealIsSwap = (isSwap: boolean) => {
 
 export const dealUnderweightType = (underweightType: UnderweightEnum) => {
   return UnderweightType[+underweightType as UnderweightEnum];
+};
+
+export const dealCurrency = (currency: CurrencyEnum | number) => {
+  return Currency[+currency as CurrencyEnum];
 };
 
 export const getKfCategoryData = (
