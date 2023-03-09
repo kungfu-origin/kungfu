@@ -17,23 +17,23 @@ namespace kungfu::wingchun {
  *  @date     : 2022/06/06 11:15
  *****************************************************************************/
 enum class LocationTimeType : char {
-  London,           //
-  Beijing,          //
-  Singapore,        //
+  London,  //
+  Beijing, //
+  Singapore,
   Tokyo,            //
   AmericaEastern,   //
   AmericaCentral,   //
   AustraliaEastern, //
   Berlin,           //
-  Amsterdam,        //阿姆斯特丹 UTC/GMT +1
-  Finland,          // 芬兰 UTC/CMT +2
-  Jakarta,          // 雅加达 印尼首都 UTC/GMT +7
-  Korea,            // 韩国UTC/GMT +9 KST
-  Malaysia,         // Kuala Lumpur 吉隆坡 UTC/GMT +8 马来西亚
-  Paris,            // 巴黎UTC/GMT +1
-  Switzerland,      //瑞士(Switzerland) 瑞士 Europe/Zurich UTC+1
-  Thailand,         //泰国 UTC/CMT +7
-  Toronto,          //多伦多 UTC/GMT -5
+  Amsterdam,        // 闃垮鏂壒涓? UTC/GMT +1
+  Finland,          // 鑺叞 UTC/CMT +2
+  Jakarta,          // 闆呭姞杈? 鍗板凹棣栭兘 UTC/GMT +7
+  Korea,            // 闊╁浗UTC/GMT +9 KST
+  Malaysia,         // Kuala Lumpur 鍚夐殕鍧? UTC/GMT +8 椹潵瑗夸簹
+  Paris,            // 宸撮粠UTC/GMT +1
+  Switzerland,      // 鐟炲＋(Switzerland) 鐟炲＋ Europe/Zurich UTC+1
+  Thailand,         // 娉板浗 UTC/CMT +7
+  Toronto           // 澶氫鸡澶? UTC/GMT -5
 };
 
 /*
@@ -42,7 +42,7 @@ enum class LocationTimeType : char {
 enum class ZoneTimeType : char {
   BST,  //
   BDT,  //
-  BJ,   // UTC +8:00
+  BJ,   //  UTC +8:00
   JST,  //
   SGT,  //
   EST,  // EST - Eastern Standard Time	UTC -5:00
