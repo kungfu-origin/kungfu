@@ -238,6 +238,8 @@ export default {
     USFUT: '美期',
     SGX: '新股',
     SGXFUT: '新期',
+    EUR: '欧股',
+    EURFUT: '欧期',
     LON: '英股',
     LONFUT: '英期',
     AEX: '荷股',
