@@ -240,6 +240,8 @@ export default {
     USFUT: 'USFUT',
     SGX: 'SGX',
     SGXFUT: 'SGXFUT',
+    EUR: 'EUR',
+    EURFUT: 'EURFUT',
     LON: 'LON',
     LONFUT: 'LONFUT',
     AEX: 'AEX',

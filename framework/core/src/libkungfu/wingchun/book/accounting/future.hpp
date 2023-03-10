@@ -375,7 +375,8 @@ private:
         strcmp(exchange_id, EXCHANGE_MYS_FUTURE) || strcmp(exchange_id, EXCHANGE_ABB) ||
         strcmp(exchange_id, EXCHANGE_PRX_FUTURE) || strcmp(exchange_id, EXCHANGE_SIX_FUTURE) ||
         strcmp(exchange_id, EXCHANGE_TAX_FUTURE) || strcmp(exchange_id, EXCHANGE_JP_FUTURE) ||
-        strcmp(exchange_id, EXCHANGE_TSE_FUTURE) || strcmp(exchange_id, EXCHANGE_XETRA)) {
+        strcmp(exchange_id, EXCHANGE_TSE_FUTURE) || strcmp(exchange_id, EXCHANGE_XETRA) ||
+        strcmp(exchange_id, EXCHANGE_EUR_FUTURE)) {
       return true;
     }
 

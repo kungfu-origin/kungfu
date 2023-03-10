@@ -37,6 +37,8 @@
 #define EXCHANGE_US_FUTURE "USFUT"     // 美期: 29（纳斯达克交易所）
 #define EXCHANGE_SGX "SGX"             // 新加坡交易所股票
 #define EXCHANGE_SGX_FUTURE "SGXFUT"   // 新加坡交易所期货
+#define EXCHANGE_EUR "EUR"             // 欧洲交易所股票
+#define EXCHANGE_EUR_FUTURE "EURFUT"   // 欧洲坡交易所期货
 #define EXCHANGE_LON "LON"             // 英股: 伦敦证券交易所
 #define EXCHANGE_LON_FUTURE "LONFUT"   // 英期
 #define EXCHANGE_AEX "AEX"             // 荷股
@@ -353,7 +355,8 @@ inline longfist::enums::InstrumentType get_instrument_type(const std::string &ex
              string_equals(exchange_id, EXCHANGE_MYS_FUTURE) || string_equals(exchange_id, EXCHANGE_ABB) ||
              string_equals(exchange_id, EXCHANGE_PRX_FUTURE) || string_equals(exchange_id, EXCHANGE_SIX_FUTURE) ||
              string_equals(exchange_id, EXCHANGE_TAX_FUTURE) || string_equals(exchange_id, EXCHANGE_JP_FUTURE) ||
-             string_equals(exchange_id, EXCHANGE_TSE_FUTURE) || string_equals(exchange_id, EXCHANGE_XETRA)) {
+             string_equals(exchange_id, EXCHANGE_TSE_FUTURE) || string_equals(exchange_id, EXCHANGE_XETRA) ||
+             string_equals(exchange_id, EXCHANGE_EUR_FUTURE)) {
     return longfist::enums::InstrumentType::Future;
   } else if (string_equals(exchange_id, EXCHANGE_US) || string_equals(exchange_id, EXCHANGE_SGX) ||
              string_equals(exchange_id, EXCHANGE_LON) || string_equals(exchange_id, EXCHANGE_AEX) ||
@@ -361,7 +364,7 @@ inline longfist::enums::InstrumentType get_instrument_type(const std::string &ex
              string_equals(exchange_id, EXCHANGE_IDX) || string_equals(exchange_id, EXCHANGE_MYS) ||
              string_equals(exchange_id, EXCHANGE_PRX) || string_equals(exchange_id, EXCHANGE_SIX) ||
              string_equals(exchange_id, EXCHANGE_TAX) || string_equals(exchange_id, EXCHANGE_JP) ||
-             string_equals(exchange_id, EXCHANGE_TSE)) {
+             string_equals(exchange_id, EXCHANGE_TSE) || string_equals(exchange_id, EXCHANGE_EUR) {
     return longfist::enums::InstrumentType::Stock;
   }
 
