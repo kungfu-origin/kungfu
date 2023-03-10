@@ -1536,6 +1536,7 @@ defineExpose({
             :items="tablesSearchRelated[item.key].tableData.value"
             :item-size="calcTableItemHeight(layout, !!item.noDivider)"
             key-field="id"
+            :buffer="0"
           >
             <template
               #default="{
