@@ -696,7 +696,7 @@ export const ExchangeIds: Record<string, KungfuApi.KfTradeValueCommonData> = {
     color: InstrumentType[InstrumentTypeEnum.future].color,
   },
   EUR: {
-    name: t('tradingConfig.EUR'),
+    name: t('tradingConfig.EURO'),
     color: InstrumentType[InstrumentTypeEnum.stock].color,
   },
   EURFUT: {

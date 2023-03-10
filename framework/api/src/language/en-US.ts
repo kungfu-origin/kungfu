@@ -295,7 +295,7 @@ export default {
     USD: 'USD',
     JPY: 'JPY',
     GBP: 'GBP',
-    EUR: 'EUR',
+    EURO: 'EUR',
     CNH: 'CNH',
     SGD: 'SGD',
     MYR: 'MYR',
