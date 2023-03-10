@@ -364,7 +364,7 @@ inline longfist::enums::InstrumentType get_instrument_type(const std::string &ex
              string_equals(exchange_id, EXCHANGE_IDX) || string_equals(exchange_id, EXCHANGE_MYS) ||
              string_equals(exchange_id, EXCHANGE_PRX) || string_equals(exchange_id, EXCHANGE_SIX) ||
              string_equals(exchange_id, EXCHANGE_TAX) || string_equals(exchange_id, EXCHANGE_JP) ||
-             string_equals(exchange_id, EXCHANGE_TSE) || string_equals(exchange_id, EXCHANGE_EUR) {
+             string_equals(exchange_id, EXCHANGE_TSE) || string_equals(exchange_id, EXCHANGE_EUR)) {
     return longfist::enums::InstrumentType::Stock;
   }
 
