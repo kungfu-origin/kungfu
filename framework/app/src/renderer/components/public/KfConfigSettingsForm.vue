@@ -93,6 +93,7 @@ const props = withDefaults(
     steps?: Record<string, number>;
     passPrimaryKeySpecialWordsVerify?: boolean;
     isPrimaryDisabled?: boolean;
+    willReplaceWholeFormState?: boolean;
   }>(),
   {
     formState: () => ({}),
@@ -109,6 +110,7 @@ const props = withDefaults(
     steps: () => ({}),
     passPrimaryKeySpecialWordsVerify: false,
     isPrimaryDisabled: false,
+    willReplaceWholeFormState: false,
   },
 );
 
@@ -224,16 +226,24 @@ watch(instrumentsInFrom, (insts) => {
   });
 });
 
+if (props.willReplaceWholeFormState) {
+  watch(
+    () => props.formState,
+    (newVal) => {
+      formState.value = newVal;
+    },
+  );
+}
+
 watch(
-  () => props.formState,
+  () => formState.value,
   (newVal) => {
-    formState.value = newVal;
+    app && app.emit('update:formState', newVal);
+  },
+  {
+    deep: true,
   },
 );
-
-watch(formState.value, (newVal) => {
-  app && app.emit('update:formState', newVal);
-});
 
 if ('instrument' in formState.value && 'side' in formState.value) {
   watch(
@@ -547,25 +557,27 @@ function csvTableCallback(
       );
       const shouldResolveInstrument =
         isInstrumentHeader && instrumentColumnConfig;
-      if (shouldResolveInstrument) {
-        const { getInstrumentByIds } = useActiveInstruments();
+      nextTick(() => {
+        if (shouldResolveInstrument) {
+          const { getInstrumentByIds } = useActiveInstruments();
 
-        data.forEach((item) => {
-          const instrument = getInstrumentByIds(
-            item.instrument_id,
-            `${item.exchange_id}`.toUpperCase(),
-            true,
-          ) as KungfuApi.InstrumentResolved;
+          data.forEach((item) => {
+            const instrument = getInstrumentByIds(
+              item.instrument_id,
+              `${item.exchange_id}`.toUpperCase(),
+              true,
+            ) as KungfuApi.InstrumentResolved;
 
-          formState.value[targetKey].push({
-            ...item,
-            [instrumentColumnConfig.key]:
-              buildInstrumentSelectOptionValue(instrument),
+            formState.value[targetKey].push({
+              ...item,
+              [instrumentColumnConfig.key]:
+                buildInstrumentSelectOptionValue(instrument),
+            });
           });
-        });
-      } else {
-        formState.value[targetKey].push(...data);
-      }
+        } else {
+          formState.value[targetKey].push(...data);
+        }
+      });
     }
   };
 }
@@ -1524,7 +1536,7 @@ defineExpose({
             :items="tablesSearchRelated[item.key].tableData.value"
             :item-size="calcTableItemHeight(layout, !!item.noDivider)"
             key-field="id"
-            :buffer="100"
+            :buffer="15"
           >
             <template
               #default="{
@@ -1571,6 +1583,7 @@ defineExpose({
                       passPrimaryKeySpecialWordsVerify
                     "
                     :is-primary-disabled="isPrimaryDisabled"
+                    :will-replace-whole-form-state="true"
                   ></KfConfigSettingsForm>
                   <div class="table-in-config-setting-row-buttons__wrap">
                     <a-button

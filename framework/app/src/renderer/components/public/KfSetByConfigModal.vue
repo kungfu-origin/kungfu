@@ -5,7 +5,6 @@ import {
   onBeforeUnmount,
   onMounted,
   ref,
-  watch,
   nextTick,
   toRaw,
 } from 'vue';
@@ -79,17 +78,6 @@ const titleResolved = computed(() => {
   return `${props.payload.title}`;
 });
 
-watch(formState.value, (val) => {
-  if (app?.proxy) {
-    app?.proxy.$globalBus.next({
-      tag: 'input:currentConfigModal',
-      category: props.payload.config.category,
-      extKey: props.payload.config.key,
-      formState: toRaw(val),
-    });
-  }
-});
-
 onMounted(() => {
   nextTick().then(() => {
     if (app?.proxy) {
@@ -161,6 +149,17 @@ function handleCancel(): void {
   app && app.emit('close');
   closeModal();
 }
+
+function handleFormStateChange(formState) {
+  if (app?.proxy) {
+    app?.proxy.$globalBus.next({
+      tag: 'input:currentConfigModal',
+      category: props.payload.config.category,
+      extKey: props.payload.config.key,
+      formState: toRaw(formState),
+    });
+  }
+}
 </script>
 <template>
   <a-modal
@@ -187,6 +186,7 @@ function handleCancel(): void {
       :primary-key-avoid-repeat-compare-extra="
         primaryKeyAvoidRepeatCompareExtra
       "
+      @update:form-state="handleFormStateChange"
     ></KfConfigSettingsForm>
   </a-modal>
 </template>
