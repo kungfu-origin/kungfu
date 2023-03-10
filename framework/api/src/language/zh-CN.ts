@@ -104,6 +104,7 @@ export default {
     csv_template: '下载 csv 模板',
     add_csv_desc: 'csv 表头为 {header}',
     clear: '清除',
+    total: '共计 {sum} 条数据'
   },
 
   tradingConfig: {

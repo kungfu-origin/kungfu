@@ -104,6 +104,7 @@ export default {
     csv_template: 'Download Csv Template',
     add_csv_desc: 'csv headers are {header}',
     clear: 'Clear',
+    total: 'Total {sum} pieces of data',
   },
 
   tradingConfig: {
