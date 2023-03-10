@@ -104,6 +104,7 @@ export default {
     csv_template: 'Download Csv Template',
     add_csv_desc: 'csv headers are {header}',
     clear: 'Clear',
+    total: 'Total {sum} pieces of data',
   },
 
   tradingConfig: {
@@ -239,6 +240,8 @@ export default {
     USFUT: 'USFUT',
     SGX: 'SGX',
     SGXFUT: 'SGXFUT',
+    EUR: 'EUR',
+    EURFUT: 'EURFUT',
     LON: 'LON',
     LONFUT: 'LONFUT',
     AEX: 'AEX',
@@ -292,7 +295,7 @@ export default {
     USD: 'USD',
     JPY: 'JPY',
     GBP: 'GBP',
-    EUR: 'EUR',
+    EURO: 'EUR',
     CNH: 'CNH',
     SGD: 'SGD',
     MYR: 'MYR',
