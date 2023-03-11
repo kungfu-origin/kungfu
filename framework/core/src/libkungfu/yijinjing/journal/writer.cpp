@@ -19,6 +19,7 @@ writer::writer(const data::location_ptr &location, uint32_t dest_id, bool lazy, 
 uint64_t writer::current_frame_uid() {
   uint32_t page_part = (journal_.page_->page_id_ << 16u) & PAGE_ID_TRANC;
   uint32_t frame_part = journal_.page_frame_nb_ & FRAME_ID_TRANC;
+  // frame_id_base is used for get account id while canceling order
   return frame_id_base_ | ((page_part | frame_part) xor writer_start_time_32int_);
 }
 
