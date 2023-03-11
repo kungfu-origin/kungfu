@@ -28,9 +28,7 @@ RuntimeContext::RuntimeContext(apprentice &app, const rx::connectable_observable
 
 void RuntimeContext::on_start() {
   broker_client_.on_start(events_);
-  if (not is_bypass_accounting()) {
-    bookkeeper_.on_start(events_);
-  }
+  bookkeeper_.on_start(events_);
   basketorder_engine_.on_start(events_);
 }
 

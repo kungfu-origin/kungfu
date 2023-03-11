@@ -17,7 +17,7 @@ public:
 
   ~BasketInstrumentStore() override = default;
 
-  Napi::Value SetAllBasketInstrument(const Napi::CallbackInfo &info);
+  Napi::Value SetAllBasketInstruments(const Napi::CallbackInfo &info);
 
   Napi::Value GetAllBasketInstrument(const Napi::CallbackInfo &info);
 

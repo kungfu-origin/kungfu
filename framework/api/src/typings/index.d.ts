@@ -370,7 +370,7 @@ declare namespace KungfuApi {
 
   export interface BasketInstrumentStore {
     getAllBasketInstrument(): BasketInstrument[] | false;
-    setAllBasketInstrument(basketInstruments: BasketInstrument[]): boolean;
+    setAllBasketInstruments(basketInstruments: BasketInstrument[]): boolean;
     setBasketInstrument(basketInstrument: BasketInstrument): boolean;
   }
 

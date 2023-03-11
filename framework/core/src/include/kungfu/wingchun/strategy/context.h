@@ -195,13 +195,6 @@ public:
    */
   [[nodiscard]] bool is_positions_mirrored() const;
 
- 
-   /**
-   * Get is bypass accounting
-   * @return true if book is bypass accounting, false otherwise. Defaults to false.
-   */
-  [[nodiscard]] bool is_bypass_accounting() const;
-
   /**
    * Call to hold book.
    */
@@ -211,11 +204,6 @@ public:
    * Call to hold positions, i.e. do not mirror positions.
    */
   void hold_positions();
-
-  /**
-   * Call to bypass bookkeeping, no asset or position calculation, no accounting overhead;
-   */
-  void bypass_accounting();
 
 
   /**
@@ -248,7 +236,6 @@ public:
 private:
   bool book_held_ = false;
   bool positions_mirrored_ = true;
-  bool bypass_accounting_ = false;
 };
 } // namespace kungfu::wingchun::strategy
 

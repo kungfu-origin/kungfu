@@ -12,7 +12,7 @@ Napi::FunctionReference BasketInstrumentStore::constructor = {};
 BasketInstrumentStore::BasketInstrumentStore(const Napi::CallbackInfo &info)
     : ObjectWrap(info), locator_(ExtractRuntimeLocatorByInfo0(info)), profile_(locator_) {}
 
-Napi::Value BasketInstrumentStore::SetAllBasketInstrument(const Napi::CallbackInfo &info) {
+Napi::Value BasketInstrumentStore::SetAllBasketInstruments(const Napi::CallbackInfo &info) {
   if (info[0].IsArray()) {
     auto args = info[0].As<Napi::Array>();
     std::vector<BasketInstrument> basket_instruments;
@@ -27,7 +27,7 @@ Napi::Value BasketInstrumentStore::SetAllBasketInstrument(const Napi::CallbackIn
         profile_.set(basket);
       }
     } catch (const std::exception &ex) {
-      SPDLOG_ERROR("failed to SetAllBasketInstrument {}", ex.what());
+      SPDLOG_ERROR("failed to SetAllBasketInstruments {}", ex.what());
       yijinjing::util::print_stack_trace();
       return Napi::Boolean::New(info.Env(), false);
     }
@@ -77,7 +77,7 @@ void BasketInstrumentStore::Init(Napi::Env env, Napi::Object exports) {
       DefineClass(env, "BasketInstrumentStore",
                   {
                       InstanceMethod("setBasketInstrument", &BasketInstrumentStore::SetBasketInstrument),
-                      InstanceMethod("setAllBasketInstrument", &BasketInstrumentStore::SetAllBasketInstrument),
+                      InstanceMethod("setAllBasketInstruments", &BasketInstrumentStore::SetAllBasketInstruments),
                       InstanceMethod("getAllBasketInstrument", &BasketInstrumentStore::GetAllBasketInstrument),
                   });
 

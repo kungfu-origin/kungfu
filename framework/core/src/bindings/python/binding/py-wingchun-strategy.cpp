@@ -184,10 +184,8 @@ void bind_strategy(pybind11::module &m) {
            py::arg("query_num") = 0)
       .def("hold_book", &strategy::Context::hold_book)
       .def("hold_positions", &strategy::Context::hold_positions)
-      .def("bypass_accounting", &strategy::Context::bypass_accounting)
       .def("is_book_held", &strategy::Context::is_book_held)
       .def("is_positions_mirrored", &strategy::Context::is_positions_mirrored)
-      .def("is_bypass_accounting", &strategy::Context::is_bypass_accounting)
       .def("req_deregister", &strategy::Context::req_deregister)
       .def("update_strategy_state", &strategy::Context::update_strategy_state)
       .def("get_writer", &strategy::Context::get_writer);
