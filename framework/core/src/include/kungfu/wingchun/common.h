@@ -31,28 +31,57 @@
 #define EXCHANGE_HB "HB"
 
 // 全市场exchange id定义
-#define EXCHANGE_HK "HK"             // 港股: 4（香港交易所）
-#define EXCHANGE_HK_FUTURE "HKFUT"   // 港股期货: 5（香港交易所）
-#define EXCHANGE_US "US"             // 美股: 29（纳斯达克交易所）
-#define EXCHANGE_US_FUTURE "USFUT"   // 美股: 29（纳斯达克交易所）
-#define EXCHANGE_GLFX "GLFX"         // 全球外汇: 41
-#define EXCHANGE_IPE "IPE"           // LME\IPE: 45(LME（伦敦金属交易所）、ICE)
-#define EXCHANGE_CBOT "CBOT"         // ES-CBOT: 62
-#define EXCHANGE_CEC "CEC"           // ES-CEC: 63
-#define EXCHANGE_LIFE "LIFE"         // ES-LIFE: 64
-#define EXCHANGE_MTIF "MTIF"         // ES-MTIF: 65
-#define EXCHANGE_NYCE "NYCE"         // ES-NYCE: 66、49
-#define EXCHANGE_CMX "CMX"           // ES-CMX: 67
-#define EXCHANGE_NYME "NYME"         // ES-NYME: 68
-#define EXCHANGE_SIME "SIME"         // ES-SIME: 69
-#define EXCHANGE_CME "CME"           // ES-CME: 70
-#define EXCHANGE_IMM "IMM"           // ES-IMM: 71
-#define EXCHANGE_WIDX "WIDX"         // ES-WIDX: 72
-#define EXCHANGE_FREX "FREX"         // ES-FREX: 73
-#define EXCHANGE_METL "METL"         // ES-METL: 74
-#define EXCHANGE_IPM "IPM"           // 国际贵金属: 5000
-#define EXCHANGE_SGX "SGX"           // 新加坡交易所股票
-#define EXCHANGE_SGX_FUTURE "SGXFUT" // 新加坡交易所期货
+#define EXCHANGE_HK "HK"               // 港股: 4（香港交易所）
+#define EXCHANGE_HK_FUTURE "HKFUT"     // 港股期货: 5（香港交易所）
+#define EXCHANGE_US "US"               // 美股: 29（纳斯达克交易所）
+#define EXCHANGE_US_FUTURE "USFUT"     // 美期: 29（纳斯达克交易所）
+#define EXCHANGE_SGX "SGX"             // 新加坡交易所股票
+#define EXCHANGE_SGX_FUTURE "SGXFUT"   // 新加坡交易所期货
+#define EXCHANGE_EUR "EUR"             // 欧洲交易所股票
+#define EXCHANGE_EUR_FUTURE "EURFUT"   // 欧洲坡交易所期货
+#define EXCHANGE_LON "LON"             // 英股: 伦敦证券交易所
+#define EXCHANGE_LON_FUTURE "LONFUT"   // 英期
+#define EXCHANGE_AEX "AEX"             // 荷股
+#define EXCHANGE_AEX_FUTURE "AEXFUT"   // 荷期
+#define EXCHANGE_AUX "AUX"             // 澳股
+#define EXCHANGE_AUX_FUTURE "AUXFUT"   // 澳期
+#define EXCHANGE_HEXS "HEXS"           // 芬股
+#define EXCHANGE_HEXS_FUTURE "HEXSFUT" // 芬期
+#define EXCHANGE_IDX "IDX"             // 印尼股
+#define EXCHANGE_IDX_FUTURE "IDXFUT"   // 印尼期
+#define EXCHANGE_KORC "KORC"           // 韩碳所
+#define EXCHANGE_LME "LME"             // 伦金所
+#define EXCHANGE_MYS "MYS"             // 马来股
+#define EXCHANGE_MYS_FUTURE "MYSFUT"   // 马来期
+#define EXCHANGE_ABB "ABB"             // 美布告
+#define EXCHANGE_PRX "PRX"             // 法股
+#define EXCHANGE_PRX_FUTURE "PRXFUT"   // 法期
+#define EXCHANGE_SIX "SIX"             // 瑞股
+#define EXCHANGE_SIX_FUTURE "SIXFUT"   // 瑞期
+#define EXCHANGE_TAX "TAX"             // 泰股
+#define EXCHANGE_TAX_FUTURE "TAXFUT"   // 泰期
+#define EXCHANGE_JP "JP"               // 日股
+#define EXCHANGE_JP_FUTURE "JPFUT"     // 日期
+#define EXCHANGE_TSE "TSE"             // 多股
+#define EXCHANGE_TSE_FUTURE "TSEFUT"   // 多期
+#define EXCHANGE_XETRA "XETRA"         // XETRA
+
+#define EXCHANGE_GLFX "GLFX" // 全球外汇: 41
+#define EXCHANGE_IPE "IPE"   // LME\IPE: 45(LME（伦敦金属交易所）、ICE)
+#define EXCHANGE_CBOT "CBOT" // ES-CBOT: 62
+#define EXCHANGE_CEC "CEC"   // ES-CEC: 63
+#define EXCHANGE_LIFE "LIFE" // ES-LIFE: 64
+#define EXCHANGE_MTIF "MTIF" // ES-MTIF: 65
+#define EXCHANGE_NYCE "NYCE" // ES-NYCE: 66、49
+#define EXCHANGE_CMX "CMX"   // ES-CMX: 67
+#define EXCHANGE_NYME "NYME" // ES-NYME: 68
+#define EXCHANGE_SIME "SIME" // ES-SIME: 69
+#define EXCHANGE_CME "CME"   // ES-CME: 70
+#define EXCHANGE_IMM "IMM"   // ES-IMM: 71
+#define EXCHANGE_WIDX "WIDX" // ES-WIDX: 72
+#define EXCHANGE_FREX "FREX" // ES-FREX: 73
+#define EXCHANGE_METL "METL" // ES-METL: 74
+#define EXCHANGE_IPM "IPM"   // 国际贵金属: 5000
 
 #define SOURCE_SIM "sim"
 #define SOURCE_CTP "ctp"
@@ -319,9 +348,23 @@ inline longfist::enums::InstrumentType get_instrument_type(const std::string &ex
   } else if (string_equals(exchange_id, EXCHANGE_HK)) {
     return get_instrument_type_by_exchange_hk(instrument_id);
   } else if (string_equals(exchange_id, EXCHANGE_HK_FUTURE) || string_equals(exchange_id, EXCHANGE_US_FUTURE) ||
-             string_equals(exchange_id, EXCHANGE_SGX_FUTURE)) {
+             string_equals(exchange_id, EXCHANGE_SGX_FUTURE) || string_equals(exchange_id, EXCHANGE_LON_FUTURE) ||
+             string_equals(exchange_id, EXCHANGE_AEX_FUTURE) || string_equals(exchange_id, EXCHANGE_AUX_FUTURE) ||
+             string_equals(exchange_id, EXCHANGE_HEXS_FUTURE) || string_equals(exchange_id, EXCHANGE_IDX_FUTURE) ||
+             string_equals(exchange_id, EXCHANGE_KORC) || string_equals(exchange_id, EXCHANGE_LME) ||
+             string_equals(exchange_id, EXCHANGE_MYS_FUTURE) || string_equals(exchange_id, EXCHANGE_ABB) ||
+             string_equals(exchange_id, EXCHANGE_PRX_FUTURE) || string_equals(exchange_id, EXCHANGE_SIX_FUTURE) ||
+             string_equals(exchange_id, EXCHANGE_TAX_FUTURE) || string_equals(exchange_id, EXCHANGE_JP_FUTURE) ||
+             string_equals(exchange_id, EXCHANGE_TSE_FUTURE) || string_equals(exchange_id, EXCHANGE_XETRA) ||
+             string_equals(exchange_id, EXCHANGE_EUR_FUTURE)) {
     return longfist::enums::InstrumentType::Future;
-  } else if (string_equals(exchange_id, EXCHANGE_US) || string_equals(exchange_id, EXCHANGE_SGX)) {
+  } else if (string_equals(exchange_id, EXCHANGE_US) || string_equals(exchange_id, EXCHANGE_SGX) ||
+             string_equals(exchange_id, EXCHANGE_LON) || string_equals(exchange_id, EXCHANGE_AEX) ||
+             string_equals(exchange_id, EXCHANGE_AUX) || string_equals(exchange_id, EXCHANGE_HEXS) ||
+             string_equals(exchange_id, EXCHANGE_IDX) || string_equals(exchange_id, EXCHANGE_MYS) ||
+             string_equals(exchange_id, EXCHANGE_PRX) || string_equals(exchange_id, EXCHANGE_SIX) ||
+             string_equals(exchange_id, EXCHANGE_TAX) || string_equals(exchange_id, EXCHANGE_JP) ||
+             string_equals(exchange_id, EXCHANGE_TSE) || string_equals(exchange_id, EXCHANGE_EUR)) {
     return longfist::enums::InstrumentType::Stock;
   }
 

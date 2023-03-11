@@ -126,6 +126,7 @@ function handleMakeOrder() {
         match_number: match_number || '',
         is_specific: !!is_specific,
         insert_time: 0n,
+        block_id: 0n,
       };
 
       if (!currentGlobalKfLocation.value) {

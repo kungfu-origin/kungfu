@@ -3,6 +3,7 @@ import {
   dealKfPrice,
   dealAssetPrice,
   dealDirection,
+  dealCurrency,
   isTdStrategyCategory,
   getIdByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
@@ -26,9 +27,11 @@ import {
   toRaw,
   watch,
 } from 'vue';
+import { storeToRefs } from 'pinia';
 import { getColumns } from './config';
 import KfBlinkNum from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfBlinkNum.vue';
 import { dealPosition } from '@kungfu-trader/kungfu-js-api/kungfu';
+import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
 import {
   OffsetEnum,
   SideEnum,
@@ -37,6 +40,7 @@ import {
   getInstrumentByInstrumentPair,
   useCurrentGlobalKfLocation,
   useInstruments,
+  useActiveInstruments,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 
 const app = getCurrentInstance();
@@ -58,6 +62,8 @@ const {
 const { handleDownload } = useDownloadHistoryTradingData();
 const { triggerOrderBook, triggerMakeOrder } = useTriggerMakeOrder();
 const { instruments } = useInstruments();
+const { getInstrumentCurrencyByIds } = useActiveInstruments();
+const { globalSetting } = storeToRefs(useGlobalStore());
 
 const columns = computed(() => {
   if (currentGlobalKfLocation.value === null) {
@@ -188,11 +194,29 @@ function dealLocationUIDResolved(holderUID: number): string {
             item,
             column,
           }: {
-            item: KungfuApi.Position,
+            item: KungfuApi.PositionResolved,
             column: KfTradingDataTableHeaderConfig,
           }"
         >
-          <template v-if="column.dataIndex === 'direction'">
+          <template v-if="column.dataIndex === 'instrument_id_resolved'">
+            <span>
+              {{ item.instrument_id_resolved }}
+              <span
+                v-if="globalSetting?.currency?.instrumentCurrency"
+                style="color: #faad14"
+              >
+                {{
+                  dealCurrency(
+                    getInstrumentCurrencyByIds(
+                      item.instrument_id,
+                      item.exchange_id,
+                    ),
+                  ).name
+                }}
+              </span>
+            </span>
+          </template>
+          <template v-else-if="column.dataIndex === 'direction'">
             <span :class="`color-${dealDirection(item.direction).color}`">
               {{ dealDirection(item.direction).name }}
             </span>

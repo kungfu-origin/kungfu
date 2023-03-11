@@ -14,7 +14,7 @@ using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
 using namespace kungfu::yijinjing::cache;
 
-#define STORE_LIMIT 100
+#define STORE_SINGLE_LOOP_VOLUME 100
 #define STORE_INTERVAL_LIMIT 200
 
 namespace kungfu::yijinjing::cache {
@@ -68,7 +68,11 @@ void cached::on_start() {
                        }) | $$(feed(event));
 }
 
-void cached::on_active() {
+void cached::on_frame() { async_handle_feeds(); }
+
+void cached::on_active() {}
+
+void cached::async_handle_feeds() {
   // limit cache overhead
   if (store_interval_ < STORE_INTERVAL_LIMIT) {
     store_interval_++;
@@ -97,7 +101,7 @@ void cached::handle_cached_feeds() {
 
     if (feed_map.size() != 0) {
       auto iter = feed_map.begin();
-      while (iter != feed_map.end() and stored_controller <= STORE_LIMIT) {
+      while (iter != feed_map.end() and stored_controller <= STORE_SINGLE_LOOP_VOLUME) {
         auto &s = iter->second;
         auto source_id = s.source;
         auto dest_id = s.dest;
@@ -133,7 +137,7 @@ void cached::handle_profile_feeds() {
 
     if (feed_map.size() != 0) {
       auto iter = feed_map.begin();
-      while (iter != feed_map.end() and stored_controller <= STORE_LIMIT) {
+      while (iter != feed_map.end() and stored_controller <= STORE_SINGLE_LOOP_VOLUME) {
         auto &s = iter->second;
         try {
           profile_ << s;

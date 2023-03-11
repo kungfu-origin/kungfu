@@ -23,6 +23,7 @@ import {
   PriceLevelEnum,
   BasketVolumeTypeEnum,
   BasketOrderStatusEnum,
+  CurrencyEnum,
 } from '../typings/enums';
 
 import { Pm2ProcessStatusTypes } from '../utils/processUtils';
@@ -676,11 +677,15 @@ export const ExchangeIds: Record<string, KungfuApi.KfTradeValueCommonData> = {
   },
   HKFUT: {
     name: t('tradingConfig.HKFUT'),
-    color: InstrumentType[InstrumentTypeEnum.stockoption].color,
+    color: InstrumentType[InstrumentTypeEnum.future].color,
   },
   US: {
     name: t('tradingConfig.US'),
     color: InstrumentType[InstrumentTypeEnum.stock].color,
+  },
+  USFUT: {
+    name: t('tradingConfig.USFUT'),
+    color: InstrumentType[InstrumentTypeEnum.future].color,
   },
   SGX: {
     name: t('tradingConfig.SGX'),
@@ -688,7 +693,111 @@ export const ExchangeIds: Record<string, KungfuApi.KfTradeValueCommonData> = {
   },
   SGXFUT: {
     name: t('tradingConfig.SGXFUT'),
-    color: InstrumentType[InstrumentTypeEnum.stockoption].color,
+    color: InstrumentType[InstrumentTypeEnum.future].color,
+  },
+  EUR: {
+    name: t('tradingConfig.EURO'),
+    color: InstrumentType[InstrumentTypeEnum.stock].color,
+  },
+  EURFUT: {
+    name: t('tradingConfig.EURFUT'),
+    color: InstrumentType[InstrumentTypeEnum.future].color,
+  },
+  LON: {
+    name: t('tradingConfig.LON'),
+    color: InstrumentType[InstrumentTypeEnum.stock].color,
+  },
+  LONFUT: {
+    name: t('tradingConfig.LONFUT'),
+    color: InstrumentType[InstrumentTypeEnum.future].color,
+  },
+  AEX: {
+    name: t('tradingConfig.AEX'),
+    color: InstrumentType[InstrumentTypeEnum.stock].color,
+  },
+  AUXFUT: {
+    name: t('tradingConfig.AUXFUT'),
+    color: InstrumentType[InstrumentTypeEnum.future].color,
+  },
+  HEXS: {
+    name: t('tradingConfig.HEXS'),
+    color: InstrumentType[InstrumentTypeEnum.stock].color,
+  },
+  HEXSFUT: {
+    name: t('tradingConfig.HEXSFUT'),
+    color: InstrumentType[InstrumentTypeEnum.future].color,
+  },
+  IDX: {
+    name: t('tradingConfig.IDX'),
+    color: InstrumentType[InstrumentTypeEnum.stock].color,
+  },
+  IDXFUT: {
+    name: t('tradingConfig.IDXFUT'),
+    color: InstrumentType[InstrumentTypeEnum.future].color,
+  },
+  KORC: {
+    name: t('tradingConfig.KORC'),
+    color: InstrumentType[InstrumentTypeEnum.future].color,
+  },
+  LME: {
+    name: t('tradingConfig.LME'),
+    color: InstrumentType[InstrumentTypeEnum.future].color,
+  },
+  MYS: {
+    name: t('tradingConfig.MYS'),
+    color: InstrumentType[InstrumentTypeEnum.stock].color,
+  },
+  MYSFUT: {
+    name: t('tradingConfig.MYSFUT'),
+    color: InstrumentType[InstrumentTypeEnum.future].color,
+  },
+  ABB: {
+    name: t('tradingConfig.ABB'),
+    color: InstrumentType[InstrumentTypeEnum.stock].color,
+  },
+  PRX: {
+    name: t('tradingConfig.PRX'),
+    color: InstrumentType[InstrumentTypeEnum.stock].color,
+  },
+  PRXFUT: {
+    name: t('tradingConfig.PRXFUT'),
+    color: InstrumentType[InstrumentTypeEnum.future].color,
+  },
+  SIX: {
+    name: t('tradingConfig.SIX'),
+    color: InstrumentType[InstrumentTypeEnum.stock].color,
+  },
+  SIXFUT: {
+    name: t('tradingConfig.SIXFUT'),
+    color: InstrumentType[InstrumentTypeEnum.future].color,
+  },
+  TAX: {
+    name: t('tradingConfig.TAX'),
+    color: InstrumentType[InstrumentTypeEnum.stock].color,
+  },
+  TAXFUT: {
+    name: t('tradingConfig.TAXFUT'),
+    color: InstrumentType[InstrumentTypeEnum.future].color,
+  },
+  JP: {
+    name: t('tradingConfig.JP'),
+    color: InstrumentType[InstrumentTypeEnum.stock].color,
+  },
+  JPFUT: {
+    name: t('tradingConfig.JPFUT'),
+    color: InstrumentType[InstrumentTypeEnum.future].color,
+  },
+  TSE: {
+    name: t('tradingConfig.TSE'),
+    color: InstrumentType[InstrumentTypeEnum.stock].color,
+  },
+  TSEFUT: {
+    name: t('tradingConfig.TSEFUT'),
+    color: InstrumentType[InstrumentTypeEnum.future].color,
+  },
+  XETRA: {
+    name: t('tradingConfig.XETRA'),
+    color: InstrumentType[InstrumentTypeEnum.stock].color,
   },
   GLFX: {
     name: t('tradingConfig.GLFX'),
@@ -786,6 +895,21 @@ export const SystemProcessName: Record<
 
 export const InstrumentMinOrderVolume = {
   [InstrumentTypeEnum.stock]: 100,
+  [InstrumentTypeEnum.techstock]: 200,
   [InstrumentTypeEnum.future]: 1,
   [InstrumentTypeEnum.bond]: 1,
 };
+
+export const Currency: Record<CurrencyEnum, KungfuApi.KfTradeValueCommonData> =
+  {
+    [CurrencyEnum.Unknown]: { name: '' },
+    [CurrencyEnum.CNY]: { name: t('tradingConfig.CNY') },
+    [CurrencyEnum.HKD]: { name: t('tradingConfig.HKD') },
+    [CurrencyEnum.USD]: { name: t('tradingConfig.USD') },
+    [CurrencyEnum.JPY]: { name: t('tradingConfig.JPY') },
+    [CurrencyEnum.GBP]: { name: t('tradingConfig.GBP') },
+    [CurrencyEnum.EUR]: { name: t('tradingConfig.EUR') },
+    [CurrencyEnum.CNH]: { name: t('tradingConfig.CNH') },
+    [CurrencyEnum.SGD]: { name: t('tradingConfig.SGD') },
+    [CurrencyEnum.MYR]: { name: t('tradingConfig.MYR') },
+  };

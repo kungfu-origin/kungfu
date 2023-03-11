@@ -24,6 +24,8 @@ protected:
 
   void on_react() override;
 
+  void on_frame() override;
+
   void on_active() override;
 
   static constexpr auto profile_get_all = [](auto &profile, auto &receiver) {
@@ -71,6 +73,8 @@ private:
   void ensure_cached_storage(uint32_t source_id, uint32_t dest_id);
 
   void feed(const event_ptr &event);
+
+  void async_handle_feeds();
 };
 
 } // namespace kungfu::yijinjing::cache

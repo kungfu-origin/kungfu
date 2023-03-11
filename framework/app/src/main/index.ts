@@ -16,7 +16,10 @@ import {
   showKungfuInfo,
   openUrl,
 } from '@kungfu-trader/kungfu-app/src/main/utils';
-import { kfLogger } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import {
+  kfLogger,
+  isUpdateVersionLogicEnable,
+} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { killExtra } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import {
   clearDB,
@@ -37,6 +40,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/config';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import { readRootPackageJsonSync } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
+import { handleUpdateKungfu } from './autoUpdater';
 const { t } = VueI18n.global;
 
 let MainWindow: BrowserWindow | null = null;
@@ -102,6 +106,8 @@ async function createWindow(
     if (reloadBySchedule) {
       SecheduleReloading = false;
     }
+
+    isUpdateVersionLogicEnable() && handleUpdateKungfu(MainWindow);
   });
 
   MainWindow.on('close', (e) => {
@@ -352,17 +358,19 @@ function setMenu() {
               },
               {
                 label: t('user_manual'),
-                click: () => openUrl('https://www.kungfu-trader.com/manual/'),
+                click: () =>
+                  openUrl('https://docs.kungfu-trader.com/latest/index.html'),
               },
               {
                 label: t('API_documentation'),
-                click: () => openUrl('https://www.kungfu-trader.com/api-doc/'),
-              },
-              {
-                label: t('Kungfu_forum'),
                 click: () =>
-                  openUrl('https://www.kungfu-trader.com/community/'),
+                  openUrl('https://docs.kungfu-trader.com/latest/07-api.html'),
               },
+              // {
+              //   label: t('Kungfu_forum'),
+              //   click: () =>
+              //     openUrl('https://www.kungfu-trader.com/community/'),
+              // },
             ],
           },
         ]

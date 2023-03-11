@@ -115,6 +115,9 @@ const busSubscription = globalBus.subscribe((data: KfEvent.KfBusEvent) => {
   if (data.tag === 'play:tradingError') {
     playSound();
   }
+  if (data.tag === 'orderbook') {
+    store.setOrderBookCurrentInstrument(data.instrument);
+  }
 });
 
 const {
@@ -154,6 +157,7 @@ onBeforeUnmount(() => {
         <router-view />
       </KfLayoutVue>
     </div>
+
     <KfSystemPrepareModal
       :title="$t('system_prompt')"
       :visible="preStartSystemLoading"

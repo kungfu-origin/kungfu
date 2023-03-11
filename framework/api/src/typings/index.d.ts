@@ -7,6 +7,14 @@ declare const __resources: string;
 type AnyFunction = (...args: unknown[]) => unknown;
 type AnyPromiseFunction = (...args: unknown[]) => Promise<unknown>;
 
+declare module 'tasklist' {
+  function tasklist(options: {
+    verbose: boolean;
+  }): Promise<{ pid: number; imageName: string; username: string }[]>;
+
+  export = tasklist;
+}
+
 declare namespace KungfuApi {
   import {
     BrokerStateStatusEnum,
@@ -36,6 +44,7 @@ declare namespace KungfuApi {
     BasketVolumeTypeEnum,
     PriceLevelEnum,
     BasketOrderStatusEnum,
+    CurrencyEnum,
   } from './enums';
   import { Dayjs } from 'dayjs';
   import { Row } from 'fast-csv';
@@ -160,6 +169,7 @@ declare namespace KungfuApi {
 
     // ---- some ui releated ----;
     noDivider?: boolean;
+    wrap?: string;
   }
 
   export interface KfExhibitConfigItem {
@@ -443,6 +453,7 @@ declare namespace KungfuApi {
     short_margin_ratio: number; //空头保证金率
 
     exchange_rate: number; // 利率
+    currency_type: CurrencyEnum; // 币种
 
     uid_key: string;
     ukey: string;
@@ -536,6 +547,7 @@ declare namespace KungfuApi {
     match_number: bigint; // 成交约定号
     is_specific: boolean; // 是否受限股份
     insert_time: bigint;
+    block_id: bigint;
   }
 
   export interface BasketOrderInput {
@@ -1083,6 +1095,7 @@ declare namespace KfEvent {
   export interface MainProcessEvent {
     tag: 'main';
     name: string;
+    payload?: object;
   }
 
   export interface TradingDataUpdateEvent {
