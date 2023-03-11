@@ -296,3 +296,11 @@ export const setAllBasketInstruments = (
     basketInstrumentStore.setAllBasketInstrument(basketInstruments),
   );
 };
+
+export const setAllBasketInstrument = (
+  basketInstrument: KungfuApi.BasketInstrument,
+) => {
+  return Promise.resolve(
+    basketInstrumentStore.setBasketInstrument(basketInstrument),
+  );
+};

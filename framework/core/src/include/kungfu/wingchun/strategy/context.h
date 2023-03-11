@@ -195,6 +195,13 @@ public:
    */
   [[nodiscard]] bool is_positions_mirrored() const;
 
+ 
+   /**
+   * Get is bypass accounting
+   * @return true if book is bypass accounting, false otherwise. Defaults to false.
+   */
+  [[nodiscard]] bool is_bypass_accounting() const;
+
   /**
    * Call to hold book.
    */
@@ -206,23 +213,29 @@ public:
   void hold_positions();
 
   /**
+   * Call to bypass bookkeeping, no asset or position calculation, no accounting overhead;
+   */
+  void bypass_accounting();
+
+
+  /**
    * request deregister.
    * @return void
    */
-  virtual void req_deregister() {}
+  virtual void req_deregister(){};
 
   /**
    * Update Strategy State
    * @param state StrategyState
    * @param infos vector<string>, info_a, info_b, info_c.
    */
-  virtual void update_strategy_state(longfist::types::StrategyStateUpdate &state_update) {}
+  virtual void update_strategy_state(longfist::types::StrategyStateUpdate &state_update) {};
 
   /**
    * Get arguments kfc run -a
    * @return string of arguments
    */
-  virtual std::string arguments() { return {}; }
+  virtual std::string arguments() { return {}; };
 
   /**
    *
@@ -235,6 +248,7 @@ public:
 private:
   bool book_held_ = false;
   bool positions_mirrored_ = true;
+  bool bypass_accounting_ = false;
 };
 } // namespace kungfu::wingchun::strategy
 

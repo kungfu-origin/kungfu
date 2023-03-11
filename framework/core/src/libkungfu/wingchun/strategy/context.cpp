@@ -24,7 +24,11 @@ bool Context::is_book_held() const { return book_held_; }
 
 bool Context::is_positions_mirrored() const { return positions_mirrored_; }
 
+bool Context::is_bypass_accounting() const { return bypass_accounting_; }
+
 void Context::hold_book() { book_held_ = true; }
 
 void Context::hold_positions() { positions_mirrored_ = false; }
+
+void Context::bypass_accounting() { bypass_accounting_ = true; }
 } // namespace kungfu::wingchun::strategy

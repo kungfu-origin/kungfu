@@ -52,12 +52,31 @@ Napi::Value BasketInstrumentStore::GetAllBasketInstrument(const Napi::CallbackIn
   }
 }
 
+Napi::Value BasketInstrumentStore::SetBasketInstrument(const Napi::CallbackInfo &info) {
+  try {
+    if (not info[0].IsObject()) {
+      throw Napi::Error::New(info.Env(), "Invalid argument");
+    }
+
+    BasketInstrument basket_instrument = {};
+    get(info[0].ToObject(), basket_instrument);
+
+    profile_.set(basket_instrument);
+  } catch (const std::exception &ex) {
+    SPDLOG_ERROR("failed to SetBasketInstrument {}", ex.what());
+    yijinjing::util::print_stack_trace();
+    return Napi::Boolean::New(info.Env(), false);
+  }
+  return Napi::Boolean::New(info.Env(), true);
+}
+
 void BasketInstrumentStore::Init(Napi::Env env, Napi::Object exports) {
   Napi::HandleScope scope(env);
 
   Napi::Function func =
       DefineClass(env, "BasketInstrumentStore",
                   {
+                      InstanceMethod("setBasketInstrument", &BasketInstrumentStore::SetBasketInstrument),
                       InstanceMethod("setAllBasketInstrument", &BasketInstrumentStore::SetAllBasketInstrument),
                       InstanceMethod("getAllBasketInstrument", &BasketInstrumentStore::GetAllBasketInstrument),
                   });
