@@ -68,9 +68,9 @@ void cached::on_start() {
                        }) | $$(feed(event));
 }
 
-void cached::on_frame() { async_handle_feeds(); }
+void cached::on_frame() {}
 
-void cached::on_active() {}
+void cached::on_active() { async_handle_feeds(); }
 
 void cached::async_handle_feeds() {
   // limit cache overhead

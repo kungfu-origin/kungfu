@@ -71,6 +71,8 @@ public:
 
   template <typename TradingData, typename ApplyMethod = void (AccountingMethod::*)(Book_ptr, const TradingData &)>
   void update_book(int64_t update_time, uint32_t source, uint32_t dest, const TradingData &data, ApplyMethod method) {
+    std::lock_guard<std::mutex> lock(update_book_mutex_);
+
     if (accounting_methods_.find(data.instrument_type) == accounting_methods_.end()) {
       SPDLOG_WARN("accounting method not found for {}: {}", data.type_name.c_str(), data.to_string());
       return;
@@ -112,6 +114,7 @@ private:
   yijinjing::practice::apprentice &app_;
   broker::Client &broker_client_;
 
+  std::mutex update_book_mutex_;
   bool positions_guarded_ = false;
   CommissionMap commissions_ = {};
   InstrumentMap instruments_ = {};

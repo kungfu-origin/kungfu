@@ -20,6 +20,8 @@ Runner::Runner(locator_ptr locator, const std::string &group, const std::string 
     : apprentice(location::make_shared(m, category::STRATEGY, group, name, std::move(locator)), low_latency),
       positions_set_(m == mode::BACKTEST), started_(m == mode::BACKTEST), arguments_(arguments) {}
 
+Runner::~Runner() { context_.reset(); }
+
 RuntimeContext_ptr Runner::get_context() const { return context_; }
 
 RuntimeContext_ptr Runner::make_context() { return std::make_shared<RuntimeContext>(*this, events_); }
