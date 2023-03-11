@@ -209,20 +209,20 @@ public:
    * request deregister.
    * @return void
    */
-  virtual void req_deregister() {}
+  virtual void req_deregister(){};
 
   /**
    * Update Strategy State
    * @param state StrategyState
    * @param infos vector<string>, info_a, info_b, info_c.
    */
-  virtual void update_strategy_state(longfist::types::StrategyStateUpdate &state_update) {}
+  virtual void update_strategy_state(longfist::types::StrategyStateUpdate &state_update){};
 
   /**
    * Get arguments kfc run -a
    * @return string of arguments
    */
-  virtual std::string arguments() { return {}; }
+  virtual std::string arguments() { return {}; };
 
   /**
    *

@@ -162,11 +162,13 @@ void Bookkeeper::update_instrument(const longfist::types::Instrument &instrument
 }
 
 void Bookkeeper::update_book(const event_ptr &event, const InstrumentKey &instrument_key) {
+  std::lock_guard<std::mutex> lock(update_book_mutex_);
   broker_client_.subscribe(instrument_key);
   get_book(event->source())->ensure_position(instrument_key);
 }
 
 void Bookkeeper::update_book(const event_ptr &event, const Quote &quote) {
+  std::lock_guard<std::mutex> lock(update_book_mutex_);
   if (accounting_methods_.find(quote.instrument_type) == accounting_methods_.end()) {
     return;
   }
