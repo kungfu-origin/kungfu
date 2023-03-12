@@ -176,6 +176,7 @@ const initStartAll = () => {
 
   const watcherIsLiveObervable = buildIfWatcherLiveObservable(window.watcher);
   watcherIsLiveObervable.pipe(first()).subscribe(() => {
+    console.log('watcher is live');
     delayMilliSeconds(2000)
       .then(() => startCacheD(false))
       .then(() => delayMilliSeconds(2000))
