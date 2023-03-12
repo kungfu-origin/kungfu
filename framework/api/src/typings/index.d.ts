@@ -372,6 +372,7 @@ declare namespace KungfuApi {
     getAllBasketInstrument(): BasketInstrument[] | false;
     setAllBasketInstruments(basketInstruments: BasketInstrument[]): boolean;
     setBasketInstrument(basketInstrument: BasketInstrument): boolean;
+    removeAllBasketInstruments(): boolean;
   }
 
   export interface DataTable<T> {
