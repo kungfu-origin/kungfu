@@ -959,10 +959,10 @@ export const usePreStartAndQuitApp = (): {
     return Promise.resolve();
   };
 
-  onMounted(() => {
+  onMounted(async () => {
     if (
       booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED) &&
-      isAllMainProcessRunning()
+      (await isAllMainProcessRunning())
     ) {
       preStartSystemLoadingData.archive = 'done';
       preStartSystemLoadingData.extraResourcesLoading = 'done';

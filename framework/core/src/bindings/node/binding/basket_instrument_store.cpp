@@ -52,6 +52,17 @@ Napi::Value BasketInstrumentStore::GetAllBasketInstrument(const Napi::CallbackIn
   }
 }
 
+Napi::Value BasketInstrumentStore::RemoveAllBasketInstruments(const Napi::CallbackInfo &info) {
+  try {
+    profile_.remove_all<BasketInstrument>();
+  } catch (const std::exception &ex) {
+    SPDLOG_ERROR("failed to RemoveAllBasketInstruments {}", ex.what());
+    yijinjing::util::print_stack_trace();
+    return Napi::Boolean::New(info.Env(), false);
+  }
+  return Napi::Boolean::New(info.Env(), true);
+}
+
 Napi::Value BasketInstrumentStore::SetBasketInstrument(const Napi::CallbackInfo &info) {
   try {
     if (not info[0].IsObject()) {
@@ -79,6 +90,7 @@ void BasketInstrumentStore::Init(Napi::Env env, Napi::Object exports) {
                       InstanceMethod("setBasketInstrument", &BasketInstrumentStore::SetBasketInstrument),
                       InstanceMethod("setAllBasketInstruments", &BasketInstrumentStore::SetAllBasketInstruments),
                       InstanceMethod("getAllBasketInstrument", &BasketInstrumentStore::GetAllBasketInstrument),
+                      InstanceMethod("removeAllBasketInstruments", &BasketInstrumentStore::RemoveAllBasketInstruments),
                   });
 
   constructor = Napi::Persistent(func);
