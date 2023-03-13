@@ -582,9 +582,9 @@ function csvTableCallback(
           }
           resolve();
         });
+      } else {
+        resolve();
       }
-
-      resolve();
     });
   };
 }
@@ -731,6 +731,7 @@ function handleSelectCsv<T>(
           transformer: buildCsvHeadersTransformer(headers),
         })
           .then(({ resRows, errRows }) => {
+            console.log(resRows, errRows, callback);
             callback &&
               callback(resRows, errRows, targetKey).finally(() => {
                 spinning.value = false;
