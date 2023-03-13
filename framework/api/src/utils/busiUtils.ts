@@ -2256,3 +2256,11 @@ export const buildIfWatcherLiveObservable = (watcher: KungfuApi.Watcher) => {
     }, 1000);
   });
 };
+
+export const getCpusNum = () => Promise.resolve(os.cpus() ? os.cpus() : 1);
+
+export const checkIfCpusNumSafe = () => {
+  return getCpusNum().then((cpusNum) => {
+    return Promise.resolve(cpusNum > 4);
+  });
+};
