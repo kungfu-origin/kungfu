@@ -46,7 +46,6 @@
     "vue-i18n": "9.1.10"
   },
   "devDependencies": {
-    "@types/find-root": "^1.1.2",
-    "patch-package": "^6.5.1"
+    "@types/find-root": "^1.1.2"
   }
 }
