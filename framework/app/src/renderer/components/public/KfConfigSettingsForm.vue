@@ -57,7 +57,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
   readCSV,
-  writeCSV,
+  writeCsvWithUTF8Bom,
 } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import { hashInstrumentUKey } from '@kungfu-trader/kungfu-js-api/kungfu';
 import {
@@ -731,7 +731,6 @@ function handleSelectCsv<T>(
           transformer: buildCsvHeadersTransformer(headers),
         })
           .then(({ resRows, errRows }) => {
-            console.log(resRows, errRows, callback);
             callback &&
               callback(resRows, errRows, targetKey).finally(() => {
                 spinning.value = false;
@@ -763,7 +762,7 @@ function handleDownloadCsvTemplate(
                 filePaths[0],
                 template.name || t('settingsFormConfig.csv_template') + '.csv',
               );
-              return writeCSV(filePath, template.data || []);
+              return writeCsvWithUTF8Bom(filePath, template.data || []);
             }),
           ).then(() => {
             messagePrompt().success();
