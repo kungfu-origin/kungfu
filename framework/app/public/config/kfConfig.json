@@ -4,6 +4,7 @@
     "bypassAccounting": false,
     "bypassTradingData": false
   },
+  "currency": { "instrumentCurrency": true },
   "strategy": { "python": false },
   "system": {
     "logLevel": "-l info",
