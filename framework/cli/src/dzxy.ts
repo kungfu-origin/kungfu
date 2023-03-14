@@ -20,7 +20,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/kungfu';
 import { watcher } from '@kungfu-trader/kungfu-js-api/kungfu/watcher';
 import { HistoryDateEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
-import { writeCSV } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
+import { writeCsvWithUTF8Bom } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import { Row } from '@fast-csv/format';
 import { useAllExtComponentByPosition } from './assets/methods/utils';
 
@@ -247,10 +247,14 @@ async function exportTradingData(date, output_folder) {
   const posFilename = path.join(output_folder, `pos-${date}`);
 
   return Promise.all([
-    writeCSV(ordersFilename, orders, dealTradingDataItemResolved),
-    writeCSV(tradesFilename, trades, dealTradingDataItemResolved),
-    writeCSV(orderStatFilename, orderStat, dealTradingDataItemResolved),
-    writeCSV(posFilename, positions, dealTradingDataItemResolved),
+    writeCsvWithUTF8Bom(ordersFilename, orders, dealTradingDataItemResolved),
+    writeCsvWithUTF8Bom(tradesFilename, trades, dealTradingDataItemResolved),
+    writeCsvWithUTF8Bom(
+      orderStatFilename,
+      orderStat,
+      dealTradingDataItemResolved,
+    ),
+    writeCsvWithUTF8Bom(posFilename, positions, dealTradingDataItemResolved),
   ]);
 }
 
