@@ -680,7 +680,6 @@ export const showTradingDataDetail = (
       vnode,
     ),
     t('confirm'),
-    '',
   );
 };
 
