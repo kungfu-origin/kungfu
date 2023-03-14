@@ -2,6 +2,7 @@ import path from 'path';
 import fse from 'fs-extra';
 import * as csv from 'fast-csv';
 import { FormatterRow, ParserOptionsArgs } from 'fast-csv';
+import stream from 'stream';
 import findRoot from 'find-root';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import { RootConfigJSON } from '../typings/global';
@@ -73,6 +74,40 @@ export const readCSV = <T>(
       .on('error', (err) => {
         reject(err);
       });
+  });
+};
+
+export const writeCsvWithUTF8Bom = (
+  filePath: string,
+  rows: KungfuApi.TradingDataTypes[],
+  transform = (row: KungfuApi.TradingDataTypes) => row as FormatterRow,
+) => {
+  filePath = path.normalize(filePath);
+  return new Promise<void>((resolve, reject) => {
+    const csvStream = csv.format({ headers: true, transform });
+    const outStream = new stream.PassThrough();
+    const buffers: Uint8Array[] = [];
+    csvStream
+      .pipe(outStream)
+      .on('data', (chunk) => {
+        buffers.push(chunk);
+      })
+      .on('end', () => {
+        // 解决Excel导出乱码的问题
+        const dataBuffer = Buffer.concat([
+          Buffer.from('\xEF\xBB\xBF', 'binary'),
+          Buffer.concat(buffers),
+        ]);
+        fse.writeFileSync(filePath, dataBuffer);
+        resolve();
+      })
+      .on('error', function (err) {
+        reject(err);
+      });
+    rows.forEach(function (row) {
+      csvStream.write(row);
+    });
+    csvStream.end();
   });
 };
 

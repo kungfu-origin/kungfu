@@ -57,7 +57,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
   readCSV,
-  writeCSV,
+  writeCsvWithUTF8Bom,
 } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import { hashInstrumentUKey } from '@kungfu-trader/kungfu-js-api/kungfu';
 import {
@@ -582,9 +582,9 @@ function csvTableCallback(
           }
           resolve();
         });
+      } else {
+        resolve();
       }
-
-      resolve();
     });
   };
 }
@@ -762,7 +762,7 @@ function handleDownloadCsvTemplate(
                 filePaths[0],
                 template.name || t('settingsFormConfig.csv_template') + '.csv',
               );
-              return writeCSV(filePath, template.data || []);
+              return writeCsvWithUTF8Bom(filePath, template.data || []);
             }),
           ).then(() => {
             messagePrompt().success();
@@ -1531,7 +1531,10 @@ defineExpose({
               <PlusOutlined @click.stop="handleAddItemIntoTableRows(item)" />
             </template>
           </a-button>
-          <div class="table-in-config-setting-total">
+          <div
+            v-if="item.type === 'csvTable' && !!item.search"
+            class="table-in-config-setting-total"
+          >
             {{
               $t('settingsFormConfig.total', {
                 sum: formState[item.key]?.length ?? 0,
