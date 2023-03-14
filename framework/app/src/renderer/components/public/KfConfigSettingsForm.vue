@@ -1531,7 +1531,10 @@ defineExpose({
               <PlusOutlined @click.stop="handleAddItemIntoTableRows(item)" />
             </template>
           </a-button>
-          <div class="table-in-config-setting-total">
+          <div
+            v-if="item.type === 'csvTable' && !!item.search"
+            class="table-in-config-setting-total"
+          >
             {{
               $t('settingsFormConfig.total', {
                 sum: formState[item.key]?.length ?? 0,
