@@ -104,6 +104,7 @@ export default {
     csv_template: '下载 csv 模板',
     add_csv_desc: 'csv 表头为 {header}',
     clear: '清除',
+    total: '共计 {sum} 条数据',
   },
 
   tradingConfig: {
@@ -238,6 +239,8 @@ export default {
     USFUT: '美期',
     SGX: '新股',
     SGXFUT: '新期',
+    EUR: '欧股',
+    EURFUT: '欧期',
     LON: '英股',
     LONFUT: '英期',
     AEX: '荷股',
@@ -291,7 +294,7 @@ export default {
     USD: 'USD',
     JPY: 'JPY',
     GBP: 'GBP',
-    EUR: 'EUR',
+    EURO: 'EUR',
     CNH: 'CNH',
     SGD: 'SGD',
     MYR: 'MYR',

@@ -12,7 +12,7 @@ Napi::FunctionReference BasketInstrumentStore::constructor = {};
 BasketInstrumentStore::BasketInstrumentStore(const Napi::CallbackInfo &info)
     : ObjectWrap(info), locator_(ExtractRuntimeLocatorByInfo0(info)), profile_(locator_) {}
 
-Napi::Value BasketInstrumentStore::SetAllBasketInstrument(const Napi::CallbackInfo &info) {
+Napi::Value BasketInstrumentStore::SetAllBasketInstruments(const Napi::CallbackInfo &info) {
   if (info[0].IsArray()) {
     auto args = info[0].As<Napi::Array>();
     std::vector<BasketInstrument> basket_instruments;
@@ -27,7 +27,7 @@ Napi::Value BasketInstrumentStore::SetAllBasketInstrument(const Napi::CallbackIn
         profile_.set(basket);
       }
     } catch (const std::exception &ex) {
-      SPDLOG_ERROR("failed to SetAllBasketInstrument {}", ex.what());
+      SPDLOG_ERROR("failed to SetAllBasketInstruments {}", ex.what());
       yijinjing::util::print_stack_trace();
       return Napi::Boolean::New(info.Env(), false);
     }
@@ -52,14 +52,45 @@ Napi::Value BasketInstrumentStore::GetAllBasketInstrument(const Napi::CallbackIn
   }
 }
 
+Napi::Value BasketInstrumentStore::RemoveAllBasketInstruments(const Napi::CallbackInfo &info) {
+  try {
+    profile_.remove_all<BasketInstrument>();
+  } catch (const std::exception &ex) {
+    SPDLOG_ERROR("failed to RemoveAllBasketInstruments {}", ex.what());
+    yijinjing::util::print_stack_trace();
+    return Napi::Boolean::New(info.Env(), false);
+  }
+  return Napi::Boolean::New(info.Env(), true);
+}
+
+Napi::Value BasketInstrumentStore::SetBasketInstrument(const Napi::CallbackInfo &info) {
+  try {
+    if (not info[0].IsObject()) {
+      throw Napi::Error::New(info.Env(), "Invalid argument");
+    }
+
+    BasketInstrument basket_instrument = {};
+    get(info[0].ToObject(), basket_instrument);
+
+    profile_.set(basket_instrument);
+  } catch (const std::exception &ex) {
+    SPDLOG_ERROR("failed to SetBasketInstrument {}", ex.what());
+    yijinjing::util::print_stack_trace();
+    return Napi::Boolean::New(info.Env(), false);
+  }
+  return Napi::Boolean::New(info.Env(), true);
+}
+
 void BasketInstrumentStore::Init(Napi::Env env, Napi::Object exports) {
   Napi::HandleScope scope(env);
 
   Napi::Function func =
       DefineClass(env, "BasketInstrumentStore",
                   {
-                      InstanceMethod("setAllBasketInstrument", &BasketInstrumentStore::SetAllBasketInstrument),
+                      InstanceMethod("setBasketInstrument", &BasketInstrumentStore::SetBasketInstrument),
+                      InstanceMethod("setAllBasketInstruments", &BasketInstrumentStore::SetAllBasketInstruments),
                       InstanceMethod("getAllBasketInstrument", &BasketInstrumentStore::GetAllBasketInstrument),
+                      InstanceMethod("removeAllBasketInstruments", &BasketInstrumentStore::RemoveAllBasketInstruments),
                   });
 
   constructor = Napi::Persistent(func);

@@ -57,7 +57,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
   readCSV,
-  writeCSV,
+  writeCsvWithUTF8Bom,
 } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import { hashInstrumentUKey } from '@kungfu-trader/kungfu-js-api/kungfu';
 import {
@@ -93,6 +93,7 @@ const props = withDefaults(
     steps?: Record<string, number>;
     passPrimaryKeySpecialWordsVerify?: boolean;
     isPrimaryDisabled?: boolean;
+    willReplaceWholeFormState?: boolean;
   }>(),
   {
     formState: () => ({}),
@@ -109,6 +110,7 @@ const props = withDefaults(
     steps: () => ({}),
     passPrimaryKeySpecialWordsVerify: false,
     isPrimaryDisabled: false,
+    willReplaceWholeFormState: false,
   },
 );
 
@@ -154,6 +156,7 @@ const { td, md, strategy } = toRefs(useAllKfConfigData());
 const { basketList, buildBasketOptionValue } = useBasket();
 const { isLanguageKeyAvailable } = useLanguage();
 
+const spinning = ref(false);
 const primaryKeys = ref<string[]>(getPrimaryKeys(props.configSettings || []));
 const sideRadiosList = ref<string[]>(Object.keys(Side).slice(0, 2));
 const customerFormItemTips = reactive<Record<string, string>>({});
@@ -224,16 +227,24 @@ watch(instrumentsInFrom, (insts) => {
   });
 });
 
+if (props.willReplaceWholeFormState) {
+  watch(
+    () => props.formState,
+    (newVal) => {
+      formState.value = newVal;
+    },
+  );
+}
+
 watch(
-  () => props.formState,
+  () => formState.value,
   (newVal) => {
-    formState.value = newVal;
+    app && app.emit('update:formState', newVal);
+  },
+  {
+    deep: true,
   },
 );
-
-watch(formState.value, (newVal) => {
-  app && app.emit('update:formState', newVal);
-});
 
 if ('instrument' in formState.value && 'side' in formState.value) {
   watch(
@@ -511,6 +522,7 @@ function instrumentsCsvCallback(
   formState.value[targetKey] = resolvedInstruments.map((item) =>
     buildInstrumentSelectOptionValue(item),
   );
+  return Promise.resolve();
 }
 
 function handleClearInstrumentsCsv(targetKey: string) {
@@ -530,43 +542,50 @@ function csvTableCallback(
     }[],
     targetKey: string,
   ) {
-    if (errRows.length) {
-      console.warn('Csv resolve error rows:', errRows);
-    }
-
-    if (data.length) {
-      if (mode === 'reset') {
-        formState.value[targetKey].length = 0;
+    return new Promise<void>((resolve) => {
+      if (errRows.length) {
+        console.warn('Csv resolve error rows:', errRows);
       }
 
-      const headers = Object.keys(data[0]);
-      const isInstrumentHeader =
-        headers.includes('instrument_id') && headers.includes('exchange_id');
-      const instrumentColumnConfig = columns.find(
-        (item) => item.type === 'instrument',
-      );
-      const shouldResolveInstrument =
-        isInstrumentHeader && instrumentColumnConfig;
-      if (shouldResolveInstrument) {
-        const { getInstrumentByIds } = useActiveInstruments();
+      if (data.length) {
+        if (mode === 'reset') {
+          formState.value[targetKey].length = 0;
+        }
 
-        data.forEach((item) => {
-          const instrument = getInstrumentByIds(
-            item.instrument_id,
-            `${item.exchange_id}`.toUpperCase(),
-            true,
-          ) as KungfuApi.InstrumentResolved;
+        const headers = Object.keys(data[0]);
+        const isInstrumentHeader =
+          headers.includes('instrument_id') && headers.includes('exchange_id');
+        const instrumentColumnConfig = columns.find(
+          (item) => item.type === 'instrument',
+        );
+        const shouldResolveInstrument =
+          isInstrumentHeader && instrumentColumnConfig;
+        nextTick(() => {
+          if (shouldResolveInstrument) {
+            const { getInstrumentByIds } = useActiveInstruments();
 
-          formState.value[targetKey].push({
-            ...item,
-            [instrumentColumnConfig.key]:
-              buildInstrumentSelectOptionValue(instrument),
-          });
+            data.forEach((item) => {
+              const instrument = getInstrumentByIds(
+                item.instrument_id,
+                `${item.exchange_id}`.toUpperCase(),
+                true,
+              ) as KungfuApi.InstrumentResolved;
+
+              formState.value[targetKey].push({
+                ...item,
+                [instrumentColumnConfig.key]:
+                  buildInstrumentSelectOptionValue(instrument),
+              });
+            });
+          } else {
+            formState.value[targetKey].push(...data);
+          }
+          resolve();
         });
       } else {
-        formState.value[targetKey].push(...data);
+        resolve();
       }
-    }
+    });
   };
 }
 
@@ -696,7 +715,7 @@ function handleSelectCsv<T>(
       data: (string | number | boolean)[];
     }[],
     targetKey: string,
-  ) => void,
+  ) => Promise<void>,
 ): void {
   dialog
     .showOpenDialog({
@@ -706,12 +725,16 @@ function handleSelectCsv<T>(
     .then((res) => {
       const { filePaths } = res;
       if (filePaths.length) {
+        spinning.value = true;
         readCSV<T>(filePaths[0], true, {
           validator: buildCsvHeadersValidator(headers),
           transformer: buildCsvHeadersTransformer(headers),
         })
           .then(({ resRows, errRows }) => {
-            callback && callback(resRows, errRows, targetKey);
+            callback &&
+              callback(resRows, errRows, targetKey).finally(() => {
+                spinning.value = false;
+              });
           })
           .catch((err) => {
             if (err instanceof Error) {
@@ -739,7 +762,7 @@ function handleDownloadCsvTemplate(
                 filePaths[0],
                 template.name || t('settingsFormConfig.csv_template') + '.csv',
               );
-              return writeCSV(filePath, template.data || []);
+              return writeCsvWithUTF8Bom(filePath, template.data || []);
             }),
           ).then(() => {
             messagePrompt().success();
@@ -1508,6 +1531,16 @@ defineExpose({
               <PlusOutlined @click.stop="handleAddItemIntoTableRows(item)" />
             </template>
           </a-button>
+          <div
+            v-if="item.type === 'csvTable' && !!item.search"
+            class="table-in-config-setting-total"
+          >
+            {{
+              $t('settingsFormConfig.total', {
+                sum: formState[item.key]?.length ?? 0,
+              })
+            }}
+          </div>
         </div>
         <template v-if="!!item.search">
           <RecycleScroller
@@ -1524,7 +1557,7 @@ defineExpose({
             :items="tablesSearchRelated[item.key].tableData.value"
             :item-size="calcTableItemHeight(layout, !!item.noDivider)"
             key-field="id"
-            :buffer="100"
+            :buffer="0"
           >
             <template
               #default="{
@@ -1571,6 +1604,7 @@ defineExpose({
                       passPrimaryKeySpecialWordsVerify
                     "
                     :is-primary-disabled="isPrimaryDisabled"
+                    :will-replace-whole-form-state="true"
                   ></KfConfigSettingsForm>
                   <div class="table-in-config-setting-row-buttons__wrap">
                     <a-button
@@ -1667,6 +1701,9 @@ defineExpose({
         </template>
       </div>
     </a-form-item>
+    <Teleport to="body">
+      <a-spin class="kf-config-setting-form-spin" :spinning="spinning"></a-spin>
+    </Teleport>
   </a-form>
 </template>
 <script lang="ts">
@@ -1751,6 +1788,12 @@ export default defineComponent({
           height: 32px;
         }
       }
+
+      .table-in-config-setting-total {
+        display: flex;
+        align-items: center;
+        margin-left: 16px;
+      }
     }
 
     .table-in-config-setting-row {
@@ -1819,5 +1862,9 @@ export default defineComponent({
     overflow: inherit;
     white-space: normal;
   }
+}
+
+.kf-config-setting-form-spin {
+  z-index: 9999;
 }
 </style>

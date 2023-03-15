@@ -4,7 +4,7 @@
     "name": "Kungfu Trader",
     "email": "info@kungfu.link"
   },
-  "version": "2.4.53-alpha.5",
+  "version": "2.4.56-alpha.1",
   "description": "Toolchain for Kungfu Development (babel/cmake-js/node-gyp/webpack/yarn/etc).",
   "license": "Apache-2.0",
   "main": "package.json",
@@ -65,6 +65,7 @@
     "monaco-editor-webpack-plugin": "^7.0.1",
     "multispinner": "^0.2.1",
     "node-loader": "^2.0.0",
+    "patch-package": "^6.5.1",
     "pinia": "^2.0.10",
     "postcss": "^8.4.5",
     "prettier": "~2.7.1",

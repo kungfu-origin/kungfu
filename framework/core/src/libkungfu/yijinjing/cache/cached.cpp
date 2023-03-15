@@ -15,7 +15,7 @@ using namespace kungfu::yijinjing::data;
 using namespace kungfu::yijinjing::cache;
 
 #define STORE_SINGLE_LOOP_VOLUME 100
-#define STORE_INTERVAL_LIMIT 500
+#define STORE_INTERVAL_LIMIT 200
 
 namespace kungfu::yijinjing::cache {
 
@@ -68,7 +68,7 @@ void cached::on_start() {
                        }) | $$(feed(event));
 }
 
-void cached::on_frame() { async_handle_feeds(); }
+void cached::on_frame() {}
 
 void cached::on_active() { async_handle_feeds(); }
 

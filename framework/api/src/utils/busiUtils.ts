@@ -86,6 +86,8 @@ import { T0T1Config } from '../typings/global';
 import { getKfGlobalSettingsValue } from '../config/globalSettings';
 import { Currency } from '../config/tradingConfig';
 const { t } = VueI18n.global;
+import { Observable } from 'rxjs';
+
 interface SourceAccountId {
   source: string;
   id: string;
@@ -1332,6 +1334,9 @@ export const dealVolumeByInstrumentType = (
 ) => {
   const minOrderVolume = InstrumentMinOrderVolume[instrumentType] || 1;
   const orderVolume = Math.max(volume, minOrderVolume);
+
+  if (instrumentType === InstrumentTypeEnum.techstock) return orderVolume;
+
   return ~~(orderVolume / minOrderVolume) * minOrderVolume;
 };
 
@@ -2238,4 +2243,16 @@ export const isCheckVersionLogicEnable = () => {
   const updateVersionLogicEnable = isUpdateVersionLogicEnable();
   const globalSetting = getKfGlobalSettingsValue();
   return updateVersionLogicEnable && !!globalSetting?.update?.isCheckVersion;
+};
+
+export const buildIfWatcherLiveObservable = (watcher: KungfuApi.Watcher) => {
+  return new Observable<boolean>((sub) => {
+    const timer = setTimerPromiseTask(async () => {
+      if (watcher.isLive()) {
+        sub.next(true);
+        sub.complete();
+        timer.clearLoop();
+      }
+    }, 1000);
+  });
 };

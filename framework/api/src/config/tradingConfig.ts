@@ -695,6 +695,14 @@ export const ExchangeIds: Record<string, KungfuApi.KfTradeValueCommonData> = {
     name: t('tradingConfig.SGXFUT'),
     color: InstrumentType[InstrumentTypeEnum.future].color,
   },
+  EUR: {
+    name: t('tradingConfig.EUR'),
+    color: InstrumentType[InstrumentTypeEnum.stock].color,
+  },
+  EURFUT: {
+    name: t('tradingConfig.EURFUT'),
+    color: InstrumentType[InstrumentTypeEnum.future].color,
+  },
   LON: {
     name: t('tradingConfig.LON'),
     color: InstrumentType[InstrumentTypeEnum.stock].color,
@@ -887,6 +895,7 @@ export const SystemProcessName: Record<
 
 export const InstrumentMinOrderVolume = {
   [InstrumentTypeEnum.stock]: 100,
+  [InstrumentTypeEnum.techstock]: 200,
   [InstrumentTypeEnum.future]: 1,
   [InstrumentTypeEnum.bond]: 1,
 };
@@ -899,7 +908,7 @@ export const Currency: Record<CurrencyEnum, KungfuApi.KfTradeValueCommonData> =
     [CurrencyEnum.USD]: { name: t('tradingConfig.USD') },
     [CurrencyEnum.JPY]: { name: t('tradingConfig.JPY') },
     [CurrencyEnum.GBP]: { name: t('tradingConfig.GBP') },
-    [CurrencyEnum.EUR]: { name: t('tradingConfig.EUR') },
+    [CurrencyEnum.EUR]: { name: t('tradingConfig.EURO') },
     [CurrencyEnum.CNH]: { name: t('tradingConfig.CNH') },
     [CurrencyEnum.SGD]: { name: t('tradingConfig.SGD') },
     [CurrencyEnum.MYR]: { name: t('tradingConfig.MYR') },

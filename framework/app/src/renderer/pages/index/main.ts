@@ -47,6 +47,7 @@ import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/ind
 import {
   booleanProcessEnv,
   delayMilliSeconds,
+  buildIfWatcherLiveObservable,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
   Pm2ProcessStatusDetailData,
@@ -74,6 +75,7 @@ import globalBus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import zhCN from 'ant-design-vue/es/locale/zh_CN';
 import enUS from 'ant-design-vue/es/locale/en_US';
+import { first } from 'rxjs';
 
 const app = createApp(App);
 
@@ -170,22 +172,26 @@ const initStartAll = () => {
           globalStore.setProcessStatusWithDetail(processStatusWithDetail);
         },
       );
-
-      delayMilliSeconds(1000)
-        .then(() => startCacheD(false))
-        .then(() => delayMilliSeconds(2000))
-        .then(() => startLedger(false))
-        .then(() => postStartAll())
-        .then(() => delayMilliSeconds(1000))
-        .then(() => {
-          globalBus.next({
-            tag: 'processStatus',
-            name: 'extraResourcesLoading',
-            status: 'online',
-          });
-        })
-        .catch((err) => console.error(err.message));
     });
+
+  const watcherIsLiveObervable = buildIfWatcherLiveObservable(window.watcher);
+  watcherIsLiveObervable.pipe(first()).subscribe(() => {
+    console.log('watcher is live');
+    delayMilliSeconds(2000)
+      .then(() => startCacheD(false))
+      .then(() => delayMilliSeconds(2000))
+      .then(() => startLedger(false))
+      .then(() => postStartAll())
+      .then(() => delayMilliSeconds(1000))
+      .then(() => {
+        globalBus.next({
+          tag: 'processStatus',
+          name: 'extraResourcesLoading',
+          status: 'online',
+        });
+      })
+      .catch((err) => console.error(err.message));
+  });
 };
 
 if (!booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED)) {
