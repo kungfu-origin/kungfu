@@ -65,6 +65,7 @@
     "monaco-editor-webpack-plugin": "^7.0.1",
     "multispinner": "^0.2.1",
     "node-loader": "^2.0.0",
+    "patch-package": "^6.5.1",
     "pinia": "^2.0.10",
     "postcss": "^8.4.5",
     "prettier": "~2.7.1",
