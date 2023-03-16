@@ -71,7 +71,7 @@ uint32_t Hash32(const Napi::CallbackInfo &info) {
     throw Napi::Error::New(info.Env(), "Invalid argument");
   }
   auto arg = info[0].ToString().Utf8Value();
-  return hash_32((const unsigned char *)(arg.c_str()), arg.length());
+  return hash_32(reinterpret_cast<const unsigned char *>(arg.c_str()), arg.length());
 }
 
 Napi::Value Hash(const Napi::CallbackInfo &info) { return Napi::Number::New(info.Env(), Hash32(info)); }

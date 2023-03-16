@@ -42,7 +42,7 @@ public:
     PYBIND11_OVERLOAD_PURE(bool, MarketData, unsubscribe, instruments);
   }
 
-  void on_start() override { PYBIND11_OVERLOAD(void, MarketData, on_start, ); }
+  void on_start() override { PYBIND11_OVERLOAD(void, MarketData, on_start); }
 };
 
 class PyTrader : public Trader {
@@ -50,7 +50,7 @@ public:
   using Trader::Trader;
 
   [[nodiscard]] AccountType get_account_type() const override {
-    PYBIND11_OVERLOAD_PURE(const AccountType, Trader, get_account_type, );
+    PYBIND11_OVERLOAD_PURE(const AccountType, Trader, get_account_type);
   }
 
   bool insert_block_message(const kungfu::event_ptr &event) override {
@@ -69,19 +69,19 @@ public:
     PYBIND11_OVERLOAD_PURE(bool, Trader, cancel_order, event);
   }
 
-  bool req_position() override { PYBIND11_OVERLOAD_PURE(bool, Trader, req_position, ); }
+  bool req_position() override { PYBIND11_OVERLOAD_PURE(bool, Trader, req_position); }
 
-  bool req_account() override { PYBIND11_OVERLOAD_PURE(bool, Trader, req_account, ); }
+  bool req_account() override { PYBIND11_OVERLOAD_PURE(bool, Trader, req_account); }
 
   bool req_history_order(const event_ptr &event) override { PYBIND11_OVERLOAD(bool, Trader, req_history_order, event); }
 
   bool req_history_trade(const event_ptr &event) override { PYBIND11_OVERLOAD(bool, Trader, req_history_trade, event); }
 
-  void on_restore() override { PYBIND11_OVERLOAD_PURE(void, Trader, on_restore, ); }
+  void on_restore() override { PYBIND11_OVERLOAD_PURE(void, Trader, on_restore); }
 
-  void on_start() override { PYBIND11_OVERLOAD(void, Trader, on_start, ); }
+  void on_start() override { PYBIND11_OVERLOAD(void, Trader, on_start); }
 
-  void on_exit() override { PYBIND11_OVERLOAD(void, Trader, on_exit, ); }
+  void on_exit() override { PYBIND11_OVERLOAD(void, Trader, on_exit); }
 };
 
 void bind_broker(pybind11::module &m) {

@@ -62,7 +62,8 @@ int64_t time::strptime(const std::string &time_string, const std::string &format
   }
 
   std::tm result = {};
-  std::istringstream iss(time_string);
+  // std::istringstream iss(time_string);
+  std::istringstream iss(normal_timestr);
   iss >> std::get_time(&result, normal_format.c_str());
   std::time_t parsed_time = std::mktime(&result);
   auto tp_system = system_clock::from_time_t(parsed_time);

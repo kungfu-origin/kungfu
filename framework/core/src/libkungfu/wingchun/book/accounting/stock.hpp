@@ -140,11 +140,11 @@ public:
   virtual void apply_order_input(Book_ptr &book, const OrderInput &input) override {
     auto &position = book->get_position_for(input);
     auto cd_mr = get_instr_conversion_margin_rate(book, position);
-    double frozen_cash = 0;
-    double frozen_margin = 0;
+    // double frozen_cash = 0;
+    // double frozen_margin = 0;
     double frozen_fee = 0;
-    auto &asset = book->asset;
-    auto &asset_margin = book->asset_margin;
+    // const auto &asset = book->asset;
+    // const auto &asset_margin = book->asset_margin;
     // Offset: Close
     if (input.side == Side::Sell || input.side == Side::RepayMargin) {
       position.frozen_total += input.volume;
@@ -156,12 +156,12 @@ public:
     } else if (input.side == Side::Buy) { // Offset: Open
       // TODO: book->asset.frozen_fee += frozen_cash * fee_ratio;
 
-      frozen_cash = input.volume * input.frozen_price * cd_mr.exchange_rate + frozen_fee;
+      double frozen_cash = input.volume * input.frozen_price * cd_mr.exchange_rate + frozen_fee;
       book->asset.frozen_cash += frozen_cash;
       book->asset.avail -= frozen_cash;
     } else if (input.side == Side::RepayStock) { // Offset: Close
       // TODO: book->asset.frozen_fee += frozen_cash * fee_ratio;
-      frozen_cash = input.volume * input.frozen_price * cd_mr.exchange_rate + frozen_fee;
+      double frozen_cash = input.volume * input.frozen_price * cd_mr.exchange_rate + frozen_fee;
       book->asset.frozen_cash += frozen_cash;
       book->asset.avail -= frozen_cash;
       // Short position need frozen
@@ -173,9 +173,9 @@ public:
       }
     } else if (input.side == Side::MarginTrade || input.side == Side::ShortSell) {
       // TODO: book->asset.frozen_fee += frozen_cash * fee_ratio;
-      frozen_cash = input.volume * input.frozen_price * cd_mr.exchange_rate + frozen_fee;
+      double frozen_cash = input.volume * input.frozen_price * cd_mr.exchange_rate + frozen_fee;
 
-      frozen_margin =
+      double frozen_margin =
           frozen_cash * (input.side == Side::MarginTrade ? cd_mr.long_margin_ratio : cd_mr.short_margin_ratio);
       book->asset.frozen_margin += frozen_margin;
       book->asset_margin.avail_margin -= frozen_margin;
@@ -257,7 +257,7 @@ public:
   }
 
   virtual void update_position(Book_ptr &book, Position &position) override {
-    auto cd_mr = get_instr_conversion_margin_rate(book, position);
+    // auto cd_mr = get_instr_conversion_margin_rate(book, position);
     if (position.last_price > 0) {
       double price_change = position.last_price - position.avg_open_price;
       position.unrealized_pnl = (position.direction == Direction::Long ? price_change : -price_change) *
@@ -270,8 +270,8 @@ protected:
   // Guard for multi-threaded
   std::mutex accounting_mutex_;
   // AccountingMethod is stateless, involve context value?
-  double short_market_value_;
-  double long_market_value_;
+  double short_market_value_ = 0;
+  double long_market_value_ = 0;
 
   virtual void calculate_marketvalue(Book_ptr &book) {
     double short_market_value = 0;
@@ -375,9 +375,9 @@ protected:
     // auto &asset_margin = book->asset_margin;
     double frozen_margin_to_release =
         book->get_frozen_price(trade.order_id) * cd_mr.exchange_rate * trade.volume * cd_mr.short_margin_ratio;
-    double original_position_margin_change =
-        (trade.price - original_last_price) * cd_mr.exchange_rate * original_volume * cd_mr.short_margin_ratio;
-    double margin_by_trade = trade_amt * cd_mr.short_margin_ratio;
+    // double original_position_margin_change =
+    // (trade.price - original_last_price) * cd_mr.exchange_rate * original_volume * cd_mr.short_margin_ratio;
+    // double margin_by_trade = trade_amt * cd_mr.short_margin_ratio;
 
     // short_market_value:
     double original_position_market_value = original_last_price * cd_mr.exchange_rate * original_volume;
@@ -511,7 +511,7 @@ protected:
         (position.last_price - position.avg_open_price) /** cd_mr.exchange_rate*/ * trade.volume;
     position.realized_pnl += realized_pnl;
     // Need revise the unrealized_pnl since the price may change.
-    double prev_unrealized_pnl = position.unrealized_pnl;
+    // double prev_unrealized_pnl = position.unrealized_pnl;
     // position.unrealized_pnl *= trade.price / position.last_price;
     position.unrealized_pnl -= unrealized_pnl_change;
 
@@ -723,7 +723,7 @@ protected:
       cd_mr.short_margin_ratio = instrument.short_margin_ratio;
       cd_mr.conversion_rate = instrument.conversion_rate;
       cd_mr.exchange_rate = is_equal(instrument.exchange_rate, 0.0) ? 1.0 : instrument.exchange_rate;
-    } catch (std::exception ex) {
+    } catch (std::exception &ex) {
       SPDLOG_ERROR("Exception for instrument_id {}: {}", instrument_id, ex.what());
       cd_mr.margin_ratio =
           position.direction == Direction::Long ? DEFAULT_STOCK_LONG_MARGIN_RATIO : DEFAULT_STOCK_SHORT_MARGIN_RATIO;

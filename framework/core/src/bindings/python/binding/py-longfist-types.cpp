@@ -88,7 +88,7 @@ template <typename DataType> void bind_data_type(pybind11::module &m_types, cons
   py_class.def("__repr__", &DataType::to_string);
   py_class.def("__hash__", &DataType::uid);
   py_class.def("__eq__", [&](DataType &a, DataType &b) { return a.uid() == b.uid(); });
-  py_class.def("__sizeof__", [&](DataType &target) { return sizeof(target); });
+  py_class.def("__sizeof__", [&](const DataType &target) { return sizeof(target); });
   py_class.def("__parse__", [&](DataType &target, std::string &s) { target.parse(s.c_str(), s.length()); });
 }
 

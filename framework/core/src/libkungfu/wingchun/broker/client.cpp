@@ -264,7 +264,7 @@ bool PassiveClient::is_custom_subscribed_all(uint32_t md_location_uid,
                                              kungfu::longfist::enums::SubscribeDataType data_type,
                                              const std::string &exchange_id, InstrumentType kf_instrument_type) const {
   if (should_connect_md(app_.get_location(md_location_uid)) and enrolled_md_locations_.at(md_location_uid)) {
-    auto &custom_sub = custom_subs_.at(md_location_uid);
+    const auto &custom_sub = custom_subs_.at(md_location_uid);
 
     SubscribeInstrumentType custom_type = instrument_type_to_subscribe_instrument_type(kf_instrument_type);
 
@@ -316,12 +316,18 @@ bool PassiveClient::is_custom_subscribed_all(uint32_t md_location_uid,
 
 bool PassiveClient::is_all_subscribed(uint32_t md_location_uid) const {
   if (should_connect_md(app_.get_location(md_location_uid))) {
-    auto &custom_sub = custom_subs_.at(md_location_uid);
-    for (auto it : custom_sub) {
-      if (it.market_type == MarketType::All and it.instrument_type == SubscribeInstrumentType::All and
-          it.data_type == SubscribeDataType::All) {
-        return true;
-      }
+    const auto &custom_sub = custom_subs_.at(md_location_uid);
+    //    for (auto it : custom_sub) {
+    //      if (it.market_type == MarketType::All and it.instrument_type == SubscribeInstrumentType::All and
+    //          it.data_type == SubscribeDataType::All) {
+    //        return true;
+    //      }
+    //    }
+    if (std::any_of(custom_sub.begin(), custom_sub.end(), [](const auto &it) {
+          return it.market_type == MarketType::All and it.instrument_type == SubscribeInstrumentType::All and
+                 it.data_type == SubscribeDataType::All;
+        })) {
+      return true;
     }
   }
 
@@ -351,7 +357,7 @@ void PassiveClient::subscribe_all(const location_ptr &md_location, uint8_t marke
 
 void PassiveClient::renew(int64_t trigger_time, const location_ptr &md_location) {
   if (is_custom_subscribed(md_location->uid)) {
-    auto &custrom_sub = custom_subs_.at(md_location->uid);
+    const auto &custrom_sub = custom_subs_.at(md_location->uid);
     for (auto it : custrom_sub) {
       auto writer = app_.get_writer(md_location->uid);
       writer->write(trigger_time, it);

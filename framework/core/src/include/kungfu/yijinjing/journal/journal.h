@@ -28,7 +28,7 @@ public:
 
   [[nodiscard]] page_ptr &current_page() { return page_; }
 
-  [[nodiscard]] const data::location_ptr &get_location() { return location_; }
+  [[nodiscard]] const data::location_ptr &get_location() const { return location_; }
 
   [[nodiscard]] uint32_t get_source() const { return location_->location_uid; }
 

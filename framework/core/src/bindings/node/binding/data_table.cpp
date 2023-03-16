@@ -100,7 +100,7 @@ Napi::Value DataTable::Range(const Napi::CallbackInfo &info) {
     auto name = names.Get(i);
     auto data = Value().Get(name).ToObject();
     auto value = data.Get(key);
-    auto add = [&](auto &val, auto &lower_bound, auto &upper_bound) {
+    auto add = [&](const auto &val, const auto &lower_bound, const auto &upper_bound) {
       if (val >= lower_bound and (val <= upper_bound or upper_bound == lower_bound)) {
         result.Set(name, data);
       }
