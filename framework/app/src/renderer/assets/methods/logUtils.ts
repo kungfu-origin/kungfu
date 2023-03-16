@@ -24,7 +24,7 @@ export function preDealLogMessage(line: string): string {
   line = line.replace(/&/g, '&amp;');
   line = line.replace(/</g, '&lt;');
   line = line.replace(/>/g, '&gt;');
-  line = line.replace(/"/g, '&quto;');
+  line = line.replace(/"/g, '&quot;');
   line = line.replace(/'/g, '&#39;');
   line = line.replace(/`/g, '&#96;');
   line = line.replace(/\//g, '&#x2F;');
