@@ -73,6 +73,8 @@ public:
 
   bool req_account() override { PYBIND11_OVERLOAD_PURE(bool, Trader, req_account); }
 
+  bool req_order_trade() override { PYBIND11_OVERLOAD_PURE(bool, Trader, req_order_trade); }
+
   bool req_history_order(const event_ptr &event) override { PYBIND11_OVERLOAD(bool, Trader, req_history_order, event); }
 
   bool req_history_trade(const event_ptr &event) override { PYBIND11_OVERLOAD(bool, Trader, req_history_trade, event); }
@@ -135,7 +137,10 @@ void bind_broker(pybind11::module &m) {
       .def("cancel_order", &Trader::cancel_order)
       .def("req_history_order", &Trader::req_history_order)
       .def("req_history_trade", &Trader::req_history_trade)
-      .def("enable_self_detect", &Trader::enable_self_detect);
+      .def("enable_self_detect", &Trader::enable_self_detect)
+      .def("req_account", &Trader::req_account)
+      .def("req_position", &Trader::req_position)
+      .def("req_order_trade", &Trader::req_order_trade);
 
   py::class_<MarketDataVendor, BrokerVendor, std::shared_ptr<MarketDataVendor>>(m, "MarketDataVendor")
       .def(py::init<locator_ptr, const std::string &, const std::string &, bool>())

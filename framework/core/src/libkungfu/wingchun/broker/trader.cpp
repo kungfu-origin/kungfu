@@ -40,6 +40,7 @@ void TraderVendor::on_start() {
   events_ | is(BlockMessage::tag) | $$(service_->insert_block_message(event));
   events_ | is(OrderAction::tag) | $$(service_->cancel_order(event));
   events_ | is(AssetRequest::tag) | $$(service_->req_account());
+  events_ | is(OrderTradeRequest::tag) | $$(service_->req_order_trade());
   events_ | is(Deregister::tag) | $$(service_->on_strategy_exit(event));
   events_ | is(PositionRequest::tag) | $$(service_->req_position());
   events_ | is(RequestHistoryOrder::tag) | $$(service_->req_history_order(event));
@@ -181,7 +182,6 @@ void Trader::restore() {
   auto fn_deal_frame = [&](const frame_ptr &frame) {
     if (frame->msg_type() == Order::tag) {
       const Order &order = frame->data<Order>();
-      external_order_id_to_order_id_.emplace(order.external_order_id, order.order_id);
       orders_.insert_or_assign(order.order_id, state<Order>(frame->source(), frame->dest(), frame->gen_time(), order));
     } else if (frame->msg_type() == Trade::tag) {
       const Trade &trade = frame->data<Trade>();
