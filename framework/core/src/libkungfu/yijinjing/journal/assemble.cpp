@@ -9,6 +9,9 @@
 #include <kungfu/yijinjing/time.h>
 
 namespace kungfu::yijinjing::journal {
+using namespace kungfu::longfist::enums;
+using namespace kungfu::longfist::types;
+
 struct noop_publisher : public publisher {
   noop_publisher() = default;
   bool is_usable() override { return true; }
@@ -36,6 +39,10 @@ void copy_sink::put(const data::location_ptr &location, uint32_t dest_id, const 
   }
   writers.at(dest_id)->copy_frame(frame);
 }
+
+assemble::assemble(const std::string &mode, const std::string &category, const std::string &group,
+                   const std::string &name)
+    : mode_(mode), category_(category), group_(group), name_(name), publisher_(std::make_shared<noop_publisher>()) {}
 
 assemble::assemble(const std::vector<data::locator_ptr> &locators, const std::string &mode, const std::string &category,
                    const std::string &group, const std::string &name)
@@ -74,6 +81,7 @@ void assemble::operator>>(const sink_ptr &sink) {
 }
 
 bool assemble::data_available() {
+  sort();
   for (auto &reader : readers_) {
     if (reader->data_available()) {
       return true;
@@ -100,4 +108,52 @@ void assemble::sort() {
     }
   }
 }
+
+assemble::assemble(const data::location_ptr &source_location, uint32_t dest_id, uint32_t assemble_mode,
+                   int64_t from_time)
+    : assemble() {
+  readers_.clear();
+  data::locator l{};
+  readers_.push_back(std::make_shared<reader>(true));
+  auto reader = readers_.front();
+
+  // join channel
+  if (assemble_mode & AssembleMode::Channel) {
+    reader->join(source_location, dest_id, from_time);
+  }
+
+  // join all journal dest of location
+  if (assemble_mode & AssembleMode::Write) {
+    for (auto dest : l.list_location_dest(source_location)) {
+      reader->join(source_location, dest, from_time);
+    }
+  }
+
+  // scan all locations, join dest_id or PUBLIC
+  bool b_read = assemble_mode & AssembleMode::Read;
+  bool b_public = assemble_mode & AssembleMode::Public;
+  bool b_all = assemble_mode & AssembleMode::All;
+  if (b_read or b_public or b_all) {
+    for (auto &location : l.list_locations("*", "*", "*", "*")) {
+      for (auto dest : l.list_location_dest(location)) {
+        if (b_all) {
+          reader->join(location, dest, from_time);
+        } else if (b_read and dest == dest_id) {
+          reader->join(location, dest_id, from_time);
+        } else if (b_public and dest == data::location::PUBLIC) {
+          reader->join(location, data::location::PUBLIC, from_time);
+        }
+      }
+    }
+  }
+  sort();
+}
+
+[[maybe_unused]] void assemble::seek_to_time(int64_t nano_time) {
+  for (auto &reader : readers_) {
+    reader->seek_to_time(nano_time);
+  }
+  sort();
+}
+
 } // namespace kungfu::yijinjing::journal
