@@ -28,6 +28,12 @@ public:
 
   [[nodiscard]] page_ptr &current_page() { return page_; }
 
+  [[nodiscard]] const data::location_ptr &get_location() { return location_; }
+
+  [[nodiscard]] uint32_t get_source() const { return location_->location_uid; }
+
+  [[nodiscard]] uint32_t get_dest() const { return dest_id_; }
+
   /**
    * move current frame to the next available one
    */
@@ -78,6 +84,8 @@ public:
   [[nodiscard]] frame_ptr current_frame() const { return current_->current_frame(); }
 
   [[nodiscard]] page_ptr current_page() const { return current_->current_page(); }
+
+  [[nodiscard]] const std::unordered_map<uint64_t, journal> &journals() const { return journals_; }
 
   bool data_available();
 

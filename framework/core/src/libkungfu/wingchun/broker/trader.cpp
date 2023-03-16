@@ -6,6 +6,7 @@
 
 #include <kungfu/common.h>
 #include <kungfu/wingchun/broker/trader.h>
+#include <kungfu/yijinjing/journal/assemble.h>
 #include <kungfu/yijinjing/time.h>
 
 using namespace kungfu::rx;
@@ -14,6 +15,7 @@ using namespace kungfu::longfist::enums;
 using namespace kungfu::yijinjing::practice;
 using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
+using namespace kungfu::yijinjing::journal;
 
 namespace kungfu::wingchun::broker {
 TraderVendor::TraderVendor(locator_ptr locator, const std::string &group, const std::string &name, bool low_latency)
@@ -23,8 +25,7 @@ void TraderVendor::set_service(Trader_ptr service) { service_ = std::move(servic
 
 void TraderVendor::react() {
   events_ | skip_until(events_ | is(RequestStart::tag)) | is(OrderInput::tag) | $$(service_->handle_order_input(event));
-  events_ | skip_until(events_ | is(RequestStart::tag)) |
-      instanceof <journal::frame>() | $$(service_->on_custom_event(event));
+  events_ | skip_until(events_ | is(RequestStart::tag)) | instanceof <frame>() | $$(service_->on_custom_event(event));
   apprentice::react();
 }
 
@@ -50,45 +51,47 @@ void TraderVendor::on_start() {
     return event->msg_type() == BatchOrderBegin::tag or event->msg_type() == BatchOrderEnd::tag;
   }) | $$(service_->handle_batch_order_tag(event));
 
-  clean_orders();
+  //  clean_orders(); unnecessary to write OrderStatus::Lost, it can restore from journal
 
+  service_->restore();
+  service_->on_restore();
   service_->on_start();
 }
 
 BrokerService_ptr TraderVendor::get_service() { return service_; }
 
 void TraderVendor::clean_orders() {
-  std::set<uint32_t> strategy_uids = {};
-  auto master_cmd_writer = get_writer(get_master_commands_uid());
-  for (auto &pair : state_bank_[boost::hana::type_c<Order>]) {
-    auto &order_state = pair.second;
-    auto &order = const_cast<Order &>(order_state.data);
-    auto strategy_uid = order_state.dest;
-    if (order.status == OrderStatus::Submitted or order.status == OrderStatus::Pending or
-        order.status == OrderStatus::PartialFilledActive) {
-
-      order.status = OrderStatus::Lost;
-      order.update_time = time::now_in_nano();
-
-      if (strategy_uid == location::PUBLIC) {
-        write_to(now(), order);
-        continue;
-      }
-
-      strategy_uids.emplace(strategy_uid);
-
-      events_ | is(Channel::tag) | filter([&, strategy_uid](const event_ptr &event) {
-        const Channel &channel = event->data<Channel>();
-        return channel.source_id == get_home_uid() and channel.dest_id == strategy_uid;
-      }) | first() |
-          $([this, order, strategy_uid](auto event) { write_to(now(), order, strategy_uid); });
-    }
-  }
-  for (auto uid : strategy_uids) {
-    if (not has_writer(uid)) {
-      request_write_to(now(), uid);
-    }
-  }
+  //  std::set<uint32_t> strategy_uids = {};
+  //  auto master_cmd_writer = get_writer(get_master_commands_uid());
+  //  for (auto &pair : state_bank_[boost::hana::type_c<Order>]) {
+  //    auto &order_state = pair.second;
+  //    auto &order = const_cast<Order &>(order_state.data);
+  //    auto strategy_uid = order_state.dest;
+  //    if (order.status == OrderStatus::Submitted or order.status == OrderStatus::Pending or
+  //        order.status == OrderStatus::PartialFilledActive) {
+  //
+  //      order.status = OrderStatus::Lost;
+  //      order.update_time = time::now_in_nano();
+  //
+  //      if (strategy_uid == location::PUBLIC) {
+  //        write_to(now(), order);
+  //        continue;
+  //      }
+  //
+  //      strategy_uids.emplace(strategy_uid);
+  //
+  //      events_ | is(Channel::tag) | filter([&, strategy_uid](const event_ptr &event) {
+  //        const Channel &channel = event->data<Channel>();
+  //        return channel.source_id == get_home_uid() and channel.dest_id == strategy_uid;
+  //      }) | first() |
+  //          $([this, order, strategy_uid](auto event) { write_to(now(), order, strategy_uid); });
+  //    }
+  //  }
+  //  for (auto uid : strategy_uids) {
+  //    if (not has_writer(uid)) {
+  //      request_write_to(now(), uid);
+  //    }
+  //  }
 }
 
 void TraderVendor::on_trading_day(const event_ptr &event, int64_t daytime) { service_->on_trading_day(event, daytime); }
@@ -209,5 +212,26 @@ bool Trader::insert_block_message(const event_ptr &event) {
 }
 
 void Trader::enable_self_detect() { self_deal_detect_ = true; }
+
+void Trader::restore() {
+  auto fn_deal_frame = [&](const frame_ptr &frame) {
+    if (frame->msg_type() == Order::tag) {
+      const Order &order = frame->data<Order>();
+      external_order_id_to_order_id_.emplace(order.external_order_id, order.order_id);
+      orders_.insert_or_assign(order.order_id, state<Order>(frame->source(), frame->dest(), frame->gen_time(), order));
+    } else if (frame->msg_type() == Trade::tag) {
+      const Trade &trade = frame->data<Trade>();
+      trades_.insert_or_assign(trade.trade_id, state<Trade>(frame->source(), frame->dest(), frame->gen_time(), trade));
+    }
+  };
+
+  assemble asb(get_home(), location::PUBLIC, AssembleMode::Write);
+  asb.seek_to_time(time::today_start()); // restore from today
+  while (asb.data_available()) {
+    auto frame = asb.current_frame();
+    fn_deal_frame(frame);
+    asb.next();
+  }
+}
 
 } // namespace kungfu::wingchun::broker

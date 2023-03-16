@@ -219,7 +219,7 @@ DECLARE_PTR(ProfileMapType)
 using StateMapType = decltype(build_state_map(longfist::StateDataTypes));
 DECLARE_PTR(StateMapType)
 
-static size_t TRADING_MAP_RING_SIZE = 2048;
+static size_t TRADING_MAP_RING_SIZE = 1024;
 using TradingMapType = decltype(build_ring_state_map(longfist::TradingDataTypes, TRADING_MAP_RING_SIZE));
 DECLARE_PTR(TradingMapType)
 
