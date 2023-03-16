@@ -51,48 +51,12 @@ void TraderVendor::on_start() {
     return event->msg_type() == BatchOrderBegin::tag or event->msg_type() == BatchOrderEnd::tag;
   }) | $$(service_->handle_batch_order_tag(event));
 
-  //  clean_orders(); unnecessary to write OrderStatus::Lost, it can restore from journal
-
   service_->restore();
   service_->on_restore();
   service_->on_start();
 }
 
 BrokerService_ptr TraderVendor::get_service() { return service_; }
-
-void TraderVendor::clean_orders() {
-  //  std::set<uint32_t> strategy_uids = {};
-  //  auto master_cmd_writer = get_writer(get_master_commands_uid());
-  //  for (auto &pair : state_bank_[boost::hana::type_c<Order>]) {
-  //    auto &order_state = pair.second;
-  //    auto &order = const_cast<Order &>(order_state.data);
-  //    auto strategy_uid = order_state.dest;
-  //    if (order.status == OrderStatus::Submitted or order.status == OrderStatus::Pending or
-  //        order.status == OrderStatus::PartialFilledActive) {
-  //
-  //      order.status = OrderStatus::Lost;
-  //      order.update_time = time::now_in_nano();
-  //
-  //      if (strategy_uid == location::PUBLIC) {
-  //        write_to(now(), order);
-  //        continue;
-  //      }
-  //
-  //      strategy_uids.emplace(strategy_uid);
-  //
-  //      events_ | is(Channel::tag) | filter([&, strategy_uid](const event_ptr &event) {
-  //        const Channel &channel = event->data<Channel>();
-  //        return channel.source_id == get_home_uid() and channel.dest_id == strategy_uid;
-  //      }) | first() |
-  //          $([this, order, strategy_uid](auto event) { write_to(now(), order, strategy_uid); });
-  //    }
-  //  }
-  //  for (auto uid : strategy_uids) {
-  //    if (not has_writer(uid)) {
-  //      request_write_to(now(), uid);
-  //    }
-  //  }
-}
 
 void TraderVendor::on_trading_day(const event_ptr &event, int64_t daytime) { service_->on_trading_day(event, daytime); }
 
