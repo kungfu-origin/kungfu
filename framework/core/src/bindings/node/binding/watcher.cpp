@@ -532,7 +532,7 @@ void Watcher::SyncStrategyStates() {
 
 void Watcher::SyncEventCache() {
   if (reset_cache_states_.size()) {
-    for (auto &reset_state : reset_cache_states_) {
+    for (const auto &reset_state : reset_cache_states_) {
       reset_cache(reset_state);
     }
     reset_cache_states_.clear();
@@ -641,10 +641,10 @@ void Watcher::OnDeregister(int64_t trigger_time, const Deregister &deregister_da
 }
 
 void Watcher::StartWorker() {
-  uv_work_.data = (void *)this;
+  uv_work_.data = static_cast<void *>(this);
   uv_work_live_ = true;
   auto worker = [](uv_work_t *req) {
-    auto watcher = (Watcher *)(req->data);
+    auto watcher = static_cast<Watcher *>(req->data);
     while (req->data && watcher->uv_work_live_) {
 
       if (not watcher->is_live() and not watcher->is_started() and watcher->is_usable()) {
@@ -664,7 +664,7 @@ void Watcher::StartWorker() {
     SPDLOG_INFO("Watcher uv loop completed");
     // have to wait for master down totally
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    auto watcher = (Watcher *)(req->data);
+    auto watcher = static_cast<Watcher *>(req->data);
     // have to be at this position, for deleting old journal securitily
     watcher->AfterMasterDown();
     watcher->set_begin_time(time::now_in_nano());

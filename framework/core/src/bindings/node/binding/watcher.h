@@ -304,7 +304,7 @@ private:
     auto &target_map = const_cast<DataTypeMap &>(data_bank_[type]);
     auto iter = target_map.begin();
     while (iter != target_map.end() and target_map.size() > 0) {
-      auto &state = iter->second;
+      const auto &state = iter->second;
       update_ledger(state.update_time, state.source, state.dest, state.data);
       iter = target_map.erase(iter);
     }

@@ -74,20 +74,20 @@ class PyLocator : public locator {
 
 class PyEvent : public event {
 public:
-  [[nodiscard]] int64_t gen_time() const override { PYBIND11_OVERLOAD_PURE(int64_t, event, gen_time, ) }
+  [[nodiscard]] int64_t gen_time() const override { PYBIND11_OVERLOAD_PURE(int64_t, event, gen_time); }
 
-  [[nodiscard]] int64_t trigger_time() const override { PYBIND11_OVERLOAD_PURE(int64_t, event, trigger_time, ) }
+  [[nodiscard]] int64_t trigger_time() const override { PYBIND11_OVERLOAD_PURE(int64_t, event, trigger_time); }
 
-  [[nodiscard]] int32_t msg_type() const override { PYBIND11_OVERLOAD_PURE(int64_t, event, msg_type, ) }
+  [[nodiscard]] int32_t msg_type() const override { PYBIND11_OVERLOAD_PURE(int64_t, event, msg_type); }
 
-  [[nodiscard]] uint32_t source() const override { PYBIND11_OVERLOAD_PURE(int64_t, event, source, ) }
+  [[nodiscard]] uint32_t source() const override { PYBIND11_OVERLOAD_PURE(int64_t, event, source); }
 
-  [[nodiscard]] uint32_t dest() const override { PYBIND11_OVERLOAD_PURE(int64_t, event, dest, ) }
+  [[nodiscard]] uint32_t dest() const override { PYBIND11_OVERLOAD_PURE(int64_t, event, dest); }
 };
 
 class PyPublisher : public publisher {
 public:
-  int notify() override { PYBIND11_OVERLOAD_PURE(int, publisher, notify, ) }
+  int notify() override { PYBIND11_OVERLOAD_PURE(int, publisher, notify); }
 
   int publish(const std::string &json_message) override {
     PYBIND11_OVERLOAD_PURE(int, publisher, publish, json_message)
@@ -96,9 +96,9 @@ public:
 
 class PyObserver : public observer {
 public:
-  bool wait() override { PYBIND11_OVERLOAD_PURE(bool, observer, wait, ) }
+  bool wait() override { PYBIND11_OVERLOAD_PURE(bool, observer, wait); }
 
-  const std::string &get_notice() override { PYBIND11_OVERLOAD_PURE(const std::string &, observer, get_notice, ) }
+  const std::string &get_notice() override { PYBIND11_OVERLOAD_PURE(const std::string &, observer, get_notice); }
 };
 
 class PySink : public sink {
@@ -106,7 +106,7 @@ public:
   void put(const data::location_ptr &location, uint32_t dest_id, const frame_ptr &frame) override {
     PYBIND11_OVERLOAD_PURE(void, sink, put, location, dest_id, frame)
   }
-  void close() override { PYBIND11_OVERLOAD(void, sink, close, ); }
+  void close() override { PYBIND11_OVERLOAD(void, sink, close); }
 };
 
 class PyMaster : public master {

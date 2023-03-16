@@ -138,7 +138,7 @@ void cached::handle_profile_feeds() {
     if (feed_map.size() != 0) {
       auto iter = feed_map.begin();
       while (iter != feed_map.end() and stored_controller <= STORE_SINGLE_LOOP_VOLUME) {
-        auto &s = iter->second;
+        const auto &s = iter->second;
         try {
           profile_ << s;
           SPDLOG_TRACE("cache [profile] {} data {}", DataType::type_name.c_str(), s.data.to_string());

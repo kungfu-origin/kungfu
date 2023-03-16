@@ -39,8 +39,8 @@ void Bookkeeper::set_accounting_method(InstrumentType instrument_type, const Acc
 
 void Bookkeeper::on_trading_day(int64_t daytime) {
   auto trading_day = time::strftime(daytime, KUNGFU_TRADING_DAY_FORMAT);
-  for (auto &book_pair : books_) {
-    auto &book = book_pair.second;
+  for (const auto &book_pair : books_) {
+    const auto &book = book_pair.second;
     strcpy(book->asset.trading_day, trading_day.c_str());
     for (auto &pos_pair : book->long_positions) {
       pos_pair.second.trading_day = book->asset.trading_day;
@@ -263,7 +263,7 @@ void Bookkeeper::try_sync_book_replica(uint32_t location_uid) {
     bool changed = false;
     for (auto &source_pair : source_map) {
       auto &source_position = source_pair.second;
-      auto &target_position = target_book->get_position_for(source_position.direction, source_position);
+      const auto &target_position = target_book->get_position_for(source_position.direction, source_position);
       changed |= source_position.volume != target_position.volume;                     // 数量
       changed |= source_position.yesterday_volume != target_position.yesterday_volume; // 昨仓数量
     }

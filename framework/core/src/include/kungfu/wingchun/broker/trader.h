@@ -36,8 +36,6 @@ protected:
 
 private:
   Trader_ptr service_ = {};
-
-  void clean_orders();
 };
 
 class Trader : public BrokerService {
