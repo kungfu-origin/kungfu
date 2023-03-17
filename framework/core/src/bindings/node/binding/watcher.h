@@ -236,11 +236,14 @@ private:
       auto &oppsite_position = book->get_oppsite_position_for(data);
       state<kungfu::longfist::types::Position> cache_state_position(source, dest, event->gen_time(), position);
       feed_state_data_bank(cache_state_position, data_bank_);
+
       state<kungfu::longfist::types::Position> cache_state_oppsite_position(source, dest, event->gen_time(),
                                                                             oppsite_position);
       feed_state_data_bank(cache_state_oppsite_position, data_bank_);
+
       state<kungfu::longfist::types::Asset> cache_state_asset(source, dest, event->gen_time(), book->asset);
       feed_state_data_bank(cache_state_asset, data_bank_);
+
       state<kungfu::longfist::types::AssetMargin> cache_state_asset_margin(source, dest, event->gen_time(),
                                                                            book->asset_margin);
       feed_state_data_bank(cache_state_asset_margin, data_bank_);

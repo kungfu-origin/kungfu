@@ -91,7 +91,7 @@ public:
 
   void enable_positions_sync();
 
-  void clear_order_inputs(const uint64_t location_uid) { order_inputs_.erase(location_uid); }
+  void clear_order_inputs(const uint64_t location_uid);
 
   std::unordered_map<uint64_t, std::vector<longfist::types::OrderInput>> &get_order_inputs() { return order_inputs_; }
 
@@ -109,6 +109,7 @@ protected:
   std::unordered_map<uint64_t, std::vector<longfist::types::OrderInput>> order_inputs_ = {};
   /// <strategy_uid, batch_flag>, true mean batch mode for this strategy
   std::unordered_map<uint64_t, bool> batch_status_{};
+  std::unordered_map<std::string, std::unordered_set<uint64_t>> map_ex_instrument_to_order_ids_{};
 
 private:
   bool sync_asset_ = false;
