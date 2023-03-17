@@ -76,6 +76,7 @@ import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import zhCN from 'ant-design-vue/es/locale/zh_CN';
 import enUS from 'ant-design-vue/es/locale/en_US';
 import { first } from 'rxjs';
+import { checkIfCpusNumSafe } from '../../../../../api/src/utils/osUtils';
 
 const app = createApp(App);
 
@@ -190,6 +191,7 @@ const initStartAll = () => {
           status: 'online',
         });
       })
+      .then(() => checkIfCpusNumSafe())
       .catch((err) => console.error(err.message));
   });
 };

@@ -49,6 +49,14 @@ declare namespace KungfuApi {
   import { Dayjs } from 'dayjs';
   import { Row } from 'fast-csv';
 
+  export type VCDepsVersionTypes =
+    | '2008'
+    | '2010'
+    | '2012'
+    | '2013'
+    | '2015-2019'
+    | '2015-2022';
+
   export type AntInKungfuColorTypes =
     | 'default'
     | 'orange'

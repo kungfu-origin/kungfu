@@ -14,6 +14,7 @@ import {
   ARCHIVE_DIR,
   buildProcessLogPath,
   KF_HOME,
+  KUNGFU_RESOURCES_DIR,
 } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 import {
   getInstrumentTypeData,
@@ -33,7 +34,7 @@ import {
 import { readRootPackageJsonSync } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import { BrowserWindow, getCurrentWindow, dialog } from '@electron/remote';
-import { ipcRenderer } from 'electron';
+import { ipcRenderer, shell } from 'electron';
 import { message, Modal } from 'ant-design-vue';
 import {
   InstrumentTypes,
@@ -41,6 +42,10 @@ import {
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import path from 'path';
 import { startExtDaemon } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
+import {
+  checkIfCpusNumSafe,
+  checkVCDepsByVersion,
+} from '@kungfu-trader/kungfu-js-api/utils/osUtils';
 import { Proc } from 'pm2';
 import { VueNode } from 'ant-design-vue/lib/_util/type';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
@@ -330,6 +335,56 @@ export const preStartAll = async (): Promise<(void | Proc)[]> => {
     removeDBBeforeStartAll(),
     removeArchiveBeforeStartAll(),
   ]);
+};
+
+export const checkCpusNumAndConfirmModal = () => {
+  return checkIfCpusNumSafe().then((flag) => {
+    if (flag) return Promise.resolve(true);
+
+    return confirmModal(t('system_prompt'), t('computer_performance_abnormal'));
+  });
+};
+
+export const checkVCDepsAndConfirmModal = () => {
+  const allVCVersions: KungfuApi.VCDepsVersionTypes[] = [
+    '2008',
+    '2010',
+    '2012',
+    '2013',
+    '2015-2019',
+    '2015-2022',
+  ];
+  return Promise.allSettled(
+    allVCVersions.map((version) => checkVCDepsByVersion(version)),
+  ).then((results) => {
+    const existed: string[] = [];
+    const notExisted: string[] = [];
+    results.forEach((res, index) =>
+      res
+        ? existed.push(allVCVersions[index])
+        : notExisted.push(allVCVersions[index]),
+    );
+
+    if (!notExisted.length) return Promise.resolve(true);
+
+    return confirmModal(
+      t('system_prompt'),
+      t('computer_performance_abnormal'),
+    ).then((flag) => {
+      if (flag) {
+        // TODO:
+        return Promise.all(
+          notExisted.map((version) => {
+            return shell.openPath(
+              path.join(KUNGFU_RESOURCES_DIR, `${version}.exe`),
+            );
+          }),
+        );
+      }
+
+      return Promise.resolve(true);
+    });
+  });
 };
 
 export const postStartAll = async (): Promise<(void | Proc)[]> => {

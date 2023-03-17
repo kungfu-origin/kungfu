@@ -901,6 +901,8 @@ export const usePreStartAndQuitApp = (): {
     archive: 'loading',
     watcher: 'loading',
     extraResourcesLoading: 'loading',
+    cpusSafeNumChecking: 'loading',
+    VCDepsExistsChecking: 'loading',
   });
 
   const preQuitSystemLoadingData = reactive<
