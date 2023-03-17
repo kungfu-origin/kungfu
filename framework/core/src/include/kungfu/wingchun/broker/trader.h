@@ -62,6 +62,8 @@ public:
 
   virtual bool req_account() = 0;
 
+  virtual bool req_order_trade() = 0;
+
   virtual bool req_history_order(const event_ptr &event) { return true; }
 
   virtual bool req_history_trade(const event_ptr &event) { return true; }
@@ -101,7 +103,6 @@ protected:
   OrderMap orders_ = {};
   OrderActionMap actions_ = {};
   TradeMap trades_ = {};
-  std::unordered_map<std::string, uint64_t> external_order_id_to_order_id_ = {};
   bool self_deal_detect_ = false;
   std::unordered_map<uint64_t, kungfu::longfist::types::BlockMessage> block_messages_ = {}; // <block_id, batch_flag>
   /// <strategy_uid, OrderInput>, a batch OrderInputs for a strategy

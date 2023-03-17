@@ -36,6 +36,8 @@ public:
 
   bool req_account() override;
 
+  bool req_order_trade() override;
+
   bool req_history_order(const event_ptr &event) override;
 
   bool req_history_trade(const event_ptr &event) override;
@@ -212,8 +214,6 @@ private:
   std::unordered_map<uint64_t, std::set<std::string>> map_xtp_order_id_to_xtp_trader_ids_;
 
   yijinjing::journal::writer_ptr get_history_writer(uint64_t request_id);
-
-  void query_not_finished_order();
 };
 } // namespace kungfu::wingchun::xtp
 #endif // KUNGFU_XTP_EXT_TRADER_H
