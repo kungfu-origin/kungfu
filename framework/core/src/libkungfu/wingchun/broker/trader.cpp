@@ -110,33 +110,52 @@ bool Trader::has_self_deal_risk(const event_ptr &event) {
     return false;
   }
   const OrderInput &input = event->data<OrderInput>();
+  static std::string str_ex_instrument;
+  str_ex_instrument = input.exchange_id.to_string() + input.instrument_id.to_string();
+  auto fn_check = [&]() -> bool {
+    auto iter = map_ex_instrument_to_order_ids_.find(str_ex_instrument);
 
-  auto fun_has_self_deal_risk = [&](const Order &order) -> bool {
-    if (strcmp(order.instrument_id, input.instrument_id) or strcmp(order.exchange_id, input.exchange_id)) {
+    /// 没有相同的标的, 判定为不存在风险
+    if (iter == map_ex_instrument_to_order_ids_.end()) {
       return false;
     }
-    if (order.side == input.side or is_final_status(order.status)) {
-      return false;
-    } else {
+
+    /// 存在相同标的, 遍历每一个order_id, 判断是否存在自成交风险
+    return std::any_of(iter->second.begin(), iter->second.end(), [&](const auto order_id) -> bool {
+      const auto order_iter = orders_.find(order_id);
+
+      /// 只接收到了OrderInput, 没有生成相应的order, 判定为不存在风险
+      if (order_iter == orders_.end()) {
+        return false;
+      }
+
+      const Order &order = order_iter->second.data;
+
+      /// 方向相同或者是委托完结, 判定为不存在风险
+      if (order.side == input.side or is_final_status(order.status)) {
+        return false;
+      }
+
+      /// 存在反方向未完成委托, 且当前委托是市价, 判定为存在风险
       if (input.price_type != PriceType::Limit) {
         return true;
-      } else {
-        if (input.side == Side::Buy and input.limit_price < order.limit_price) {
-          return false;
-        } else if (input.side == Side::Sell and input.limit_price > order.limit_price) {
-          return false;
-        } else {
-          return true;
-        }
       }
-    }
+
+      /// 限价, 判断买卖方向和价格
+      if (input.side == Side::Buy and input.limit_price < order.limit_price) {
+        return false; /// 新委托买价低于已存在卖价, 判定为不存在风险
+      } else if (input.side == Side::Sell and input.limit_price > order.limit_price) {
+        return false; /// 新委托卖价高于已存在买价, 判定为不存在风险
+      } else {
+        return true; /// 新委托买价大于等于已存在卖价, 或 新委托卖价小于等于已存在买价, 判定为存在风险
+      }
+    });
   };
 
-  for (const auto pair : orders_) {
-    if (fun_has_self_deal_risk(pair.second.data)) {
-      return true;
-    }
+  if (fn_check()) {
+    return true;
   }
+  map_ex_instrument_to_order_ids_.try_emplace(str_ex_instrument).first->second.emplace(input.order_id);
   return false;
 }
 
@@ -183,6 +202,8 @@ void Trader::restore() {
     if (frame->msg_type() == Order::tag) {
       const Order &order = frame->data<Order>();
       orders_.insert_or_assign(order.order_id, state<Order>(frame->source(), frame->dest(), frame->gen_time(), order));
+      map_ex_instrument_to_order_ids_.try_emplace(order.exchange_id.to_string() + order.instrument_id.to_string())
+          .first->second.emplace(order.order_id);
     } else if (frame->msg_type() == Trade::tag) {
       const Trade &trade = frame->data<Trade>();
       trades_.insert_or_assign(trade.trade_id, state<Trade>(frame->source(), frame->dest(), frame->gen_time(), trade));
@@ -197,5 +218,7 @@ void Trader::restore() {
     asb.next();
   }
 }
+
+void Trader::clear_order_inputs(const uint64_t location_uid) { order_inputs_.erase(location_uid); }
 
 } // namespace kungfu::wingchun::broker
