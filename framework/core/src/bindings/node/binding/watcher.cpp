@@ -478,7 +478,7 @@ void Watcher::Feed(const event_ptr &event, const Instrument &instrument) {
 
 void Watcher::RestoreState(const location_ptr &state_location, int64_t from, int64_t to, bool sync_schema) {
   add_location(0, state_location);
-  serialize::JsRestoreState(ledger_ref_, state_location)(from, to, sync_schema);
+  serialize::JsRestoreState(ledger_ref_, state_location).filter_no<Position, Asset>(from, to, sync_schema);
 }
 
 Napi::Value Watcher::Start(const Napi::CallbackInfo &info) {
@@ -532,7 +532,7 @@ void Watcher::SyncStrategyStates() {
 
 void Watcher::SyncEventCache() {
   if (reset_cache_states_.size()) {
-    for (auto &reset_state : reset_cache_states_) {
+    for (const auto &reset_state : reset_cache_states_) {
       reset_cache(reset_state);
     }
     reset_cache_states_.clear();
@@ -641,10 +641,10 @@ void Watcher::OnDeregister(int64_t trigger_time, const Deregister &deregister_da
 }
 
 void Watcher::StartWorker() {
-  uv_work_.data = (void *)this;
+  uv_work_.data = static_cast<void *>(this);
   uv_work_live_ = true;
   auto worker = [](uv_work_t *req) {
-    auto watcher = (Watcher *)(req->data);
+    auto watcher = static_cast<Watcher *>(req->data);
     while (req->data && watcher->uv_work_live_) {
 
       if (not watcher->is_live() and not watcher->is_started() and watcher->is_usable()) {
@@ -664,7 +664,7 @@ void Watcher::StartWorker() {
     SPDLOG_INFO("Watcher uv loop completed");
     // have to wait for master down totally
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    auto watcher = (Watcher *)(req->data);
+    auto watcher = static_cast<Watcher *>(req->data);
     // have to be at this position, for deleting old journal securitily
     watcher->AfterMasterDown();
     watcher->set_begin_time(time::now_in_nano());
@@ -699,7 +699,6 @@ void Watcher::UpdateStrategyState(uint32_t strategy_uid, const StrategyStateUpda
 
 void Watcher::UpdateAsset(const event_ptr &event, uint32_t book_uid) {
   auto book = bookkeeper_.get_book(book_uid);
-  book->update(event->gen_time());
   state<Asset> cache_state_asset(ledger_home_location_->uid, book_uid, event->gen_time(), book->asset);
   feed_state_data_bank(cache_state_asset, data_bank_);
   state<AssetMargin> cache_state_asset_margin(ledger_home_location_->uid, book_uid, event->gen_time(),
@@ -751,7 +750,6 @@ Watcher::BookListener::BookListener(Watcher &watcher) : watcher_(watcher) {}
 
 void Watcher::BookListener::on_asset_sync_reset(const Asset &old_asset, const Asset &new_asset) {
   auto book = watcher_.bookkeeper_.get_book(new_asset.holder_uid);
-  book->update(watcher_.now());
   state<Asset> cache_state(watcher_.ledger_home_location_->uid, book->asset.holder_uid, book->asset.update_time,
                            book->asset);
   watcher_.feed_state_data_bank(cache_state, watcher_.data_bank_);
@@ -760,26 +758,25 @@ void Watcher::BookListener::on_asset_sync_reset(const Asset &old_asset, const As
 void Watcher::BookListener::on_asset_margin_sync_reset(const AssetMargin &old_asset_margin,
                                                        const AssetMargin &new_asset_margin) {
   auto book = watcher_.bookkeeper_.get_book(new_asset_margin.holder_uid);
-  book->update(watcher_.now());
   state<AssetMargin> cache_state(watcher_.ledger_home_location_->uid, book->asset_margin.holder_uid,
                                  book->asset_margin.update_time, book->asset_margin);
   watcher_.feed_state_data_bank(cache_state, watcher_.data_bank_);
 }
 
 void Watcher::BookListener::on_position_sync_reset(const book::Book &old_book, const book::Book &new_book) {
-  auto fun_update_st_position = [&](book::PositionMap &position_map) {
-    for (auto &st_pair : position_map) {
-      auto &position = st_pair.second;
+  auto update_position = [&](book::PositionMap &position_map) {
+    for (auto &pair : position_map) {
+      auto &position = pair.second;
       state<Position> cache_state(watcher_.ledger_home_location_->uid, position.holder_uid, position.update_time,
                                   position);
       watcher_.feed_state_data_bank(cache_state, watcher_.data_bank_);
     }
   };
 
-  for (auto &bk_pair : watcher_.bookkeeper_.get_books()) {
-    auto &st_book = bk_pair.second;
-    fun_update_st_position(st_book->long_positions);
-    fun_update_st_position(st_book->short_positions);
+  for (auto &pair : watcher_.bookkeeper_.get_books()) {
+    auto &book = pair.second;
+    update_position(book->long_positions);
+    update_position(book->short_positions);
   }
 }
 

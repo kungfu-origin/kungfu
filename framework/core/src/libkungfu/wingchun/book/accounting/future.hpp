@@ -193,7 +193,7 @@ public:
       double cost = 0;
 
       if (book->commissions.find(product_key) != book->commissions.end()) {
-        auto &commission = book->commissions.at(product_key);
+        const auto &commission = book->commissions.at(product_key);
         auto close_today_volume = double(position.volume - position.yesterday_volume);
         if (commission.mode == CommissionRateMode::ByAmount) {
           cost = (position.last_price /** cm_mr.exchange_rate*/ * position.yesterday_volume * commission.close_ratio) +
@@ -278,7 +278,7 @@ private:
     if (not able_long_short_position_merge(trading_data.exchange_id))
       return false;
 
-    auto &oppsite_position = book->get_oppsite_position_for(trading_data);
+    const auto &oppsite_position = book->get_oppsite_position_for(trading_data);
     if (oppsite_position.volume > 0)
       return true;
     return false;
@@ -289,7 +289,7 @@ private:
     if (not able_long_short_position_merge(trading_data.exchange_id))
       return false;
 
-    auto &position = book->get_position_for(trading_data);
+    const auto &position = book->get_position_for(trading_data);
     if (position.volume <= 0 && trading_data.offset != Offset::Open)
       return true;
     return false;
@@ -320,7 +320,7 @@ private:
       SPDLOG_WARN("commission information missing for {}@{}", trade.instrument_id, trade.exchange_id);
       return 0;
     }
-    auto &commission = book->commissions.at(product_key);
+    const auto &commission = book->commissions.at(product_key);
     if (commission.mode == CommissionRateMode::ByAmount) {
       if (trade.offset == Offset::Open) {
         return trade.price * cm_mr.exchange_rate * trade.volume * contract_multiplier * commission.open_ratio;

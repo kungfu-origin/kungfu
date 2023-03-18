@@ -545,6 +545,12 @@ function csvTableCallback(
     return new Promise<void>((resolve) => {
       if (errRows.length) {
         console.warn('Csv resolve error rows:', errRows);
+        messagePrompt().error(
+          `${t('settingsFormConfig.import_failed')}: ${t(
+            'settingsFormConfig.csv_format_error',
+          )}`,
+        );
+        return resolve();
       }
 
       if (data.length) {
@@ -580,11 +586,12 @@ function csvTableCallback(
           } else {
             formState.value[targetKey].push(...data);
           }
+          messagePrompt().success();
           resolve();
         });
-      } else {
-        resolve();
       }
+
+      resolve();
     });
   };
 }
@@ -731,15 +738,22 @@ function handleSelectCsv<T>(
           transformer: buildCsvHeadersTransformer(headers),
         })
           .then(({ resRows, errRows }) => {
-            callback &&
-              callback(resRows, errRows, targetKey).finally(() => {
-                spinning.value = false;
-              });
+            if (callback) return callback(resRows, errRows, targetKey);
+
+            return Promise.resolve();
           })
           .catch((err) => {
+            messagePrompt().error(
+              `${t('settingsFormConfig.import_failed')}: ${t(
+                'settingsFormConfig.csv_format_error',
+              )}`,
+            );
             if (err instanceof Error) {
               console.error(err);
             }
+          })
+          .finally(() => {
+            spinning.value = false;
           });
       }
     });

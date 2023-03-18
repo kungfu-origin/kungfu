@@ -105,6 +105,9 @@ export default {
     add_csv_desc: 'csv headers are {header}',
     clear: 'Clear',
     total: 'Total {sum} pieces of data',
+    import_successed: 'Import Successed',
+    import_failed: 'Import Failed',
+    csv_format_error: 'Csv format error, please check and retry',
   },
 
   tradingConfig: {
