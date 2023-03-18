@@ -309,6 +309,12 @@ template <typename T, typename... Ts> constexpr void type_check(Ts... arg) {
   static_assert(boost::hana::fold(check, std::logical_and<>()), "type check of arguments failed");
 }
 
+template <typename T, typename... Ts> constexpr bool type_belong_to() {
+  constexpr auto check =
+      boost::hana::transform(type_tuple<Ts...>::value, [](auto t) { return t == boost::hana::type_c<T>; });
+  return boost::hana::fold(check, std::logical_or<>());
+}
+
 template <typename DataType> struct data {
   static constexpr bool reflect = true;
 
