@@ -80,56 +80,53 @@ public:
   virtual void apply_quote(Book_ptr &book, const Quote &quote) override {
     static int counter = 0;
     auto apply = [&](Position &position) {
-      if (is_valid_price(quote.last_price) and position.volume) {
-        if (not position.last_price) {
-          // SPDLOG_INFO("position.last_price set to {} for {} ", quote.last_price, position.instrument_id);
-          position.last_price = quote.last_price;
-        }
-        // position.last_price = position.last_price > 0 ? position.last_price : quote.last_price;
-        double price_change = quote.last_price - position.last_price;
+      if (not is_valid_price(quote.last_price) or not position.volume) {
+        return;
+      }
 
-        if (price_change) {
-          auto cd_mr = get_instr_conversion_margin_rate(book, position);
-          double market_value_change = price_change * cd_mr.exchange_rate * position.volume;
-          double avail_margin_change;
+      if (not position.last_price) {
+        position.last_price = quote.last_price;
+      }
+      double price_change = quote.last_price - position.last_price;
+      position.last_price = quote.last_price;
 
-          auto &asset = book->asset;
-          auto &asset_margin = book->asset_margin;
+      auto cd_mr = get_instr_conversion_margin_rate(book, position);
+      double market_value_change = price_change * cd_mr.exchange_rate * position.volume;
 
-          if (position.direction == Direction::Long) {
-            avail_margin_change = cd_mr.conversion_rate * market_value_change;
-            // position.margin would not be changed for Long direction, the margin depends on debt.
-            // TODO: As non-margin position and margin position are combined together, need distinguish each volume.
-            // asset_margin.margin_market_value += price_change * position.margin_volume;
+      auto &asset = book->asset;
+      auto &asset_margin = book->asset_margin;
 
-            asset.market_value += market_value_change; // Asset.market_value means Long positions only.
-            asset.unrealized_pnl += market_value_change;
-            asset_margin.total_asset += market_value_change;
-          } else {
-            double short_margin_change = 0;
-            if (quote.last_price < position.avg_open_price) {
-              short_margin_change = cd_mr.short_margin_ratio * market_value_change;
-            } else {
-              short_margin_change = market_value_change; // short_margin_ratio as 100% when last_price > avg_open_price;
-            }
-            avail_margin_change = -cd_mr.conversion_rate * market_value_change - short_margin_change;
-            position.margin += short_margin_change;
-            asset_margin.short_margin += short_margin_change;
-            asset_margin.short_market_value += market_value_change;
-            // Asset_margin.margin is combined with long_margin and short_margin.
-            asset_margin.margin += short_margin_change;
-            asset.unrealized_pnl -= market_value_change;
-          }
-          asset_margin.avail_margin += avail_margin_change;
+      if (position.direction == Direction::Long) {
+        // position.margin would not be changed for Long direction, the margin depends on debt.
+        // TODO: As non-margin position and margin position are combined together, need distinguish each volume.
+        // asset_margin.margin_market_value += price_change * position.margin_volume;
 
-          position.last_price = quote.last_price;
-          // update position.unrealized_pnl
-          update_position(book, position);
-          if (counter > 20) {
-            counter = 0;
-            calculate_marketvalue(book);
-          }
-        }
+        asset.market_value += market_value_change; // Asset.market_value means Long positions only.
+        asset.unrealized_pnl += market_value_change;
+        asset_margin.total_asset += market_value_change;
+      } else {
+        // short_margin_ratio as 100% when last_price > avg_open_price;
+        double short_margin_change = (quote.last_price < position.avg_open_price)
+                                         ? cd_mr.short_margin_ratio * market_value_change
+                                         : market_value_change;
+
+        position.margin += short_margin_change;
+        asset_margin.short_margin += short_margin_change;
+        asset_margin.short_market_value += market_value_change;
+        // Asset_margin.margin is combined with long_margin and short_margin.
+        asset_margin.margin += short_margin_change;
+        double avail_margin_change = (price_change && position.direction == Direction::Short)
+                                         ? (-cd_mr.conversion_rate * market_value_change - short_margin_change)
+                                         : 0;
+        asset_margin.avail_margin += avail_margin_change;
+        asset.unrealized_pnl -= market_value_change;
+      }
+
+      // update position.unrealized_pnl
+      update_position(book, position);
+      if (counter > 20) {
+        counter = 0;
+        calculate_marketvalue(book);
       }
     };
     apply(book->get_position_for(Direction::Long, quote));
