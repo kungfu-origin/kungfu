@@ -4,6 +4,7 @@
 
 #include <algorithm>
 
+#include "serialize_xtp.h"
 #include "trader_xtp.h"
 #include "type_convert.h"
 
