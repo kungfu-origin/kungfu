@@ -585,6 +585,17 @@ inline void order_from_input(const longfist::types::OrderInput &input, longfist:
   order.parent_id = input.parent_id;
 }
 
+inline void trade_from_order(const longfist::types::Order &order, longfist::types::Trade &trade) {
+  trade.order_id = order.order_id;
+  strcpy(trade.instrument_id, order.instrument_id);
+  strcpy(trade.exchange_id, order.exchange_id);
+  strcpy(trade.external_order_id, order.external_order_id);
+  trade.instrument_type = order.instrument_type;
+  trade.side = order.side;
+  trade.offset = order.offset;
+  trade.hedge_flag = order.hedge_flag;
+}
+
 } // namespace kungfu::wingchun
 
 #endif // WINGCHUN_COMMON_H
