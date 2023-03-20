@@ -8,6 +8,7 @@
 #define KUNGFU_LONGFIST_ENUM_H
 
 #include <fmt/ostream.h>
+#include <nlohmann/json.hpp>
 #include <spdlog/fmt/ostr.h>
 
 namespace kungfu::longfist::enums {
