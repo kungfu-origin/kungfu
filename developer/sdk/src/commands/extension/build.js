@@ -11,6 +11,7 @@ module.exports = {
     });
   },
   run: async (argv) => {
+    sdk.lib.project.configure();
     await sdk.lib.extension.installBatch(argv.url);
     sdk.lib.extension.configure();
     sdk.lib.extension.compile();
