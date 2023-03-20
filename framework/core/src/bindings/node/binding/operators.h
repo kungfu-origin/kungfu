@@ -315,7 +315,7 @@ public:
 
       boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
         using DataType = typename decltype(+boost::hana::second(it))::type;
-        if (type_belong_to<DataType, Ts...>()) {
+        if constexpr (type_belong_to<DataType, Ts...>()) {
           return;
         }
 
