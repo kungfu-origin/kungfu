@@ -965,6 +965,8 @@ export const usePreStartAndQuitApp = (): {
       booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED) &&
       (await isAllMainProcessRunning())
     ) {
+      preStartSystemLoadingData.cpusSafeNumChecking = 'done';
+      preStartSystemLoadingData.VCDepsExistsChecking = 'done';
       preStartSystemLoadingData.archive = 'done';
       preStartSystemLoadingData.extraResourcesLoading = 'done';
     }
@@ -972,6 +974,15 @@ export const usePreStartAndQuitApp = (): {
     if (app?.proxy) {
       const subscription = app?.proxy.$globalBus.subscribe(
         (data: KfEvent.KfBusEvent) => {
+          if (data.tag === 'preStartCheck') {
+            if (data.tag === 'cpusNum') {
+              preStartSystemLoadingData.cpusSafeNumChecking = 'done';
+            }
+            if (data.name === 'VCDeps') {
+              preStartSystemLoadingData.VCDepsExistsChecking = 'done';
+            }
+          }
+
           if (data.tag === 'processStatus') {
             if (data.name && data.name === 'archive') {
               preStartSystemLoadingData.archive =

@@ -14,7 +14,7 @@ import {
   ARCHIVE_DIR,
   buildProcessLogPath,
   KF_HOME,
-  KUNGFU_RESOURCES_DIR,
+  VC_DEPS_DIR,
 } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 import {
   getInstrumentTypeData,
@@ -30,6 +30,7 @@ import {
   removeArchiveBeforeToday,
   isKfColor,
   isHexOrRgbColor,
+  getKfExtVCDepsVersions,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { readRootPackageJsonSync } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
@@ -345,45 +346,39 @@ export const checkCpusNumAndConfirmModal = () => {
   });
 };
 
-export const checkVCDepsAndConfirmModal = () => {
-  const allVCVersions: KungfuApi.VCDepsVersionTypes[] = [
-    '2008',
-    '2010',
-    '2012',
-    '2013',
-    '2015-2019',
-    '2015-2022',
-  ];
+export const checkVCDepsAndConfirmModal = async () => {
+  const allVCVersions: KungfuApi.VCDepsVersionTypes[] =
+    await getKfExtVCDepsVersions();
+  console.log(allVCVersions);
   return Promise.allSettled(
     allVCVersions.map((version) => checkVCDepsByVersion(version)),
   ).then((results) => {
     const existed: string[] = [];
     const notExisted: string[] = [];
     results.forEach((res, index) =>
-      res
+      res.status === 'fulfilled' && res.value
         ? existed.push(allVCVersions[index])
         : notExisted.push(allVCVersions[index]),
     );
+    console.log(existed, notExisted);
 
     if (!notExisted.length) return Promise.resolve(true);
 
-    return confirmModal(
-      t('system_prompt'),
-      t('computer_performance_abnormal'),
-    ).then((flag) => {
-      if (flag) {
-        // TODO:
-        return Promise.all(
-          notExisted.map((version) => {
-            return shell.openPath(
-              path.join(KUNGFU_RESOURCES_DIR, `${version}.exe`),
-            );
-          }),
-        );
-      }
+    return confirmModal(t('system_prompt'), t('vc_deps_abnormal')).then(
+      (flag) => {
+        if (flag) {
+          return Promise.allSettled(
+            notExisted.map((version) => {
+              return shell.openPath(
+                path.join(VC_DEPS_DIR, version, 'vcredist_x64.exe'),
+              );
+            }),
+          ).then(() => Promise.resolve(true));
+        }
 
-      return Promise.resolve(true);
-    });
+        return Promise.resolve(true);
+      },
+    );
   });
 };
 

@@ -168,6 +168,14 @@ onBeforeUnmount(() => {
           key: 'extraResourcesLoading',
           status: preStartSystemLoadingData.extraResourcesLoading,
         },
+        {
+          key: 'cpusSafeNumChecking',
+          status: preStartSystemLoadingData.cpusSafeNumChecking,
+        },
+        {
+          key: 'VCDepsExistsChecking',
+          status: preStartSystemLoadingData.VCDepsExistsChecking,
+        },
       ]"
       :txt="{
         archive: { done: $t('archive_done'), loading: $t('archive_loading') },
@@ -178,6 +186,14 @@ onBeforeUnmount(() => {
         extraResourcesLoading: {
           done: $t('extra_resources_done'),
           loading: $t('extra_resouces_loading'),
+        },
+        cpusSafeNumChecking: {
+          done: $t('computer_performance_done'),
+          loading: $t('computer_performance_detecting'),
+        },
+        VCDepsExistsChecking: {
+          done: $t('vc_deps_done'),
+          loading: $t('vc_deps_detecting'),
         },
       }"
     ></KfSystemPrepareModal>

@@ -42,6 +42,8 @@ import {
   postStartAll,
   preStartAll,
   mergeExtLanguages,
+  checkCpusNumAndConfirmModal,
+  checkVCDepsAndConfirmModal,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
 import {
@@ -76,7 +78,6 @@ import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import zhCN from 'ant-design-vue/es/locale/zh_CN';
 import enUS from 'ant-design-vue/es/locale/en_US';
 import { first } from 'rxjs';
-import { checkIfCpusNumSafe } from '../../../../../api/src/utils/osUtils';
 
 const app = createApp(App);
 
@@ -136,6 +137,22 @@ const __BYPASS_ARCHIVE__ = false;
 
 const initStartAll = () => {
   preStartAll()
+    .then(() => checkCpusNumAndConfirmModal())
+    .then((res) => {
+      globalBus.next({
+        tag: 'preStartCheck',
+        name: 'cpusNum',
+        status: res,
+      });
+    })
+    .then(() => checkVCDepsAndConfirmModal())
+    .then((res) => {
+      globalBus.next({
+        tag: 'preStartCheck',
+        name: 'VCDeps',
+        status: res,
+      });
+    })
     .then(async () => {
       if (__BYPASS_ARCHIVE__) {
         globalBus.next({
@@ -191,7 +208,6 @@ const initStartAll = () => {
           status: 'online',
         });
       })
-      .then(() => checkIfCpusNumSafe())
       .catch((err) => console.error(err.message));
   });
 };
