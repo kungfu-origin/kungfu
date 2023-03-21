@@ -30,7 +30,6 @@ import {
   removeArchiveBeforeToday,
   isKfColor,
   isHexOrRgbColor,
-  getKfExtVCDepsVersions,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { readRootPackageJsonSync } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
@@ -45,6 +44,7 @@ import path from 'path';
 import { startExtDaemon } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import {
   checkIfCpusNumSafe,
+  getAllVCDepsVersions,
   checkVCDepsByVersion,
 } from '@kungfu-trader/kungfu-js-api/utils/osUtils';
 import { Proc } from 'pm2';
@@ -338,7 +338,7 @@ export const preStartAll = async (): Promise<(void | Proc)[]> => {
   ]);
 };
 
-export const checkCpusNumAndConfirmModal = () => {
+export const checkCpusNumAndConfirmModal = (): Promise<boolean> => {
   return checkIfCpusNumSafe().then((flag) => {
     if (flag) return Promise.resolve(true);
 
@@ -350,9 +350,8 @@ export const checkCpusNumAndConfirmModal = () => {
   });
 };
 
-export const checkVCDepsAndConfirmModal = async () => {
-  const allVCVersions: KungfuApi.VCDepsVersionTypes[] =
-    await getKfExtVCDepsVersions();
+export const checkVCDepsAndConfirmModal = (): Promise<boolean> => {
+  const allVCVersions: KungfuApi.VCDepsVersionTypes[] = getAllVCDepsVersions();
   return Promise.allSettled(
     allVCVersions.map((version) => checkVCDepsByVersion(version)),
   ).then((results) => {
@@ -363,7 +362,6 @@ export const checkVCDepsAndConfirmModal = async () => {
         ? existed.push(allVCVersions[index])
         : notExisted.push(allVCVersions[index]),
     );
-    console.log(existed, notExisted);
 
     if (!notExisted.length) return Promise.resolve(true);
 

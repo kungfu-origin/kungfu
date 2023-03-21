@@ -675,26 +675,6 @@ export const getKfExtensionLanguage = async () => {
   }, {} as KungfuApi.KfExtLanguages);
 };
 
-export const getKfExtVCDepsVersions = async () => {
-  const kfExtConfigList = await getKfExtConfigList();
-
-  const allVersions = kfExtConfigList.reduce((depVersions, extConfig) => {
-    if (extConfig.config) {
-      const config = extConfig.config;
-      depVersions.push(
-        ...Object.values(config).reduce(
-          (vers, cur) => [...vers, ...(cur.vcDepVersions || [])],
-          [] as KungfuApi.VCDepsVersionTypes[],
-        ),
-      );
-      return depVersions;
-    }
-    return depVersions;
-  }, [] as KungfuApi.VCDepsVersionTypes[]);
-
-  return Array.from(new Set(allVersions));
-};
-
 export const getAvailDaemonList = async (): Promise<
   KungfuApi.KfDaemonLocation[]
 > => {
