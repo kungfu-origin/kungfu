@@ -105,6 +105,9 @@ export default {
     add_csv_desc: 'csv 表头为 {header}',
     clear: '清除',
     total: '共计 {sum} 条数据',
+    import_successed: '导入成功',
+    import_failed: '导入失败',
+    csv_format_error: 'csv 格式错误, 请检查后重试',
   },
 
   tradingConfig: {

@@ -36,9 +36,13 @@ public:
 
   bool req_account() override;
 
+  bool req_order_trade() override;
+
   bool req_history_order(const event_ptr &event) override;
 
   bool req_history_trade(const event_ptr &event) override;
+
+  void on_restore() override;
 
   /// 当客户端的某个连接与交易后台通信连接断开时，该方法被调用。
   ///@param reason 错误原因，请与错误代码表对应
@@ -204,9 +208,10 @@ private:
   uint64_t session_id_;
   int request_id_;
   std::string trading_day_;
-  std::unordered_map<uint64_t, uint64_t> inbound_orders_;
-  std::unordered_map<uint64_t, uint64_t> outbound_orders_;
+  std::unordered_map<uint64_t, uint64_t> map_kf_to_xtp_order_id_;
+  std::unordered_map<uint64_t, uint64_t> map_xtp_to_kf_order_id_;
   std::unordered_map<uint64_t, uint64_t> map_request_location_;
+  std::unordered_map<uint64_t, std::set<std::string>> map_xtp_order_id_to_xtp_trader_ids_;
 
   yijinjing::journal::writer_ptr get_history_writer(uint64_t request_id);
 };

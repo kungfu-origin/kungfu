@@ -23,12 +23,12 @@ void BasketOrderEngine::on_start(const rx::connectable_observable<event_ptr> &ev
 }
 
 void BasketOrderEngine::restore(const cache::bank &state_bank) {
-  for (auto &pair : state_bank[boost::hana::type_c<BasketOrder>]) {
+  for (const auto &pair : state_bank[boost::hana::type_c<BasketOrder>]) {
     auto basketorder_state = pair.second;
     make_basket_order_state(basketorder_state.update_time, basketorder_state.data);
   }
 
-  for (auto &pair : state_bank[boost::hana::type_c<Order>]) {
+  for (const auto &pair : state_bank[boost::hana::type_c<Order>]) {
     auto order_state = pair.second;
     try_update_basket_order(order_state.update_time, order_state.data);
   }

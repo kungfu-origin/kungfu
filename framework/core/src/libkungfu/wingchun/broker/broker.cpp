@@ -75,7 +75,7 @@ const cache::bank &BrokerService::get_state_bank() const { return vendor_.get_st
 bool BrokerService::check_if_stored_instruments(const std::string &trading_day) const {
   SPDLOG_INFO("CHECK_IF_STORED_INSTRUMENTS trading_day {}", trading_day);
   auto &time_key_value_map = get_state_bank()[boost::hana::type_c<TimeKeyValue>];
-  for (auto &pair : time_key_value_map) {
+  for (const auto &pair : time_key_value_map) {
     const TimeKeyValue &timeKeyValue = pair.second.data;
     if (timeKeyValue.key == "instrument_stored_trading_day" ||
         timeKeyValue.key == "instrument_stored_trading_day_next_day") {

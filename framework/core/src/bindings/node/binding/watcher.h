@@ -236,11 +236,14 @@ private:
       auto &oppsite_position = book->get_oppsite_position_for(data);
       state<kungfu::longfist::types::Position> cache_state_position(source, dest, event->gen_time(), position);
       feed_state_data_bank(cache_state_position, data_bank_);
+
       state<kungfu::longfist::types::Position> cache_state_oppsite_position(source, dest, event->gen_time(),
                                                                             oppsite_position);
       feed_state_data_bank(cache_state_oppsite_position, data_bank_);
+
       state<kungfu::longfist::types::Asset> cache_state_asset(source, dest, event->gen_time(), book->asset);
       feed_state_data_bank(cache_state_asset, data_bank_);
+
       state<kungfu::longfist::types::AssetMargin> cache_state_asset_margin(source, dest, event->gen_time(),
                                                                            book->asset_margin);
       feed_state_data_bank(cache_state_asset_margin, data_bank_);
@@ -304,7 +307,7 @@ private:
     auto &target_map = const_cast<DataTypeMap &>(data_bank_[type]);
     auto iter = target_map.begin();
     while (iter != target_map.end() and target_map.size() > 0) {
-      auto &state = iter->second;
+      const auto &state = iter->second;
       update_ledger(state.update_time, state.source, state.dest, state.data);
       iter = target_map.erase(iter);
     }

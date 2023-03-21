@@ -22,7 +22,7 @@ public:
   void get_instrument(const Book_ptr &book, const Trade &trade, char *instrument_a, char *instrument_b,
                       char *instrument_commission, int64_t &volume_a, int64_t &volume_b, int64_t &volume_commission) {
     auto instrument_hash = hash_instrument(trade.exchange_id, trade.instrument_id);
-    auto &instrument = book->instruments.at(instrument_hash);
+    const auto &instrument = book->instruments.at(instrument_hash);
     strncpy(instrument_a, instrument.instrument_id, strlen(instrument.instrument_id) - instrument.delivery_year);
     strcpy(instrument_b, &(instrument.instrument_id[strlen(instrument.instrument_id) - instrument.delivery_year]));
     if (trade.hedge_flag == HedgeFlag::Speculation)

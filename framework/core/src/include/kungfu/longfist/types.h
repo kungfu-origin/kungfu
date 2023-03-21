@@ -18,6 +18,7 @@ static constexpr int DATE_LEN = 9;
 static constexpr int EXCHANGE_ID_LEN = 16;
 static constexpr int TRAIDNG_PHASE_CODE_LEN = 8;
 static constexpr int ERROR_MSG_LEN = 256;
+static constexpr int EXTERNAL_ID_LEN = 32;
 
 KF_DEFINE_MARK_TYPE(PageEnd, 10000);
 KF_DEFINE_MARK_TYPE(SessionStart, 10001);
@@ -43,6 +44,7 @@ KF_DEFINE_MARK_TYPE(AssetSync, 404);
 KF_DEFINE_MARK_TYPE(PositionSync, 405);
 KF_DEFINE_MARK_TYPE(KeepPositionsRequest, 406);
 KF_DEFINE_MARK_TYPE(RebuildPositionsRequest, 407);
+KF_DEFINE_MARK_TYPE(OrderTradeRequest, 408);
 KF_DEFINE_MARK_TYPE(AlgoOrderInput, 20010);
 KF_DEFINE_MARK_TYPE(AlgoOrderReport, 20011);
 KF_DEFINE_MARK_TYPE(AlgoOrderModify, 20012);
@@ -520,17 +522,18 @@ KF_DEFINE_PACK_TYPE(                                               //
 KF_DEFINE_PACK_TYPE(                                                    //
     OrderActionError, 216, PK(order_action_id), TIMESTAMP(insert_time), //
     (uint64_t, order_id),                                               // 订单ID
-    (uint64_t, order_action_id),                                        // 订单操作ID
-    (int32_t, error_id),                                                // 错误ID
-    (kungfu::array<char, ERROR_MSG_LEN>, error_msg),                    // 错误信息
-    (int64_t, insert_time)                                              // 写入时间
+    (kungfu::array<char, EXTERNAL_ID_LEN>, external_order_id), // 撤单原委托柜台订单id, 新生成撤单委托编号不记录
+    (uint64_t, order_action_id),                               // 订单操作ID
+    (int32_t, error_id),                                       // 错误ID
+    (kungfu::array<char, ERROR_MSG_LEN>, error_msg), // 错误信息
+    (int64_t, insert_time)                           // 写入时间
 );
 
-KF_DEFINE_PACK_TYPE(                                  //
-    Order, 203, PK(order_id), TIMESTAMP(insert_time), //
-    (uint64_t, order_id),                             // 订单ID
-    (uint64_t, external_id),                          // 柜台订单id, 字符型则hash转换
-    (uint64_t, parent_id),                            // 母单号
+KF_DEFINE_PACK_TYPE(                                           //
+    Order, 203, PK(order_id), TIMESTAMP(insert_time),          //
+    (uint64_t, order_id),                                      // 订单ID
+    (kungfu::array<char, EXTERNAL_ID_LEN>, external_order_id), // 柜台订单id
+    (uint64_t, parent_id),                                     // 母单号
 
     (int64_t, insert_time), // 订单写入时间
     (int64_t, update_time), // 订单更新时间
@@ -565,10 +568,10 @@ KF_DEFINE_PACK_TYPE(                                  //
     (enums::TimeCondition, time_condition)      // 成交时间类型
 );
 
-KF_DEFINE_PACK_TYPE(                                         //
-    HistoryOrder, 212, PK(order_id), TIMESTAMP(insert_time), //
-    (uint64_t, order_id),                                    // 订单ID
-    (uint64_t, external_id),                                 // 柜台订单id, 字符型则hash转换
+KF_DEFINE_PACK_TYPE(                                           //
+    HistoryOrder, 212, PK(order_id), TIMESTAMP(insert_time),   //
+    (uint64_t, order_id),                                      // 订单ID
+    (kungfu::array<char, EXTERNAL_ID_LEN>, external_order_id), // 柜台订单id, 字符型则hash转换
 
     (int64_t, insert_time), // 订单写入时间
     (int64_t, update_time), // 订单更新时间
@@ -611,8 +614,9 @@ KF_DEFINE_PACK_TYPE(                                 //
     Trade, 204, PK(trade_id), TIMESTAMP(trade_time), //
     (uint64_t, trade_id),                            // 成交ID
 
-    (uint64_t, order_id),    // 订单ID
-    (uint64_t, external_id), // 柜台订单id, 字符型则hash转换
+    (uint64_t, order_id),                                      // 订单ID
+    (kungfu::array<char, EXTERNAL_ID_LEN>, external_order_id), // 柜台订单id
+    (kungfu::array<char, EXTERNAL_ID_LEN>, external_trade_id), // 柜台成交编号id
 
     (int64_t, trade_time),                        // 成交时间
     (kungfu::array<char, DATE_LEN>, trading_day), // 交易日
@@ -637,8 +641,9 @@ KF_DEFINE_PACK_TYPE(                                        //
     HistoryTrade, 213, PK(trade_id), TIMESTAMP(trade_time), //
     (uint64_t, trade_id),                                   // 成交ID
 
-    (uint64_t, order_id),    // 订单ID
-    (uint64_t, external_id), // 柜台订单id, 字符型则hash转换
+    (uint64_t, order_id),                                      // 订单ID
+    (kungfu::array<char, EXTERNAL_ID_LEN>, external_order_id), // 柜台订单id
+    (kungfu::array<char, EXTERNAL_ID_LEN>, external_trade_id), // 柜台成交编号id
 
     (int64_t, trade_time),                        // 成交时间
     (kungfu::array<char, DATE_LEN>, trading_day), // 交易日

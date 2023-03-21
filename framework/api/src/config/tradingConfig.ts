@@ -696,7 +696,7 @@ export const ExchangeIds: Record<string, KungfuApi.KfTradeValueCommonData> = {
     color: InstrumentType[InstrumentTypeEnum.future].color,
   },
   EUR: {
-    name: t('tradingConfig.EURO'),
+    name: t('tradingConfig.EUR'),
     color: InstrumentType[InstrumentTypeEnum.stock].color,
   },
   EURFUT: {
@@ -908,7 +908,7 @@ export const Currency: Record<CurrencyEnum, KungfuApi.KfTradeValueCommonData> =
     [CurrencyEnum.USD]: { name: t('tradingConfig.USD') },
     [CurrencyEnum.JPY]: { name: t('tradingConfig.JPY') },
     [CurrencyEnum.GBP]: { name: t('tradingConfig.GBP') },
-    [CurrencyEnum.EUR]: { name: t('tradingConfig.EUR') },
+    [CurrencyEnum.EUR]: { name: t('tradingConfig.EURO') },
     [CurrencyEnum.CNH]: { name: t('tradingConfig.CNH') },
     [CurrencyEnum.SGD]: { name: t('tradingConfig.SGD') },
     [CurrencyEnum.MYR]: { name: t('tradingConfig.MYR') },

@@ -36,8 +36,6 @@ protected:
 
 private:
   Trader_ptr service_ = {};
-
-  void clean_orders();
 };
 
 class Trader : public BrokerService {
@@ -63,6 +61,8 @@ public:
   virtual bool req_position() = 0;
 
   virtual bool req_account() = 0;
+
+  virtual bool req_order_trade() = 0;
 
   virtual bool req_history_order(const event_ptr &event) { return true; }
 
@@ -91,11 +91,13 @@ public:
 
   void enable_positions_sync();
 
-  void clear_order_inputs(const uint64_t location_uid) { order_inputs_.erase(location_uid); }
+  void clear_order_inputs(const uint64_t location_uid);
 
   std::unordered_map<uint64_t, std::vector<longfist::types::OrderInput>> &get_order_inputs() { return order_inputs_; }
 
   void enable_self_detect();
+
+  virtual void on_restore(){};
 
 protected:
   OrderMap orders_ = {};
@@ -107,6 +109,7 @@ protected:
   std::unordered_map<uint64_t, std::vector<longfist::types::OrderInput>> order_inputs_ = {};
   /// <strategy_uid, batch_flag>, true mean batch mode for this strategy
   std::unordered_map<uint64_t, bool> batch_status_{};
+  std::unordered_map<std::string, std::unordered_set<uint64_t>> map_ex_instrument_to_order_ids_{};
 
 private:
   bool sync_asset_ = false;
@@ -118,6 +121,7 @@ private:
   void handle_order_input(const event_ptr &event);
   void handle_batch_order_tag(const event_ptr &event);
   bool has_self_deal_risk(const event_ptr &event);
+  void restore();
 };
 } // namespace kungfu::wingchun::broker
 

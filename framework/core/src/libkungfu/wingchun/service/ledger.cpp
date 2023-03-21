@@ -46,7 +46,7 @@ void Ledger::on_start() {
   events_ | is(BrokerStateRequest::tag) | $$(write_broker_state(event->gen_time(), event->source()));
   events_ | is(AssetRequest::tag) | $$(write_book_reset(event->gen_time(), event->source()));
   events_ | is(PositionRequest::tag) | $$(write_strategy_data(event->gen_time(), event->source()));
-  events_ | is(PositionEnd::tag) | $$(update_account_book(event->gen_time(), event->data<PositionEnd>().holder_uid););
+  events_ | is(PositionEnd::tag) | $$(update_account_book(event->gen_time(), event->data<PositionEnd>().holder_uid));
 
   add_time_interval(time_unit::NANOSECONDS_PER_MINUTE, [&](auto e) { request_asset_sync(e->gen_time()); });
   add_time_interval(time_unit::NANOSECONDS_PER_MINUTE, [&](auto e) { request_position_sync(e->gen_time()); });
@@ -59,9 +59,9 @@ void Ledger::update_broker_state_map(uint32_t location_uid, const BrokerStateUpd
 }
 
 void Ledger::update_broker_state_map(uint32_t location_uid, const Deregister &deregister) {
-  if (broker_states_.find(location_uid) != broker_states_.end()) {
-    broker_states_.erase(location_uid);
-  }
+  // if (broker_states_.find(location_uid) != broker_states_.end()) {
+  broker_states_.erase(location_uid);
+  // }
   write_broker_state_to_public();
 }
 
@@ -172,7 +172,7 @@ void Ledger::keep_positions(int64_t trigger_time, uint32_t strategy_uid) {
 
 void Ledger::rebuild_positions(int64_t trigger_time, uint32_t strategy_uid) {
   auto strategy_book = bookkeeper_.get_book(strategy_uid);
-  auto rebuild_book = [&](auto &positions) {
+  auto rebuild_book = [&](const auto &positions) {
     for (const auto &pair : positions) {
       auto &position = pair.second;
       if (strategy_book->has_position_for(position)) {
@@ -225,7 +225,7 @@ void Ledger::write_strategy_data(int64_t trigger_time, uint32_t strategy_uid) {
   for (const auto &pair : bookkeeper_.get_books()) {
     auto &book = pair.second;
     auto &asset = book->asset;
-    auto &asset_margin = book->asset_margin;
+    // auto &asset_margin = book->asset_margin;
     auto book_uid = asset.holder_uid;
     bool has_account = asset.ledger_category == LedgerCategory::Account and has_channel(book_uid, strategy_uid);
     bool is_strategy = asset.ledger_category == LedgerCategory::Strategy and book_uid == strategy_uid;
@@ -233,7 +233,7 @@ void Ledger::write_strategy_data(int64_t trigger_time, uint32_t strategy_uid) {
       write_positions(trigger_time, strategy_uid, book->long_positions);
       write_positions(trigger_time, strategy_uid, book->short_positions);
       writer->write(trigger_time, asset);
-      writer->write(trigger_time, asset_margin);
+      writer->write(trigger_time, book->asset_margin);
     }
   }
   writer->open_data<PositionEnd>(trigger_time).holder_uid = strategy_uid;

@@ -121,7 +121,7 @@ function buildGlobalPositions(
         avg_open_price:
           (avg_open_price * Number(volume) +
             pos.avg_open_price * Number(pos.volume)) /
-          (Number(pos.volume) + Number(pos.volume)),
+          (Number(volume) + Number(pos.volume)),
         unrealized_pnl: unrealized_pnl + pos.unrealized_pnl,
       };
     }

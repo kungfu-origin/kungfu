@@ -57,7 +57,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
   readCSV,
-  writeCSV,
+  writeCsvWithUTF8Bom,
 } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import { hashInstrumentUKey } from '@kungfu-trader/kungfu-js-api/kungfu';
 import {
@@ -545,6 +545,12 @@ function csvTableCallback(
     return new Promise<void>((resolve) => {
       if (errRows.length) {
         console.warn('Csv resolve error rows:', errRows);
+        messagePrompt().error(
+          `${t('settingsFormConfig.import_failed')}: ${t(
+            'settingsFormConfig.csv_format_error',
+          )}`,
+        );
+        return resolve();
       }
 
       if (data.length) {
@@ -580,11 +586,12 @@ function csvTableCallback(
           } else {
             formState.value[targetKey].push(...data);
           }
+          messagePrompt().success();
           resolve();
         });
-      } else {
-        resolve();
       }
+
+      resolve();
     });
   };
 }
@@ -731,16 +738,22 @@ function handleSelectCsv<T>(
           transformer: buildCsvHeadersTransformer(headers),
         })
           .then(({ resRows, errRows }) => {
-            console.log(resRows, errRows, callback);
-            callback &&
-              callback(resRows, errRows, targetKey).finally(() => {
-                spinning.value = false;
-              });
+            if (callback) return callback(resRows, errRows, targetKey);
+
+            return Promise.resolve();
           })
           .catch((err) => {
+            messagePrompt().error(
+              `${t('settingsFormConfig.import_failed')}: ${t(
+                'settingsFormConfig.csv_format_error',
+              )}`,
+            );
             if (err instanceof Error) {
               console.error(err);
             }
+          })
+          .finally(() => {
+            spinning.value = false;
           });
       }
     });
@@ -763,7 +776,7 @@ function handleDownloadCsvTemplate(
                 filePaths[0],
                 template.name || t('settingsFormConfig.csv_template') + '.csv',
               );
-              return writeCSV(filePath, template.data || []);
+              return writeCsvWithUTF8Bom(filePath, template.data || []);
             }),
           ).then(() => {
             messagePrompt().success();
@@ -1532,7 +1545,10 @@ defineExpose({
               <PlusOutlined @click.stop="handleAddItemIntoTableRows(item)" />
             </template>
           </a-button>
-          <div class="table-in-config-setting-total">
+          <div
+            v-if="item.type === 'csvTable' && !!item.search"
+            class="table-in-config-setting-total"
+          >
             {{
               $t('settingsFormConfig.total', {
                 sum: formState[item.key]?.length ?? 0,

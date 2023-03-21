@@ -39,7 +39,7 @@ public:
 
   emitable_logger(std::string name, spdlog::sinks_init_list sinks) : spdlog::logger(std::move(name), sinks) {}
 
-  emitable_logger(const logger &other) : spdlog::logger(other) {}
+  explicit emitable_logger(const logger &other) : spdlog::logger(other) {}
 
   std::shared_ptr<logger> clone(std::string logger_name) override {
     auto cloned = std::make_shared<emitable_logger>(*this);

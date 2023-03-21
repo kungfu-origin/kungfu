@@ -21,7 +21,13 @@ export function preDealLogMessage(line: string): string {
   if (line.indexOf('[') === 21) {
     line = line.slice(21);
   }
-  line = line.replace(/</g, '[').replace(/>/g, ']');
+  line = line.replace(/&/g, '&amp;');
+  line = line.replace(/</g, '&lt;');
+  line = line.replace(/>/g, '&gt;');
+  line = line.replace(/"/g, '&quot;');
+  line = line.replace(/'/g, '&#39;');
+  line = line.replace(/`/g, '&#96;');
+  line = line.replace(/\//g, '&#x2F;');
   return line;
 }
 
