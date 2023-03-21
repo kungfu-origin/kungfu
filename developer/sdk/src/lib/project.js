@@ -18,10 +18,89 @@ exports.configure = (writePackageJson = false, writeWorkflows = true) => {
     const sdkDir = path.dirname(
       path.dirname(customResolve('@kungfu-trader/kungfu-sdk')),
     );
-    const templatesDir = path.join(sdkDir, 'templates', 'workflows');
     const targetDir = path.join(projectDir, '.github', 'workflows');
-    fse.mkdirSync(path.dirname(targetDir), { recursive: true });
-    fse.copySync(templatesDir, targetDir, { overwrite: true });
+    const dotGithubCODEOWNERS = path.join(projectDir, '.github', 'CODEOWNERS');
+    const templates_bmajor = path.join(
+      sdkDir,
+      'templates',
+      'workflows',
+      'bump-major-version.yml',
+    );
+    const templates_bminor = path.join(
+      sdkDir,
+      'templates',
+      'workflows',
+      'bump-minor-version.yml',
+    );
+    const templates_release_new = path.join(
+      sdkDir,
+      'templates',
+      'workflows',
+      'release-new-version.yml',
+    );
+    const templates_release_verify = path.join(
+      sdkDir,
+      'templates',
+      'workflows',
+      'release-verify.yml',
+    );
+    const templates_own = path.join(
+      sdkDir,
+      'templates',
+      'protection',
+      'CODEOWNERS',
+    );
+    try {
+      fse.mkdirSync(path.dirname(targetDir), { recursive: true });
+    } catch (e) {
+      console.warn(`create ${targetDir} fail`);
+    }
+    try {
+      fse.copySync(
+        templates_bmajor,
+        path.join(projectDir, '.github', 'workflows', 'bump-major-version.yml'),
+        { overwrite: false, errorOnExist: true },
+      );
+    } catch (e) {
+      console.warn(`copy bump-major-version.yml fail`);
+    }
+    try {
+      fse.copySync(
+        templates_bminor,
+        path.join(projectDir, '.github', 'workflows', 'bump-minor-version.yml'),
+        { overwrite: false, errorOnExist: true },
+      );
+    } catch (e) {
+      console.warn(`copy bump-minor-version.yml fail`);
+    }
+    try {
+      fse.copySync(
+        templates_release_new,
+        path.join(
+          projectDir,
+          '.github',
+          'workflows',
+          'release-new-version.yml',
+        ),
+        { overwrite: false, errorOnExist: true },
+      );
+    } catch (e) {
+      console.warn(`copy release-new-version.yml fail`);
+    }
+    try {
+      fse.copySync(
+        templates_release_verify,
+        path.join(projectDir, '.github', 'workflows', 'release-verify.yml'),
+        { overwrite: false, errorOnExist: true },
+      );
+    } catch (e) {
+      console.warn(`copy release-verify.yml fail`);
+    }
+    try {
+      fse.copySync(templates_own, dotGithubCODEOWNERS, { overwrite: true });
+    } catch (e) {
+      console.warn(`copy CODEOWNERS fail`);
+    }
   }
 };
 
