@@ -43,6 +43,7 @@ import {
 import path from 'path';
 import { startExtDaemon } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import {
+  isWindows,
   checkIfCpusNumSafe,
   getAllVCDepsVersions,
   checkVCDepsByVersion,
@@ -351,6 +352,8 @@ export const checkCpusNumAndConfirmModal = (): Promise<boolean> => {
 };
 
 export const checkVCDepsAndConfirmModal = (): Promise<boolean> => {
+  if (!isWindows()) return Promise.resolve(true);
+
   const allVCVersions: KungfuApi.VCDepsVersionTypes[] = getAllVCDepsVersions();
   return Promise.allSettled(
     allVCVersions.map((version) => checkVCDepsByVersion(version)),
