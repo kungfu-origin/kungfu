@@ -162,12 +162,6 @@ onBeforeUnmount(() => {
       :title="$t('system_prompt')"
       :visible="preStartSystemLoading"
       :status="[
-        { key: 'archive', status: preStartSystemLoadingData.archive },
-        { key: 'watcher', status: preStartSystemLoadingData.watcher },
-        {
-          key: 'extraResourcesLoading',
-          status: preStartSystemLoadingData.extraResourcesLoading,
-        },
         {
           key: 'cpusSafeNumChecking',
           status: preStartSystemLoadingData.cpusSafeNumChecking,
@@ -176,8 +170,22 @@ onBeforeUnmount(() => {
           key: 'VCDepsExistsChecking',
           status: preStartSystemLoadingData.VCDepsExistsChecking,
         },
+        { key: 'archive', status: preStartSystemLoadingData.archive },
+        { key: 'watcher', status: preStartSystemLoadingData.watcher },
+        {
+          key: 'extraResourcesLoading',
+          status: preStartSystemLoadingData.extraResourcesLoading,
+        },
       ]"
       :txt="{
+        cpusSafeNumChecking: {
+          done: $t('computer_performance_done'),
+          loading: $t('computer_performance_detecting'),
+        },
+        VCDepsExistsChecking: {
+          done: $t('vc_deps_done'),
+          loading: $t('vc_deps_detecting'),
+        },
         archive: { done: $t('archive_done'), loading: $t('archive_loading') },
         watcher: {
           done: $t('environment_done'),
@@ -186,14 +194,6 @@ onBeforeUnmount(() => {
         extraResourcesLoading: {
           done: $t('extra_resources_done'),
           loading: $t('extra_resouces_loading'),
-        },
-        cpusSafeNumChecking: {
-          done: $t('computer_performance_done'),
-          loading: $t('computer_performance_detecting'),
-        },
-        VCDepsExistsChecking: {
-          done: $t('vc_deps_done'),
-          loading: $t('vc_deps_detecting'),
         },
       }"
     ></KfSystemPrepareModal>

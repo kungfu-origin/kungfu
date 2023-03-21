@@ -36,7 +36,7 @@ import { readRootPackageJsonSync } from '@kungfu-trader/kungfu-js-api/utils/file
 import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import { BrowserWindow, getCurrentWindow, dialog } from '@electron/remote';
 import { ipcRenderer, shell } from 'electron';
-import { message, Modal } from 'ant-design-vue';
+import { message, Modal, ModalFuncProps } from 'ant-design-vue';
 import {
   InstrumentTypes,
   KfUIExtLocatorTypes,
@@ -342,14 +342,17 @@ export const checkCpusNumAndConfirmModal = () => {
   return checkIfCpusNumSafe().then((flag) => {
     if (flag) return Promise.resolve(true);
 
-    return confirmModal(t('system_prompt'), t('computer_performance_abnormal'));
+    return confirmModalByCustomArgs(
+      t('system_prompt'),
+      t('computer_performance_abnormal'),
+      { zIndex: 1001 },
+    );
   });
 };
 
 export const checkVCDepsAndConfirmModal = async () => {
   const allVCVersions: KungfuApi.VCDepsVersionTypes[] =
     await getKfExtVCDepsVersions();
-  console.log(allVCVersions);
   return Promise.allSettled(
     allVCVersions.map((version) => checkVCDepsByVersion(version)),
   ).then((results) => {
@@ -364,21 +367,28 @@ export const checkVCDepsAndConfirmModal = async () => {
 
     if (!notExisted.length) return Promise.resolve(true);
 
-    return confirmModal(t('system_prompt'), t('vc_deps_abnormal')).then(
-      (flag) => {
-        if (flag) {
-          return Promise.allSettled(
-            notExisted.map((version) => {
-              return shell.openPath(
-                path.join(VC_DEPS_DIR, version, 'vcredist_x64.exe'),
-              );
-            }),
-          ).then(() => Promise.resolve(true));
-        }
-
-        return Promise.resolve(true);
+    return confirmModalByCustomArgs(
+      t('system_prompt'),
+      h('div', {}, [
+        h('div', {}, t('vc_deps_abnormal')),
+        h('div', { class: 'color-red' }, t('vc_deps_abnormal_message')),
+      ]),
+      {
+        zIndex: 1001,
       },
-    );
+    ).then((flag) => {
+      if (flag) {
+        return Promise.allSettled(
+          notExisted.map((version) => {
+            return shell.openPath(
+              path.join(VC_DEPS_DIR, version, 'vcredist_x64.exe'),
+            );
+          }),
+        ).then(() => Promise.resolve(true));
+      }
+
+      return Promise.resolve(true);
+    });
   });
 };
 
@@ -789,6 +799,29 @@ export const confirmModal = (
       content: content,
       okText: okText,
       cancelText: cancelText,
+      onOk: () => {
+        resolve(true);
+      },
+      onCancel: () => {
+        resolve(false);
+      },
+    });
+  });
+};
+
+export const confirmModalByCustomArgs = (
+  title: string,
+  content: VueNode | (() => VueNode) | string,
+  args: ModalFuncProps = {},
+): Promise<boolean> => {
+  return new Promise((resolve) => {
+    Modal.confirm({
+      title,
+      content,
+      ...args,
+      okText: args?.okText || t('confirm'),
+      cancelText: args?.cancelText || t('cancel'),
+      zIndex: args?.zIndex || 1000,
       onOk: () => {
         resolve(true);
       },

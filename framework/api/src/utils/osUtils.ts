@@ -8,7 +8,8 @@ export const isWindows = () => os.platform() === 'win32';
 export const isMacos = () => os.platform() === 'darwin';
 export const isLinux = () => os.platform() === 'linux';
 
-export const getCpusNum = () => Promise.resolve(os.cpus() ? os.cpus() : 1);
+export const getCpusNum = () =>
+  Promise.resolve(os.cpus() ? os.cpus().length : 1);
 
 export const checkIfCpusNumSafe = () => {
   return getCpusNum().then((cpusNum) => {
@@ -30,12 +31,14 @@ export const checkVCDepsByVersion = async (
   version: KungfuApi.VCDepsVersionTypes,
 ) => {
   const versionDepKeys = VCDepsWinRegMap[version];
-  const registries = await getWinRegistry(versionDepKeys);
 
+  if (!versionDepKeys || !versionDepKeys.length) return true;
+
+  const registries = await getWinRegistry(versionDepKeys);
   if (!isWindows() && registries === null) return true;
 
   if (registries) {
-    return versionDepKeys.every((key) => {
+    return versionDepKeys.some((key) => {
       return registries[key]?.exists;
     });
   }

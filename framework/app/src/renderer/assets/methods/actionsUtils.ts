@@ -891,7 +891,6 @@ export const usePreStartAndQuitApp = (): {
   preStartSystemLoading: ComputedRef<boolean>;
   preQuitSystemLoadingData: Record<string, 'loading' | 'done' | undefined>;
   preQuitSystemLoading: ComputedRef<boolean>;
-  saveBoardsMap: () => Promise<void>;
 } => {
   const app = getCurrentInstance();
 
@@ -951,15 +950,6 @@ export const usePreStartAndQuitApp = (): {
 
   startGetWatcherStatus();
 
-  const saveBoardsMap = (): Promise<void> => {
-    const { boardsMap } = storeToRefs(useGlobalStore());
-    localStorage.setItem(
-      'indexBoardsMap',
-      JSON.stringify(boardsMap.value || '{}'),
-    );
-    return Promise.resolve();
-  };
-
   onMounted(async () => {
     if (
       booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED) &&
@@ -972,10 +962,12 @@ export const usePreStartAndQuitApp = (): {
     }
 
     if (app?.proxy) {
-      const subscription = app?.proxy.$globalBus.subscribe(
+      app.proxy.$globalBus.next({ tag: 'appMounted' });
+
+      const subscription = app.proxy.$globalBus.subscribe(
         (data: KfEvent.KfBusEvent) => {
           if (data.tag === 'preStartCheck') {
-            if (data.tag === 'cpusNum') {
+            if (data.name === 'cpusNum') {
               preStartSystemLoadingData.cpusSafeNumChecking = 'done';
             }
             if (data.name === 'VCDeps') {
@@ -1036,7 +1028,6 @@ export const usePreStartAndQuitApp = (): {
     preStartSystemLoading,
     preQuitSystemLoadingData,
     preQuitSystemLoading,
-    saveBoardsMap,
   };
 };
 

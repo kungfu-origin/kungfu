@@ -94,6 +94,7 @@ function handleOpenSetStrategyDialog(
   setStrategyConfigPayload.value.type = type;
   setStrategyConfigPayload.value.config = {
     type: [],
+    vcDepVersions: [],
     name: t('strategyConfig.strategy'),
     category: 'strategy',
     key: 'default',

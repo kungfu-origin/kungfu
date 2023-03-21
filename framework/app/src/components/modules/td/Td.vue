@@ -270,6 +270,7 @@ function handleOpenAddTdGroupDialog(type: KungfuApi.ModalChangeType) {
   addTdGroupConfigPayload.value.type = type;
   addTdGroupConfigPayload.value.config = {
     type: [],
+    vcDepVersions: [],
     name: t('tdConfig.td_group'),
     category: 'tdGroup',
     key: 'TdGroup',

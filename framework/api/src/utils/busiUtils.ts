@@ -355,6 +355,39 @@ export const buildObjectFromArray = <T>(
   }, {} as Record<string | number, T | T[keyof T] | undefined>);
 };
 
+export const mergeObject = (
+  targetObj: Record<string, KungfuApi.KfConfigValue>,
+  sourceObj: Record<string, KungfuApi.KfConfigValue>,
+) => {
+  if (typeof targetObj !== 'object' || typeof sourceObj !== 'object')
+    return targetObj;
+
+  const allKeys = Array.from(
+    new Set([...Object.keys(targetObj), ...Object.keys(sourceObj)]),
+  );
+
+  allKeys.forEach((key) => {
+    if (key in targetObj) {
+      if (key in sourceObj) {
+        if (
+          typeof targetObj[key] === 'object' &&
+          typeof sourceObj[key] === 'object'
+        ) {
+          targetObj[key] = mergeObject(targetObj[key], sourceObj[key]);
+        } else {
+          targetObj[key] = sourceObj[key];
+        }
+      }
+    } else {
+      if (key in sourceObj) {
+        targetObj[key] = sourceObj[key];
+      }
+    }
+  });
+
+  return targetObj;
+};
+
 export const getInstrumentTypeData = (
   instrumentType: InstrumentTypes,
 ): KungfuApi.KfTradeValueCommonData => {
@@ -510,7 +543,7 @@ const getKfExtensionConfigByCategory = (
                 category,
                 configOfCategory?.type || [],
               ),
-              vcDepVersions: configOfCategory.vc_dep_versions || [],
+              vcDepVersions: configOfCategory.vcDepVersions || [],
               settings: configOfCategory?.settings || [],
             },
           };
@@ -650,7 +683,7 @@ export const getKfExtVCDepsVersions = async () => {
       const config = extConfig.config;
       depVersions.push(
         ...Object.values(config).reduce(
-          (vers, cur) => [...vers, ...(cur.vc_dep_versions || [])],
+          (vers, cur) => [...vers, ...(cur.vcDepVersions || [])],
           [] as KungfuApi.VCDepsVersionTypes[],
         ),
       );

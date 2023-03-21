@@ -134,82 +134,103 @@ mergeExtLanguages().then(() =>
 
 const globalStore = useGlobalStore();
 const __BYPASS_ARCHIVE__ = false;
+let appMounted = false;
+
+globalBus.subscribe((data) => {
+  if (data.tag === 'appMounted') {
+    appMounted = true;
+  }
+});
 
 const initStartAll = () => {
-  preStartAll()
-    .then(() => checkCpusNumAndConfirmModal())
-    .then((res) => {
-      globalBus.next({
-        tag: 'preStartCheck',
-        name: 'cpusNum',
-        status: res,
-      });
-    })
-    .then(() => checkVCDepsAndConfirmModal())
-    .then((res) => {
-      globalBus.next({
-        tag: 'preStartCheck',
-        name: 'VCDeps',
-        status: res,
-      });
-    })
-    .then(async () => {
-      if (__BYPASS_ARCHIVE__) {
+  const start = () => {
+    preStartAll()
+      .then(() => checkCpusNumAndConfirmModal())
+      .then((res) => {
         globalBus.next({
-          tag: 'processStatus',
-          name: 'archive',
-          status: 'online',
+          tag: 'preStartCheck',
+          name: 'cpusNum',
+          status: res,
         });
-        await delayMilliSeconds(2000);
+      })
+      .then(() => checkVCDepsAndConfirmModal())
+      .then((res) => {
         globalBus.next({
-          tag: 'processStatus',
-          name: 'archive',
-          status: 'stopped',
+          tag: 'preStartCheck',
+          name: 'VCDeps',
+          status: res,
         });
-        return;
-      } else {
-        return startArchiveMakeTask((archiveStatus: Pm2ProcessStatusTypes) => {
+      })
+      .then(async () => {
+        if (__BYPASS_ARCHIVE__) {
           globalBus.next({
             tag: 'processStatus',
             name: 'archive',
-            status: archiveStatus,
+            status: 'online',
           });
-        });
-      }
-    })
-    .then(() => startMaster(false))
-    .catch((err) => console.error(err.message))
-    .finally(() => {
-      startGetProcessStatus(
-        (res: {
-          processStatus: Pm2ProcessStatusData;
-          processStatusWithDetail: Pm2ProcessStatusDetailData;
-        }) => {
-          const { processStatus, processStatusWithDetail } = res;
-          globalStore.setProcessStatus(processStatus);
-          globalStore.setProcessStatusWithDetail(processStatusWithDetail);
-        },
-      );
-    });
-
-  const watcherIsLiveObervable = buildIfWatcherLiveObservable(window.watcher);
-  watcherIsLiveObervable.pipe(first()).subscribe(() => {
-    console.log('watcher is live');
-    delayMilliSeconds(2000)
-      .then(() => startCacheD(false))
-      .then(() => delayMilliSeconds(2000))
-      .then(() => startLedger(false))
-      .then(() => postStartAll())
-      .then(() => delayMilliSeconds(1000))
-      .then(() => {
-        globalBus.next({
-          tag: 'processStatus',
-          name: 'extraResourcesLoading',
-          status: 'online',
-        });
+          await delayMilliSeconds(2000);
+          globalBus.next({
+            tag: 'processStatus',
+            name: 'archive',
+            status: 'stopped',
+          });
+          return;
+        } else {
+          return startArchiveMakeTask(
+            (archiveStatus: Pm2ProcessStatusTypes) => {
+              globalBus.next({
+                tag: 'processStatus',
+                name: 'archive',
+                status: archiveStatus,
+              });
+            },
+          );
+        }
       })
-      .catch((err) => console.error(err.message));
-  });
+      .then(() => startMaster(false))
+      .catch((err) => console.error(err.message))
+      .finally(() => {
+        startGetProcessStatus(
+          (res: {
+            processStatus: Pm2ProcessStatusData;
+            processStatusWithDetail: Pm2ProcessStatusDetailData;
+          }) => {
+            const { processStatus, processStatusWithDetail } = res;
+            globalStore.setProcessStatus(processStatus);
+            globalStore.setProcessStatusWithDetail(processStatusWithDetail);
+          },
+        );
+      });
+
+    const watcherIsLiveObervable = buildIfWatcherLiveObservable(window.watcher);
+    watcherIsLiveObervable.pipe(first()).subscribe(() => {
+      console.log('watcher is live');
+      delayMilliSeconds(2000)
+        .then(() => startCacheD(false))
+        .then(() => delayMilliSeconds(2000))
+        .then(() => startLedger(false))
+        .then(() => postStartAll())
+        .then(() => delayMilliSeconds(1000))
+        .then(() => {
+          globalBus.next({
+            tag: 'processStatus',
+            name: 'extraResourcesLoading',
+            status: 'online',
+          });
+        })
+        .catch((err) => console.error(err.message));
+    });
+  };
+
+  if (appMounted) {
+    start();
+  } else {
+    globalBus.subscribe((data) => {
+      if (data.tag === 'appMounted') {
+        start();
+      }
+    });
+  }
 };
 
 if (!booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED)) {

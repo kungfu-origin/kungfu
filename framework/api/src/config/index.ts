@@ -5,11 +5,16 @@ import {
   KF_INSTRUMENTS_DEFAULT_PATH,
   KF_INSTRUMENTS_PATH,
 } from './pathConfig';
+import { readRootPackageJsonSync } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
+import { mergeObject } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 
 export const initKfConfig = () => {
   if (!fse.existsSync(KF_CONFIG_PATH)) {
     ensureFileSync(KF_CONFIG_PATH);
-    const kfConfigJSON = fse.readJsonSync(KF_CONFIG_DEFAULT_PATH);
+    let kfConfigJSON = fse.readJsonSync(KF_CONFIG_DEFAULT_PATH);
+    const kfConfigInitValue =
+      readRootPackageJsonSync()?.appConfig?.kfConfigInitValue || {};
+    kfConfigJSON = mergeObject(kfConfigJSON, kfConfigInitValue);
     fse.outputJsonSync(KF_CONFIG_PATH, kfConfigJSON);
   }
 };

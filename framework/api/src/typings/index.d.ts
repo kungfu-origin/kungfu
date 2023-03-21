@@ -54,7 +54,6 @@ declare namespace KungfuApi {
     | '2010'
     | '2012'
     | '2013'
-    | '2015-2019'
     | '2015-2022';
 
   export type AntInKungfuColorTypes =
@@ -225,7 +224,7 @@ declare namespace KungfuApi {
           | InstrumentTypes
           | StrategyExtTypes[]
           | StrategyExtTypes;
-        vc_dep_versions?: VCDepsVersionTypes[];
+        vcDepVersions?: VCDepsVersionTypes[];
         settings: KfConfigItem[];
       }
     >;
