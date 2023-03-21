@@ -13,8 +13,10 @@ export const initKfConfig = () => {
     ensureFileSync(KF_CONFIG_PATH);
     let kfConfigJSON = fse.readJsonSync(KF_CONFIG_DEFAULT_PATH);
     const kfConfigInitValue =
-      readRootPackageJsonSync()?.appConfig?.kfConfigInitValue || {};
-    kfConfigJSON = mergeObject(kfConfigJSON, kfConfigInitValue);
+      readRootPackageJsonSync()?.appConfig?.kfConfigInitValue;
+    if (kfConfigInitValue && typeof kfConfigInitValue === 'object') {
+      kfConfigJSON = mergeObject(kfConfigJSON, kfConfigInitValue);
+    }
     fse.outputJsonSync(KF_CONFIG_PATH, kfConfigJSON);
   }
 };
