@@ -703,6 +703,10 @@ export default {
   kungfu: 'Kungfu',
 
   system_prompt: 'System Prompt',
+  computer_performance_done: 'Computer performance detecting done ✓',
+  computer_performance_detecting: 'Computer performance detecting...',
+  vc_deps_done: 'VS dependencies detecting done ✓',
+  vc_deps_detecting: 'VS dependencies detecting...',
   archive_done: 'Kungfu archive done',
   archive_loading: 'Kungfu archive loading...',
   environment_done: 'Kungfu environment done ✓',
@@ -713,6 +717,12 @@ export default {
   saving_data_loading: 'Saving data loading ...',
   end_all_transactions: 'End all transactions ✓',
   closing: 'End the transaction process, Please do not close...',
+
+  computer_performance_abnormal:
+    'Computer performance is too low, continue start maybe make system process crash, suggest use the CPU core num more than 8.',
+  vc_deps_abnormal: 'Without Visual C++ dependencies, install now?',
+  vc_deps_abnormal_message:
+    '(notice: without this dependency will crash the Td and Md when them start)',
 
   quit_confirm:
     'Exiting the application ends all transactions, Confirm to exit?',

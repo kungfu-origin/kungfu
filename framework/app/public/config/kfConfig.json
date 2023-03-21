@@ -9,7 +9,8 @@
   "system": {
     "logLevel": "-l info",
     "autoRestartTd": true,
-    "language": "zh-CN"
+    "language": "zh-CN",
+    "bypassArchive": false
   },
   "code": { "tabSpaceType": "SPACES", "tabSpaceSize": "TWOINDENT" },
   "trade": { "sound": true, "fatFinger": 0, "close": 100 },
