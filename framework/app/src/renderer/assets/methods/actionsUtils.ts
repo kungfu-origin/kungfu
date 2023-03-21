@@ -982,8 +982,6 @@ export const usePreStartAndQuitApp = (): {
     }
 
     if (app?.proxy) {
-      app.proxy.$globalBus.next({ tag: 'appMounted' });
-
       const subscription = app.proxy.$globalBus.subscribe(
         (data: KfEvent.KfBusEvent) => {
           if (data.tag === 'preStartCheck') {

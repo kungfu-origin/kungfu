@@ -142,6 +142,8 @@ onMounted(() => {
         tag: 'resize',
       } as KfEvent.ResizeEvent);
   });
+
+  app?.proxy?.$globalBus.next({ tag: 'appMounted' });
 });
 
 onBeforeUnmount(() => {
