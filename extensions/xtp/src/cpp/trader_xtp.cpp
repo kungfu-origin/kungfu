@@ -407,7 +407,7 @@ void TraderXTP::OnQueryTrade(XTPQueryTradeRsp *trade_info, XTPRI *error_info, in
   writer->close_data();
 }
 
-void TraderXTP::on_restore() {
+void TraderXTP::on_recover() {
   for (auto &pair : orders_) {
     const std::string str_external_order_id = pair.second.data.external_order_id.to_string();
     if (not str_external_order_id.empty()) {
