@@ -52,12 +52,47 @@ void TraderVendor::on_start() {
     return event->msg_type() == BatchOrderBegin::tag or event->msg_type() == BatchOrderEnd::tag;
   }) | $$(service_->handle_batch_order_tag(event));
 
+  clean_orders();
   service_->restore();
   service_->on_restore();
   service_->on_start();
 }
 
 BrokerService_ptr TraderVendor::get_service() { return service_; }
+
+void TraderVendor::clean_orders() {
+  std::set<uint32_t> strategy_uids = {};
+  auto master_cmd_writer = get_writer(get_master_commands_uid());
+  for (auto &pair : state_bank_[boost::hana::type_c<Order>]) {
+    auto &order_state = pair.second;
+    auto &order = const_cast<Order &>(order_state.data);
+    auto strategy_uid = order_state.dest;
+    if (order.status == OrderStatus::Submitted or order.status == OrderStatus::Pending or
+        order.status == OrderStatus::PartialFilledActive) {
+
+      order.status = OrderStatus::Lost;
+      order.update_time = time::now_in_nano();
+
+      if (strategy_uid == location::PUBLIC) {
+        write_to(now(), order);
+        continue;
+      }
+
+      strategy_uids.emplace(strategy_uid);
+
+      events_ | is(Channel::tag) | filter([&, strategy_uid](const event_ptr &event) {
+        const Channel &channel = event->data<Channel>();
+        return channel.source_id == get_home_uid() and channel.dest_id == strategy_uid;
+      }) | first() |
+          $([this, order, strategy_uid](auto event) { write_to(now(), order, strategy_uid); });
+    }
+  }
+  for (auto uid : strategy_uids) {
+    if (not has_writer(uid)) {
+      request_write_to(now(), uid);
+    }
+  }
+}
 
 void TraderVendor::on_trading_day(const event_ptr &event, int64_t daytime) { service_->on_trading_day(event, daytime); }
 
@@ -112,7 +147,7 @@ bool Trader::has_self_deal_risk(const event_ptr &event) {
   const OrderInput &input = event->data<OrderInput>();
   static std::string str_ex_instrument;
   str_ex_instrument = input.exchange_id.to_string() + input.instrument_id.to_string();
-  auto fn_check = [&]() -> bool {
+  auto risk_check = [&]() -> bool {
     auto iter = map_ex_instrument_to_order_ids_.find(str_ex_instrument);
 
     /// 没有相同的标的, 判定为不存在风险
@@ -152,7 +187,7 @@ bool Trader::has_self_deal_risk(const event_ptr &event) {
     });
   };
 
-  if (fn_check()) {
+  if (risk_check()) {
     return true;
   }
   map_ex_instrument_to_order_ids_.try_emplace(str_ex_instrument).first->second.emplace(input.order_id);
@@ -198,7 +233,11 @@ bool Trader::insert_block_message(const event_ptr &event) {
 void Trader::enable_self_detect() { self_deal_detect_ = true; }
 
 void Trader::restore() {
-  auto fn_deal_frame = [&](const frame_ptr &frame) {
+  if (disable_restore_) {
+    return;
+  }
+
+  auto deal_write_frame = [&](const frame_ptr &frame) {
     if (frame->msg_type() == Order::tag) {
       const Order &order = frame->data<Order>();
       orders_.insert_or_assign(order.order_id, state<Order>(frame->source(), frame->dest(), frame->gen_time(), order));
@@ -210,15 +249,53 @@ void Trader::restore() {
     }
   };
 
-  assemble asb(get_home(), location::PUBLIC, AssembleMode::Write);
-  asb.seek_to_time(time::today_start()); // restore from today
-  while (asb.data_available()) {
-    auto frame = asb.current_frame();
-    fn_deal_frame(frame);
-    asb.next();
+  assemble asb_write(get_home(), location::PUBLIC, AssembleMode::Write);
+  asb_write.seek_to_time(time::today_start()); // restore from today
+  while (asb_write.data_available()) {
+    auto frame = asb_write.current_frame();
+    deal_write_frame(frame);
+    asb_write.next();
+  }
+
+  // set order as Lost which without external_order_id
+  for (auto &pair : orders_) {
+    if (not has_writer(pair.second.dest)) {
+      continue;
+    }
+    Order &order = pair.second.data;
+    if (not is_final_status(order.status) and order.external_order_id.to_string().empty()) {
+      order.status = OrderStatus::Lost;
+      write_to(order, pair.second.dest);
+    }
+  }
+
+  // write a Lost Order to journal when read an OrderInput whose order_id not in orders_
+  auto deal_read_frame = [&](const frame_ptr &frame) {
+    if (frame->msg_type() == OrderInput::tag) {
+      if (not has_writer(frame->source())) {
+        return;
+      }
+      const OrderInput &order_input = frame->data<OrderInput>();
+      if (orders_.find(order_input.order_id) != orders_.end()) {
+        return;
+      }
+      Order &order = get_writer(frame->source())->open_data<Order>();
+      order_from_input(order_input, order);
+      order.status = OrderStatus::Lost;
+      get_writer(frame->source())->close_data();
+    }
+  };
+
+  assemble asb_read(get_home(), get_home_uid(), AssembleMode::Read);
+  while (asb_read.data_available()) {
+    auto frame = asb_read.current_frame();
+    deal_read_frame(frame);
+    asb_read.next();
   }
 }
 
 void Trader::clear_order_inputs(const uint64_t location_uid) { order_inputs_.erase(location_uid); }
+
+void Trader::disable_restore() { disable_restore_ = true; }
 
 } // namespace kungfu::wingchun::broker

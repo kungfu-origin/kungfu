@@ -36,6 +36,8 @@ protected:
 
 private:
   Trader_ptr service_ = {};
+
+  void clean_orders();
 };
 
 class Trader : public BrokerService {
@@ -97,6 +99,8 @@ public:
 
   void enable_self_detect();
 
+  void disable_restore();
+
   virtual void on_restore(){};
 
 protected:
@@ -104,6 +108,7 @@ protected:
   OrderActionMap actions_ = {};
   TradeMap trades_ = {};
   bool self_deal_detect_ = false;
+  bool disable_restore_ = false;
   std::unordered_map<uint64_t, kungfu::longfist::types::BlockMessage> block_messages_ = {}; // <block_id, batch_flag>
   /// <strategy_uid, OrderInput>, a batch OrderInputs for a strategy
   std::unordered_map<uint64_t, std::vector<longfist::types::OrderInput>> order_inputs_ = {};
