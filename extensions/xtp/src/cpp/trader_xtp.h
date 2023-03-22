@@ -42,7 +42,7 @@ public:
 
   bool req_history_trade(const event_ptr &event) override;
 
-  void on_restore() override;
+  void on_recover() override;
 
   /// 当客户端的某个连接与交易后台通信连接断开时，该方法被调用。
   ///@param reason 错误原因，请与错误代码表对应
