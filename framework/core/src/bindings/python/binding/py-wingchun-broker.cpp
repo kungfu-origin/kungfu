@@ -79,7 +79,7 @@ public:
 
   bool req_history_trade(const event_ptr &event) override { PYBIND11_OVERLOAD(bool, Trader, req_history_trade, event); }
 
-  void on_restore() override { PYBIND11_OVERLOAD_PURE(void, Trader, on_restore); }
+  void on_recover() override { PYBIND11_OVERLOAD_PURE(void, Trader, on_recover); }
 
   void on_start() override { PYBIND11_OVERLOAD(void, Trader, on_start); }
 
@@ -118,7 +118,7 @@ void bind_broker(pybind11::module &m) {
       .def_property_readonly("order_inputs", &Trader::get_order_inputs)
       .def("clear_order_inputs", &Trader::clear_order_inputs)
       .def("on_start", &Trader::on_start)
-      .def("on_restore", &Trader::on_restore)
+      .def("on_recover", &Trader::on_recover)
       .def("now", &Trader::now)
       .def("get_writer", &Trader::get_writer)
       .def("has_writer", &Trader::has_writer)
