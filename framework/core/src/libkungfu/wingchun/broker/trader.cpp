@@ -53,8 +53,8 @@ void TraderVendor::on_start() {
   }) | $$(service_->handle_batch_order_tag(event));
 
   clean_orders();
-  service_->restore();
-  service_->on_restore();
+  service_->recover();
+  service_->on_recover();
   service_->on_start();
 }
 
@@ -232,8 +232,8 @@ bool Trader::insert_block_message(const event_ptr &event) {
 
 void Trader::enable_self_detect() { self_deal_detect_ = true; }
 
-void Trader::restore() {
-  if (disable_restore_) {
+void Trader::recover() {
+  if (disable_recover_) {
     return;
   }
 
@@ -250,7 +250,7 @@ void Trader::restore() {
   };
 
   assemble asb_write(get_home(), location::PUBLIC, AssembleMode::Write);
-  asb_write.seek_to_time(time::today_start()); // restore from today
+  asb_write.seek_to_time(time::today_start()); // recover from today
   while (asb_write.data_available()) {
     auto frame = asb_write.current_frame();
     deal_write_frame(frame);
@@ -296,6 +296,6 @@ void Trader::restore() {
 
 void Trader::clear_order_inputs(const uint64_t location_uid) { order_inputs_.erase(location_uid); }
 
-void Trader::disable_restore() { disable_restore_ = true; }
+void Trader::disable_recover() { disable_recover_ = true; }
 
 } // namespace kungfu::wingchun::broker

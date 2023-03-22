@@ -99,16 +99,16 @@ public:
 
   void enable_self_detect();
 
-  void disable_restore();
+  void disable_recover();
 
-  virtual void on_restore(){};
+  virtual void on_recover(){};
 
 protected:
   OrderMap orders_ = {};
   OrderActionMap actions_ = {};
   TradeMap trades_ = {};
   bool self_deal_detect_ = false;
-  bool disable_restore_ = false;
+  bool disable_recover_ = false;
   std::unordered_map<uint64_t, kungfu::longfist::types::BlockMessage> block_messages_ = {}; // <block_id, batch_flag>
   /// <strategy_uid, OrderInput>, a batch OrderInputs for a strategy
   std::unordered_map<uint64_t, std::vector<longfist::types::OrderInput>> order_inputs_ = {};
@@ -126,7 +126,7 @@ private:
   void handle_order_input(const event_ptr &event);
   void handle_batch_order_tag(const event_ptr &event);
   bool has_self_deal_risk(const event_ptr &event);
-  void restore();
+  void recover();
 };
 } // namespace kungfu::wingchun::broker
 
