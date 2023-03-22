@@ -143,7 +143,6 @@ module.exports = {
         'public/keywords',
         'public/music',
         'public/language',
-        'public/VCDeps',
         ...(fse.existsSync(defaultInstrumentsJson)
           ? ['!public/config/defaultInstruments.json']
           : []),
