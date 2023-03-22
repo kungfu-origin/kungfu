@@ -59,9 +59,7 @@ void Ledger::update_broker_state_map(uint32_t location_uid, const BrokerStateUpd
 }
 
 void Ledger::update_broker_state_map(uint32_t location_uid, const Deregister &deregister) {
-  // if (broker_states_.find(location_uid) != broker_states_.end()) {
   broker_states_.erase(location_uid);
-  // }
   write_broker_state_to_public();
 }
 
