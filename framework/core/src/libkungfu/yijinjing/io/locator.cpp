@@ -121,7 +121,7 @@ std::vector<uint32_t> locator::list_location_dest(const location_ptr &location) 
       set.emplace(std::stoul(basename.stem(), nullptr, 16));
     }
   }
-  return std::vector<uint32_t>(set.begin(), set.end());
+  return std::vector<uint32_t>{set.begin(), set.end()};
 }
 
 std::vector<uint32_t> locator::list_location_dest_by_db(const location_ptr &location) const {
@@ -133,6 +133,6 @@ std::vector<uint32_t> locator::list_location_dest_by_db(const location_ptr &loca
       set.emplace(std::stoul(basename.stem(), nullptr, 16));
     }
   }
-  return std::vector<uint32_t>(set.begin(), set.end());
+  return std::vector<uint32_t>{set.begin(), set.end()};
 }
 } // namespace kungfu::yijinjing::data

@@ -79,6 +79,7 @@ void TraderXTP::on_trading_day(const event_ptr &event, int64_t daytime) {
 
 bool TraderXTP::insert_order(const event_ptr &event) {
   const OrderInput &input = event->data<OrderInput>();
+  SPDLOG_DEBUG("OrderInput: {}", input.to_string());
   XTPOrderInsertInfo xtp_input = {};
   to_xtp(xtp_input, input);
 
