@@ -134,7 +134,7 @@ void Client::sync(int64_t trigger_time, const yijinjing::data::location_ptr &td_
   writer->mark(trigger_time, OrderTradeRequest::tag);
 }
 
-bool Client::try_sync(int64_t trigger_time, const location_ptr &td_location) {
+[[maybe_unused]] bool Client::try_sync(int64_t trigger_time, const location_ptr &td_location) {
   if (ready_td_locations_.find(td_location->uid) == ready_td_locations_.end()) {
     return false;
   }
@@ -211,7 +211,7 @@ void Client::update_broker_state(const event_ptr &event, const BrokerStateUpdate
   broker_states_.emplace(broker_location->uid, state_value);
 }
 
-void Client::update_broker_state(const event_ptr &event, const longfist::types::Deregister &deregister_data) {
+void Client::update_broker_state(const event_ptr &, const longfist::types::Deregister &deregister_data) {
   auto location_uid = deregister_data.location_uid;
   auto broker_location = app_.get_location(location_uid);
   broker_states_.emplace(location_uid, BrokerState::DisConnected);
@@ -249,7 +249,7 @@ SilentAutoClient::SilentAutoClient(practice::apprentice &app) : AutoClient(app) 
 //   return false;
 // }
 
-void SilentAutoClient::renew(int64_t trigger_time, const location_ptr &md_location){};
+void SilentAutoClient::renew(int64_t trigger_time, const location_ptr &md_location) {}
 
 void SilentAutoClient::sync(int64_t trigger_time, const location_ptr &td_location) {}
 

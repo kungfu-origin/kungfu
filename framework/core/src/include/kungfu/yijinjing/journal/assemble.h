@@ -23,13 +23,13 @@ private:
 };
 DECLARE_PTR(sink)
 
-class null_sink : public sink {
+class [[maybe_unused]] null_sink : public sink {
 public:
   null_sink() = default;
   void put(const data::location_ptr &location, uint32_t dest_id, const frame_ptr &frame) override{};
 };
 
-class copy_sink : public sink {
+class [[maybe_unused]] copy_sink : public sink {
 public:
   explicit copy_sink(data::locator_ptr locator);
   void put(const data::location_ptr &location, uint32_t dest_id, const frame_ptr &frame) override;
@@ -62,7 +62,7 @@ public:
 
   frame_ptr current_frame();
 
-  template <typename T> std::vector<T> read_all(int32_t msg_type, int64_t end_time = INT64_MAX) {
+  template <typename T> [[maybe_unused]] std::vector<T> read_all(int32_t msg_type, int64_t end_time = INT64_MAX) {
     std::vector<T> v{};
     while (data_available() and current_frame()->gen_time() < end_time) {
       if (current_frame()->msg_type() == msg_type) {
@@ -75,7 +75,7 @@ public:
 
   [[maybe_unused]] void seek_to_time(int64_t nano_time);
 
-  [[nodiscard]] const std::vector<reader_ptr> &get_readers() const { return readers_; }
+  [[maybe_unused]] [[nodiscard]] const std::vector<reader_ptr> &get_readers() const { return readers_; }
 
 protected:
   std::vector<reader_ptr> readers_ = {};

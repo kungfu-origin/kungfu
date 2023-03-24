@@ -6,7 +6,6 @@
 
 #ifdef _WINDOWS
 #include <fcntl.h>
-#include <io.h>
 #include <windows.h>
 #else
 
@@ -97,7 +96,7 @@ uintptr_t load_mmap_buffer(const std::string &path, size_t size, bool is_writing
   return reinterpret_cast<uintptr_t>(buffer);
 }
 
-bool release_mmap_buffer(uintptr_t address, size_t size, bool lazy) {
+bool release_mmap_buffer(uintptr_t address, [[maybe_unused]] size_t size, bool lazy) {
   void *buffer = reinterpret_cast<void *>(address);
 #ifdef _WINDOWS
   FlushViewOfFile(buffer, 0);

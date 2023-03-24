@@ -32,10 +32,10 @@ constexpr auto make_storage_ptr = [](const std::string &db_file, const auto &typ
     return [&](auto key) {
       using DataType = typename decltype(+types[key])::type;
       auto data_accessors = boost::hana::accessors<DataType>();
-      DataType *image = {}; // workaround for visual studio 17.4 sake
+      [[maybe_unused]] DataType *image = {}; // workaround for visual studio 17.4 sake
       auto columns = boost::hana::transform(data_accessors, [&](auto it) {
         auto name = boost::hana::first(it);
-        auto accessor = boost::hana::second(it);
+        [[maybe_unused]] auto accessor = boost::hana::second(it);
         auto member_pointer = member_pointer_trait<decltype(accessor)>().pointer();
         using MemberType = std::decay_t<decltype(accessor(*image))>;
         return sqlite_orm::make_column(name.c_str(), member_pointer,
@@ -43,7 +43,7 @@ constexpr auto make_storage_ptr = [](const std::string &db_file, const auto &typ
       });
       auto pk_members = boost::hana::transform(DataType::primary_keys, [&](auto pk) {
         auto pk_member = boost::hana::find_if(data_accessors, hana::on(boost::hana::equal.to(pk), boost::hana::first));
-        auto accessor = boost::hana::second(*pk_member);
+        [[maybe_unused]] auto accessor = boost::hana::second(*pk_member);
         return member_pointer_trait<decltype(accessor)>().pointer();
       });
       auto make_primary_keys = [](auto... keys) { return sqlite_orm::primary_key(keys...); };
@@ -73,7 +73,7 @@ using StateStoragePtr = decltype(make_storage_ptr(std::string(), longfist::State
 template <typename, typename = void, bool = true> struct time_spec;
 
 template <typename DataType> struct time_spec<DataType, std::enable_if_t<not DataType::has_timestamp>> {
-  static std::vector<DataType> get_all(StateStoragePtr &storage, int64_t from, int64_t to) {
+  static std::vector<DataType> get_all(StateStoragePtr &storage, int64_t, int64_t) {
     return storage->get_all<DataType>();
   };
 };
@@ -82,7 +82,7 @@ template <typename DataType> struct time_spec<DataType, std::enable_if_t<DataTyp
   static std::vector<DataType> get_all(StateStoragePtr &storage, int64_t from, int64_t to) {
     auto comparator = [](auto it) { return DataType::timestamp_key.value() == boost::hana::first(it); };
     auto just = boost::hana::find_if(boost::hana::accessors<DataType>(), comparator);
-    auto accessor = boost::hana::second(*just);
+    [[maybe_unused]] auto accessor = boost::hana::second(*just);
     auto ts = member_pointer_trait<decltype(accessor)>().pointer();
     return storage->get_all<DataType>(sqlite_orm::where(
         sqlite_orm::and_(sqlite_orm::greater_or_equal(ts, from), sqlite_orm::lesser_or_equal(ts, to))));
@@ -126,7 +126,7 @@ public:
     storage_map_.at(event->dest())->template remove_all<DataType>();
   }
 
-  template <typename DataType> void operator/=(const typed_event_ptr<DataType> &event) {
+  template <typename DataType> void operator/=(const typed_event_ptr<DataType> &) {
     for (auto &pair : storage_map_) {
       pair.second->template remove_all<DataType>();
     }

@@ -18,7 +18,7 @@
 
 #include <kungfu/yijinjing/common.h>
 
-#define MAX_MSG_LENGTH 16 * 1024
+#define MAX_MSG_LENGTH (16 * 1024)
 
 namespace kungfu::yijinjing::nanomsg {
 enum class protocol : int {
@@ -50,7 +50,7 @@ inline std::string get_protocol_name(protocol p) {
   }
 }
 
-inline protocol get_opposite_protol(protocol p) {
+[[maybe_unused]] inline protocol get_opposite_protol(protocol p) {
   switch (p) {
   case protocol::REPLY:
     return protocol::REQUEST;
@@ -82,9 +82,9 @@ class nn_exception : public std::exception {
 public:
   nn_exception() : errno_(nn_errno()) {}
 
-  [[nodiscard]] virtual const char *what() const throw();
+  [[nodiscard]] const char *what() const noexcept override;
 
-  [[nodiscard]] int num() const;
+  [[maybe_unused]] [[nodiscard]] int num() const;
 
 private:
   int errno_;
@@ -94,7 +94,7 @@ DECLARE_PTR(nn_exception)
 
 class socket {
 public:
-  socket(protocol p) : socket(AF_SP, p, MAX_MSG_LENGTH){};
+  explicit socket(protocol p) : socket(AF_SP, p, MAX_MSG_LENGTH){};
 
   socket(int domain, protocol p) : socket(domain, p, MAX_MSG_LENGTH){};
 
@@ -102,23 +102,23 @@ public:
 
   ~socket();
 
-  void setsockopt(int level, int option, const void *optval, size_t optvallen);
+  void setsockopt(int level, int option, const void *optval, size_t optvallen) const;
 
-  void setsockopt_str(int level, int option, std::string value);
+  void setsockopt_str(int level, int option, const std::string &value) const;
 
-  void setsockopt_int(int level, int option, int value);
+  void setsockopt_int(int level, int option, int value) const;
 
-  void getsockopt(int level, int option, void *optval, size_t *optvallen);
+  void getsockopt(int level, int option, void *optval, size_t *optvallen) const;
 
-  int getsockopt_int(int level, int option);
+  [[maybe_unused]] [[nodiscard]] int getsockopt_int(int level, int option) const;
 
   int bind(const std::string &path);
 
   int connect(const std::string &path);
 
-  void shutdown(int how = 0);
+  [[maybe_unused]] void shutdown(int how = 0) const;
 
-  void close();
+  void close() const;
 
   int send(const std::string &msg, int flags = NN_DONTWAIT) const;
 
@@ -126,13 +126,13 @@ public:
 
   const std::string &recv_msg(int flags = NN_DONTWAIT);
 
-  int send_json(const nlohmann::json &msg, int flags = NN_DONTWAIT) const;
+  [[maybe_unused]] [[nodiscard]] int send_json(const nlohmann::json &msg, int flags = NN_DONTWAIT) const;
 
-  nlohmann::json recv_json(int flags = 0);
+  [[maybe_unused]] nlohmann::json recv_json(int flags = 0);
 
   const std::string &request(const std::string &json_message);
 
-  [[nodiscard]] protocol get_protocol() const { return protocol_; };
+  [[maybe_unused]] [[nodiscard]] protocol get_protocol() const { return protocol_; };
 
   [[nodiscard]] const std::string &get_url() const { return url_; };
 

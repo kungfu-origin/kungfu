@@ -77,7 +77,8 @@ struct console_table {
 io_device_console::io_device_console(data::location_ptr home, int32_t console_width, int32_t console_height)
     : io_device(std::move(home), false, true), console_width_(console_width), console_height_(console_height) {}
 
-void io_device_console::trace(int64_t begin_time, int64_t end_time, bool in, bool out, std::string csv) {
+[[maybe_unused]] void io_device_console::trace(int64_t begin_time, int64_t end_time, bool in, bool out,
+                                               std::string csv) {
   std::unordered_map<uint32_t, location_ptr> locations = {};
   for (auto location : home_->locator->list_locations(".*", ".*", ".*", ".*")) {
     locations.emplace(location->uid, location);
@@ -173,7 +174,8 @@ void io_device_console::trace(int64_t begin_time, int64_t end_time, bool in, boo
   }
 }
 
-void io_device_console::show(int64_t begin_time, int64_t end_time, bool in, bool out, std::string csv) {
+[[maybe_unused]] void io_device_console::show(int64_t begin_time, int64_t end_time, bool in, bool out,
+                                              std::string csv) {
   std::unordered_map<uint32_t, location_ptr> locations = {};
   for (auto location : home_->locator->list_locations(".*", ".*", ".*", ".*")) {
     locations.emplace(location->uid, location);

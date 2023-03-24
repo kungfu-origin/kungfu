@@ -48,13 +48,13 @@ int64_t BrokerService::now() const { return vendor_.now(); }
 
 BrokerState BrokerService::get_state() { return state_; }
 
-const std::string &BrokerService::get_config() {
+const std::string &BrokerService::get_config() const {
   auto &config_map = get_state_bank()[boost::hana::type_c<Config>];
   auto &config_obj = config_map.at(get_home_uid());
   return config_obj.data.value;
 }
 
-const std::string &BrokerService::get_risk_setting() {
+[[maybe_unused]] const std::string &BrokerService::get_risk_setting() const {
   auto &risk_setting_map = get_state_bank()[boost::hana::type_c<RiskSetting>];
   auto &risk_setting_obj = risk_setting_map.at(get_home_uid());
   return risk_setting_obj.data.value;
@@ -72,7 +72,7 @@ bool BrokerService::has_writer(uint32_t dest_id) const { return vendor_.has_writ
 
 const cache::bank &BrokerService::get_state_bank() const { return vendor_.get_state_bank(); }
 
-bool BrokerService::check_if_stored_instruments(const std::string &trading_day) const {
+[[maybe_unused]] bool BrokerService::check_if_stored_instruments(const std::string &trading_day) const {
   SPDLOG_INFO("CHECK_IF_STORED_INSTRUMENTS trading_day {}", trading_day);
   auto &time_key_value_map = get_state_bank()[boost::hana::type_c<TimeKeyValue>];
   for (const auto &pair : time_key_value_map) {
@@ -87,7 +87,7 @@ bool BrokerService::check_if_stored_instruments(const std::string &trading_day) 
   return false;
 }
 
-void BrokerService::record_stored_instruments_trading_day(const std::string &trading_day) {
+[[maybe_unused]] void BrokerService::record_stored_instruments_trading_day(const std::string &trading_day) const {
   auto writer = get_writer(location::PUBLIC);
   TimeKeyValue instrument_stored_trading_day_tkv = {};
   instrument_stored_trading_day_tkv.update_time = now();
@@ -121,4 +121,6 @@ void BrokerService::update_broker_state(BrokerState state) {
   broker_state.location_uid = get_home_uid();
   writer->close_data();
 }
+
+yijinjing::io_device_ptr BrokerService::get_io_device() const { return get_vendor().get_io_device(); }
 } // namespace kungfu::wingchun::broker

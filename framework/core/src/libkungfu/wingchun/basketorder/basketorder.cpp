@@ -56,9 +56,8 @@ int64_t BasketOrderState::get_total_volume() {
   for (auto &iter : orders) {
     auto &order = iter.second;
     auto hashed_key = hash_instrument(order);
-    auto is_lastest_order = lastest_order_map.find(hashed_key) != lastest_order_map.end()
-                                ? lastest_order_map.at(hashed_key).order_id == order.order_id
-                                : false;
+    auto is_lastest_order = lastest_order_map.find(hashed_key) != lastest_order_map.end() &&
+                            lastest_order_map.at(hashed_key).order_id == order.order_id;
     total_volume += is_lastest_order                ? order.volume
                     : is_final_status(order.status) ? order.volume - order.volume_left
                                                     : order.volume;

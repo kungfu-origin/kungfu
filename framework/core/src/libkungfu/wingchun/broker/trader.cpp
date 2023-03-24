@@ -96,7 +96,7 @@ void TraderVendor::clean_orders() {
 
 void TraderVendor::on_trading_day(const event_ptr &event, int64_t daytime) { service_->on_trading_day(event, daytime); }
 
-const std::string &Trader::get_account_id() const { return get_home()->name; }
+[[maybe_unused]] const std::string &Trader::get_account_id() const { return get_home()->name; }
 
 yijinjing::journal::writer_ptr Trader::get_asset_writer() const {
   return get_writer(sync_asset_ ? location::SYNC : location::PUBLIC);
@@ -296,6 +296,6 @@ void Trader::recover() {
 
 void Trader::clear_order_inputs(const uint64_t location_uid) { order_inputs_.erase(location_uid); }
 
-void Trader::disable_recover() { disable_recover_ = true; }
+[[maybe_unused]] void Trader::disable_recover() { disable_recover_ = true; }
 
 } // namespace kungfu::wingchun::broker

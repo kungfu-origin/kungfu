@@ -5,6 +5,6 @@
 //
 #include <napi.h>
 
-Napi::Object InitAll(Napi::Env env, Napi::Object exports) { return exports; }
+Napi::Object InitAll([[maybe_unused]] Napi::Env env, Napi::Object exports) { return exports; }
 
 NODE_API_MODULE(module, InitAll)

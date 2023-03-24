@@ -47,7 +47,7 @@ public:
     auto apply = [&](PositionMap &positions) {
       for (auto &pair : positions) {
         auto &position = pair.second;
-        auto margin_pre = position.margin;
+        [[maybe_unused]] auto margin_pre = position.margin;
         if (is_valid_price(position.close_price)) {
           position.pre_close_price = position.close_price;
         } else if (is_valid_price(position.last_price)) {
@@ -249,7 +249,7 @@ public:
       apply_repaymargin(book, trade);
     } else if (trade.side == Side::RepayStock) {
       apply_repaystock(book, trade);
-    };
+    }
     // update_position(book, book->get_position_for(trade));
   }
 
@@ -267,8 +267,8 @@ protected:
   // Guard for multi-threaded
   std::mutex accounting_mutex_;
   // AccountingMethod is stateless, involve context value?
-  double short_market_value_ = 0;
-  double long_market_value_ = 0;
+  [[maybe_unused]] double short_market_value_ = 0;
+  [[maybe_unused]] double long_market_value_ = 0;
 
   virtual void calculate_marketvalue(Book_ptr &book) {
     double short_market_value = 0;
@@ -277,7 +277,7 @@ protected:
     auto apply = [&](PositionMap &positions, double &market_value) {
       for (auto &pair : positions) {
         auto &position = pair.second;
-        auto margin_pre = position.margin;
+        //        auto margin_pre = position.margin;
         auto cd_mr = get_instr_conversion_margin_rate(book, position);
         if (is_valid_price(position.last_price)) {
           market_value += position.volume * position.last_price * cd_mr.exchange_rate;
@@ -745,7 +745,7 @@ protected:
   static double margin_ratio(const Instrument &instrument, const Position &position) {
     return position.direction == Direction::Long ? instrument.long_margin_ratio : instrument.short_margin_ratio;
   }
-  static double roundn(double value, int n = AMOUT_PRECISION) {
+  [[maybe_unused]] static double roundn(double value, int n = AMOUT_PRECISION) {
     double x = pow(10.0, (double)n);
     double round_val = round(value * x) / x;
     return round_val;

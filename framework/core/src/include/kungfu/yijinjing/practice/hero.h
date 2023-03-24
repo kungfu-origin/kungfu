@@ -60,11 +60,11 @@ public:
 
   const std::string &get_home_uname() const;
 
-  const yijinjing::data::location_ptr &get_live_home() const;
+  [[maybe_unused]] const yijinjing::data::location_ptr &get_live_home() const;
 
   uint32_t get_live_home_uid() const;
 
-  [[nodiscard]] yijinjing::journal::reader_ptr get_reader() const;
+  [[maybe_unused]] [[nodiscard]] yijinjing::journal::reader_ptr get_reader() const;
 
   bool has_writer(uint32_t dest_id) const;
 
@@ -82,9 +82,9 @@ public:
 
   bool has_channel(uint64_t hash) const;
 
-  const longfist::types::Channel &get_channel(uint64_t hash) const;
+  [[maybe_unused]] const longfist::types::Channel &get_channel(uint64_t hash) const;
 
-  const std::unordered_map<uint64_t, longfist::types::Channel> &get_channels() const;
+  [[maybe_unused]] const std::unordered_map<uint64_t, longfist::types::Channel> &get_channels() const;
 
   virtual void on_notify();
 
@@ -97,9 +97,9 @@ public:
 
   yijinjing::data::location_ptr get_ledger_home_location();
 
-  yijinjing::data::location_ptr get_master_home_location();
+  [[maybe_unused]] yijinjing::data::location_ptr get_master_home_location();
 
-  yijinjing::data::location_ptr get_master_cmd_location();
+  [[maybe_unused]] yijinjing::data::location_ptr get_master_cmd_location();
 
 protected:
   int64_t begin_time_;
@@ -127,7 +127,7 @@ protected:
 
   void add_location(int64_t trigger_time, const longfist::types::Location &location);
 
-  void remove_location(int64_t trigger_time, uint32_t location_uid);
+  [[maybe_unused]] void remove_location(int64_t trigger_time, uint32_t location_uid);
 
   void register_location(int64_t trigger_time, const longfist::types::Register &register_data);
 
