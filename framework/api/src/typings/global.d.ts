@@ -94,6 +94,7 @@ export type AllPublishOptions =
 type Writeable<T> = { -readonly [P in keyof T]: T[P] };
 
 export interface RootConfigJSON {
+  name?: string;
   version?: string;
   kungfuCraft?: {
     appTitle?: string;
