@@ -81,6 +81,8 @@ declare namespace KungfuApi {
     | 'files' // string[]
     | 'folder' // string
     | 'table' // any[]
+    | 'dateTimePicker' //string
+    | 'datePicker' //string
     | 'timePicker' //string
     | 'select'
     | 'radio'

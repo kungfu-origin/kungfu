@@ -821,6 +821,20 @@ function handleRemoveFile(key: string, filename: string): void {
   }
 }
 
+function handleDateTimePickerChange(date: Dayjs, key: string) {
+  formState.value[key] =
+    dayjs(date).toString() === 'Invalid Date'
+      ? null
+      : dayjs(date).format('YYYY-MM-DD HH:mm:ss');
+}
+
+function handleDatePickerChange(date: Dayjs, key: string) {
+  formState.value[key] =
+    dayjs(date).toString() === 'Invalid Date'
+      ? null
+      : dayjs(date).format('YYYY-MM-DD HH:mm:ss');
+}
+
 function handleTimePickerChange(date: Dayjs, key: string) {
   formState.value[key] =
     dayjs(date).toString() === 'Invalid Date'
@@ -1474,6 +1488,26 @@ defineExpose({
           </div>
         </template>
       </div>
+      <a-date-picker 
+        v-else-if="item.type === 'dateTimePicker'"
+        :disabled="
+          (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
+          item.disabled 
+        "
+        format="YYYY-MM-DD HH:mm:ss"
+        :show-time="{ defaultValue: dayjs('00:00:00', 'HH:mm:ss') }"
+        :value="(formState[item.key] == null || formState[item.key] == '') ? null : dayjs(formState[item.key])"
+        @change="handleDateTimePickerChange($event as unknown as Dayjs, item.key)"  >
+      </a-date-picker>
+      <a-date-picker 
+        v-else-if="item.type === 'datePicker'"
+        :disabled="
+          (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
+          item.disabled 
+        "
+        :value="(formState[item.key] == null || formState[item.key] == '') ? null : dayjs(formState[item.key])"
+        @change="handleDatePickerChange($event as unknown as Dayjs, item.key)"  >
+      </a-date-picker>
       <a-time-picker
         v-else-if="item.type === 'timePicker'"
         :disabled="
