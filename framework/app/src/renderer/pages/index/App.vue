@@ -142,6 +142,8 @@ onMounted(() => {
         tag: 'resize',
       } as KfEvent.ResizeEvent);
   });
+
+  app?.proxy?.$globalBus.next({ tag: 'appMounted' });
 });
 
 onBeforeUnmount(() => {
@@ -162,6 +164,14 @@ onBeforeUnmount(() => {
       :title="$t('system_prompt')"
       :visible="preStartSystemLoading"
       :status="[
+        {
+          key: 'cpusSafeNumChecking',
+          status: preStartSystemLoadingData.cpusSafeNumChecking,
+        },
+        {
+          key: 'VCDepsExistsChecking',
+          status: preStartSystemLoadingData.VCDepsExistsChecking,
+        },
         { key: 'archive', status: preStartSystemLoadingData.archive },
         { key: 'watcher', status: preStartSystemLoadingData.watcher },
         {
@@ -170,6 +180,14 @@ onBeforeUnmount(() => {
         },
       ]"
       :txt="{
+        cpusSafeNumChecking: {
+          done: $t('computer_performance_done'),
+          loading: $t('computer_performance_detecting'),
+        },
+        VCDepsExistsChecking: {
+          done: $t('vc_deps_done'),
+          loading: $t('vc_deps_detecting'),
+        },
         archive: { done: $t('archive_done'), loading: $t('archive_loading') },
         watcher: {
           done: $t('environment_done'),

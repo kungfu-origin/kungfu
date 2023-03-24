@@ -688,6 +688,10 @@ export default {
   kungfu: '功夫交易系统',
 
   system_prompt: '系统提示',
+  computer_performance_done: '电脑性能检测已完成 ✓',
+  computer_performance_detecting: '电脑性能检测中...',
+  vc_deps_done: 'VS依赖检测已完成 ✓',
+  vc_deps_detecting: 'VS依赖检测中...',
   archive_done: '功夫归档完成 ✓',
   archive_loading: '功夫归档中...',
   environment_done: '功夫环境准备完成 ✓',
@@ -698,6 +702,12 @@ export default {
   saving_data_loading: '保存数据中...',
   end_all_transactions: '结束所有交易进程 ✓',
   closing: '结束交易进程中, 请勿关闭...',
+
+  computer_performance_abnormal:
+    '电脑性能过低, 继续启动可能会导致系统进程奔溃, 建议使用8核及以上的 CPU 运行系统',
+  vc_deps_abnormal: '缺少 Visual C++ 依赖, 是否现在安装?',
+  vc_deps_abnormal_message:
+    '(注: 缺少此依赖会导致 交易账户 和 行情源 启动失败)',
 
   quit_confirm: '退出应用会结束所有交易进程, 确认退出吗?',
   restart_process: '功夫图形进程中断, 该中断不会影响交易, 是否重启图形进程？',
