@@ -33,6 +33,17 @@ const getPlatformName = (): string => {
   return platformNameMap[platform] || platform;
 };
 
+const getMainVersion = (rootConfigJson: RootConfigJSON) => {
+  if (rootConfigJson.version) {
+    const version = semver.parse(rootConfigJson.version);
+    if (version) {
+      return `${version.major}.${version.minor}.${version.patch}`;
+    }
+  }
+
+  return `kungfu-main-version-undefined-${new Date().toDateString()}`;
+};
+
 const getVersionChannel = (
   rootConfigJson: RootConfigJSON,
 ): 'alpha' | 'latest' => {
@@ -53,7 +64,7 @@ const getProjectName = (rootConfigJson: RootConfigJSON): string => {
     }
   }
 
-  return `kungfu-project-name-undefined-${new Date().getTime()}`;
+  return `kungfu-project-name-undefined-${new Date().toDateString()}`;
 };
 
 function handleUpdateKungfu(MainWindow: BrowserWindow | null) {
@@ -68,9 +79,10 @@ function handleUpdateKungfu(MainWindow: BrowserWindow | null) {
 
   const kungfuUpdaterRootDir = 'kungfu-updater';
   const projectName = getProjectName(rootPackageJson);
+  const mainVersion = getMainVersion(rootPackageJson);
   const channel = getVersionChannel(rootPackageJson);
   const platform = getPlatformName();
-  const artifactPath = `${kungfuUpdaterRootDir}/${projectName}/${channel}/${platform}`;
+  const artifactPath = `${kungfuUpdaterRootDir}/${projectName}/${mainVersion}/${channel}/${platform}`;
 
   kfLogger.info('Kungfu autoUpdater artifact path: ', artifactPath);
 
