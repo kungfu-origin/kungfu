@@ -32,21 +32,6 @@ export const getConfigSettings = (
           required: true,
         },
     {
-      key: 'datetime',
-      type: 'dateTimePicker',
-      name: '日期时间选择器',
-    },
-    {
-      key: 'date',
-      type: 'datePicker',
-      name: '日期选择器',
-    },
-    {
-      key: 'time',
-      type: 'timePicker',
-      name: 'lalala',
-    },
-    {
       key: 'instrument',
       name: t('tradingConfig.instrument'),
       type: 'instrument',

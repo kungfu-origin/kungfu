@@ -832,7 +832,7 @@ function handleDatePickerChange(date: Dayjs, key: string) {
   formState.value[key] =
     dayjs(date).toString() === 'Invalid Date'
       ? null
-      : dayjs(date).format('YYYY-MM-DD HH:mm:ss');
+      : dayjs(date).format('YYYY-MM-DD');
 }
 
 function handleTimePickerChange(date: Dayjs, key: string) {
