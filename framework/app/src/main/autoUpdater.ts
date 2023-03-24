@@ -86,6 +86,8 @@ function handleUpdateKungfu(MainWindow: BrowserWindow | null) {
 
   kfLogger.info('Kungfu autoUpdater artifact path: ', artifactPath);
 
+  updaterOption.channel = channel;
+
   if (updaterOption.provider === 'generic') {
     updaterOption.url = `${updaterOption.url}/${artifactPath}`;
   } else if (updaterOption.provider === 's3') {
