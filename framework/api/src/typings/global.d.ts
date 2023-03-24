@@ -108,8 +108,6 @@ export interface RootConfigJSON {
   appConfig?: {
     showHelp?: boolean;
 
-    kfConfigInitValue?: Record<string, KungfuApi.KfConfigValue>;
-
     T0T1?: T0T1Config;
 
     makeOrder?: {

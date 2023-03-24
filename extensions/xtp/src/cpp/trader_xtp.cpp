@@ -79,6 +79,7 @@ void TraderXTP::on_trading_day(const event_ptr &event, int64_t daytime) {
 
 bool TraderXTP::insert_order(const event_ptr &event) {
   const OrderInput &input = event->data<OrderInput>();
+  SPDLOG_DEBUG("OrderInput: {}", input.to_string());
   XTPOrderInsertInfo xtp_input = {};
   to_xtp(xtp_input, input);
 
@@ -407,7 +408,7 @@ void TraderXTP::OnQueryTrade(XTPQueryTradeRsp *trade_info, XTPRI *error_info, in
   writer->close_data();
 }
 
-void TraderXTP::on_restore() {
+void TraderXTP::on_recover() {
   for (auto &pair : orders_) {
     const std::string str_external_order_id = pair.second.data.external_order_id.to_string();
     if (not str_external_order_id.empty()) {

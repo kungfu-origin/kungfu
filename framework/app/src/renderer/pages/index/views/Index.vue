@@ -33,8 +33,8 @@ import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/ind
 import {
   defaultBoardsMap,
   getIndexBoardsMap,
-  saveIndexBoardsMap,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/configs';
+import { usePreStartAndQuitApp } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import KfAddBoardModalVue from '../../../components/public/KfAddBoardModal.vue';
 import { Empty } from 'ant-design-vue';
 import globalBus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
@@ -67,6 +67,7 @@ export default defineComponent({
 
     const addBoardModalVisible = ref<boolean>(false);
     const addBoardTargetBoardId = ref<number>(-1);
+    const { saveBoardsMap } = usePreStartAndQuitApp();
 
     const subscription = globalBus.subscribe((data: KfEvent.KfBusEvent) => {
       if (data.tag === 'addBoard') {
@@ -81,7 +82,7 @@ export default defineComponent({
         }
 
         if (data.name == 'record-before-quit') {
-          saveIndexBoardsMap(boardsMap.value);
+          saveBoardsMap();
           window.watcher && window.watcher.quit();
         }
       }
@@ -99,7 +100,7 @@ export default defineComponent({
 
     onBeforeUnmount(() => {
       subscription.unsubscribe();
-      saveIndexBoardsMap(boardsMap.value);
+      saveBoardsMap();
     });
 
     return {

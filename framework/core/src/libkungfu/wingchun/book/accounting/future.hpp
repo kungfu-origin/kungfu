@@ -368,15 +368,15 @@ private:
 
   static bool able_long_short_position_merge(const char *exchange_id) {
     if (strcmp(exchange_id, EXCHANGE_US_FUTURE) == 0 || strcmp(exchange_id, EXCHANGE_HK_FUTURE) == 0 ||
-        strcmp(exchange_id, EXCHANGE_SGX_FUTURE) == 0 || strcmp(exchange_id, EXCHANGE_LON_FUTURE) ||
-        strcmp(exchange_id, EXCHANGE_AEX_FUTURE) || strcmp(exchange_id, EXCHANGE_AUX_FUTURE) ||
-        strcmp(exchange_id, EXCHANGE_HEXS_FUTURE) || strcmp(exchange_id, EXCHANGE_IDX_FUTURE) ||
-        strcmp(exchange_id, EXCHANGE_KORC) || strcmp(exchange_id, EXCHANGE_LME) ||
-        strcmp(exchange_id, EXCHANGE_MYS_FUTURE) || strcmp(exchange_id, EXCHANGE_ABB) ||
-        strcmp(exchange_id, EXCHANGE_PRX_FUTURE) || strcmp(exchange_id, EXCHANGE_SIX_FUTURE) ||
-        strcmp(exchange_id, EXCHANGE_TAX_FUTURE) || strcmp(exchange_id, EXCHANGE_JP_FUTURE) ||
-        strcmp(exchange_id, EXCHANGE_TSE_FUTURE) || strcmp(exchange_id, EXCHANGE_XETRA) ||
-        strcmp(exchange_id, EXCHANGE_EUR_FUTURE)) {
+        strcmp(exchange_id, EXCHANGE_SGX_FUTURE) == 0 || strcmp(exchange_id, EXCHANGE_LON_FUTURE) == 0 ||
+        strcmp(exchange_id, EXCHANGE_AEX_FUTURE) == 0 || strcmp(exchange_id, EXCHANGE_AUX_FUTURE) == 0 ||
+        strcmp(exchange_id, EXCHANGE_HEXS_FUTURE) == 0 || strcmp(exchange_id, EXCHANGE_IDX_FUTURE) == 0 ||
+        strcmp(exchange_id, EXCHANGE_KORC) == 0 || strcmp(exchange_id, EXCHANGE_LME) == 0 ||
+        strcmp(exchange_id, EXCHANGE_MYS_FUTURE) == 0 || strcmp(exchange_id, EXCHANGE_ABB) == 0 ||
+        strcmp(exchange_id, EXCHANGE_PRX_FUTURE) == 0 || strcmp(exchange_id, EXCHANGE_SIX_FUTURE) == 0 ||
+        strcmp(exchange_id, EXCHANGE_TAX_FUTURE) == 0 || strcmp(exchange_id, EXCHANGE_JP_FUTURE) == 0 ||
+        strcmp(exchange_id, EXCHANGE_TSE_FUTURE) == 0 || strcmp(exchange_id, EXCHANGE_XETRA) == 0 ||
+        strcmp(exchange_id, EXCHANGE_EUR_FUTURE) == 0) {
       return true;
     }
 
