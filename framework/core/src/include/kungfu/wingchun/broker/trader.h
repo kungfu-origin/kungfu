@@ -79,7 +79,7 @@ public:
   /// 非两融柜台想要取消日志输出请override此函数.
   virtual bool write_default_asset_margin();
 
-  [[nodiscard]] const std::string &get_account_id() const;
+  [[maybe_unused]] [[nodiscard]] const std::string &get_account_id() const;
 
   [[nodiscard]] yijinjing::journal::writer_ptr get_asset_writer() const;
 
@@ -99,7 +99,7 @@ public:
 
   void enable_self_detect();
 
-  void disable_recover();
+  [[maybe_unused]] void disable_recover();
 
   virtual void on_recover(){};
 

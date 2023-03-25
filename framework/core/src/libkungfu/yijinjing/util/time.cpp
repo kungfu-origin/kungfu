@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
-#include <assert.h>
 #include <chrono>
 #include <ctime>
 #include <fmt/format.h>
 #include <regex>
-#include <sstream>
 
 #include <kungfu/common.h>
 #include <kungfu/yijinjing/time.h>
@@ -22,7 +20,7 @@ uint32_t time::nano_hashed(int64_t nano_time) {
   return kungfu::hash_32((const unsigned char *)&nano_time, sizeof(nano_time));
 }
 
-int64_t time::next_minute(int64_t nanotime) {
+[[maybe_unused]] int64_t time::next_minute(int64_t nanotime) {
   return nanotime - nanotime % time_unit::NANOSECONDS_PER_MINUTE + time_unit::NANOSECONDS_PER_MINUTE;
 }
 

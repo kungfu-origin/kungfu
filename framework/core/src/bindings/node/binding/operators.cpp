@@ -15,7 +15,7 @@ using namespace kungfu::yijinjing::data;
 using namespace kungfu::yijinjing::practice;
 
 namespace kungfu::node::serialize {
-void InitStateMap(const Napi::CallbackInfo &info, Napi::ObjectReference &state, const std::string &name) {
+void InitStateMap(Napi::ObjectReference &state, const std::string &name) {
   boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
     auto name = std::string(boost::hana::first(it).c_str());
     state.Set(name, DataTable::NewInstance(state.Value()));
@@ -23,7 +23,7 @@ void InitStateMap(const Napi::CallbackInfo &info, Napi::ObjectReference &state, 
   state.Value().DefineProperty(Napi::PropertyDescriptor::Value("state_name", Napi::String::New(state.Env(), name)));
 }
 
-void InitTradingDataMap(const Napi::CallbackInfo &info, Napi::ObjectReference &state, const std::string &name) {
+void InitTradingDataMap(Napi::ObjectReference &state, const std::string &name) {
   boost::hana::for_each(longfist::TradingDataTypes, [&](auto it) {
     auto name = std::string(boost::hana::first(it).c_str());
     state.Set(name, DataTable::NewInstance(state.Value()));

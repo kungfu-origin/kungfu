@@ -142,7 +142,7 @@ void master::register_app(const event_ptr &event) {
   on_register(event, register_data);
 }
 
-void master::deregister_app(int64_t trigger_time, uint32_t app_location_uid) {
+[[maybe_unused]] void master::deregister_app(int64_t trigger_time, uint32_t app_location_uid) {
   auto location = get_location(app_location_uid);
   SPDLOG_INFO("app {} gone", location->uname);
 
@@ -158,7 +158,7 @@ void master::deregister_app(int64_t trigger_time, uint32_t app_location_uid) {
   get_writer(location::PUBLIC)->write(trigger_time, location->to<Deregister>());
 }
 
-void master::publish_trading_day() { write_trading_day(0, get_writer(location::PUBLIC)); }
+[[maybe_unused]] void master::publish_trading_day() { write_trading_day(0, get_writer(location::PUBLIC)); }
 
 void master::react() {
   events_ | is(RequestWriteTo::tag) | $$(on_request_write_to(event));
@@ -250,7 +250,7 @@ void master::feed(const event_ptr &event) {
   session_builder_.update_session(std::dynamic_pointer_cast<journal::frame>(event));
 }
 
-void master::pong(const event_ptr &event) { get_io_device()->get_publisher()->publish("{}"); }
+void master::pong(const event_ptr &) { get_io_device()->get_publisher()->publish("{}"); }
 
 void master::on_request_write_to_band(const event_ptr &event) {
   const RequestWriteToBand &request = event->data<RequestWriteToBand>();
@@ -369,7 +369,7 @@ void master::on_new_location(const event_ptr &event) {
   get_writer(location::PUBLIC)->write(event->gen_time(), location);
 }
 
-void master::write_time_reset(int64_t trigger_time, const writer_ptr &writer) {
+void master::write_time_reset(int64_t, const writer_ptr &writer) {
   auto time_base = time::get_base();
   TimeReset &time_reset = writer->open_data<TimeReset>();
   time_reset.system_clock_count = time_base.system_clock_count;
@@ -377,7 +377,7 @@ void master::write_time_reset(int64_t trigger_time, const writer_ptr &writer) {
   writer->close_data();
 }
 
-void master::write_trading_day(int64_t trigger_time, const writer_ptr &writer) {
+void master::write_trading_day(int64_t, const writer_ptr &writer) {
   TradingDay &trading_day = writer->open_data<TradingDay>();
   trading_day.timestamp = acquire_trading_day();
   writer->close_data();

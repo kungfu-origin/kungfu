@@ -236,7 +236,7 @@ protected:
 
   virtual void on_start();
 
-  uint32_t lookup_account_location_id(const std::string &account) const;
+  [[maybe_unused]] uint32_t lookup_account_location_id(const std::string &account) const;
 
   uint32_t get_td_location_uid(const std::string &source, const std::string &account) const;
 

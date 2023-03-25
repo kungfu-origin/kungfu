@@ -93,12 +93,6 @@ module.exports = {
   generateUpdatesFilesForAllChannels: true,
   electronVersion:
     kungfuCore.devDependencies.electron || kungfuCore.dependencies.electron,
-  publish: [
-    {
-      provider: 'generic',
-      url: 'https://www.kungfu-trader.com',
-    },
-  ],
   npmRebuild: false,
   files: [
     'dist/app/**/*',
@@ -143,6 +137,7 @@ module.exports = {
         'public/keywords',
         'public/music',
         'public/language',
+        'public/VCDeps',
         ...(fse.existsSync(defaultInstrumentsJson)
           ? ['!public/config/defaultInstruments.json']
           : []),
@@ -240,5 +235,6 @@ module.exports = {
     if (process.env.CI && process.platform === 'win32') {
       fse.removeSync(path.join(result.outDir, 'win-unpacked'));
     }
+    return result.artifactPaths;
   },
 };

@@ -40,7 +40,7 @@ BarGenerator::BarGenerator(const locator_ptr &locator, mode m, bool low_latency,
   log::copy_log_settings(get_home(), "bar");
   auto config = nlohmann::json::parse(json_config);
   auto source = config["source"];
-  source_location_ = location::make_shared(mode::LIVE, category::MD, source, source, get_locator());
+  source_location_ = location::make_shared(m, category::MD, source, source, get_locator());
   if (config.find("time_interval") != config.end()) {
     time_interval_ = parse_time_interval(config["time_interval"]);
   }

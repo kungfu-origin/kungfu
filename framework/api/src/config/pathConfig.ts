@@ -89,6 +89,8 @@ addFileSync('', KF_SCHEDULE_TASKS_JSON_PATH, 'file');
 
 export const PY_WHL_DIR = path.join(KUNGFU_RESOURCES_DIR, 'python');
 
+export const VC_DEPS_DIR = path.join(KUNGFU_RESOURCES_DIR, 'VCDeps');
+
 //================== config & resouces end ===================================
 
 //================== cli start ====================================

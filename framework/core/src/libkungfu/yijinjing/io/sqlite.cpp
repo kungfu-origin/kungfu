@@ -16,7 +16,7 @@ void handle_sql_error(int rc, const std::string &error_tip) {
   }
 }
 
-int sql_callback(void *NotUsed, int argc, char **argv, char **azColName) {
+[[maybe_unused]] int sql_callback(void *, int argc, char **argv, char **azColName) {
   int i;
   for (i = 0; i < argc; i++) {
     SPDLOG_INFO("[sqlite3] callback: {} = {}", azColName[i], argv[i] ? argv[i] : "nullptr");
@@ -24,9 +24,7 @@ int sql_callback(void *NotUsed, int argc, char **argv, char **azColName) {
   return 0;
 }
 
-void sqlite3_log(void *callback, int result_code, const char *msg) {
-  SPDLOG_WARN("[sqlite3] [{}] {}", result_code, msg);
-}
+void sqlite3_log(void *, int result_code, const char *msg) { SPDLOG_WARN("[sqlite3] [{}] {}", result_code, msg); }
 
 struct sqlite_initilize {
   sqlite_initilize() {
@@ -42,7 +40,7 @@ struct sqlite_shutdown {
   sqlite_shutdown() { sqlite3_shutdown(); }
 };
 
-void ensure_sqlite_initilize() { static sqlite_initilize instance{}; }
+void ensure_sqlite_initilize() { [[maybe_unused]] static sqlite_initilize instance{}; }
 
-void ensure_sqlite_shutdown() { static sqlite_shutdown instance{}; }
+void ensure_sqlite_shutdown() { [[maybe_unused]] static sqlite_shutdown instance{}; }
 } // namespace kungfu::yijinjing

@@ -24,7 +24,7 @@ template <class Facet> struct deletable_facet : Facet {
 
 typedef deletable_facet<std::codecvt_byname<wchar_t, char, std::mbstate_t>> codec_facet_t;
 
-std::string gbk2utf8(const std::string &str) {
+[[maybe_unused]] std::string gbk2utf8(const std::string &str) {
   try {
     std::wstring_convert<codec_facet_t> cv_gb(new codec_facet_t(GB_ENCODING_NAME));
     std::wstring_convert<std::codecvt_utf8<wchar_t>> cv_utf8;

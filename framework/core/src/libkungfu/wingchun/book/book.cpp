@@ -28,10 +28,10 @@ double Book::get_frozen_price(uint64_t order_id) {
 
 void Book::ensure_position(const InstrumentKey &instrument_key) {
   if (is_shortable(instrument_key.instrument_type)) {
-    const auto &short_position = get_position_for(Direction::Short, instrument_key);
+    [[maybe_unused]] const auto &short_position = get_position_for(Direction::Short, instrument_key);
     assert(short_position.volume >= 0);
   }
-  auto &long_position = get_position_for(Direction::Long, instrument_key);
+  [[maybe_unused]] auto &long_position = get_position_for(Direction::Long, instrument_key);
   assert(long_position.volume >= 0);
 }
 

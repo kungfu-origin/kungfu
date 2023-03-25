@@ -41,11 +41,10 @@ private:
   book::BookMap tmp_books_;
   std::unordered_map<uint64_t, state<longfist::types::OrderStat>> order_stats_ = {};
   BrokerStateMap broker_states_ = {};
-  bool is_sync_;
 
   void update_broker_state_map(uint32_t location_uid, const longfist::types::BrokerStateUpdate &brokerStateUpdate);
 
-  void update_broker_state_map(uint32_t location_uid, const longfist::types::Deregister &deregister);
+  void update_broker_state_map(uint32_t location_uid, [[maybe_unused]] const longfist::types::Deregister &deregister);
 
   void refresh_books();
 
@@ -63,7 +62,7 @@ private:
 
   void inspect_channel(int64_t trigger_time, const longfist::types::Channel &channel);
 
-  void keep_positions(int64_t trigger_time, uint32_t strategy_uid);
+  void keep_positions([[maybe_unused]] int64_t trigger_time, uint32_t strategy_uid);
 
   void rebuild_positions(int64_t trigger_time, uint32_t strategy_uid);
 

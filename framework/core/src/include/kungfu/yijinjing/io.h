@@ -36,15 +36,16 @@ public:
 
   journal::reader_ptr open_reader_to_subscribe();
 
-  journal::reader_ptr open_reader(const data::location_ptr &location, uint32_t dest_id);
+  [[maybe_unused]] journal::reader_ptr open_reader(const data::location_ptr &location, uint32_t dest_id);
 
   journal::writer_ptr open_writer(uint32_t dest_id);
 
   journal::writer_ptr open_writer_at(const data::location_ptr &location, uint32_t dest_id);
 
-  nanomsg::socket_ptr connect_socket(const data::location_ptr &location, const nanomsg::protocol &p, int timeout = 0);
+  [[maybe_unused]] nanomsg::socket_ptr connect_socket(const data::location_ptr &location, const nanomsg::protocol &p,
+                                                      int timeout = 0);
 
-  nanomsg::socket_ptr bind_socket(const nanomsg::protocol &p, int timeout = 0);
+  [[maybe_unused]] nanomsg::socket_ptr bind_socket(const nanomsg::protocol &p, int timeout = 0);
 
   [[nodiscard]] nanomsg::url_factory_ptr get_url_factory() const { return url_factory_; }
 
@@ -86,9 +87,9 @@ class io_device_console : public io_device {
 public:
   io_device_console(data::location_ptr home, int32_t console_width, int32_t console_height);
 
-  void trace(int64_t begin_time, int64_t end_time, bool in, bool out, std::string csv);
+  [[maybe_unused]] void trace(int64_t begin_time, int64_t end_time, bool in, bool out, std::string csv);
 
-  void show(int64_t begin_time, int64_t end_time, bool in, bool out, std::string csv);
+  [[maybe_unused]] void show(int64_t begin_time, int64_t end_time, bool in, bool out, std::string csv);
 
 private:
   int32_t console_width_;

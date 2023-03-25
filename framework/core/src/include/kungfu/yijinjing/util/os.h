@@ -25,9 +25,9 @@ namespace kungfu::yijinjing::os {
  */
 uintptr_t load_mmap_buffer(const std::string &path, size_t size, bool is_writing = false, bool lazy = true);
 
-bool release_mmap_buffer(uintptr_t address, size_t size, bool lazy);
+bool release_mmap_buffer(uintptr_t address, [[maybe_unused]] size_t size, bool lazy);
 
-void disable_os_signals_handler();
+[[maybe_unused]] void disable_os_signals_handler();
 
 void handle_os_signals(void *hero);
 } // namespace kungfu::yijinjing::os

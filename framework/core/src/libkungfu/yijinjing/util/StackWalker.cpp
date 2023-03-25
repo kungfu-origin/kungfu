@@ -89,8 +89,8 @@
 #include "StackWalker.h"
 #include <kungfu/common.h>
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <tchar.h>
 #include <windows.h>
 #pragma comment(lib, "version.lib") // for "VerQueryValue"
@@ -220,7 +220,7 @@ typedef DWORD64(__stdcall *PTRANSLATE_ADDRESS_ROUTINE64)(HANDLE hProcess, HANDLE
 #endif
 
 static void MyStrCpy(char *szDest, size_t nMaxDestSize, const char *szSrc) {
-  if (nMaxDestSize <= 0)
+  if (nMaxDestSize == 0)
     return;
   strncpy_s(szDest, nMaxDestSize, szSrc, _TRUNCATE);
   // INFO: _TRUNCATE will ensure that it is null-terminated;

@@ -55,7 +55,7 @@ public:
     target_map.insert_or_assign(event->template data<DataType>().uid(), *event);
   }
 
-  void operator>>(const yijinjing::journal::writer_ptr &writer) const {
+  void operator>>([[maybe_unused]] const yijinjing::journal::writer_ptr &writer) const {
     boost::hana::for_each(types_, [&](auto it) {
       auto type = boost::hana::second(it);
       for (const auto &element : state_map_[type]) {

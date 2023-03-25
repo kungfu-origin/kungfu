@@ -95,11 +95,11 @@ uint32_t hero::get_home_uid() const { return get_io_device()->get_home()->uid; }
 
 const std::string &hero::get_home_uname() const { return get_io_device()->get_home()->uname; }
 
-const location_ptr &hero::get_live_home() const { return get_io_device()->get_live_home(); }
+[[maybe_unused]] const location_ptr &hero::get_live_home() const { return get_io_device()->get_live_home(); }
 
 uint32_t hero::get_live_home_uid() const { return get_io_device()->get_live_home()->uid; }
 
-reader_ptr hero::get_reader() const { return reader_; }
+[[maybe_unused]] reader_ptr hero::get_reader() const { return reader_; }
 
 bool hero::has_writer(uint32_t dest_id) const { return writers_.find(dest_id) != writers_.end(); }
 
@@ -142,12 +142,14 @@ bool hero::has_channel(uint32_t source, uint32_t dest) const {
 
 bool hero::has_channel(uint64_t hash) const { return channels_.find(hash) != channels_.end(); }
 
-const Channel &hero::get_channel(uint64_t hash) const {
+[[maybe_unused]] const Channel &hero::get_channel(uint64_t hash) const {
   assert(has_channel(hash));
   return channels_.at(hash);
 }
 
-const std::unordered_map<uint64_t, longfist::types::Channel> &hero::get_channels() const { return channels_; }
+[[maybe_unused]] const std::unordered_map<uint64_t, longfist::types::Channel> &hero::get_channels() const {
+  return channels_;
+}
 
 void hero::on_notify() {}
 
@@ -155,9 +157,9 @@ void hero::on_exit() { SPDLOG_INFO("default on_exit"); }
 
 location_ptr hero::get_ledger_home_location() { return ledger_home_location_; }
 
-location_ptr hero::get_master_home_location() { return master_home_location_; }
+[[maybe_unused]] location_ptr hero::get_master_home_location() { return master_home_location_; }
 
-location_ptr hero::get_master_cmd_location() { return master_cmd_location_; }
+[[maybe_unused]] location_ptr hero::get_master_cmd_location() { return master_cmd_location_; }
 
 uint64_t hero::make_source_dest_hash(uint32_t source_id, uint32_t dest_id) const {
   return uint64_t(source_id) << 32u | uint64_t(dest_id);
@@ -198,7 +200,9 @@ void hero::add_location(int64_t trigger_time, const Location &location) {
   add_location(trigger_time, data::location::make_shared(location, get_locator()));
 }
 
-void hero::remove_location(int64_t trigger_time, uint32_t location_uid) { locations_.erase(location_uid); }
+[[maybe_unused]] void hero::remove_location(int64_t trigger_time, uint32_t location_uid) {
+  locations_.erase(location_uid);
+}
 
 void hero::register_location(int64_t trigger_time, const Register &register_data) {
   uint32_t location_uid = register_data.location_uid;

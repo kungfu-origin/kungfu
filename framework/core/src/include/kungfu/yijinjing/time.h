@@ -52,7 +52,7 @@ public:
    * @param nanotime timestamp in nano seconds
    * @return start time point of next minute in nano seconds
    */
-  static int64_t next_minute(int64_t nanotime);
+  [[maybe_unused]] static int64_t next_minute(int64_t nanotime);
 
   /**
    * Given a timestamp, returns the next end of trading time, i.e. 15:30 of today if the argument is before that,

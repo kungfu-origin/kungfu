@@ -271,7 +271,7 @@ book::Bookkeeper &RuntimeContext::get_bookkeeper() { return bookkeeper_; }
 
 basketorder::BasketOrderEngine &RuntimeContext::get_basketorder_engine() { return basketorder_engine_; }
 
-uint32_t RuntimeContext::lookup_account_location_id(const std::string &account) const {
+[[maybe_unused]] uint32_t RuntimeContext::lookup_account_location_id(const std::string &account) const {
   return account_location_ids_.at(hash_str_32(account));
 }
 
@@ -334,7 +334,6 @@ std::string RuntimeContext::arguments() { return arguments_; }
 
 yijinjing::journal::writer_ptr RuntimeContext::get_writer(const std::string &source, const std::string &account) {
   return app_.get_writer(get_td_location_uid(source, account));
-  ;
 }
 
 } // namespace kungfu::wingchun::strategy

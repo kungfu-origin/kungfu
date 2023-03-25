@@ -32,6 +32,11 @@ const run = (distDir, andPublish) => {
   process.chdir(cwd);
   return electronBuilder.build({
     config: { ...baseConfig, ...craftConfig, ...appConfig },
+    ...(andPublish
+      ? {
+          publish: 'always',
+        }
+      : {}),
   });
 };
 
