@@ -26,6 +26,8 @@ inline yijinjing::data::location_ptr make_system_location(const std::string &gro
                                                 name, locator);
 }
 
+typedef std::unordered_map<uint32_t, yijinjing::journal::writer_ptr> WriterMap;
+
 class hero : public resource {
 public:
   explicit hero(yijinjing::io_device_ptr io_device);
@@ -70,6 +72,8 @@ public:
 
   [[nodiscard]] yijinjing::journal::writer_ptr get_writer(uint32_t dest_id) const;
 
+  [[maybe_unused]] [[nodiscard]] const WriterMap &get_writers() const;
+
   bool has_location(uint32_t uid) const;
 
   [[nodiscard]] yijinjing::data::location_ptr get_location(uint32_t uid) const;
@@ -82,9 +86,25 @@ public:
 
   bool has_channel(uint64_t hash) const;
 
-  [[maybe_unused]] const longfist::types::Channel &get_channel(uint64_t hash) const;
+  [[maybe_unused]] const longfist::types::Channel &get_channel(uint32_t source, uint32_t dest) const;
+
+  const longfist::types::Channel &get_channel(uint64_t hash) const;
 
   [[maybe_unused]] const std::unordered_map<uint64_t, longfist::types::Channel> &get_channels() const;
+
+  [[maybe_unused]] bool has_band(uint32_t source, uint32_t dest) const;
+
+  bool has_band(uint64_t hash) const;
+
+  [[maybe_unused]] const longfist::types::Band &get_band(uint32_t source, uint32_t dest) const;
+
+  const longfist::types::Band &get_band(uint64_t hash) const;
+
+  [[maybe_unused]] const std::unordered_map<uint64_t, longfist::types::Band> &get_bands() const;
+
+  const std::unordered_map<uint32_t, longfist::types::Register> &get_registry() const;
+
+  const std::unordered_map<uint32_t, yijinjing::data::location_ptr> &get_locations() const;
 
   virtual void on_notify();
 
@@ -105,7 +125,7 @@ protected:
   int64_t begin_time_;
   int64_t end_time_;
   yijinjing::journal::reader_ptr reader_;
-  std::unordered_map<uint32_t, yijinjing::journal::writer_ptr> writers_ = {};
+  WriterMap writers_ = {};
   std::unordered_map<uint64_t, longfist::types::Band> bands_ = {};
   std::unordered_map<uint64_t, longfist::types::Channel> channels_ = {};
   std::unordered_map<uint32_t, yijinjing::data::location_ptr> locations_ = {};
@@ -117,7 +137,7 @@ protected:
   const yijinjing::data::location_ptr cached_home_location_;
   const yijinjing::data::location_ptr ledger_home_location_;
 
-  uint64_t make_source_dest_hash(uint32_t source_id, uint32_t dest_id) const;
+  static uint64_t make_source_dest_hash(uint32_t source_id, uint32_t dest_id);
 
   bool check_location_exists(uint32_t source_id, uint32_t dest_id) const;
 
@@ -133,7 +153,7 @@ protected:
 
   void deregister_location(int64_t trigger_time, uint32_t location_uid);
 
-  void register_channel(int64_t trigger_time, const longfist::types::Channel &channel);
+  void register_channel([[maybe_unused]] int64_t trigger_time, const longfist::types::Channel &channel);
 
   void deregister_channel(uint32_t source_id);
 
@@ -149,7 +169,8 @@ protected:
 
   void require_write_to(int64_t trigger_time, uint32_t source_id, uint32_t dest_id);
 
-  void require_write_to_band(int64_t trigger_time, uint32_t source_id, const yijinjing::data::location_ptr &location);
+  void require_write_to_band(int64_t trigger_time, uint32_t source_id,
+                             const yijinjing::data::location_ptr &location) const;
 
   virtual void react() = 0;
 

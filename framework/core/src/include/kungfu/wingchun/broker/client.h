@@ -260,8 +260,7 @@ static constexpr auto is_own(const Client &broker_client) {
                                                     kungfu::longfist::enums::SubscribeDataType::Snapshot,
                                                     data.exchange_id, data.instrument_type)) ||
             (std::is_same_v<DataType, longfist::types::Tree> &&
-             broker_client.is_custom_subscribed_all(event->source(),
-                                                    kungfu::longfist::enums::SubscribeDataType::Snapshot,
+             broker_client.is_custom_subscribed_all(event->source(), kungfu::longfist::enums::SubscribeDataType::Tree,
                                                     data.exchange_id, data.instrument_type)) ||
             (std::is_same_v<DataType, longfist::types::Transaction> &&
              broker_client.is_custom_subscribed_all(event->source(),

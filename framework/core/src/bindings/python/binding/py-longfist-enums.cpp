@@ -253,6 +253,7 @@ void bind_enums(py::module &m) {
       .value("Snapshot", SubscribeDataType::Snapshot)
       .value("Transaction", SubscribeDataType::Transaction)
       .value("Entrust", SubscribeDataType::Entrust)
+      .value("Tree", SubscribeDataType::Tree)
       .export_values()
       .def("__eq__", [](const SubscribeDataType &a, uint64_t b) { return static_cast<uint64_t>(a) == b; })
       .def("__or__", py::overload_cast<const SubscribeDataType &, const SubscribeDataType &>(

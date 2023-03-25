@@ -143,6 +143,7 @@ enum class SubscribeDataType : uint64_t {
   Snapshot = 0x000000000001,    ///< 订阅快照数据类别
   Entrust = 0x000000000002,     ///< 订阅逐笔委托数据
   Transaction = 0x000000000004, ///< 订阅逐笔成交数据
+  Tree = 0x000000000008,        ///< 建树行情, 目前只有盛立有
 };
 
 NLOHMANN_JSON_SERIALIZE_ENUM(SubscribeDataType, {
@@ -150,6 +151,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(SubscribeDataType, {
                                                     {SubscribeDataType::Snapshot, "Snapshot"},
                                                     {SubscribeDataType::Entrust, "Entrust"},
                                                     {SubscribeDataType::Transaction, "Transaction"},
+                                                    {SubscribeDataType::Tree, "Tree"},
                                                 })
 
 // for subscribe

@@ -110,11 +110,13 @@ writer_ptr hero::get_writer(uint32_t dest_id) const {
   return writers_.at(dest_id);
 }
 
+[[maybe_unused]] const WriterMap &hero::get_writers() const { return writers_; }
+
 bool hero::has_location(uint32_t uid) const { return locations_.find(uid) != locations_.end(); }
 
 location_ptr hero::get_location(uint32_t uid) const {
   if (not has_location(uid)) {
-    SPDLOG_ERROR("no location {} uname {} in locations_", uid, get_location_uname(uid));
+    SPDLOG_ERROR("no location {} in locations_", uid);
   }
 
   assert(has_location(uid));
@@ -142,7 +144,11 @@ bool hero::has_channel(uint32_t source, uint32_t dest) const {
 
 bool hero::has_channel(uint64_t hash) const { return channels_.find(hash) != channels_.end(); }
 
-[[maybe_unused]] const Channel &hero::get_channel(uint64_t hash) const {
+[[maybe_unused]] const longfist::types::Channel &hero::get_channel(uint32_t source, uint32_t dest) const {
+  return get_channel(make_source_dest_hash(source, dest));
+}
+
+const Channel &hero::get_channel(uint64_t hash) const {
   assert(has_channel(hash));
   return channels_.at(hash);
 }
@@ -150,6 +156,27 @@ bool hero::has_channel(uint64_t hash) const { return channels_.find(hash) != cha
 [[maybe_unused]] const std::unordered_map<uint64_t, longfist::types::Channel> &hero::get_channels() const {
   return channels_;
 }
+
+[[maybe_unused]] bool hero::has_band(uint32_t source, uint32_t dest) const {
+  return has_band(make_source_dest_hash(source, dest));
+}
+
+bool hero::has_band(uint64_t hash) const { return bands_.find(hash) != bands_.end(); }
+
+[[maybe_unused]] const longfist::types::Band &hero::get_band(uint32_t source, uint32_t dest) const {
+  return get_band(make_source_dest_hash(source, dest));
+}
+
+const longfist::types::Band &hero::get_band(uint64_t hash) const {
+  assert(has_band(hash));
+  return bands_.at(hash);
+}
+
+[[maybe_unused]] const std::unordered_map<uint64_t, longfist::types::Band> &hero::get_bands() const { return bands_; }
+
+const std::unordered_map<uint32_t, longfist::types::Register> &hero::get_registry() const { return registry_; }
+
+const std::unordered_map<uint32_t, yijinjing::data::location_ptr> &hero::get_locations() const { return locations_; }
 
 void hero::on_notify() {}
 
@@ -161,7 +188,7 @@ location_ptr hero::get_ledger_home_location() { return ledger_home_location_; }
 
 [[maybe_unused]] location_ptr hero::get_master_cmd_location() { return master_cmd_location_; }
 
-uint64_t hero::make_source_dest_hash(uint32_t source_id, uint32_t dest_id) const {
+uint64_t hero::make_source_dest_hash(uint32_t source_id, uint32_t dest_id) {
   return uint64_t(source_id) << 32u | uint64_t(dest_id);
 }
 
@@ -192,19 +219,15 @@ bool hero::check_location_live(uint32_t source_id, uint32_t dest_id) const {
   return true;
 }
 
-void hero::add_location(int64_t trigger_time, const location_ptr &location) {
-  locations_.try_emplace(location->uid, location);
-}
+void hero::add_location(int64_t, const location_ptr &location) { locations_.try_emplace(location->uid, location); }
 
 void hero::add_location(int64_t trigger_time, const Location &location) {
   add_location(trigger_time, data::location::make_shared(location, get_locator()));
 }
 
-[[maybe_unused]] void hero::remove_location(int64_t trigger_time, uint32_t location_uid) {
-  locations_.erase(location_uid);
-}
+void hero::remove_location(int64_t trigger_time, uint32_t location_uid) { locations_.erase(location_uid); }
 
-void hero::register_location(int64_t trigger_time, const Register &register_data) {
+void hero::register_location(int64_t, const Register &register_data) {
   uint32_t location_uid = register_data.location_uid;
   auto result = registry_.try_emplace(location_uid, register_data);
   if (result.second) {
@@ -212,15 +235,15 @@ void hero::register_location(int64_t trigger_time, const Register &register_data
   }
 }
 
-void hero::deregister_location(int64_t trigger_time, const uint32_t location_uid) {
+void hero::deregister_location(int64_t, const uint32_t location_uid) {
   auto result = registry_.erase(location_uid);
   if (result) {
     SPDLOG_TRACE("location [{:08x}] {} down", location_uid, get_location_uname(location_uid));
   }
 }
 
-void hero::register_channel(int64_t trigger_time, const Channel &channel) {
-  uint64_t channel_uid = make_source_dest_hash(channel.source_id, channel.dest_id);
+void hero::register_channel(int64_t, const Channel &channel) {
+  [[maybe_unused]] uint64_t channel_uid = make_source_dest_hash(channel.source_id, channel.dest_id);
   auto result = channels_.try_emplace(channel_uid, channel);
   if (result.second) {
     auto source_uname = get_location_uname(channel.source_id);
@@ -245,7 +268,7 @@ void hero::deregister_channel(uint32_t source_id) {
   }
 }
 
-void hero::register_band(int64_t trigger_time, const Band &band) {
+void hero::register_band(int64_t, const Band &band) {
   uint64_t band_uid = make_source_dest_hash(band.source_id, band.dest_id);
   auto result = bands_.try_emplace(band_uid, band);
   if (result.second) {
@@ -294,7 +317,7 @@ void hero::require_write_to(int64_t trigger_time, uint32_t source_id, uint32_t d
 }
 
 void hero::require_write_to_band(int64_t trigger_time, uint32_t source_id,
-                                 const yijinjing::data::location_ptr &location) {
+                                 const yijinjing::data::location_ptr &location) const {
   auto writer = get_writer(source_id);
   RequestWriteToBand msg = {};
   location->to<RequestWriteToBand>(msg);
