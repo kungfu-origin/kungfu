@@ -375,7 +375,7 @@ private:
 
   template <typename J, typename V> static std::enable_if_t<is_array_of_v<V, char>> restore_from_json(J &j, V &v) {
     std::string value = j;
-    v = value.c_str();
+    v = value.c_str(); // kungfu_array overload operator=, it actually use memcpy rather than assign pointer
   }
 
   template <typename J, typename V>
