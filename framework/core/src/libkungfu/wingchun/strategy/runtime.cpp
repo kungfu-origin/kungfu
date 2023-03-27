@@ -362,10 +362,9 @@ void RuntimeContext::send_instrument_keys() {
   if (not started_) {
     return;
   }
-  const event_ptr &e = app_.get_reader()->current_frame();
   for (const auto &pair : app_.get_locations()) {
     SPDLOG_DEBUG("Location: {}", pair.second->to_string());
-    broker_client_.try_renew(e->gen_time(), pair.second);
+    broker_client_.try_renew(app_.now(), pair.second);
   }
 }
 
