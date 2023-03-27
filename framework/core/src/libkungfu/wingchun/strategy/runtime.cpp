@@ -60,7 +60,7 @@ void RuntimeContext::add_account(const std::string &source, const std::string &a
   account_location_ids_.emplace(hashed_account, account_location->uid);
 
   broker_client_.enroll_account(account_location);
-  dynamic_subscribe(false);
+  //  ensure_connect();
 }
 
 void RuntimeContext::subscribe(const std::string &source, const std::vector<std::string> &instrument_ids,
@@ -70,13 +70,15 @@ void RuntimeContext::subscribe(const std::string &source, const std::vector<std:
     broker_client_.subscribe(md_location, exchange_ids, instrument_id);
   }
   md_locations_.emplace(md_location->uid, md_location);
-  dynamic_subscribe(true);
+  ensure_connect();
+  send_instrument_keys();
 }
 
 void RuntimeContext::subscribe_all(const std::string &source, uint8_t market_type, uint64_t instrument_type,
                                    uint64_t data_type) {
   broker_client_.subscribe_all(find_md_location(source), market_type, instrument_type, data_type);
-  dynamic_subscribe(true);
+  ensure_connect();
+  send_instrument_keys();
 }
 
 uint64_t RuntimeContext::insert_block_message(const std::string &source, const std::string &account,
@@ -339,7 +341,7 @@ yijinjing::journal::writer_ptr RuntimeContext::get_writer(const std::string &sou
   return app_.get_writer(get_td_location_uid(source, account));
 }
 
-void RuntimeContext::dynamic_subscribe(bool is_md) {
+void RuntimeContext::ensure_connect() {
   if (not started_) {
     return;
   }
@@ -354,12 +356,15 @@ void RuntimeContext::dynamic_subscribe(bool is_md) {
     SPDLOG_DEBUG("Band: {}", pair.second.to_string());
     broker_client_.connect(e, pair.second);
   }
+}
 
-  if (is_md) {
-    for (const auto &pair : app_.get_locations()) {
-      SPDLOG_DEBUG("Location: {}", pair.second->to_string());
-      broker_client_.try_renew(e->gen_time(), pair.second);
-    }
+void RuntimeContext::send_instrument_keys() {
+  if (not started_) {
+    return;
+  }
+  for (const auto &pair : app_.get_locations()) {
+    SPDLOG_DEBUG("Location: {}", pair.second->to_string());
+    broker_client_.try_renew(app_.now(), pair.second);
   }
 }
 

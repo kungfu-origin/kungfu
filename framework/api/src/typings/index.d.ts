@@ -226,7 +226,6 @@ declare namespace KungfuApi {
           | InstrumentTypes
           | StrategyExtTypes[]
           | StrategyExtTypes;
-        vcDepVersions?: VCDepsVersionTypes[];
         settings: KfConfigItem[];
       }
     >;
@@ -250,7 +249,6 @@ declare namespace KungfuApi {
     key: string;
     extPath: string;
     type: InstrumentTypes[] | StrategyExtTypes[];
-    vcDepVersions: VCDepsVersionTypes[];
     settings: KfConfigItem[];
   }
 

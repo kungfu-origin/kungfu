@@ -543,7 +543,6 @@ const getKfExtensionConfigByCategory = (
                 category,
                 configOfCategory?.type || [],
               ),
-              vcDepVersions: configOfCategory.vcDepVersions || [],
               settings: configOfCategory?.settings || [],
             },
           };
