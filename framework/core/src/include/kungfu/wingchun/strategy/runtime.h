@@ -244,7 +244,9 @@ protected:
 
   const yijinjing::data::location_ptr &find_md_location(const std::string &source);
 
-  void dynamic_subscribe(bool is_md);
+  void  ensure_connect();
+
+  void send_instrument_keys();
 
 private:
   broker::PassiveClient broker_client_;
