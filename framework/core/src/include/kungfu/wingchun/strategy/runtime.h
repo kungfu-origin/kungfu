@@ -244,7 +244,7 @@ protected:
 
   const yijinjing::data::location_ptr &find_md_location(const std::string &source);
 
-  void  ensure_connect();
+  void ensure_connect();
 
   void send_instrument_keys();
 
