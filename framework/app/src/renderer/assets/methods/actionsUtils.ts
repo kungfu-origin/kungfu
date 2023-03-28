@@ -920,8 +920,9 @@ export const usePreStartAndQuitApp = (): {
     archive: 'loading',
     watcher: 'loading',
     extraResourcesLoading: 'loading',
-    cpusSafeNumChecking: 'loading',
-    VCDepsExistsChecking: 'loading',
+    // TODO: 临时注释
+    // cpusSafeNumChecking: 'loading',
+    // VCDepsExistsChecking: 'loading',
   });
 
   const preQuitSystemLoadingData = reactive<
@@ -2440,24 +2441,18 @@ export const useBasket = () => {
 
   onMounted(() => {
     if (app?.proxy) {
-      const subscription = app.proxy.$tradingDataSubject.subscribe(
-        (watcher: KungfuApi.Watcher) => {
-          store.setBasketList();
-          store.setBasketInstrumentList();
-
-          // const basketInWatcher = watcher.ledger.Basket.sort('id')
-          // const basketInstrumentInWatcher = watcher.ledger.BasketInstrument.list()
-          watcher;
-          basketList.value = store.basketList;
-          basketInstrumentList.value = store.basketInstrumentList;
-        },
-      );
-
-      onBeforeUnmount(() => {
-        subscription.unsubscribe();
-      });
+      updateBasketData();
     }
   });
+
+  function updateBasketData() {
+    store.setBasketList();
+    store.setBasketInstrumentList();
+
+    basketList.value = store.basketList;
+    basketInstrumentList.value = store.basketInstrumentList;
+    return Promise.resolve();
+  }
 
   function buildBasketOptionLabel(basket: KungfuApi.Basket) {
     return `${basket.name} ${BasketVolumeType[basket.volume_type].name}`;
@@ -2486,5 +2481,6 @@ export const useBasket = () => {
     buildBasketOptionLabel,
     buildBasketOptionValue,
     parseBasketOptionValue,
+    updateBasketData,
   };
 };
