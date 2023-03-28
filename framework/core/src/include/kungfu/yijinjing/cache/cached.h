@@ -28,6 +28,8 @@ protected:
 
   void on_active() override;
 
+  void on_notify() override;
+
   static constexpr auto profile_get_all = [](auto &profile, auto &receiver) {
     boost::hana::for_each(longfist::ProfileDataTypes, [&](auto it) {
       auto type = boost::hana::second(it);
