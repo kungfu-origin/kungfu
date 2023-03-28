@@ -41,11 +41,11 @@ void MarketDataVendor::on_trading_day(const event_ptr &event, int64_t daytime) {
   service_->on_trading_day(event, daytime);
 }
 
-bool MarketData::has_instrument(const std::string &instrument_id) const {
+[[maybe_unused]] bool MarketData::has_instrument(const std::string &instrument_id) const {
   return instruments_.find(instrument_id) != instruments_.end();
 }
 
-const Instrument &MarketData::get_instrument(const std::string &instrument_id) const {
+[[maybe_unused]] const Instrument &MarketData::get_instrument(const std::string &instrument_id) const {
   return instruments_.at(instrument_id);
 }
 

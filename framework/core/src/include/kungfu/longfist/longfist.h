@@ -91,53 +91,53 @@ constexpr auto AllTypes = boost::hana::make_map( //
     TYPE_PAIR(RequestHistoryTradeError)          //
 );
 
-constexpr auto AllDataTypes = boost::hana::make_map( //
-    TYPE_PAIR(Config),                               //
-    TYPE_PAIR(RiskSetting),                          //
-    TYPE_PAIR(TimeValue),                            //
-    TYPE_PAIR(TimeKeyValue),                         //
-    TYPE_PAIR(StrategyStateUpdate),                  //
-    TYPE_PAIR(Commission),                           //
-    TYPE_PAIR(Session),                              //
-    TYPE_PAIR(Location),                             //
-    TYPE_PAIR(Register),                             //
-    TYPE_PAIR(Deregister),                           //
-    TYPE_PAIR(CacheReset),                           //
-    TYPE_PAIR(BrokerStateUpdate),                    //
-    TYPE_PAIR(RequestReadFrom),                      //
-    TYPE_PAIR(RequestReadFromPublic),                //
-    TYPE_PAIR(RequestReadFromSync),                  //
-    TYPE_PAIR(RequestWriteTo),                       //
-    TYPE_PAIR(RequestWriteToBand),                   //
-    TYPE_PAIR(Band),                                 //
-    TYPE_PAIR(Basket),                               //
-    TYPE_PAIR(BasketInstrument),                     //
-    TYPE_PAIR(TradingDay),                           //
-    TYPE_PAIR(Channel),                              //
-    TYPE_PAIR(ChannelRequest),                       //
-    TYPE_PAIR(TimeRequest),                          //
-    TYPE_PAIR(TimeReset),                            //
-    TYPE_PAIR(Instrument),                           //
-    TYPE_PAIR(InstrumentKey),                        //
-    TYPE_PAIR(Quote),                                //
-    TYPE_PAIR(Tree),                                 //
-    TYPE_PAIR(Entrust),                              //
-    TYPE_PAIR(Transaction),                          //
-    TYPE_PAIR(Bar),                                  //
-    TYPE_PAIR(BlockMessage),                         //
-    TYPE_PAIR(OrderInput),                           //
-    TYPE_PAIR(OrderAction),                          //
-    TYPE_PAIR(OrderActionError),                     //
-    TYPE_PAIR(Order),                                //
-    TYPE_PAIR(Trade),                                //
-    TYPE_PAIR(HistoryOrder),                         //
-    TYPE_PAIR(HistoryTrade),                         //
-    TYPE_PAIR(Asset),                                //
-    TYPE_PAIR(AssetMargin),                          //
-    TYPE_PAIR(Position),                             //
-    TYPE_PAIR(PositionEnd),                          //
-    TYPE_PAIR(OrderStat),                            //
-    TYPE_PAIR(BasketOrder)                           //
+[[maybe_unused]] constexpr auto AllDataTypes = boost::hana::make_map( //
+    TYPE_PAIR(Config),                                                //
+    TYPE_PAIR(RiskSetting),                                           //
+    TYPE_PAIR(TimeValue),                                             //
+    TYPE_PAIR(TimeKeyValue),                                          //
+    TYPE_PAIR(StrategyStateUpdate),                                   //
+    TYPE_PAIR(Commission),                                            //
+    TYPE_PAIR(Session),                                               //
+    TYPE_PAIR(Location),                                              //
+    TYPE_PAIR(Register),                                              //
+    TYPE_PAIR(Deregister),                                            //
+    TYPE_PAIR(CacheReset),                                            //
+    TYPE_PAIR(BrokerStateUpdate),                                     //
+    TYPE_PAIR(RequestReadFrom),                                       //
+    TYPE_PAIR(RequestReadFromPublic),                                 //
+    TYPE_PAIR(RequestReadFromSync),                                   //
+    TYPE_PAIR(RequestWriteTo),                                        //
+    TYPE_PAIR(RequestWriteToBand),                                    //
+    TYPE_PAIR(Band),                                                  //
+    TYPE_PAIR(Basket),                                                //
+    TYPE_PAIR(BasketInstrument),                                      //
+    TYPE_PAIR(TradingDay),                                            //
+    TYPE_PAIR(Channel),                                               //
+    TYPE_PAIR(ChannelRequest),                                        //
+    TYPE_PAIR(TimeRequest),                                           //
+    TYPE_PAIR(TimeReset),                                             //
+    TYPE_PAIR(Instrument),                                            //
+    TYPE_PAIR(InstrumentKey),                                         //
+    TYPE_PAIR(Quote),                                                 //
+    TYPE_PAIR(Tree),                                                  //
+    TYPE_PAIR(Entrust),                                               //
+    TYPE_PAIR(Transaction),                                           //
+    TYPE_PAIR(Bar),                                                   //
+    TYPE_PAIR(BlockMessage),                                          //
+    TYPE_PAIR(OrderInput),                                            //
+    TYPE_PAIR(OrderAction),                                           //
+    TYPE_PAIR(OrderActionError),                                      //
+    TYPE_PAIR(Order),                                                 //
+    TYPE_PAIR(Trade),                                                 //
+    TYPE_PAIR(HistoryOrder),                                          //
+    TYPE_PAIR(HistoryTrade),                                          //
+    TYPE_PAIR(Asset),                                                 //
+    TYPE_PAIR(AssetMargin),                                           //
+    TYPE_PAIR(Position),                                              //
+    TYPE_PAIR(PositionEnd),                                           //
+    TYPE_PAIR(OrderStat),                                             //
+    TYPE_PAIR(BasketOrder)                                            //
 );
 
 constexpr auto ProfileDataTypes = boost::hana::make_map( //
@@ -206,8 +206,7 @@ constexpr auto build_state_map = [](auto types) {
 constexpr auto build_ring_state_map = [](auto types, size_t ring_size) {
   auto maps = boost::hana::transform(boost::hana::values(types), [ring_size](auto value) {
     using DataType = typename decltype(+value)::type;
-    kungfu::yijinjing::cache::ringqueue<state<DataType>> *p =
-        new kungfu::yijinjing::cache::ringqueue<state<DataType>>(ring_size);
+    auto *p = new kungfu::yijinjing::cache::ringqueue<state<DataType>>(ring_size);
     return boost::hana::make_pair(value, p);
   });
   return boost::hana::unpack(maps, boost::hana::make_map);
@@ -233,6 +232,6 @@ template <typename DataType> std::enable_if_t<not size_fixed_v<DataType>> copy(D
     accessor(to) = accessor(from);
   });
 }
-}; // namespace kungfu::longfist
+} // namespace kungfu::longfist
 
 #endif // KUNGFU_LONGFIST_H

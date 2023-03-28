@@ -30,9 +30,9 @@ public:
 
   [[nodiscard]] const data::location_ptr &get_location() const { return location_; }
 
-  [[nodiscard]] uint32_t get_source() const { return location_->location_uid; }
+  [[maybe_unused]] [[nodiscard]] uint32_t get_source() const { return location_->location_uid; }
 
-  [[nodiscard]] uint32_t get_dest() const { return dest_id_; }
+  [[maybe_unused]] [[nodiscard]] uint32_t get_dest() const { return dest_id_; }
 
   /**
    * move current frame to the next available one
@@ -85,7 +85,7 @@ public:
 
   [[nodiscard]] page_ptr current_page() const { return current_->current_page(); }
 
-  [[nodiscard]] const std::unordered_map<uint64_t, journal> &journals() const { return journals_; }
+  [[maybe_unused]] [[nodiscard]] const std::unordered_map<uint64_t, journal> &journals() const { return journals_; }
 
   bool data_available();
 
@@ -109,7 +109,7 @@ public:
 
   [[nodiscard]] const data::location_ptr &get_location() const { return journal_.location_; }
 
-  [[nodiscard]] uint32_t get_dest() const { return journal_.dest_id_; }
+  [[maybe_unused]] [[nodiscard]] uint32_t get_dest() const { return journal_.dest_id_; }
 
   uint64_t current_frame_uid();
 
@@ -121,9 +121,9 @@ public:
 
   void mark(int64_t trigger_time, int32_t msg_type);
 
-  void mark_at(int64_t gen_time, int64_t trigger_time, int32_t msg_type);
+  [[maybe_unused]] void mark_at(int64_t gen_time, int64_t trigger_time, int32_t msg_type);
 
-  void write_raw(int64_t trigger_time, int32_t msg_type, uintptr_t data, uint32_t length);
+  [[maybe_unused]] void write_raw(int64_t trigger_time, int32_t msg_type, uintptr_t data, uint32_t length);
 
   /**
    * Using auto with the return mess up the reference with the undlerying memory address, DO NOT USE it.
@@ -176,14 +176,14 @@ public:
   }
 
   template <typename T>
-  std::enable_if_t<size_fixed_v<T>> write_at(int64_t gen_time, int64_t trigger_time, const T &data) {
+  [[maybe_unused]] std::enable_if_t<size_fixed_v<T>> write_at(int64_t gen_time, int64_t trigger_time, const T &data) {
     auto frame = open_frame(trigger_time, T::tag, sizeof(T));
     auto size = frame->copy_data(data);
     close_frame(size, gen_time);
   }
 
   template <typename T>
-  std::enable_if_t<size_unfixed_v<T>> write_at(int64_t gen_time, int64_t trigger_time, const T &data) {
+  [[maybe_unused]] std::enable_if_t<size_unfixed_v<T>> write_at(int64_t gen_time, int64_t trigger_time, const T &data) {
     auto s = data.to_string();
     auto size = s.length();
     auto frame = open_frame(trigger_time, T::tag, size);

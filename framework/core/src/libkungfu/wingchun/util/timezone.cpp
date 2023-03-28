@@ -124,7 +124,7 @@ const std::unordered_map<LocationTimeType, LocationTimeData> g_locationTimeMap =
 };
 
 namespace TimeUtil {
-time_t TimeToSeconds(const std::string &time, bool is_gmt) {
+[[maybe_unused]] time_t TimeToSeconds(const std::string &time, bool is_gmt) {
   int year, month, day, hour, minute, second;
   sscanf(time.c_str(), "%d-%d-%d %d:%d:%d", &year, &month, &day, &hour, &minute, &second);
 
@@ -144,7 +144,7 @@ time_t TimeToSeconds(int year, int month, int day, int hour, int minute, int sec
   return is_gmt ? mkgmtime(&t_temp) : mktime(&t_temp);
 }
 
-time_t DateToSeconds(const std::string &time, bool is_gmt) {
+[[maybe_unused]] time_t DateToSeconds(const std::string &time, bool is_gmt) {
   int year, month, day;
   sscanf(time.c_str(), "%d-%d-%d", &year, &month, &day);
 
@@ -192,7 +192,8 @@ std::shared_ptr<LocalTimeInfo> TranslateGMTimeToLocalTime(time_t gmt, const Loca
   return t_local;
 }
 
-time_t TranslateLocalTimeToGMTime(time_t local_seconds, LocationTimeType loc_type, LocalTimeInfo *info /*= nullptr*/) {
+[[maybe_unused]] time_t TranslateLocalTimeToGMTime(time_t local_seconds, LocationTimeType loc_type,
+                                                   LocalTimeInfo *info /*= nullptr*/) {
   const LocationTimeData &data = GetLocationTimeDataByType(loc_type);
 
   /*

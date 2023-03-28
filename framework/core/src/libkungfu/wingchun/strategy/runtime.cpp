@@ -60,6 +60,7 @@ void RuntimeContext::add_account(const std::string &source, const std::string &a
   account_location_ids_.emplace(hashed_account, account_location->uid);
 
   broker_client_.enroll_account(account_location);
+  //  ensure_connect();
 }
 
 void RuntimeContext::subscribe(const std::string &source, const std::vector<std::string> &instrument_ids,
@@ -69,11 +70,15 @@ void RuntimeContext::subscribe(const std::string &source, const std::vector<std:
     broker_client_.subscribe(md_location, exchange_ids, instrument_id);
   }
   md_locations_.emplace(md_location->uid, md_location);
+  ensure_connect();
+  send_instrument_keys();
 }
 
 void RuntimeContext::subscribe_all(const std::string &source, uint8_t market_type, uint64_t instrument_type,
                                    uint64_t data_type) {
   broker_client_.subscribe_all(find_md_location(source), market_type, instrument_type, data_type);
+  ensure_connect();
+  send_instrument_keys();
 }
 
 uint64_t RuntimeContext::insert_block_message(const std::string &source, const std::string &account,
@@ -271,7 +276,7 @@ book::Bookkeeper &RuntimeContext::get_bookkeeper() { return bookkeeper_; }
 
 basketorder::BasketOrderEngine &RuntimeContext::get_basketorder_engine() { return basketorder_engine_; }
 
-uint32_t RuntimeContext::lookup_account_location_id(const std::string &account) const {
+[[maybe_unused]] uint32_t RuntimeContext::lookup_account_location_id(const std::string &account) const {
   return account_location_ids_.at(hash_str_32(account));
 }
 
@@ -334,7 +339,35 @@ std::string RuntimeContext::arguments() { return arguments_; }
 
 yijinjing::journal::writer_ptr RuntimeContext::get_writer(const std::string &source, const std::string &account) {
   return app_.get_writer(get_td_location_uid(source, account));
-  ;
 }
+
+void RuntimeContext::ensure_connect() {
+  if (not started_) {
+    return;
+  }
+
+  const event_ptr &e = app_.get_reader()->current_frame();
+  for (const auto &pair : app_.get_registry()) {
+    SPDLOG_DEBUG("Register: {}", pair.second.to_string());
+    broker_client_.connect(e, pair.second);
+  }
+
+  for (const auto &pair : app_.get_bands()) {
+    SPDLOG_DEBUG("Band: {}", pair.second.to_string());
+    broker_client_.connect(e, pair.second);
+  }
+}
+
+void RuntimeContext::send_instrument_keys() {
+  if (not started_) {
+    return;
+  }
+  for (const auto &pair : app_.get_locations()) {
+    SPDLOG_DEBUG("Location: {}", pair.second->to_string());
+    broker_client_.try_renew(app_.now(), pair.second);
+  }
+}
+
+void RuntimeContext::set_started(bool started) { started_ = started; }
 
 } // namespace kungfu::wingchun::strategy

@@ -134,8 +134,8 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
       update_ledger(ledger_ref_),                                                                 //
       publish(*this, state_ref_),                                                                 //
       reset_cache(*this, ledger_ref_) {
-  serialize::InitStateMap(info, state_ref_, "state");
-  serialize::InitStateMap(info, ledger_ref_, "ledger");
+  serialize::InitStateMap(state_ref_, "state");
+  serialize::InitStateMap(ledger_ref_, "ledger");
 
   auto today = time::today_start();
   auto config_store = ConfigStore::Unwrap(config_ref_.Value());
@@ -502,7 +502,7 @@ void Watcher::SyncLedger() {
 
 void Watcher::TryRefreshTradingData(const Napi::CallbackInfo &info) {
   if (refresh_trading_data_before_sync_) {
-    serialize::InitTradingDataMap(info, ledger_ref_, "ledger");
+    serialize::InitTradingDataMap(ledger_ref_, "ledger");
   }
 }
 
@@ -637,6 +637,7 @@ void Watcher::OnDeregister(int64_t trigger_time, const Deregister &deregister_da
   if (app_location->category == category::SYSTEM and app_location->group == "master" and
       app_location->name == "master") {
     CancelWorker();
+    serialize::InitTradingDataMap(ledger_ref_, "ledger");
   }
 }
 

@@ -58,10 +58,8 @@ void Ledger::update_broker_state_map(uint32_t location_uid, const BrokerStateUpd
   write_broker_state_to_public();
 }
 
-void Ledger::update_broker_state_map(uint32_t location_uid, const Deregister &deregister) {
-  // if (broker_states_.find(location_uid) != broker_states_.end()) {
+void Ledger::update_broker_state_map(uint32_t location_uid, [[maybe_unused]] const Deregister &deregister) {
   broker_states_.erase(location_uid);
-  // }
   write_broker_state_to_public();
 }
 
@@ -126,10 +124,10 @@ void Ledger::update_order_stat(const event_ptr &event, const Order &data) {
 void Ledger::update_order_stat(const event_ptr &event, const Trade &data) {
   write_book(event->gen_time(), event->source(), event->dest(), data);
   auto &stat = get_order_stat(data.order_id, event);
-  if (stat.trade_time == 0) {
+  if (stat.trade_time < event->gen_time()) {
     stat.trade_time = event->gen_time();
-    stat.total_price += data.price * data.volume;
-    stat.total_volume += data.volume;
+    stat.total_price += data.price * double(data.volume);
+    stat.total_volume += double(data.volume);
     if (stat.total_volume > 0) {
       stat.avg_price = int((stat.total_price / stat.total_volume) * 10000) / 10000.0;
     }
@@ -162,7 +160,7 @@ void Ledger::inspect_channel(int64_t trigger_time, const Channel &channel) {
   }
 }
 
-void Ledger::keep_positions(int64_t trigger_time, uint32_t strategy_uid) {
+void Ledger::keep_positions([[maybe_unused]] int64_t trigger_time, uint32_t strategy_uid) {
   if (bookkeeper_.has_book(strategy_uid)) {
     auto strategy_book = bookkeeper_.get_book(strategy_uid);
     tmp_books_.insert_or_assign(strategy_uid, strategy_book);

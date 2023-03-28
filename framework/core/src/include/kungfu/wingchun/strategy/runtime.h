@@ -226,9 +226,11 @@ public:
    * @param account td account id
    * @return writer to related td
    */
-  virtual yijinjing::journal::writer_ptr get_writer(const std::string &source, const std::string &account) override;
+  yijinjing::journal::writer_ptr get_writer(const std::string &source, const std::string &account) override;
 
   void set_arguments(const std::string &argument) { arguments_ = argument; }
+
+  void set_started(bool started);
 
 protected:
   yijinjing::practice::apprentice &app_;
@@ -236,11 +238,15 @@ protected:
 
   virtual void on_start();
 
-  uint32_t lookup_account_location_id(const std::string &account) const;
+  [[maybe_unused]] uint32_t lookup_account_location_id(const std::string &account) const;
 
   uint32_t get_td_location_uid(const std::string &source, const std::string &account) const;
 
   const yijinjing::data::location_ptr &find_md_location(const std::string &source);
+
+  void ensure_connect();
+
+  void send_instrument_keys();
 
 private:
   broker::PassiveClient broker_client_;
@@ -251,6 +257,7 @@ private:
   std::unordered_map<uint32_t, uint32_t> account_location_ids_ = {};
   std::unordered_map<std::string, yijinjing::data::location_ptr> market_data_ = {};
   std::string arguments_;
+  bool started_ = false;
 
   friend void enable(RuntimeContext &context) { context.on_start(); }
 };

@@ -178,9 +178,11 @@ template <typename T, size_t N> struct array {
   array<T, N> &operator=(const array<T, N> &other) { return operator=(other.value); }
 } KF_PACK_TYPE_END;
 
-template <typename T, size_t N> void to_json(nlohmann::json &j, const array<T, N> &value) { j = value.value; }
+template <typename T, size_t N> [[maybe_unused]] void to_json(nlohmann::json &j, const array<T, N> &value) {
+  j = value.value;
+}
 
-template <typename T, size_t N> void from_json(const nlohmann::json &j, array<T, N> &value) {
+template <typename T, size_t N> [[maybe_unused]] void from_json(const nlohmann::json &j, array<T, N> &value) {
   for (int i = 0; i < N; i++) {
     value.value[i] = j[i].get<T>();
   }
@@ -229,7 +231,7 @@ struct size_fixed<DataType, std::enable_if_t<std::is_class_v<DataType> and DataT
   static constexpr bool value = boost::hana::fold(
       boost::hana::transform(boost::hana::accessors<DataType>(),
                              [](auto it) {
-                               auto accessor = boost::hana::second(it);
+                               [[maybe_unused]] auto accessor = boost::hana::second(it);
                                using AttrType = std::decay_t<decltype(accessor(std::forward<DataType &>(DataType{})))>;
                                return std::is_arithmetic_v<AttrType> or std::is_enum_v<AttrType> or
                                       is_array_v<AttrType>;
@@ -303,7 +305,7 @@ template <typename T> struct type_tuple<T> {
   static constexpr auto value = boost::hana::make_tuple(boost::hana::type_c<T>);
 };
 
-template <typename T, typename... Ts> constexpr void type_check(Ts... arg) {
+template <typename T, typename... Ts> constexpr void type_check(Ts...) {
   constexpr auto check =
       boost::hana::transform(type_tuple<Ts...>::value, [](auto t) { return t == boost::hana::type_c<T>; });
   static_assert(boost::hana::fold(check, std::logical_and<>()), "type check of arguments failed");
@@ -364,7 +366,7 @@ template <typename DataType> struct data {
 private:
   template <typename V> static std::enable_if_t<is_numeric_v<V>> init_member(V &v) { v = static_cast<V>(0); }
 
-  template <typename V> static std::enable_if_t<not is_numeric_v<V>> init_member(V &v) {}
+  template <typename V> static std::enable_if_t<not is_numeric_v<V>> init_member(V &) {}
 
   template <typename J, typename V>
   static std::enable_if_t<std::is_arithmetic_v<V> or is_array_of_others_v<V, char>> restore_from_json(J &j, V &v) {
@@ -373,7 +375,7 @@ private:
 
   template <typename J, typename V> static std::enable_if_t<is_array_of_v<V, char>> restore_from_json(J &j, V &v) {
     std::string value = j;
-    v = value.c_str();
+    v = value.c_str(); // kungfu_array overload operator=, it actually use memcpy rather than assign pointer
   }
 
   template <typename J, typename V>

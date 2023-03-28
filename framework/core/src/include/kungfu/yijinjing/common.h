@@ -75,7 +75,8 @@ public:
   [[nodiscard]] virtual std::string layout_file(const location_ptr &location, longfist::enums::layout layout,
                                                 const std::string &name) const;
 
-  [[nodiscard]] virtual std::string default_to_system_db(const location_ptr &location, const std::string &name) const;
+  [[maybe_unused]] [[maybe_unused]] [[nodiscard]] virtual std::string
+  default_to_system_db(const location_ptr &location, const std::string &name) const;
 
   [[nodiscard]] virtual std::vector<uint32_t> list_page_id(const location_ptr &location, uint32_t dest_id) const;
 

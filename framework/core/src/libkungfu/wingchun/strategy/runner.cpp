@@ -187,6 +187,7 @@ void Runner::prepare(const event_ptr &event) {
   }
   context_->get_bookkeeper().guard_positions();
   started_ = true;
+  context_->set_started(true);
   post_start();
 }
 

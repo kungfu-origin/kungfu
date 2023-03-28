@@ -101,8 +101,6 @@ private:
   DECLARE_PTR(BookListener);
 };
 
-static const int64_t NANO_MILLISECOND = int64_t(1000000);
-
 } // namespace kungfu::wingchun::strategy
 
 #endif // WINGCHUN_RUNNER_H

@@ -60,19 +60,20 @@ enum class ZoneTimeType : char {
 struct LocalTimeInfo {
   time_t seconds = 0;
 
-  bool has_summer_day = false;
+  [[maybe_unused]] bool has_summer_day = false;
   bool is_summer_day = false;
 
-  ZoneTimeType zone_time_type = ZoneTimeType::BST;
+  [[maybe_unused]] ZoneTimeType zone_time_type = ZoneTimeType::BST;
 };
 
 namespace TimeUtil {
-time_t TimeToSeconds(const std::string &time, bool is_gmt);
-time_t TimeToSeconds(int year, int month, int day, int hour, int minute, int second, bool is_gmt);
+[[maybe_unused]] time_t TimeToSeconds(const std::string &time, bool is_gmt);
+time_t TimeToSeconds(int year, int month, int day, int hour, int minute, int second, [[maybe_unused]] bool is_gmt);
 
-time_t DateToSeconds(const std::string &time, bool is_gmt);
+[[maybe_unused]] time_t DateToSeconds(const std::string &time, bool is_gmt);
 
-time_t TranslateLocalTimeToGMTime(time_t local_seconds, LocationTimeType loc_type, LocalTimeInfo *info = nullptr);
+[[maybe_unused]] time_t TranslateLocalTimeToGMTime(time_t local_seconds, LocationTimeType loc_type,
+                                                   LocalTimeInfo *info = nullptr);
 std::shared_ptr<LocalTimeInfo> TranslateGMTimeToLocalTime(time_t gmt, LocationTimeType loc_type);
 } // namespace TimeUtil
 
@@ -80,8 +81,9 @@ std::shared_ptr<LocalTimeInfo> TranslateGMTimeToLocalTime(time_t gmt, LocationTi
 // param1: local time
 // param2: exchangeid
 // params3:  YYYYMMDD
-inline std::string translate_GMTime_to_localdate_by_exchange_id(time_t lTime, const std::string &exchangeId,
-                                                                const std::string strformat = "%Y%m%d") {
+[[maybe_unused]] inline std::string
+translate_GMTime_to_localdate_by_exchange_id(time_t lTime, const std::string &exchangeId,
+                                             const std::string &strformat = "%Y%m%d") {
   // ExchangeId LocationTime
   static const std::unordered_map<std::string, LocationTimeType> location_time_exchange_id_map = {
       {EXCHANGE_US, LocationTimeType::AmericaEastern},           //

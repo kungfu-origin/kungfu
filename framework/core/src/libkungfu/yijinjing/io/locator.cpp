@@ -57,7 +57,8 @@ std::string locator::layout_file(const location_ptr &location, es::layout layout
   return path.string();
 }
 
-std::string locator::default_to_system_db(const location_ptr &location, const std::string &name) const {
+[[maybe_unused]] std::string locator::default_to_system_db(const location_ptr &location,
+                                                           const std::string &name) const {
   auto sqlite_layout = es::layout::SQLITE;
   auto db_file = layout_file(location, sqlite_layout, name);
   if (not fs::exists(db_file)) {
@@ -121,7 +122,7 @@ std::vector<uint32_t> locator::list_location_dest(const location_ptr &location) 
       set.emplace(std::stoul(basename.stem(), nullptr, 16));
     }
   }
-  return std::vector<uint32_t>(set.begin(), set.end());
+  return std::vector<uint32_t>{set.begin(), set.end()};
 }
 
 std::vector<uint32_t> locator::list_location_dest_by_db(const location_ptr &location) const {
@@ -133,6 +134,6 @@ std::vector<uint32_t> locator::list_location_dest_by_db(const location_ptr &loca
       set.emplace(std::stoul(basename.stem(), nullptr, 16));
     }
   }
-  return std::vector<uint32_t>(set.begin(), set.end());
+  return std::vector<uint32_t>{set.begin(), set.end()};
 }
 } // namespace kungfu::yijinjing::data

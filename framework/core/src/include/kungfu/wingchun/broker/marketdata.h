@@ -53,9 +53,10 @@ public:
   virtual bool on_custom_event(const event_ptr &event) { return true; }
 
 protected:
-  [[nodiscard]] bool has_instrument(const std::string &instrument_id) const;
+  [[maybe_unused]] [[nodiscard]] bool has_instrument(const std::string &instrument_id) const;
 
-  [[nodiscard]] const longfist::types::Instrument &get_instrument(const std::string &instrument_id) const;
+  [[maybe_unused]] [[nodiscard]] const longfist::types::Instrument &
+  get_instrument(const std::string &instrument_id) const;
 
   void update_instrument(longfist::types::Instrument instrument);
 

@@ -3,6 +3,7 @@
 //
 
 #include "marketdata_xtp.h"
+#include "serialize_xtp.h"
 #include "type_convert.h"
 
 using namespace kungfu::yijinjing;

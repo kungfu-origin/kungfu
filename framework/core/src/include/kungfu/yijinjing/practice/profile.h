@@ -37,7 +37,7 @@ public:
     return boost::hana::unpack(pk_members, operation);
   }
 
-  template <typename DataType> std::vector<DataType> get_all(const DataType &query) {
+  template <typename DataType> std::vector<DataType> get_all(const DataType &) {
     return get_storage()->get_all<DataType>();
   }
 

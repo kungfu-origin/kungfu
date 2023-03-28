@@ -52,7 +52,7 @@ public:
     position.avg_open_price = 1;
     auto commission = calculate_commission(book, trade);
     auto tax = calculate_tax(trade);
-    auto days = get_repo_expire_days(trade.instrument_id);
+    //    auto days = get_repo_expire_days(trade.instrument_id);
     //    auto profit = trade.volume / 100 / 360 * days;
 
     position.volume += trade.volume;

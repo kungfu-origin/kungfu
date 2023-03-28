@@ -39,7 +39,7 @@ class TraderSim(wc.Trader):
         self.map_block_msg = {}
         self.enable_self_detect()
 
-    def on_restore(self):
+    def on_recover(self):
         pass
 
     def on_start(self):

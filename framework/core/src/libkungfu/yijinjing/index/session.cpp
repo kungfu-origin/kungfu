@@ -40,13 +40,14 @@ int64_t session_finder::find_last_active_time(const data::location_ptr &source_l
   return sessions.empty() ? INT64_MIN : sessions.front().end_time;
 }
 
-SessionVector session_finder::find_sessions(int64_t from, int64_t to) {
+[[maybe_unused]] SessionVector session_finder::find_sessions(int64_t from, int64_t to) {
   auto bt = &Session::begin_time;
   auto range = where(greater_or_equal(bt, from) and lesser_or_equal(bt, to));
   return session_storage_->get_all<Session>(range, order_by(bt));
 }
 
-SessionVector session_finder::find_sessions_for(const location_ptr &source_location, int64_t from, int64_t to) {
+[[maybe_unused]] SessionVector session_finder::find_sessions_for(const location_ptr &source_location, int64_t from,
+                                                                 int64_t to) {
   auto bt = &Session::begin_time;
   auto match_uid = eq(&Session::location_uid, source_location->uid);
   auto range = where(match_uid and greater_or_equal(bt, from) and lesser_or_equal(bt, to));
@@ -112,7 +113,7 @@ void session_builder::update_session(const frame_ptr &frame) {
   session.data_size += frame->frame_length();
 }
 
-void session_builder::rebuild_index_db() {
+[[maybe_unused]] void session_builder::rebuild_index_db() {
   std::unordered_map<std::string, location_ptr> formatstr_to_locations = {};
   auto locator = io_device_->get_locator();
   auto reader = io_device_->open_reader_to_subscribe();

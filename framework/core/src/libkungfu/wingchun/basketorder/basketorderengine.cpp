@@ -73,7 +73,7 @@ void BasketOrderEngine::update_basket_order(int64_t trigger_time, const longfist
   }
 }
 
-bool BasketOrderEngine::try_update_basket_order(int64_t trigger_time, const longfist::types::Order &order) {
+bool BasketOrderEngine::try_update_basket_order(int64_t, const longfist::types::Order &order) {
   if (order.parent_id == (uint64_t)0) {
     SPDLOG_TRACE("not a basket order");
     return false;

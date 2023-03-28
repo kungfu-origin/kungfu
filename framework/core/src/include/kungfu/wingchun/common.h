@@ -16,9 +16,6 @@
 #include <kungfu/yijinjing/time.h>
 #include <kungfu/yijinjing/util/util.h>
 
-#define REGION_CN "CN"
-#define REGION_HK "HK"
-
 #define EXCHANGE_SSE "SSE"
 #define EXCHANGE_SZE "SZE"
 #define EXCHANGE_BSE "BSE"
@@ -82,11 +79,6 @@
 #define EXCHANGE_FREX "FREX" // ES-FREX: 73
 #define EXCHANGE_METL "METL" // ES-METL: 74
 #define EXCHANGE_IPM "IPM"   // 国际贵金属: 5000
-
-#define SOURCE_SIM "sim"
-#define SOURCE_CTP "ctp"
-#define SOURCE_XTP "xtp"
-#define SOURCE_BAC "barrich"
 
 #define EPSILON (1e-6)
 #define DOUBLEMAX (1e16) // 一亿亿, 2018年A股总市值不到50万亿
@@ -159,7 +151,7 @@ inline bool is_final_status(const longfist::enums::OrderStatus &status) {
   }
 }
 
-inline bool is_final_basket_order_status(const longfist::enums::BasketOrderStatus &status) {
+[[maybe_unused]] inline bool is_final_basket_order_status(const longfist::enums::BasketOrderStatus &status) {
   switch (status) {
   case longfist::enums::BasketOrderStatus::Unknown:
   case longfist::enums::BasketOrderStatus::Pending:
@@ -178,7 +170,7 @@ inline bool is_convertible_bond(const std::string &instrument_id, const std::str
           string_equals(exchange_id, EXCHANGE_SSE));
 }
 
-inline bool is_repo(const std::string &instrument_id, const std::string &exchange_id) {
+[[maybe_unused]] inline bool is_repo(const std::string &instrument_id, const std::string &exchange_id) {
   return (string_equals_n(instrument_id, "204", 3) && string_equals(exchange_id, EXCHANGE_SSE)) ||
          (string_equals_n(instrument_id, "1318", 4) && string_equals(exchange_id, EXCHANGE_SZE));
 }
@@ -292,7 +284,7 @@ inline longfist::enums::InstrumentType get_instrument_type_by_exchange_hk(const 
       {90000, 99999, longfist::enums::InstrumentType::Stock},       // 供日後使用
   };
 
-  int nId = atoi(instrument_id.c_str());
+  int nId = std::stoi(instrument_id);
 
   for (auto &iter : hk_code_type_def) {
     if (nId >= iter.beg && nId <= iter.end) {
@@ -583,6 +575,17 @@ inline void order_from_input(const longfist::types::OrderInput &input, longfist:
   order.time_condition = input.time_condition;
 
   order.parent_id = input.parent_id;
+}
+
+[[maybe_unused]] inline void trade_from_order(const longfist::types::Order &order, longfist::types::Trade &trade) {
+  trade.order_id = order.order_id;
+  strcpy(trade.instrument_id, order.instrument_id);
+  strcpy(trade.exchange_id, order.exchange_id);
+  strcpy(trade.external_order_id, order.external_order_id);
+  trade.instrument_type = order.instrument_type;
+  trade.side = order.side;
+  trade.offset = order.offset;
+  trade.hedge_flag = order.hedge_flag;
 }
 
 } // namespace kungfu::wingchun

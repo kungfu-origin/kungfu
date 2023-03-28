@@ -6,13 +6,12 @@
 
 #include <kungfu/common.h>
 #include <kungfu/yijinjing/nanomsg/socket.h>
-#include <kungfu/yijinjing/util/util.h>
 
 namespace kungfu::yijinjing::nanomsg {
 
-const char *nn_exception::what() const throw() { return nn_strerror(errno_); }
+const char *nn_exception::what() const noexcept { return nn_strerror(errno_); }
 
-int nn_exception::num() const { return errno_; }
+[[maybe_unused]] int nn_exception::num() const { return errno_; }
 
 socket::socket(int domain, protocol p, int buffer_size) : protocol_(p), buf_(buffer_size) {
   sock_ = nn_socket(domain, static_cast<int>(p));
@@ -24,7 +23,7 @@ socket::socket(int domain, protocol p, int buffer_size) : protocol_(p), buf_(buf
 
 socket::~socket() { nn_close(sock_); }
 
-void socket::setsockopt(int level, int option, const void *optval, size_t optvallen) {
+void socket::setsockopt(int level, int option, const void *optval, size_t optvallen) const {
   int rc = nn_setsockopt(sock_, level, option, optval, optvallen);
   if (rc != 0) {
     SPDLOG_DEBUG("can not setsockopt");
@@ -32,13 +31,15 @@ void socket::setsockopt(int level, int option, const void *optval, size_t optval
   }
 }
 
-void socket::setsockopt_str(int level, int option, std::string value) {
+void socket::setsockopt_str(int level, int option, const std::string &value) const {
   setsockopt(level, option, value.c_str(), value.length());
 }
 
-void socket::setsockopt_int(int level, int option, int value) { setsockopt(level, option, &value, sizeof(value)); }
+void socket::setsockopt_int(int level, int option, int value) const {
+  setsockopt(level, option, &value, sizeof(value));
+}
 
-void socket::getsockopt(int level, int option, void *optval, size_t *optvallen) {
+void socket::getsockopt(int level, int option, void *optval, size_t *optvallen) const {
   int rc = nn_getsockopt(sock_, level, option, optval, optvallen);
   if (rc != 0) {
     SPDLOG_DEBUG("can not getsockopt");
@@ -46,7 +47,7 @@ void socket::getsockopt(int level, int option, void *optval, size_t *optvallen) 
   }
 }
 
-int socket::getsockopt_int(int level, int option) {
+[[maybe_unused]] int socket::getsockopt_int(int level, int option) const {
   int rc;
   size_t s = sizeof(rc);
   getsockopt(level, option, &rc, &s);
@@ -73,7 +74,7 @@ int socket::connect(const std::string &path) {
   return rc;
 }
 
-void socket::shutdown(int how) {
+[[maybe_unused]] void socket::shutdown(int how) const {
   int rc = nn_shutdown(sock_, how);
   if (rc != 0) {
     SPDLOG_DEBUG("can not shutdown");
@@ -81,7 +82,7 @@ void socket::shutdown(int how) {
   }
 }
 
-void socket::close() {
+void socket::close() const {
   int rc = nn_close(sock_);
   if (rc != 0) {
     SPDLOG_DEBUG("can not close");
@@ -130,15 +131,15 @@ const std::string &socket::recv_msg(int flags) {
   return message_;
 }
 
-int socket::send_json(const nlohmann::json &msg, int flags) const { return send(msg.dump(), flags); }
+[[maybe_unused]] int socket::send_json(const nlohmann::json &msg, int flags) const { return send(msg.dump(), flags); }
 
-nlohmann::json socket::recv_json(int flags) {
+[[maybe_unused]] nlohmann::json socket::recv_json(int flags) {
   int rc = 0;
   if ((rc = recv(flags)) > 0) {
     SPDLOG_INFO("parsing json {} {}", rc, message_);
     return nlohmann::json::parse(message_);
   } else {
-    return nlohmann::json();
+    return nlohmann::json{};
   }
 }
 
