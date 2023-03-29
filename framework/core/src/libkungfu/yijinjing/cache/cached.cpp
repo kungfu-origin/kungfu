@@ -15,7 +15,6 @@ using namespace kungfu::yijinjing::data;
 using namespace kungfu::yijinjing::cache;
 
 #define STORE_SINGLE_LOOP_VOLUME 100
-#define STORE_INTERVAL_LIMIT 200
 
 namespace kungfu::yijinjing::cache {
 
@@ -78,12 +77,6 @@ void cached::on_notify() {
 }
 
 void cached::async_handle_feeds() {
-  // limit cache overhead
-  if (store_interval_ < STORE_INTERVAL_LIMIT) {
-    store_interval_++;
-    return;
-  }
-  store_interval_ = 0;
   handle_cached_feeds();
   handle_profile_feeds();
 }
