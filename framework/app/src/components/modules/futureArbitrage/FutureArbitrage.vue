@@ -209,7 +209,7 @@ function handleMakeOrder() {
 <template>
   <div class="kf-make-order-dashboard__warp">
     <KfDashboard @boardSizeChange="handleBodySizeChange">
-      <template  v-slot:title>
+      <template v-slot:title>
         <span v-if="currentGlobalKfLocation && isShowCurrentGlobalKfLocationTitle">
           <a-tag
             v-if="currentCategoryData"
