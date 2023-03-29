@@ -75,7 +75,8 @@ export default {
   add_config_modal:
     '{category}ID系统唯一, {changeTypeName} 成功后不可修改, 确认 {key}',
   update_config_modal: '确认{key} 相关配置',
-  database_locked: '当前数据库被其他进程占用, 请稍后再试',
+  database_locked:
+    '检测到当前有交易进行，为不影响交易数据落地，建议收盘后尝试进行此操作',
 
   MakeOrder: '下单面板',
   FutureArbitrage: '套利指令',
