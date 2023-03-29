@@ -39,6 +39,12 @@ const {
   getCurrentGlobalKfLocationId,
 } = useCurrentGlobalKfLocation(window.watcher);
 
+const isShowTittle = computed(() => {
+  return (
+    currentGlobalKfLocation.value?.category !== 'globalPos'
+  );
+});
+
 const configSettings = computed(() => {
   if (!currentGlobalKfLocation.value) {
     return getConfigSettings();
@@ -202,7 +208,7 @@ function handleMakeOrder() {
 <template>
   <div class="kf-make-order-dashboard__warp">
     <KfDashboard @boardSizeChange="handleBodySizeChange">
-      <template v-slot:title>
+      <template v-if="isShowTittle" v-slot:title>
         <span v-if="currentGlobalKfLocation">
           <a-tag
             v-if="currentCategoryData"
