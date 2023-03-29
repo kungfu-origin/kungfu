@@ -552,10 +552,10 @@ export const messagePrompt = (): {
     message.success(msg);
   };
   const error = (msg: string = t('operation_failed')): void => {
-    message.error(msg);
+    message.error(msg, 5);
   };
   const warning = (msg: string): void => {
-    message.warning(msg);
+    message.warning(msg, 5);
   };
   return {
     success,

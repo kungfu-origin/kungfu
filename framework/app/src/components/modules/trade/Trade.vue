@@ -165,7 +165,6 @@ watch(historyDate, async (newDate) => {
           toRaw(dealTrade(window.watcher, item, tradingData.OrderStat, true)),
         ),
       );
-      historyDataLoading.value = false;
     })
     .catch((err) => {
       if (err.message === 'database_locked') {
@@ -173,6 +172,9 @@ watch(historyDate, async (newDate) => {
       } else {
         console.error(err.message);
       }
+    })
+    .finally(() => {
+      historyDataLoading.value = false;
     });
 });
 
