@@ -1921,7 +1921,7 @@ export const initFormTimePicker = (initValue?: string) => {
     parsedValue = dayjs(initValue, 'YYYY-MM-DD');
     if (parsedValue) return parsedValue.format('YYYY-MM-DD');
   }
-  
+
   return null;
 };
 
