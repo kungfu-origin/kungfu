@@ -72,6 +72,11 @@ void cached::on_frame() {}
 
 void cached::on_active() { async_handle_feeds(); }
 
+void cached::on_notify() {
+  handle_cached_feeds();
+  handle_profile_feeds();
+}
+
 void cached::async_handle_feeds() {
   // limit cache overhead
   if (store_interval_ < STORE_INTERVAL_LIMIT) {

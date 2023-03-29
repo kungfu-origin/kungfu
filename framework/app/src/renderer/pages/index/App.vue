@@ -16,7 +16,6 @@ import {
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import {
   playSound,
-  useBasket,
   useDealExportHistoryTradingData,
   useDealInstruments,
   usePreStartAndQuitApp,
@@ -52,7 +51,6 @@ const {
 
 useDealInstruments();
 useSubscibeInstrumentAtEntry(window.watcher);
-useBasket();
 
 const { exportDateModalVisible, exportDataLoading, handleConfirmExportDate } =
   useDealExportHistoryTradingData();
@@ -164,14 +162,15 @@ onBeforeUnmount(() => {
       :title="$t('system_prompt')"
       :visible="preStartSystemLoading"
       :status="[
-        {
-          key: 'cpusSafeNumChecking',
-          status: preStartSystemLoadingData.cpusSafeNumChecking,
-        },
-        {
-          key: 'VCDepsExistsChecking',
-          status: preStartSystemLoadingData.VCDepsExistsChecking,
-        },
+        // TODO: 临时注释
+        // {
+        //   key: 'cpusSafeNumChecking',
+        //   status: preStartSystemLoadingData.cpusSafeNumChecking,
+        // },
+        // {
+        //   key: 'VCDepsExistsChecking',
+        //   status: preStartSystemLoadingData.VCDepsExistsChecking,
+        // },
         { key: 'archive', status: preStartSystemLoadingData.archive },
         { key: 'watcher', status: preStartSystemLoadingData.watcher },
         {
@@ -180,14 +179,15 @@ onBeforeUnmount(() => {
         },
       ]"
       :txt="{
-        cpusSafeNumChecking: {
-          done: $t('computer_performance_done'),
-          loading: $t('computer_performance_detecting'),
-        },
-        VCDepsExistsChecking: {
-          done: $t('vc_deps_done'),
-          loading: $t('vc_deps_detecting'),
-        },
+        // TODO: 临时注释
+        // cpusSafeNumChecking: {
+        //   done: $t('computer_performance_done'),
+        //   loading: $t('computer_performance_detecting'),
+        // },
+        // VCDepsExistsChecking: {
+        //   done: $t('vc_deps_done'),
+        //   loading: $t('vc_deps_detecting'),
+        // },
         archive: { done: $t('archive_done'), loading: $t('archive_loading') },
         watcher: {
           done: $t('environment_done'),
