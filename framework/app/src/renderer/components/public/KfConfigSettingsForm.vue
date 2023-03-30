@@ -822,14 +822,12 @@ function handleRemoveFile(key: string, filename: string): void {
 }
 
 function onOpenChange(open: boolean,key: string){
-  console.log( 'onOpenChange',open ,formState.value[key])
-      if (open) {
-        formState.value[key] = null;
-      }
-    };
+  if (open) {
+    formState.value[key] = null;
+  }
+};
 
 function onCalendarChange(val: Dayjs[],key: string){
-  console.log( 'onCalendarChange',val )
   if(val){
     formState.value[key]= val.map(d =>{
     if(d) {
@@ -843,7 +841,6 @@ function onCalendarChange(val: Dayjs[],key: string){
     }
   });
   }
-  console.log('formState.value',formState.value,dayjs(formState.value[key][0]).hour())
 };
 
 function disabledEndDate(currentDate: Dayjs,key: string){
