@@ -1898,6 +1898,12 @@ export const KfConfigValueArrayType = [
   'csvTable',
 ];
 
+export const KfConfigValueTimeType = [
+  'dateTimePicker',
+  'datePicker',
+  'timePicker',
+];
+
 export const initFormTimePicker = (initValue?: string) => {
   if (typeof initValue !== 'string') return null;
 
@@ -1905,13 +1911,16 @@ export const initFormTimePicker = (initValue?: string) => {
 
   if (initValue === 'now') {
     parsedValue = dayjs();
-  } else if (/\d{2}:\d{2}:\d{2}/.test(initValue)) {
+  } else if (/^\d{2}:\d{2}:\d{2}$/.test(initValue)) {
     parsedValue = dayjs(initValue, 'HH:mm:ss');
-  } else if (/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/.test(initValue)) {
+    if (parsedValue) return parsedValue.format('YYYY-MM-DD HH:mm:ss');
+  } else if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(initValue)) {
     parsedValue = dayjs(initValue, 'YYYY-MM-DD HH:mm:ss');
+    if (parsedValue) return parsedValue.format('YYYY-MM-DD HH:mm:ss');
+  } else if (/^\d{4}-\d{2}-\d{2}$/.test(initValue)) {
+    parsedValue = dayjs(initValue, 'YYYY-MM-DD');
+    if (parsedValue) return parsedValue.format('YYYY-MM-DD');
   }
-
-  if (parsedValue) return parsedValue.format('YYYY-MM-DD HH:mm:ss');
 
   return null;
 };
@@ -1927,6 +1936,7 @@ export const initFormStateByConfig = (
     const isBoolean = KfConfigValueBooleanType.includes(type);
     const isNumber = KfConfigValueNumberType.includes(type);
     const isArray = KfConfigValueArrayType.includes(type);
+    const isTime = KfConfigValueTimeType.includes(type);
 
     let defaultValue;
 
@@ -1935,7 +1945,7 @@ export const initFormStateByConfig = (
         ? false
         : isNumber
         ? 0
-        : type === 'timePicker'
+        : isTime
         ? null
         : isArray
         ? []
@@ -1976,7 +1986,7 @@ export const initFormStateByConfig = (
           defaultValue = [];
         }
       }
-    } else if (item.type === 'timePicker') {
+    } else if (KfConfigValueTimeType.includes(type)) {
       defaultValue = initFormTimePicker(item?.default);
     }
 
