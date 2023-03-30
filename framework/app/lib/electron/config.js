@@ -95,6 +95,11 @@ module.exports = {
   generateUpdatesFilesForAllChannels: true,
   electronVersion:
     kungfuCore.devDependencies.electron || kungfuCore.dependencies.electron,
+  publish: {
+    provider: 'generic',
+    url: 'www.kungfu-trader.com',
+    channel: '${channel}-${os}',
+  },
   npmRebuild: false,
   files: [
     'dist/app/**/*',
