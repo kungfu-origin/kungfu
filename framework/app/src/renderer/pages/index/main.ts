@@ -42,8 +42,7 @@ import {
   postStartAll,
   preStartAll,
   mergeExtLanguages,
-  // checkCpusNumAndConfirmModal,
-  // checkVCDepsAndConfirmModal,
+  checkCpusNumAndConfirmModal,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
 import {
@@ -145,23 +144,16 @@ globalBus.subscribe((data) => {
 const initStartAll = () => {
   const start = () => {
     preStartAll()
-      // TODO: 临时注释
-      // .then(() => checkCpusNumAndConfirmModal())
-      // .then((res) => {
-      //   globalBus.next({
-      //     tag: 'preStartCheck',
-      //     name: 'cpusNum',
-      //     status: res,
-      //   });
-      // })
-      // .then(() => checkVCDepsAndConfirmModal())
-      // .then((res) => {
-      //   globalBus.next({
-      //     tag: 'preStartCheck',
-      //     name: 'VCDeps',
-      //     status: res,
-      //   });
-      // })
+      .then(() => checkCpusNumAndConfirmModal())
+      .then((res) => {
+        return delayMilliSeconds(2000).then(() => {
+          globalBus.next({
+            tag: 'preStartCheck',
+            name: 'cpusNum',
+            status: res,
+          });
+        });
+      })
       .then(async () => {
         if (__BYPASS_ARCHIVE__) {
           globalBus.next({

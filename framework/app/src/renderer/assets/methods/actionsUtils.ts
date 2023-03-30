@@ -920,9 +920,7 @@ export const usePreStartAndQuitApp = (): {
     archive: 'loading',
     watcher: 'loading',
     extraResourcesLoading: 'loading',
-    // TODO: 临时注释
-    // cpusSafeNumChecking: 'loading',
-    // VCDepsExistsChecking: 'loading',
+    cpusSafeNumChecking: 'loading',
   });
 
   const preQuitSystemLoadingData = reactive<
@@ -977,7 +975,6 @@ export const usePreStartAndQuitApp = (): {
       (await isAllMainProcessRunning())
     ) {
       preStartSystemLoadingData.cpusSafeNumChecking = 'done';
-      preStartSystemLoadingData.VCDepsExistsChecking = 'done';
       preStartSystemLoadingData.archive = 'done';
       preStartSystemLoadingData.extraResourcesLoading = 'done';
     }
@@ -988,9 +985,6 @@ export const usePreStartAndQuitApp = (): {
           if (data.tag === 'preStartCheck') {
             if (data.name === 'cpusNum') {
               preStartSystemLoadingData.cpusSafeNumChecking = 'done';
-            }
-            if (data.name === 'VCDeps') {
-              preStartSystemLoadingData.VCDepsExistsChecking = 'done';
             }
           }
 

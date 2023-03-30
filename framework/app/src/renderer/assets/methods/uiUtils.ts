@@ -14,7 +14,6 @@ import {
   ARCHIVE_DIR,
   buildProcessLogPath,
   KF_HOME,
-  VC_DEPS_DIR,
 } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 import {
   getInstrumentTypeData,
@@ -34,7 +33,7 @@ import {
 import { readRootPackageJsonSync } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import { BrowserWindow, getCurrentWindow, dialog } from '@electron/remote';
-import { ipcRenderer, shell } from 'electron';
+import { ipcRenderer } from 'electron';
 import { message, Modal, ModalFuncProps } from 'ant-design-vue';
 import {
   InstrumentTypes,
@@ -42,12 +41,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import path from 'path';
 import { startExtDaemon } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
-import {
-  isWindows,
-  checkIfCpusNumSafe,
-  getAllVCDepsVersions,
-  checkVCDepsByVersion,
-} from '@kungfu-trader/kungfu-js-api/utils/osUtils';
+import { checkIfCpusNumSafe } from '@kungfu-trader/kungfu-js-api/utils/osUtils';
 import { Proc } from 'pm2';
 import { VueNode } from 'ant-design-vue/lib/_util/type';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
@@ -348,48 +342,6 @@ export const checkCpusNumAndConfirmModal = (): Promise<boolean> => {
       t('computer_performance_abnormal'),
       { zIndex: 1001 },
     );
-  });
-};
-
-export const checkVCDepsAndConfirmModal = (): Promise<boolean> => {
-  if (!isWindows()) return Promise.resolve(true);
-
-  const allVCVersions: KungfuApi.VCDepsVersionTypes[] = getAllVCDepsVersions();
-  return Promise.allSettled(
-    allVCVersions.map((version) => checkVCDepsByVersion(version)),
-  ).then((results) => {
-    const existed: string[] = [];
-    const notExisted: string[] = [];
-    results.forEach((res, index) =>
-      res.status === 'fulfilled' && res.value
-        ? existed.push(allVCVersions[index])
-        : notExisted.push(allVCVersions[index]),
-    );
-
-    if (!notExisted.length) return Promise.resolve(true);
-
-    return confirmModalByCustomArgs(
-      t('system_prompt'),
-      h('div', {}, [
-        h('div', {}, t('vc_deps_abnormal')),
-        h('div', { class: 'color-red' }, t('vc_deps_abnormal_message')),
-      ]),
-      {
-        zIndex: 1001,
-      },
-    ).then((flag) => {
-      if (flag) {
-        return Promise.allSettled(
-          notExisted.map((version) => {
-            return shell.openPath(
-              path.join(VC_DEPS_DIR, version, 'vcredist_x64.exe'),
-            );
-          }),
-        ).then(() => Promise.resolve(true));
-      }
-
-      return Promise.resolve(true);
-    });
   });
 };
 
