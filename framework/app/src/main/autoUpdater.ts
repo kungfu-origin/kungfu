@@ -55,7 +55,9 @@ function handleUpdateKungfu(MainWindow: BrowserWindow | null) {
 
   kfLogger.info('Kungfu autoUpdater artifact path: ', artifactPath);
 
-  updaterOption.channel = '${channel}-${os}';
+  if (!updaterOption.channel) {
+    updaterOption.channel = '${channel}-${os}';
+  }
 
   if (updaterOption.provider === 'generic') {
     updaterOption.url = `${updaterOption.url}/${artifactPath}`;
