@@ -202,7 +202,6 @@ public:
           cost = (position.yesterday_volume * commission.close_ratio) +
                  (close_today_volume * commission.close_today_ratio);
         }
-        cost = cost * contract_multiplier;
       }
 
       auto multiplier = contract_multiplier * (position.direction == Direction::Long ? 1 : -1);
