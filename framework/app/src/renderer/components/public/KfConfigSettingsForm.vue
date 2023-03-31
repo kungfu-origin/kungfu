@@ -1007,7 +1007,7 @@ defineExpose({
       ></a-input>
       <a-input-password
         v-else-if="item.type === 'password'"
-        v-model:value="formState[item.key]"
+        v-model:value.trim="formState[item.key]"
         :disabled="
           (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
           item.disabled
@@ -1488,26 +1488,36 @@ defineExpose({
           </div>
         </template>
       </div>
-      <a-date-picker 
+      <a-date-picker
         v-else-if="item.type === 'dateTimePicker'"
         :disabled="
           (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
-          item.disabled 
+          item.disabled
         "
         format="YYYY-MM-DD HH:mm:ss"
         :show-time="{ defaultValue: dayjs('00:00:00', 'HH:mm:ss') }"
-        :value="(formState[item.key] == null || formState[item.key] == '') ? null : dayjs(formState[item.key])"
-        @change="handleDateTimePickerChange($event as unknown as Dayjs, item.key)"  >
-      </a-date-picker>
-      <a-date-picker 
+        :value="
+          formState[item.key] == null || formState[item.key] == ''
+            ? null
+            : dayjs(formState[item.key])
+        "
+        @change="
+          handleDateTimePickerChange($event as unknown as Dayjs, item.key)
+        "
+      ></a-date-picker>
+      <a-date-picker
         v-else-if="item.type === 'datePicker'"
         :disabled="
           (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
-          item.disabled 
+          item.disabled
         "
-        :value="(formState[item.key] == null || formState[item.key] == '') ? null : dayjs(formState[item.key])"
-        @change="handleDatePickerChange($event as unknown as Dayjs, item.key)"  >
-      </a-date-picker>
+        :value="
+          formState[item.key] == null || formState[item.key] == ''
+            ? null
+            : dayjs(formState[item.key])
+        "
+        @change="handleDatePickerChange($event as unknown as Dayjs, item.key)"
+      ></a-date-picker>
       <a-time-picker
         v-else-if="item.type === 'timePicker'"
         :disabled="
