@@ -162,15 +162,10 @@ onBeforeUnmount(() => {
       :title="$t('system_prompt')"
       :visible="preStartSystemLoading"
       :status="[
-        // TODO: 临时注释
-        // {
-        //   key: 'cpusSafeNumChecking',
-        //   status: preStartSystemLoadingData.cpusSafeNumChecking,
-        // },
-        // {
-        //   key: 'VCDepsExistsChecking',
-        //   status: preStartSystemLoadingData.VCDepsExistsChecking,
-        // },
+        {
+          key: 'cpusSafeNumChecking',
+          status: preStartSystemLoadingData.cpusSafeNumChecking,
+        },
         { key: 'archive', status: preStartSystemLoadingData.archive },
         { key: 'watcher', status: preStartSystemLoadingData.watcher },
         {
@@ -179,15 +174,10 @@ onBeforeUnmount(() => {
         },
       ]"
       :txt="{
-        // TODO: 临时注释
-        // cpusSafeNumChecking: {
-        //   done: $t('computer_performance_done'),
-        //   loading: $t('computer_performance_detecting'),
-        // },
-        // VCDepsExistsChecking: {
-        //   done: $t('vc_deps_done'),
-        //   loading: $t('vc_deps_detecting'),
-        // },
+        cpusSafeNumChecking: {
+          done: $t('computer_performance_done'),
+          loading: $t('computer_performance_detecting'),
+        },
         archive: { done: $t('archive_done'), loading: $t('archive_loading') },
         watcher: {
           done: $t('environment_done'),

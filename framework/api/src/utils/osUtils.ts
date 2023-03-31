@@ -1,6 +1,5 @@
 import os from 'os';
 import { promisified as regedit, RegistryItem } from 'regedit';
-import { VCDepsWinRegMap } from '../config/VCDepsConfig';
 
 const KUNGFU_SAFE_CPUS_NUM = 4;
 
@@ -27,27 +26,4 @@ export const getWinRegistry = (
 
 export const isWinRegistryExists = (registry: RegistryItem): boolean => {
   return !!registry && registry.exists;
-};
-
-export const getAllVCDepsVersions = (): KungfuApi.VCDepsVersionTypes[] => {
-  return Object.keys(VCDepsWinRegMap) as KungfuApi.VCDepsVersionTypes[];
-};
-
-export const checkVCDepsByVersion = async (
-  version: KungfuApi.VCDepsVersionTypes,
-): Promise<boolean> => {
-  const versionDepKeys = VCDepsWinRegMap[version];
-
-  if (!versionDepKeys || !versionDepKeys.length) return true;
-
-  const registries = await getWinRegistry(versionDepKeys);
-  if (!isWindows() && registries === null) return true;
-
-  if (registries) {
-    return versionDepKeys.some((key) => {
-      return registries[key]?.exists;
-    });
-  }
-
-  return false;
 };

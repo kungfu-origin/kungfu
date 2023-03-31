@@ -100,7 +100,6 @@ export interface RootConfigJSON {
     appTitle?: string;
     productName?: string;
     autoUpdate?: {
-      publish?: Writeable<AllPublishOptions>;
       update?: Writeable<AllPublishOptions>;
     };
   };

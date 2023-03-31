@@ -1,4 +1,3 @@
-import os from 'os';
 import semver from 'semver';
 import { app, ipcMain, BrowserWindow } from 'electron';
 import { autoUpdater } from 'electron-updater';
@@ -21,38 +20,6 @@ import { removeTargetFilesInFolder } from '@kungfu-trader/kungfu-js-api/utils/fi
 import { RootConfigJSON } from '@kungfu-trader/kungfu-js-api/typings/global';
 
 autoUpdater.logger = kfLogger;
-
-const platformNameMap: Partial<Record<NodeJS.Platform, string>> = {
-  win32: 'windows',
-  darwin: 'macos',
-  linux: 'linux',
-};
-
-const getPlatformName = (): string => {
-  const platform = os.platform();
-  return platformNameMap[platform] || platform;
-};
-
-const getMainVersion = (rootConfigJson: RootConfigJSON) => {
-  if (rootConfigJson.version) {
-    const version = semver.parse(rootConfigJson.version);
-    if (version) {
-      return `${version.major}.${version.minor}.${version.patch}`;
-    }
-  }
-
-  return `kungfu-main-version-undefined-${new Date().toDateString()}`;
-};
-
-const getVersionChannel = (
-  rootConfigJson: RootConfigJSON,
-): 'alpha' | 'latest' => {
-  if (rootConfigJson.version) {
-    return semver.prerelease(rootConfigJson?.version) ? 'alpha' : 'latest';
-  }
-
-  return 'alpha';
-};
 
 const getProjectName = (rootConfigJson: RootConfigJSON): string => {
   if (rootConfigJson.name) {
@@ -77,16 +44,20 @@ function handleUpdateKungfu(MainWindow: BrowserWindow | null) {
 
   if (!rootPackageJson || !updaterOption) return;
 
-  const kungfuUpdaterRootDir = 'kungfu-updater';
   const projectName = getProjectName(rootPackageJson);
-  const mainVersion = getMainVersion(rootPackageJson);
-  const channel = getVersionChannel(rootPackageJson);
-  const platform = getPlatformName();
-  const artifactPath = `${kungfuUpdaterRootDir}/${projectName}/${mainVersion}/${channel}/${platform}`;
+  const version = semver.parse(
+    rootPackageJson.version as string,
+  ) as semver.SemVer;
+  const targetVersion = version.prerelease.length
+    ? semver.inc(version, 'prerelease', 'alpha')
+    : semver.inc(version, 'patch');
+  const artifactPath = `${projectName}/v${version.major}/v${targetVersion}`;
 
   kfLogger.info('Kungfu autoUpdater artifact path: ', artifactPath);
 
-  updaterOption.channel = channel;
+  if (!updaterOption.channel) {
+    updaterOption.channel = '${channel}-${os}';
+  }
 
   if (updaterOption.provider === 'generic') {
     updaterOption.url = `${updaterOption.url}/${artifactPath}`;
