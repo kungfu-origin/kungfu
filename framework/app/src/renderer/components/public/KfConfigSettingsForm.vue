@@ -43,6 +43,9 @@ import {
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { RuleObject } from 'ant-design-vue/lib/form';
 import {
+  useCurrentGlobalKfLocation,
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
+import {
   useActiveInstruments,
   useAllKfConfigData,
   useBasket,
@@ -152,6 +155,9 @@ const app = getCurrentInstance();
 const formRef = ref();
 
 const formState = ref(props.formState);
+const {
+  currentGlobalKfLocation,
+} = useCurrentGlobalKfLocation(window.watcher);
 const { td, md, strategy } = toRefs(useAllKfConfigData());
 const { basketList, buildBasketOptionValue } = useBasket();
 const { isLanguageKeyAvailable } = useLanguage();
@@ -1393,7 +1399,7 @@ defineExpose({
         "
       >
         <a-select-option
-          v-for="config in td"
+          v-for="config in (currentGlobalKfLocation && currentGlobalKfLocation.children ? currentGlobalKfLocation.children : td)"
           :key="getIdByKfLocation(config)"
           :value="getIdByKfLocation(config)"
         >
