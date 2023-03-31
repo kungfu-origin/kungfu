@@ -821,6 +821,122 @@ function handleRemoveFile(key: string, filename: string): void {
   }
 }
 
+function onOpenRangePickerChange(open: boolean, key: string) {
+  if (open) {
+    formState.value[key] = null;
+  }
+}
+
+function onRangePickerCalendarChange(val: Dayjs[], key: string) {
+  if (val) {
+    formState.value[key] = val.map((d) => {
+      if (d) {
+        return d.format('YYYY-MM-DD HH:mm:ss');
+      } else if (val[0]) {
+        return val[0].format('YYYY-MM-DD HH:mm:ss');
+      } else if (val[1]) {
+        return val[1].format('YYYY-MM-DD HH:mm:ss');
+      } else {
+        return dayjs().format('YYYY-MM-DD HH:mm:ss');
+      }
+    });
+  }
+}
+
+function disabledEndDate(currentDate: Dayjs, key: string, timeInterval = 1) {
+  if (!formState.value[key] || !formState.value[key][0]) {
+    return false;
+  }
+  let endTime;
+  const startTime = dayjs(formState.value[key][0]);
+  const hour = startTime.hour();
+  const minute = startTime.minute();
+  if (hour === 0 && minute === 0) {
+    endTime = startTime.add(timeInterval, 'day');
+  } else {
+    endTime = startTime.add(timeInterval + 1, 'day');
+  }
+
+  return (
+    currentDate &&
+    (currentDate.valueOf() <= startTime.valueOf() ||
+      currentDate.valueOf() >= endTime.valueOf())
+  );
+}
+
+function disabledEndTime(
+  currentDate: Dayjs,
+  type: string,
+  key: string,
+  timeInterval = 1,
+) {
+  if (!formState.value[key] || !formState.value[key][0]) {
+    return {};
+  }
+  if (type === 'start') {
+    return {};
+  }
+
+  const startTime = dayjs(formState.value[key][0]);
+  const endTime = startTime.add(timeInterval, 'day');
+
+  const disabledHours = () => {
+    const hours: number[] = [];
+
+    if (currentDate.isSame(startTime, 'day')) {
+      for (let i = 0; i <= startTime.hour(); i++) {
+        hours.push(i);
+      }
+    }
+
+    if (currentDate.isSame(endTime, 'day')) {
+      for (let i = endTime.hour() + 1; i < 24; i++) {
+        hours.push(i);
+      }
+    }
+
+    return hours;
+  };
+
+  const disabledMinutes = (selectedHour) => {
+    const minutes: number[] = [];
+
+    if (
+      currentDate.isSame(startTime, 'day') &&
+      selectedHour === startTime.hour()
+    ) {
+      for (let i = 0; i <= startTime.minute(); i++) {
+        minutes.push(i);
+      }
+    }
+
+    if (currentDate.isSame(endTime, 'day') && selectedHour === endTime.hour()) {
+      for (let i = endTime.minute() + 1; i < 60; i++) {
+        minutes.push(i);
+      }
+    }
+
+    return minutes;
+  };
+
+  return {
+    disabledHours,
+    disabledMinutes,
+  };
+}
+
+function handleRangePickerChange(date: Dayjs[], key: string) {
+  if (date) {
+    formState.value[key] = date.map((d) =>
+      dayjs(d).toString() === 'Invalid Date'
+        ? null
+        : dayjs(d).format('YYYY-MM-DD HH:mm:ss'),
+    );
+  } else {
+    formState.value[key] = null;
+  }
+}
+
 function handleDateTimePickerChange(date: Dayjs, key: string) {
   formState.value[key] =
     dayjs(date).toString() === 'Invalid Date'
@@ -1488,6 +1604,38 @@ defineExpose({
           </div>
         </template>
       </div>
+      <a-range-picker
+        v-else-if="item.type === 'rangePicker'"
+        :disabled="
+          (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
+          item.disabled
+        "
+        :disabled-date="
+          (currentDate) =>
+            disabledEndDate(currentDate, item.key, item.disableDateRange)
+        "
+        :disabled-time="
+          (currentDate, type) =>
+            disabledEndTime(currentDate, type, item.key, item.disableDateRange)
+        "
+        :show-time="{
+          hideDisabledOptions: true,
+          defaultValue: [
+            dayjs('00:00:00', 'HH:mm:ss'),
+            dayjs('11:59:59', 'HH:mm:ss'),
+          ],
+        }"
+        :value="Array.isArray(formState[item.key]) ? formState[item.key].map((item: string) => dayjs(item)) : null"
+        @open-change="
+          onOpenRangePickerChange($event as unknown as boolean, item.key)
+        "
+        @calendar-change="
+          onRangePickerCalendarChange($event as unknown as Dayjs[], item.key)
+        "
+        @change="
+          handleRangePickerChange($event as unknown as Dayjs[], item.key)
+        "
+      ></a-range-picker>
       <a-date-picker
         v-else-if="item.type === 'dateTimePicker'"
         :disabled="

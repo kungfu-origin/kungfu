@@ -1896,30 +1896,47 @@ export const KfConfigValueArrayType = [
   'instrumentsCsv',
   'table',
   'csvTable',
+  'rangePicker',
 ];
 
 export const KfConfigValueTimeType = [
+  'rangePicker',
   'dateTimePicker',
   'datePicker',
   'timePicker',
 ];
 
-export const initFormTimePicker = (initValue?: string) => {
-  if (typeof initValue !== 'string') return null;
+export const initFormTimePicker = (initValue?: string | string[]) => {
+  if (typeof initValue !== 'string' && !Array.isArray(initValue)) return null;
 
-  let parsedValue: dayjs.Dayjs | null = null;
+  if (typeof initValue === 'string') {
+    let parsedValue: dayjs.Dayjs | null = null;
 
-  if (initValue === 'now') {
-    parsedValue = dayjs();
-  } else if (/^\d{2}:\d{2}:\d{2}$/.test(initValue)) {
-    parsedValue = dayjs(initValue, 'HH:mm:ss');
-    if (parsedValue) return parsedValue.format('YYYY-MM-DD HH:mm:ss');
-  } else if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(initValue)) {
-    parsedValue = dayjs(initValue, 'YYYY-MM-DD HH:mm:ss');
-    if (parsedValue) return parsedValue.format('YYYY-MM-DD HH:mm:ss');
-  } else if (/^\d{4}-\d{2}-\d{2}$/.test(initValue)) {
-    parsedValue = dayjs(initValue, 'YYYY-MM-DD');
-    if (parsedValue) return parsedValue.format('YYYY-MM-DD');
+    if (initValue === 'now') {
+      parsedValue = dayjs();
+    } else if (/^\d{2}:\d{2}:\d{2}$/.test(initValue)) {
+      parsedValue = dayjs(initValue, 'HH:mm:ss');
+      if (parsedValue) return parsedValue.format('YYYY-MM-DD HH:mm:ss');
+    } else if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(initValue)) {
+      parsedValue = dayjs(initValue, 'YYYY-MM-DD HH:mm:ss');
+      if (parsedValue) return parsedValue.format('YYYY-MM-DD HH:mm:ss');
+    } else if (/^\d{4}-\d{2}-\d{2}$/.test(initValue)) {
+      parsedValue = dayjs(initValue, 'YYYY-MM-DD');
+      if (parsedValue) return parsedValue.format('YYYY-MM-DD');
+    }
+  } else if (Array.isArray(initValue)) {
+    let parsedStartValue: dayjs.Dayjs | null = null;
+    let parsedEndValue: dayjs.Dayjs | null = null;
+    const [start, end] = initValue;
+    parsedStartValue = dayjs(start, 'YYYY-MM-DD HH:mm:ss');
+    parsedEndValue = dayjs(end, 'YYYY-MM-DD HH:mm:ss');
+
+    if (parsedStartValue && parsedEndValue) {
+      return [
+        parsedStartValue.format('YYYY-MM-DD HH:mm:ss'),
+        parsedEndValue.format('YYYY-MM-DD HH:mm:ss'),
+      ];
+    }
   }
 
   return null;
