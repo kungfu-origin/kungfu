@@ -82,6 +82,16 @@ private:
     }
   }
 
+  template <typename OnMethod = void (Strategy::*)(Context_ptr &, uint32_t, const std::vector<uint8_t> &, uint32_t,
+                                                   const kungfu::yijinjing::data::location_ptr &)>
+  void invoke(OnMethod method, uint32_t msg_type, const std::vector<uint8_t> &data, uint32_t length,
+              const kungfu::yijinjing::data::location_ptr &location) {
+    auto context = std::dynamic_pointer_cast<Context>(context_);
+    for (const auto &strategy : strategies_) {
+      (*strategy.*method)(context, msg_type, data, length, location);
+    }
+  }
+
   class BookListener : public wingchun::book::BookListener {
   public:
     explicit BookListener(Runner &runner);

@@ -9,6 +9,7 @@
 
 #include "kungfu/yijinjing/cache/ringqueue.h"
 #include <kungfu/longfist/types.h>
+#include <unordered_set>
 
 #define TYPE_PAIR(DataType) boost::hana::make_pair(HANA_STR(#DataType), boost::hana::type_c<types::DataType>)
 
@@ -34,6 +35,7 @@ constexpr auto AllTypes = boost::hana::make_map( //
     TYPE_PAIR(MirrorPositionsRequest),           //
     TYPE_PAIR(AssetRequest),                     //
     TYPE_PAIR(PositionRequest),                  //
+    TYPE_PAIR(OrderTradeRequest),                //
     TYPE_PAIR(KeepPositionsRequest),             //
     TYPE_PAIR(RebuildPositionsRequest),          //
     TYPE_PAIR(AlgoOrderInput),                   //
@@ -186,6 +188,17 @@ constexpr auto TradingDataTypes = boost::hana::make_map( //
     TYPE_PAIR(OrderStat),                                //
     TYPE_PAIR(BasketOrder)                               //
 );
+
+const auto build_data_set = [](auto types) {
+  std::unordered_set<int32_t> s;
+  boost::hana::for_each(types, [&](auto it) {
+    using DataType = typename decltype(+boost::hana::second(it))::type;
+    s.emplace(DataType::tag);
+  });
+  return s;
+};
+
+const std::unordered_set<int32_t> AllTypesTags = build_data_set(AllTypes);
 
 constexpr auto build_data_map = [](auto types) {
   auto maps = boost::hana::transform(boost::hana::values(types), [](auto value) {

@@ -133,6 +133,17 @@ public:
   virtual void on_broker_state_change(Context_ptr &context,
                                       const longfist::types::BrokerStateUpdate &broker_state_update,
                                       const kungfu::yijinjing::data::location_ptr &location){};
+
+  /**
+   * 自定义数据回调, 如果数据的msg_type不在AllTypes, 则会通过此函数响应
+   * @param context
+   * @param msg_type 数据类型
+   * @param data  自定义数据, 以字节数组表示
+   * @param length 自定义数据的字节数
+   * @param location 数据来源
+   */
+  virtual void on_custom_data(Context_ptr &context, uint32_t msg_type, const std::vector<uint8_t> &data,
+                              uint32_t length, const kungfu::yijinjing::data::location_ptr &location){};
 };
 
 DECLARE_PTR(Strategy)
