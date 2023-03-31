@@ -98,7 +98,7 @@ module.exports = {
   publish: {
     provider: 'generic',
     url: 'www.kungfu-trader.com',
-    channel: 'update-${channel}',
+    channel: 'kungfu-update-${channel}',
   },
   npmRebuild: false,
   files: [

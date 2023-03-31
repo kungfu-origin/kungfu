@@ -22,7 +22,7 @@ import { RootConfigJSON } from '@kungfu-trader/kungfu-js-api/typings/global';
 autoUpdater.logger = kfLogger;
 
 const getChannel = (isPrerelease: boolean) => {
-  const prefix = 'update';
+  const prefix = 'kungfu-update';
   const baseChannel = isPrerelease ? 'alpha' : 'latest';
   return `${prefix}-${baseChannel}`;
 };
