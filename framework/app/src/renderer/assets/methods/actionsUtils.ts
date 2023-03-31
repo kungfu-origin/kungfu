@@ -440,7 +440,6 @@ export const useDealExportHistoryTradingData = (): {
     if (!exportEventData.value) {
       throw new Error('exportEventData is undefined');
     }
-
     const { currentKfLocation, tradingDataType } =
       exportEventData.value || ({} as KfEvent.ExportTradingDataEvent);
     const { date, dateType } = formState;
@@ -482,6 +481,8 @@ export const useDealExportHistoryTradingData = (): {
       const positions = tradingData.Position.sort(positionSortKey);
       const assetSortKey = getTradingDataSortKey('Asset');
       const assets = tradingData.Asset.sort(assetSortKey);
+      const orderInputSortKey = getTradingDataSortKey('OrderInput');
+      const orderInputs = tradingData.OrderInput.sort(orderInputSortKey);
 
       const { filePaths } = await dialog.showOpenDialog({
         properties: ['openDirectory'],
@@ -490,9 +491,7 @@ export const useDealExportHistoryTradingData = (): {
       if (!filePaths) {
         return;
       }
-
       const targetFolder = filePaths[0];
-
       const ordersFilename = path.join(
         targetFolder,
         `orders-${dateResolved}.csv`,
@@ -509,6 +508,10 @@ export const useDealExportHistoryTradingData = (): {
       const assetFilename = path.join(
         targetFolder,
         `assets-${dateResolved}.csv`,
+      );
+      const orderInputsFilename = path.join(
+        targetFolder,
+        `orderInputs-${dateResolved}.csv`,
       );
 
       return Promise.all([
@@ -535,6 +538,11 @@ export const useDealExportHistoryTradingData = (): {
         writeCsvWithUTF8Bom(
           assetFilename,
           assets,
+          dealTradingDataItemResolved(),
+        ),
+        writeCsvWithUTF8Bom(
+          orderInputsFilename,
+          orderInputs,
           dealTradingDataItemResolved(),
         ),
       ])
