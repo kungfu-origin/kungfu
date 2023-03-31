@@ -821,13 +821,13 @@ function handleRemoveFile(key: string, filename: string): void {
   }
 }
 
-function onOpenChange(open: boolean,key: string){
+function onOpenRangePickerChange(open: boolean,key: string){
   if (open) {
     formState.value[key] = null;
   }
 };
 
-function onCalendarChange(val: Dayjs[],key: string){
+function onRangePickerCalendarChange(val: Dayjs[],key: string){
   if(val){
     formState.value[key]= val.map(d =>{
     if(d) {
@@ -1613,8 +1613,8 @@ defineExpose({
           defaultValue: [dayjs('00:00:00', 'HH:mm:ss'), dayjs('11:59:59', 'HH:mm:ss')],
         }"
         :value="Array.isArray(formState[item.key]) ? formState[item.key].map((item: string) => dayjs(item)) : null"
-        @openChange="onOpenChange($event as unknown as boolean, item.key)"
-        @calendarChange="onCalendarChange($event as unknown as Dayjs[], item.key)"
+        @openChange="onOpenRangePickerChange($event as unknown as boolean, item.key)"
+        @calendarChange="onRangePickerCalendarChange($event as unknown as Dayjs[], item.key)"
         @change="handleRangePickerChange($event as unknown as Dayjs[], item.key)"  >
       </a-range-picker> 
       <a-date-picker 
