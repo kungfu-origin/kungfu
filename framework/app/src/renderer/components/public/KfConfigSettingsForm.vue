@@ -843,7 +843,7 @@ function onCalendarChange(val: Dayjs[],key: string){
   }
 };
 
-function disabledEndDate(currentDate: Dayjs,key: string){
+function disabledEndDate(currentDate: Dayjs,key: string, timeInterval: number = 1){
   if (!formState.value[key] || !formState.value[key][0]) {
     return false;
   }
@@ -852,9 +852,9 @@ function disabledEndDate(currentDate: Dayjs,key: string){
   const hour = startTime.hour();
   const minute = startTime.minute();
   if(hour === 0 && minute === 0){
-    endTime = startTime.add(1, 'day');
+    endTime = startTime.add(timeInterval, 'day');
   }else{
-    endTime = startTime.add(2, 'day');
+    endTime = startTime.add(timeInterval + 1, 'day');
   }
   
   return (
@@ -863,7 +863,7 @@ function disabledEndDate(currentDate: Dayjs,key: string){
   );
 };
 
-function disabledEndTime(currentDate: Dayjs,type: string,key: string){
+function disabledEndTime(currentDate: Dayjs,type: string,key: string, timeInterval: number = 1){
   if (!formState.value[key] || !formState.value[key][0]) {
     return {};
   }
@@ -872,7 +872,7 @@ function disabledEndTime(currentDate: Dayjs,type: string,key: string){
   }
 
   const startTime = dayjs(formState.value[key][0]);
-  const endTime = startTime.add(1, 'day');
+  const endTime = startTime.add(timeInterval, 'day');
 
   const disabledHours = () => {
     const hours : number[] = [];
@@ -1606,8 +1606,8 @@ defineExpose({
           (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
           item.disabled 
         "
-        :disabledDate="(currentDate) => disabledEndDate(currentDate, item.key)"
-        :disabledTime="(currentDate, type) => disabledEndTime(currentDate, type, item.key)"
+        :disabledDate="(currentDate) => disabledEndDate(currentDate, item.key, item.disableDateRange)"
+        :disabledTime="(currentDate, type) => disabledEndTime(currentDate, type, item.key, item.disableDateRange)"
         :show-time="{
           hideDisabledOptions: true,
           defaultValue: [dayjs('00:00:00', 'HH:mm:ss'), dayjs('11:59:59', 'HH:mm:ss')],
