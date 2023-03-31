@@ -145,6 +145,10 @@ export const useUpdateVersion = () => {
     if (!isUpdateVersionLogicEnable()) return;
 
     vueInstance?.proxy?.$globalBus.subscribe((data) => {
+      if (data.tag === 'app-is-already') {
+        ipcRenderer.send('auto-update-renderer-ready');
+      }
+
       if (data.tag === 'main') {
         if (data.name === 'auto-update-find-new-version') {
           hasNewVersion.value = true;
@@ -942,7 +946,7 @@ export const usePreStartAndQuitApp = (): {
     () => preStartSystemLoading.value,
     (newVal) => {
       if (!newVal) {
-        ipcRenderer.send('auto-update-renderer-ready');
+        app?.proxy?.$globalBus.next({ tag: 'app-is-already' });
         watchStopHandle();
       }
     },
