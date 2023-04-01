@@ -82,6 +82,13 @@ void writer::mark(int64_t trigger_time, int32_t msg_type) {
   close_frame(length);
 }
 
+[[maybe_unused]] void writer::write_bytes(int64_t trigger_time, int32_t msg_type, const std::vector<uint8_t> &data,
+                                          uint32_t length) {
+  auto frame = open_frame(trigger_time, msg_type, length);
+  memcpy(const_cast<void *>(frame->data_address()), data.data(), length);
+  close_frame(length);
+}
+
 void writer::close_data() { close_frame(size_to_write_); }
 
 void writer::close_page(int64_t trigger_time) {

@@ -21,6 +21,12 @@ import { RootConfigJSON } from '@kungfu-trader/kungfu-js-api/typings/global';
 
 autoUpdater.logger = kfLogger;
 
+const getChannel = (isPrerelease: boolean) => {
+  const prefix = 'kungfu-update';
+  const baseChannel = isPrerelease ? 'alpha' : 'latest';
+  return `${prefix}-${baseChannel}`;
+};
+
 const getProjectName = (rootConfigJson: RootConfigJSON): string => {
   if (rootConfigJson.name) {
     const names = rootConfigJson.name.split('/');
@@ -55,9 +61,7 @@ function handleUpdateKungfu(MainWindow: BrowserWindow | null) {
 
   kfLogger.info('Kungfu autoUpdater artifact path: ', artifactPath);
 
-  if (!updaterOption.channel) {
-    updaterOption.channel = '${channel}-${os}';
-  }
+  updaterOption.channel = getChannel(!!version.prerelease.length);
 
   if (updaterOption.provider === 'generic') {
     updaterOption.url = `${updaterOption.url}/${artifactPath}`;
@@ -125,7 +129,6 @@ function handleUpdateKungfu(MainWindow: BrowserWindow | null) {
             ['etc', 'config.db'],
           ).then(() => {
             autoUpdater.quitAndInstall(false, true);
-            // MainWindow.destroy();
             app.exit();
           });
         });

@@ -25,7 +25,7 @@ void TraderVendor::set_service(Trader_ptr service) { service_ = std::move(servic
 
 void TraderVendor::react() {
   events_ | skip_until(events_ | is(RequestStart::tag)) | is(OrderInput::tag) | $$(service_->handle_order_input(event));
-  events_ | skip_until(events_ | is(RequestStart::tag)) | instanceof <frame>() | $$(service_->on_custom_event(event));
+  events_ | skip_until(events_ | is(RequestStart::tag)) | is_custom() | $$(service_->on_custom_event(event));
   apprentice::react();
 }
 
