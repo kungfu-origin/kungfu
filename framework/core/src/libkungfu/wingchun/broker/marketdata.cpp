@@ -29,7 +29,7 @@ void MarketDataVendor::on_start() {
   BrokerVendor::on_start();
   events_ | is(CustomSubscribe::tag) | $$(service_->subscribe_custom(event->data<CustomSubscribe>()));
   events_ | is(InstrumentKey::tag) | $$(service_->add_instrument_key(event->data<InstrumentKey>()));
-  events_ | instanceof <journal::frame>() | $$(service_->on_custom_event(event));
+  events_ | is_custom() | $$(service_->on_custom_event(event));
   service_->on_start();
 
   add_time_interval(time_unit::NANOSECONDS_PER_SECOND, [&](auto e) { service_->try_subscribe(); });

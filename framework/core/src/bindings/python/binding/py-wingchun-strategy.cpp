@@ -136,6 +136,11 @@ public:
     PYBIND11_OVERLOAD(void, strategy::Strategy, on_asset_margin_sync_reset, context, old_asset_margin,
                       new_asset_margin);
   }
+
+  void on_custom_data(strategy::Context_ptr &context, uint32_t msg_type, const std::vector<uint8_t> &data,
+                      uint32_t length, const kungfu::yijinjing::data::location_ptr &location) override {
+    PYBIND11_OVERLOAD(void, strategy::Strategy, on_custom_data, context, msg_type, data, length, location);
+  }
 };
 
 void bind_strategy(pybind11::module &m) {
@@ -219,6 +224,7 @@ void bind_strategy(pybind11::module &m) {
       .def("on_history_order", &strategy::Strategy::on_history_order)
       .def("on_history_trade", &strategy::Strategy::on_history_trade)
       .def("on_req_history_order_error", &strategy::Strategy::on_req_history_order_error)
-      .def("on_req_history_trade_error", &strategy::Strategy::on_req_history_trade_error);
+      .def("on_req_history_trade_error", &strategy::Strategy::on_req_history_trade_error)
+      .def("on_custom_data", &strategy::Strategy::on_custom_data);
 }
 } // namespace kungfu::wingchun::pybind

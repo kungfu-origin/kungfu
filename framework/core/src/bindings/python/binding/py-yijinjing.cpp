@@ -251,7 +251,8 @@ void bind(pybind11::module &&m) {
       .def("current_frame_uid", &writer::current_frame_uid)
       .def("copy_frame", &writer::copy_frame)
       .def("mark", &writer::mark)
-      .def("mark_at", &writer::mark_at);
+      .def("mark_at", &writer::mark_at)
+      .def("write_bytes", &writer::write_bytes);
   boost::hana::for_each(AllDataTypes, [&](auto type) {
     using DataType = typename decltype(+boost::hana::second(type))::type;
     writer_class.def("write", py::overload_cast<int64_t, const DataType &, int32_t>(&writer::write<DataType>),
