@@ -88,6 +88,7 @@ declare namespace KungfuApi {
     | 'files' // string[]
     | 'folder' // string
     | 'table' // any[]
+    | 'rangePicker' //string[]
     | 'dateTimePicker' //string
     | 'datePicker' //string
     | 'timePicker' //string
@@ -175,6 +176,7 @@ declare namespace KungfuApi {
     template?: KfConfigItemTemplate[];
     search?: KfConfigItemSearch;
     importMode?: 'reset' | 'add';
+    disableDateRange?: number; //时间范围选择器不可选的日期范围
 
     // ---- some ui releated ----;
     noDivider?: boolean;

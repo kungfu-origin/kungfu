@@ -75,7 +75,8 @@ export default {
   add_config_modal:
     '{category} ID unique in the system. {changeTypeName} cannot be modified after it succeeds.',
   update_config_modal: 'Confirm {key} configurations',
-  database_locked: 'The database is occupied now, please wait and retry.',
+  database_locked:
+    'Detect there are some trading, should make sure the trading data be saved, suggest do this after closing quotation.',
 
   MakeOrder: 'Order Dashboard',
   FutureArbitrage: 'Future Arbitrage',
@@ -705,8 +706,6 @@ export default {
   system_prompt: 'System Prompt',
   computer_performance_done: 'Computer performance detecting done ✓',
   computer_performance_detecting: 'Computer performance detecting...',
-  vc_deps_done: 'VS dependencies detecting done ✓',
-  vc_deps_detecting: 'VS dependencies detecting...',
   archive_done: 'Kungfu archive done',
   archive_loading: 'Kungfu archive loading...',
   environment_done: 'Kungfu environment done ✓',
@@ -720,9 +719,6 @@ export default {
 
   computer_performance_abnormal:
     'Computer performance is too low, continue start maybe make system process crash, suggest use the CPU core num more than 8.',
-  vc_deps_abnormal: 'Without Visual C++ dependencies, install now?',
-  vc_deps_abnormal_message:
-    '(notice: without this dependency will crash the Td and Md when them start)',
 
   quit_confirm:
     'Exiting the application ends all transactions, Confirm to exit?',

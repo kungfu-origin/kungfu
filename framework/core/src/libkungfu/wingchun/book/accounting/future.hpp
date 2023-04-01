@@ -198,11 +198,12 @@ public:
         if (commission.mode == CommissionRateMode::ByAmount) {
           cost = (position.last_price /** cm_mr.exchange_rate*/ * position.yesterday_volume * commission.close_ratio) +
                  (position.last_price /** cm_mr.exchange_rate*/ * close_today_volume * commission.close_today_ratio);
+
+          cost = cost * contract_multiplier;
         } else {
           cost = (position.yesterday_volume * commission.close_ratio) +
                  (close_today_volume * commission.close_today_ratio);
         }
-        cost = cost * contract_multiplier;
       }
 
       auto multiplier = contract_multiplier * (position.direction == Direction::Long ? 1 : -1);

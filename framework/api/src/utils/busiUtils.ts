@@ -1896,22 +1896,48 @@ export const KfConfigValueArrayType = [
   'instrumentsCsv',
   'table',
   'csvTable',
+  'rangePicker',
 ];
 
-export const initFormTimePicker = (initValue?: string) => {
-  if (typeof initValue !== 'string') return null;
+export const KfConfigValueTimeType = [
+  'rangePicker',
+  'dateTimePicker',
+  'datePicker',
+  'timePicker',
+];
 
-  let parsedValue: dayjs.Dayjs | null = null;
+export const initFormTimePicker = (initValue?: string | string[]) => {
+  if (typeof initValue !== 'string' && !Array.isArray(initValue)) return null;
 
-  if (initValue === 'now') {
-    parsedValue = dayjs();
-  } else if (/\d{2}:\d{2}:\d{2}/.test(initValue)) {
-    parsedValue = dayjs(initValue, 'HH:mm:ss');
-  } else if (/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/.test(initValue)) {
-    parsedValue = dayjs(initValue, 'YYYY-MM-DD HH:mm:ss');
+  if (typeof initValue === 'string') {
+    let parsedValue: dayjs.Dayjs | null = null;
+
+    if (initValue === 'now') {
+      parsedValue = dayjs();
+    } else if (/^\d{2}:\d{2}:\d{2}$/.test(initValue)) {
+      parsedValue = dayjs(initValue, 'HH:mm:ss');
+      if (parsedValue) return parsedValue.format('YYYY-MM-DD HH:mm:ss');
+    } else if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(initValue)) {
+      parsedValue = dayjs(initValue, 'YYYY-MM-DD HH:mm:ss');
+      if (parsedValue) return parsedValue.format('YYYY-MM-DD HH:mm:ss');
+    } else if (/^\d{4}-\d{2}-\d{2}$/.test(initValue)) {
+      parsedValue = dayjs(initValue, 'YYYY-MM-DD');
+      if (parsedValue) return parsedValue.format('YYYY-MM-DD');
+    }
+  } else if (Array.isArray(initValue)) {
+    let parsedStartValue: dayjs.Dayjs | null = null;
+    let parsedEndValue: dayjs.Dayjs | null = null;
+    const [start, end] = initValue;
+    parsedStartValue = dayjs(start, 'YYYY-MM-DD HH:mm:ss');
+    parsedEndValue = dayjs(end, 'YYYY-MM-DD HH:mm:ss');
+
+    if (parsedStartValue && parsedEndValue) {
+      return [
+        parsedStartValue.format('YYYY-MM-DD HH:mm:ss'),
+        parsedEndValue.format('YYYY-MM-DD HH:mm:ss'),
+      ];
+    }
   }
-
-  if (parsedValue) return parsedValue.format('YYYY-MM-DD HH:mm:ss');
 
   return null;
 };
@@ -1927,6 +1953,7 @@ export const initFormStateByConfig = (
     const isBoolean = KfConfigValueBooleanType.includes(type);
     const isNumber = KfConfigValueNumberType.includes(type);
     const isArray = KfConfigValueArrayType.includes(type);
+    const isTime = KfConfigValueTimeType.includes(type);
 
     let defaultValue;
 
@@ -1935,7 +1962,7 @@ export const initFormStateByConfig = (
         ? false
         : isNumber
         ? 0
-        : type === 'timePicker'
+        : isTime
         ? null
         : isArray
         ? []
@@ -1976,7 +2003,7 @@ export const initFormStateByConfig = (
           defaultValue = [];
         }
       }
-    } else if (item.type === 'timePicker') {
+    } else if (KfConfigValueTimeType.includes(type)) {
       defaultValue = initFormTimePicker(item?.default);
     }
 

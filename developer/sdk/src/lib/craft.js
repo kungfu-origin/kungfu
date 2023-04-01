@@ -43,12 +43,9 @@ exports.build = () => {
   fse.copySync(publicDir, targetCliDistPublicDir, {});
 };
 
-exports.package = async (andPublish = false) => {
+exports.package = async () => {
   const buildDir = ensureDir(process.cwd().toString(), 'build');
-  await require('@kungfu-trader/kungfu-app').electronBuild(
-    buildDir,
-    andPublish,
-  );
+  await require('@kungfu-trader/kungfu-app').electronBuild(buildDir);
 };
 
 exports.dev = (withWebpack) => {

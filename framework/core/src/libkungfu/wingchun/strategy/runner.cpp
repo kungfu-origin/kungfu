@@ -52,6 +52,10 @@ void Runner::react() {
       $$(invoke(&Strategy::on_transaction, event->data<Transaction>(), get_location(event->source())));
   start_events | is(Order::tag) | $$(invoke(&Strategy::on_order, event->data<Order>(), get_location(event->source())));
   start_events | is(Trade::tag) | $$(invoke(&Strategy::on_trade, event->data<Trade>(), get_location(event->source())));
+  start_events | is_custom() |
+      $$(invoke(&Strategy::on_custom_data, event->msg_type(),
+                {event->data_as_bytes(), event->data_as_bytes() + event->data_length()}, event->data_length(),
+                get_location(event->source())));
   apprentice::react();
 }
 

@@ -177,6 +177,12 @@ template <typename EventType>
 static constexpr auto instanceof
     = []() { return filter([](const event_ptr &event) { return dynamic_cast<EventType *>(event.get()) != nullptr; }); };
 
+static constexpr auto is_custom = []() {
+  return filter([](const event_ptr &event) {
+    return longfist::AllTypesTags.find(event->msg_type()) == longfist::AllTypesTags.end();
+  });
+};
+
 template <typename... Ts>
 static constexpr auto event_filter_any = [](auto member) {
   return [=](Ts... arg) {
