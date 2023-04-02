@@ -168,7 +168,7 @@ export const useUpdateVersion = () => {
         }
 
         if (data.name === 'auto-update-download-process') {
-          process.value = +data.payload.process;
+          process.value = Number((+data.payload.process).toFixed(2));
           if (process.value === 100) {
             progressStatus.value = 'success';
           } else {
