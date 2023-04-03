@@ -47,7 +47,8 @@ const isShowCurrentGlobalKfLocationTitle = computed(() => {
 });
 
 const tdList = computed<KungfuApi.KfLocation[] | null | undefined>(() => {
-  return currentGlobalKfLocation.value && 'children' in currentGlobalKfLocation.value
+  return currentGlobalKfLocation.value &&
+    'children' in currentGlobalKfLocation.value
     ? currentGlobalKfLocation.value.children
     : null;
 });

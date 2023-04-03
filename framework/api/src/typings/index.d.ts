@@ -979,7 +979,7 @@ declare namespace KungfuApi {
 
   export interface KfLocationBase {
     group: string;
-    name: string; 
+    name: string;
   }
 
   export interface KfLocationGroup extends KfLocation {

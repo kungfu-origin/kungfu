@@ -76,7 +76,6 @@ private:
   void ensure_cached_storage(uint32_t source_id, uint32_t dest_id);
 
   void feed(const event_ptr &event);
-
 };
 
 } // namespace kungfu::yijinjing::cache

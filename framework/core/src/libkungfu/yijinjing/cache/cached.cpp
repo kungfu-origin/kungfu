@@ -21,7 +21,8 @@ namespace kungfu::yijinjing::cache {
 
 cached::cached(locator_ptr locator, mode m, bool low_latency)
     : apprentice(location::make_shared(m, category::SYSTEM, "service", "cached", std::move(locator)), low_latency),
-      profile_(get_locator()), store_volume_every_loop_(low_latency ? LOW_LATENCY_STORE_VOLUME_BY_INTERVAL : DEFAULT_STORE_VOLUME_BY_INTERVAL) {
+      profile_(get_locator()),
+      store_volume_every_loop_(low_latency ? LOW_LATENCY_STORE_VOLUME_BY_INTERVAL : DEFAULT_STORE_VOLUME_BY_INTERVAL) {
   profile_.setup();
   profile_get_all(profile_, profile_bank_);
 }
@@ -73,11 +74,9 @@ void cached::on_frame() {}
 void cached::on_active() {
   handle_cached_feeds(store_volume_every_loop_);
   handle_profile_feeds(store_volume_every_loop_);
- }
-
- void cached::on_notify() {
-    handle_cached_feeds(LOW_LATENCY_STORE_VOLUME_BY_INTERVAL);
 }
+
+void cached::on_notify() { handle_cached_feeds(LOW_LATENCY_STORE_VOLUME_BY_INTERVAL); }
 
 void cached::mark_request_cached_done(uint32_t dest_id) {
   auto writer = get_writer(master_cmd_location_->uid);
