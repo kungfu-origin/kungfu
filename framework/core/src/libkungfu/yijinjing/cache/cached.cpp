@@ -14,13 +14,11 @@ using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
 using namespace kungfu::yijinjing::cache;
 
-#define STORE_SINGLE_LOOP_VOLUME 100
-
 namespace kungfu::yijinjing::cache {
 
 cached::cached(locator_ptr locator, mode m, bool low_latency)
     : apprentice(location::make_shared(m, category::SYSTEM, "service", "cached", std::move(locator)), low_latency),
-      profile_(get_locator()) {
+      profile_(get_locator()), store_volume_every_loop_(low_latency ? 10 : 25) {
   profile_.setup();
   profile_get_all(profile_, profile_bank_);
 }
@@ -71,10 +69,7 @@ void cached::on_frame() {}
 
 void cached::on_active() { async_handle_feeds(); }
 
-void cached::on_notify() {
-  handle_cached_feeds();
-  handle_profile_feeds();
-}
+void cached::on_notify() { async_handle_feeds(); }
 
 void cached::async_handle_feeds() {
   handle_cached_feeds();
@@ -99,7 +94,7 @@ void cached::handle_cached_feeds() {
 
     if (feed_map.size() != 0) {
       auto iter = feed_map.begin();
-      while (iter != feed_map.end() and stored_controller <= STORE_SINGLE_LOOP_VOLUME) {
+      while (iter != feed_map.end() and stored_controller <= store_volume_every_loop_) {
         auto &s = iter->second;
         auto source_id = s.source;
         auto dest_id = s.dest;
@@ -135,7 +130,7 @@ void cached::handle_profile_feeds() {
 
     if (feed_map.size() != 0) {
       auto iter = feed_map.begin();
-      while (iter != feed_map.end() and stored_controller <= STORE_SINGLE_LOOP_VOLUME) {
+      while (iter != feed_map.end() and stored_controller <= store_volume_every_loop_) {
         const auto &s = iter->second;
         try {
           profile_ << s;
