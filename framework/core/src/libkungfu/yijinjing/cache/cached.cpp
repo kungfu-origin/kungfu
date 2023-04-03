@@ -14,13 +14,14 @@ using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
 using namespace kungfu::yijinjing::cache;
 
-#define DEFAULT_STORE_VOLUME_BY_INTERVAL 10
+#define DEFAULT_STORE_VOLUME_BY_INTERVAL 100
+#define LOW_LATENCY_STORE_VOLUME_BY_INTERVAL 10
 
 namespace kungfu::yijinjing::cache {
 
 cached::cached(locator_ptr locator, mode m, bool low_latency)
     : apprentice(location::make_shared(m, category::SYSTEM, "service", "cached", std::move(locator)), low_latency),
-      profile_(get_locator()), is_low_latency_(low_latency) {
+      profile_(get_locator()), store_volume_every_loop_(low_latency ? LOW_LATENCY_STORE_VOLUME_BY_INTERVAL : DEFAULT_STORE_VOLUME_BY_INTERVAL) {
   profile_.setup();
   profile_get_all(profile_, profile_bank_);
 }
@@ -70,13 +71,12 @@ void cached::on_start() {
 void cached::on_frame() {}
 
 void cached::on_active() {
-  int store_volume = is_low_latency_ ? DEFAULT_STORE_VOLUME_BY_INTERVAL: 50;
-  handle_cached_feeds(store_volume);
-  handle_profile_feeds(DEFAULT_STORE_VOLUME_BY_INTERVAL);
+  handle_cached_feeds(store_volume_every_loop_);
+  handle_profile_feeds(store_volume_every_loop_);
  }
 
  void cached::on_notify() {
-    handle_cached_feeds(DEFAULT_STORE_VOLUME_BY_INTERVAL);
+    handle_cached_feeds(LOW_LATENCY_STORE_VOLUME_BY_INTERVAL);
 }
 
 void cached::mark_request_cached_done(uint32_t dest_id) {

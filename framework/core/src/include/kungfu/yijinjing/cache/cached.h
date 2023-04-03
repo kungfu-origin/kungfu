@@ -55,7 +55,7 @@ private:
   yijinjing::cache::bank feed_bank_;
   yijinjing::practice::profile profile_;
   ProfileStateBank profile_bank_ = ProfileStateBank(longfist::ProfileDataTypes);
-  const bool is_low_latency_;
+  const int store_volume_every_loop_;
 
   void on_location(const event_ptr &event);
 
