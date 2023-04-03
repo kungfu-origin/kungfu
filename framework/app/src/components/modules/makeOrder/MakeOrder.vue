@@ -707,9 +707,9 @@ watch(
               v-model:formState="formState"
               :configSettings="configSettings"
               :tdList="
-              currentGlobalKfLocation && (currentGlobalKfLocation as KungfuApi.KfLocationGroup).children
-                ? (currentGlobalKfLocation as KungfuApi.KfLocationGroup).children
-                : null
+                currentGlobalKfLocation && (currentGlobalKfLocation as KungfuApi.KfLocationGroup).children
+                  ? (currentGlobalKfLocation as KungfuApi.KfLocationGroup).children
+                  : null
               "
               changeType="add"
               :label-col="LABEL_COL"
