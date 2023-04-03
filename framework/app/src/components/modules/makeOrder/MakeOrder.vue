@@ -98,6 +98,12 @@ const makeOrderInstrumentType = ref<InstrumentTypeEnum>(
   InstrumentTypeEnum.unknown,
 );
 
+const tdList = computed<KungfuApi.KfLocation[] | null | undefined>(() => {
+  return currentGlobalKfLocation.value && 'children' in currentGlobalKfLocation.value
+    ? currentGlobalKfLocation.value.children
+    : null;
+});
+
 const configSettings = computed(() => {
   if (!currentGlobalKfLocation.value) {
     return getConfigSettings();
@@ -706,11 +712,7 @@ watch(
               ref="formRef"
               v-model:formState="formState"
               :configSettings="configSettings"
-              :tdList="
-                currentGlobalKfLocation && (currentGlobalKfLocation as KungfuApi.KfLocationGroup).children
-                  ? (currentGlobalKfLocation as KungfuApi.KfLocationGroup).children
-                  : null
-              "
+              :tdList="tdList"
               changeType="add"
               :label-col="LABEL_COL"
               :wrapper-col="WRAPPER_COL"
