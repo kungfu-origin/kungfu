@@ -1591,7 +1591,7 @@ export const useCurrentGlobalKfLocation = (
   watcher: KungfuApi.Watcher | null,
 ): {
   currentGlobalKfLocation: Ref<
-    KungfuApi.KfLocation | KungfuApi.KfConfig | null
+    KungfuApi.KfLocation | KungfuApi.KfLocationGroup | KungfuApi.KfConfig | null
   >;
   currentCategoryData: ComputedRef<KungfuApi.KfTradeValueCommonData | null>;
   currentUID: ComputedRef<string>;

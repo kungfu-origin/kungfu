@@ -237,6 +237,11 @@ function handleMakeOrder() {
             ref="formRef"
             v-model:formState="formState"
             :configSettings="configSettings"
+            :tdList="
+              currentGlobalKfLocation && (currentGlobalKfLocation as KungfuApi.KfLocationGroup).children
+                ? (currentGlobalKfLocation as KungfuApi.KfLocationGroup).children
+                : null
+              "
             changeType="add"
             :label-col="6"
             :wrapper-col="14"
