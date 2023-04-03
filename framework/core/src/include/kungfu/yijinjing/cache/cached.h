@@ -8,6 +8,7 @@
 #include <kungfu/yijinjing/log.h>
 #include <kungfu/yijinjing/practice/apprentice.h>
 #include <kungfu/yijinjing/practice/profile.h>
+#include <sys/_types/_int32_t.h>
 
 namespace kungfu::yijinjing::cache {
 
@@ -54,6 +55,7 @@ private:
   yijinjing::cache::bank feed_bank_;
   yijinjing::practice::profile profile_;
   ProfileStateBank profile_bank_ = ProfileStateBank(longfist::ProfileDataTypes);
+  const uint32_t store_volume_every_loop_;
 
   void on_location(const event_ptr &event);
 
