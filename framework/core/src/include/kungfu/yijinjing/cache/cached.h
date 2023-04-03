@@ -55,13 +55,13 @@ private:
   yijinjing::cache::bank feed_bank_;
   yijinjing::practice::profile profile_;
   ProfileStateBank profile_bank_ = ProfileStateBank(longfist::ProfileDataTypes);
-  const uint32_t store_volume_every_loop_;
+  const bool is_low_latency_;
 
   void on_location(const event_ptr &event);
 
-  void handle_cached_feeds();
+  void handle_cached_feeds(int store_volume_every_loop);
 
-  void handle_profile_feeds();
+  void handle_profile_feeds(int store_volume_every_loop);
 
   void mark_request_cached_done(uint32_t dest_id);
 
@@ -77,7 +77,6 @@ private:
 
   void feed(const event_ptr &event);
 
-  void async_handle_feeds();
 };
 
 } // namespace kungfu::yijinjing::cache

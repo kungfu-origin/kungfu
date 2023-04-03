@@ -14,11 +14,13 @@ using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
 using namespace kungfu::yijinjing::cache;
 
+#define DEFAULT_STORE_VOLUME_BY_INTERVAL 10
+
 namespace kungfu::yijinjing::cache {
 
 cached::cached(locator_ptr locator, mode m, bool low_latency)
     : apprentice(location::make_shared(m, category::SYSTEM, "service", "cached", std::move(locator)), low_latency),
-      profile_(get_locator()), store_volume_every_loop_(low_latency ? 10 : 25) {
+      profile_(get_locator()), is_low_latency_(low_latency) {
   profile_.setup();
   profile_get_all(profile_, profile_bank_);
 }
@@ -67,13 +69,14 @@ void cached::on_start() {
 
 void cached::on_frame() {}
 
-void cached::on_active() { async_handle_feeds(); }
+void cached::on_active() {
+  int store_volume = is_low_latency_ ? DEFAULT_STORE_VOLUME_BY_INTERVAL: 50;
+  handle_cached_feeds(store_volume);
+  handle_profile_feeds(DEFAULT_STORE_VOLUME_BY_INTERVAL);
+ }
 
-void cached::on_notify() { async_handle_feeds(); }
-
-void cached::async_handle_feeds() {
-  handle_cached_feeds();
-  handle_profile_feeds();
+ void cached::on_notify() {
+    handle_cached_feeds(DEFAULT_STORE_VOLUME_BY_INTERVAL);
 }
 
 void cached::mark_request_cached_done(uint32_t dest_id) {
@@ -83,7 +86,7 @@ void cached::mark_request_cached_done(uint32_t dest_id) {
   writer->close_data();
 }
 
-void cached::handle_cached_feeds() {
+void cached::handle_cached_feeds(int store_volume_every_loop) {
   int stored_controller = 0;
   boost::hana::for_each(StateDataTypes, [&](auto it) {
     using DataType = typename decltype(+boost::hana::second(it))::type;
@@ -94,7 +97,7 @@ void cached::handle_cached_feeds() {
 
     if (feed_map.size() != 0) {
       auto iter = feed_map.begin();
-      while (iter != feed_map.end() and stored_controller <= store_volume_every_loop_) {
+      while (iter != feed_map.end() and stored_controller <= store_volume_every_loop) {
         auto &s = iter->second;
         auto source_id = s.source;
         auto dest_id = s.dest;
@@ -119,7 +122,7 @@ void cached::handle_cached_feeds() {
   });
 }
 
-void cached::handle_profile_feeds() {
+void cached::handle_profile_feeds(int store_volume_every_loop) {
   int stored_controller = 0;
   boost::hana::for_each(ProfileDataTypes, [&](auto it) {
     using DataType = typename decltype(+boost::hana::second(it))::type;
@@ -130,7 +133,7 @@ void cached::handle_profile_feeds() {
 
     if (feed_map.size() != 0) {
       auto iter = feed_map.begin();
-      while (iter != feed_map.end() and stored_controller <= store_volume_every_loop_) {
+      while (iter != feed_map.end() and stored_controller <= store_volume_every_loop) {
         const auto &s = iter->second;
         try {
           profile_ << s;
