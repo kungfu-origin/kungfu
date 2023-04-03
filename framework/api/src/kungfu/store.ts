@@ -4,13 +4,22 @@ import { configStore } from '../kungfu';
 import { kfLogger, hidePasswordByLogger } from '../utils/busiUtils';
 import { BASE_DB_DIR } from '../config/pathConfig';
 
-type AllConfig = Record<string, KungfuApi.KfConfigOrigin>;
-
 export const getKfAllConfig = (): Promise<KungfuApi.KfConfigOrigin[]> => {
   if (fse.pathExistsSync(path.join(BASE_DB_DIR, 'config.db'))) {
-    return Promise.resolve(
-      Object.values((configStore.getAllConfig() || {}) as AllConfig),
-    );
+    return new Promise((resolve) => {
+      const getter = () => {
+        setTimeout(() => {
+          const allConfig = configStore.getAllConfig();
+          if (allConfig) {
+            resolve(Object.values(allConfig));
+          } else {
+            getter();
+          }
+        }, 160);
+      };
+
+      getter();
+    });
   } else {
     return Promise.resolve([]);
   }

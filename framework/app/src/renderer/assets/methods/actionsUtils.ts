@@ -973,14 +973,15 @@ export const usePreStartAndQuitApp = (): {
 
   startGetWatcherStatus();
 
-  onMounted(async () => {
-    if (
-      booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED) &&
-      (await isAllMainProcessRunning())
-    ) {
-      preStartSystemLoadingData.cpusSafeNumChecking = 'done';
-      preStartSystemLoadingData.archive = 'done';
-      preStartSystemLoadingData.extraResourcesLoading = 'done';
+  onMounted(() => {
+    if (booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED)) {
+      isAllMainProcessRunning().then((flag) => {
+        if (flag) {
+          preStartSystemLoadingData.cpusSafeNumChecking = 'done';
+          preStartSystemLoadingData.archive = 'done';
+          preStartSystemLoadingData.extraResourcesLoading = 'done';
+        }
+      });
     }
 
     if (app?.proxy) {
