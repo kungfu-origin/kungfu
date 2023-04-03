@@ -706,7 +706,7 @@ watch(
               ref="formRef"
               v-model:formState="formState"
               :configSettings="configSettings"
-              :tdGroup="
+              :tdList="
               currentGlobalKfLocation && (currentGlobalKfLocation as KungfuApi.KfLocationGroup).children
                 ? (currentGlobalKfLocation as KungfuApi.KfLocationGroup).children
                 : null
