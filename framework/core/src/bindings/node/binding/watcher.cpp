@@ -478,7 +478,7 @@ void Watcher::Feed(const event_ptr &event, const Instrument &instrument) {
 
 void Watcher::RestoreState(const location_ptr &state_location, int64_t from, int64_t to, bool sync_schema) {
   add_location(0, state_location);
-  serialize::JsRestoreState(ledger_ref_, state_location).filter_no<Position, Asset>(from, to, sync_schema);
+  serialize::JsRestoreState(ledger_ref_, state_location)(from, to, sync_schema);
 }
 
 Napi::Value Watcher::Start(const Napi::CallbackInfo &info) {
@@ -492,7 +492,7 @@ void Watcher::Sync(const Napi::CallbackInfo &info) {
   SyncAppStates();
   SyncStrategyStates();
   SyncLedger();
-  TryRefreshTradingData(info);
+  TryRefreshTradingData();
   SyncTradingData();
 }
 
@@ -500,7 +500,7 @@ void Watcher::SyncLedger() {
   boost::hana::for_each(StateDataTypes, [&](auto it) { UpdateLedger(+boost::hana::second(it)); });
 }
 
-void Watcher::TryRefreshTradingData(const Napi::CallbackInfo &info) {
+void Watcher::TryRefreshTradingData() {
   if (refresh_trading_data_before_sync_) {
     serialize::InitTradingDataMap(ledger_ref_, "ledger");
   }
@@ -637,7 +637,6 @@ void Watcher::OnDeregister(int64_t trigger_time, const Deregister &deregister_da
   if (app_location->category == category::SYSTEM and app_location->group == "master" and
       app_location->name == "master") {
     CancelWorker();
-    serialize::InitTradingDataMap(ledger_ref_, "ledger");
   }
 }
 
@@ -684,6 +683,7 @@ void Watcher::Quit(const Napi::CallbackInfo &info) { uv_work_live_ = false; }
 void Watcher::AfterMasterDown() {
   reader_->disjoin(master_cmd_location_->uid);
   writers_.clear();
+  serialize::InitTradingDataMap(ledger_ref_, "ledger");
 }
 
 void Watcher::UpdateBrokerState(uint32_t source_id, uint32_t dest_id, const BrokerStateUpdate &state) {
