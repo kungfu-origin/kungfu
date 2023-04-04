@@ -8,7 +8,6 @@
 #include <kungfu/yijinjing/log.h>
 #include <kungfu/yijinjing/practice/apprentice.h>
 #include <kungfu/yijinjing/practice/profile.h>
-#include <sys/_types/_int32_t.h>
 
 namespace kungfu::yijinjing::cache {
 
