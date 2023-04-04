@@ -92,7 +92,8 @@ export default {
   PosGlobal: 'Positon Global',
   Pos: 'Positon',
 
-  please_wait: '请稍后',
+  please_wait: 'Please wait...',
+  please_wait_and_retry: 'Please wait and retry',
 
   baseConfig: {
     main_panel: 'HOME',
@@ -622,6 +623,7 @@ export default {
     comission: 'Comission',
     varieties: 'Varieties',
     add_comission: 'Add',
+    save_comission: 'Save',
     exchange_id: 'Exchange ID',
     open: 'Open',
     close_today: 'Close Today',

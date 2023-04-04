@@ -48,6 +48,7 @@ import {
   getTradingDataSortKey,
   isUpdateVersionLogicEnable,
   isCheckVersionLogicEnable,
+  kfLogger,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { BasketVolumeType } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import { writeCsvWithUTF8Bom } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
@@ -337,6 +338,8 @@ export const useAddUpdateRemoveKfConfig = (): {
               resolve();
             })
             .catch((err) => {
+              error(`${t('operation_failed')}, ${t('please_wait_and_retry')}`);
+              kfLogger.error(err);
               reject(err);
             });
         },
@@ -383,25 +386,29 @@ export const useAddUpdateRemoveKfConfig = (): {
             mode: 'live',
           };
 
-          return setKfConfig(
-            kfLocation,
-            JSON.stringify({
-              ...formState,
-              add_time: +new Date().getTime() * Math.pow(10, 6),
-            }),
-          )
-            .then(() => {
-              success();
-            })
-            .then(() => {
-              useGlobalStore().setKfConfigList();
-            })
-            .catch((err: Error) => {
-              error(t('operation_failed') + err.message);
-            })
-            .finally(() => {
-              resolve();
-            });
+          return new Promise<void>((resolve, reject) => {
+            setKfConfig(
+              kfLocation,
+              JSON.stringify({
+                ...formState,
+                add_time: +new Date().getTime() * Math.pow(10, 6),
+              }),
+            )
+              .then(() => {
+                success();
+              })
+              .then(() => {
+                useGlobalStore().setKfConfigList();
+                resolve();
+              })
+              .catch((err: Error) => {
+                error(
+                  `${t('operation_failed')}, ${t('please_wait_and_retry')}`,
+                );
+                kfLogger.error(err);
+                reject(err);
+              });
+          });
         },
         onCancel() {
           resolve();

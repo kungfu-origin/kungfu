@@ -5,6 +5,7 @@ import {
   setKfGlobalSettingsValue,
 } from '@kungfu-trader/kungfu-js-api/config/globalSettings';
 import {
+  messagePrompt,
   useModalVisible,
   useWritableTableSearchKeyword,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
@@ -23,12 +24,15 @@ import { longfist } from '@kungfu-trader/kungfu-js-api/kungfu';
 import {
   dealCommissionMode,
   initFormStateByConfig,
+  kfLogger,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { useExtConfigsRelated } from '../../assets/methods/actionsUtils';
 import globalBus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 import { useGlobalStore } from '../../pages/index/store/global';
 import { storeToRefs } from 'pinia';
-import { useLanguage } from '@kungfu-trader/kungfu-js-api/language';
+import VueI18n, { useLanguage } from '@kungfu-trader/kungfu-js-api/language';
+
+const { t } = VueI18n.global;
 
 const props = withDefaults(
   defineProps<{
@@ -96,6 +100,19 @@ onUnmounted(() => {
 
   setKfCommission(commissions.value);
 });
+
+function handleSaveCommission() {
+  setKfCommission(commissions.value)
+    .then(() => {
+      messagePrompt().success();
+    })
+    .catch((err: Error) => {
+      messagePrompt().error(
+        `${t('operation_failed')}, ${t('please_wait_and_retry')}`,
+      );
+      kfLogger.error(err);
+    });
+}
 
 function initGlobalSettingsFromStates(
   configs: KfSystemConfig[],
@@ -176,8 +193,14 @@ function handleAddCommission() {
                   size="large"
                   style="width: 480px"
                 />
-                <a-button @click="handleAddCommission">
+                <a-button
+                  style="margin-right: 16px"
+                  @click="handleAddCommission"
+                >
                   {{ $t('globalSettingConfig.add_comission') }}
+                </a-button>
+                <a-button type="primary" @click="handleSaveCommission">
+                  {{ $t('globalSettingConfig.save_comission') }}
                 </a-button>
               </div>
               <div

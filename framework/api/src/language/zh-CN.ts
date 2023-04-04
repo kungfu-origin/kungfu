@@ -93,6 +93,7 @@ export default {
   Pos: '持仓',
 
   please_wait: '请稍后',
+  please_wait_and_retry: '请稍后重试',
 
   baseConfig: {
     main_panel: '主面板',
@@ -612,6 +613,7 @@ export default {
     comission: '期货手续费',
     varieties: '品种',
     add_comission: '添加',
+    save_comission: '保存',
     exchange_id: '交易所',
     open: '开仓',
     close_today: '平今',

@@ -1,45 +1,31 @@
-import { kfLogger } from '../utils/busiUtils';
+import { kfLogger, getResultUntilValuable } from '../utils/busiUtils';
 import { commissionStore, longfist } from './index';
 
 export const getKfCommission = (): Promise<KungfuApi.Commission[]> => {
   kfLogger.info('Get kungfu Commission');
-  return new Promise((resolve, reject) => {
-    try {
-      const commissionData = commissionStore.getAllCommission() || [];
-      resolve(
-        commissionData.sort((a, b) =>
-          a.exchange_id.localeCompare(b.exchange_id),
-        ),
-      );
-    } catch (err) {
-      reject(err);
-    }
-  });
+  return getResultUntilValuable(() => commissionStore.getAllCommission()).then(
+    (allCommissions) =>
+      allCommissions.sort((a, b) => a.exchange_id.localeCompare(b.exchange_id)),
+  );
 };
 
 export const setKfCommission = (
   commissions: KungfuApi.Commission[],
 ): Promise<boolean> => {
   kfLogger.info('Set kungfu Commission');
-  return new Promise((resolve, reject) => {
-    const kfCommissionData = longfist.Commission();
-    const comissionsResolved = commissions
-      .filter((item) => {
-        return item.product_id && item.exchange_id;
-      })
-      .map((item: KungfuApi.Commission) => {
-        return {
-          ...kfCommissionData,
-          ...item,
-        };
-      });
+  const kfCommissionData = longfist.Commission();
+  const comissionsResolved = commissions
+    .filter((item) => {
+      return item.product_id && item.exchange_id;
+    })
+    .map((item: KungfuApi.Commission) => {
+      return {
+        ...kfCommissionData,
+        ...item,
+      };
+    });
 
-    const result = commissionStore.setAllCommission(comissionsResolved);
-
-    if (result) {
-      resolve(result);
-    } else {
-      reject(result);
-    }
-  });
+  return getResultUntilValuable(() =>
+    commissionStore.setAllCommission(comissionsResolved),
+  );
 };
