@@ -402,9 +402,7 @@ export const useAddUpdateRemoveKfConfig = (): {
                 resolve();
               })
               .catch((err: Error) => {
-                error(
-                  `${t('database_locked')}, ${t('please_wait_and_retry')}`,
-                );
+                error(`${t('database_locked')}, ${t('please_wait_and_retry')}`);
                 kfLogger.error(err);
                 reject(err);
               });
