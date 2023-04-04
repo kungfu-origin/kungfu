@@ -108,7 +108,6 @@ function sendMsgToMainWindow(
 ): void {
   if (mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents) {
     mainWindow.webContents.send('main-process-messages', msg, payload);
-    const slientResolved = options?.slient === undefined || options?.slient;
-    slientResolved && mainWindow.focus();
+    !options?.slient && mainWindow.focus();
   }
 }
