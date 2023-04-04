@@ -106,14 +106,14 @@ export const forceKill = (tasks: string[]): Promise<void> => {
   return findProcessByKeywords(tasks).then((processList) => {
     const pids = processList.map((item) => item.pid);
 
-    console.log('Target to force kill processList ', processList);
+    kfLogger.info('Target to force kill processList ', processList);
     return fkill(pids, {
       force: true,
       tree: isWin ? true : false,
       ignoreCase: true,
       silent: process.env.NODE_ENV === 'development' ? true : false,
     }).catch((err) => {
-      console.warn((<Error>err).message);
+      kfLogger.warn((<Error>err).message);
     });
   });
 };
@@ -946,8 +946,11 @@ export const startStrategy = async (
 
   //因为pm2环境残留，在反复切换本地python跟内置python时，会出现本地python启动失败，所以需要先pm2 kill
   try {
-    kfLogger.info(`Clear existed strategy ${strategyIdResolved}`);
-    await deleteProcess(strategyIdResolved);
+    const { processStatus } = await listProcessStatus();
+    if (!getIfProcessDeleted(processStatus, strategyIdResolved)) {
+      kfLogger.info(`Clear existed strategy ${strategyIdResolved}`);
+      await deleteProcess(strategyIdResolved);
+    }
   } catch (err) {
     kfLogger.warn(err);
   }

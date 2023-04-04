@@ -75,7 +75,8 @@ export default {
   add_config_modal:
     '{category} ID unique in the system. {changeTypeName} cannot be modified after it succeeds.',
   update_config_modal: 'Confirm {key} configurations',
-  database_locked:
+  database_locked: 'Detect there are some trading, database has been used',
+  export_database_locked:
     'Detect there are some trading, should make sure the trading data be saved, suggest do this after closing quotation.',
 
   MakeOrder: 'Order Dashboard',
@@ -92,7 +93,8 @@ export default {
   PosGlobal: 'Positon Global',
   Pos: 'Positon',
 
-  please_wait: '请稍后',
+  please_wait: 'Please wait...',
+  please_wait_and_retry: 'Please wait and retry',
 
   baseConfig: {
     main_panel: 'HOME',
@@ -622,6 +624,7 @@ export default {
     comission: 'Comission',
     varieties: 'Varieties',
     add_comission: 'Add',
+    save_comission: 'Save',
     exchange_id: 'Exchange ID',
     open: 'Open',
     close_today: 'Close Today',
