@@ -108,7 +108,7 @@ void cached::handle_cached_feeds(int store_volume_every_loop) {
           } catch (const std::exception &e) {
             SPDLOG_ERROR("Unexpected exception by handle_cached_feeds {}", e.what());
             stored_controller++;
-            continue;
+            break;
           }
 
           iter = feed_map.erase(iter);
@@ -140,7 +140,7 @@ void cached::handle_profile_feeds(int store_volume_every_loop) {
         } catch (const std::exception &e) {
           SPDLOG_ERROR("Unexpected exception by handle_profile_feeds {}", e.what());
           stored_controller++;
-          continue;
+          break;
         }
 
         iter = feed_map.erase(iter);
