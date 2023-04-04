@@ -106,14 +106,14 @@ export const forceKill = (tasks: string[]): Promise<void> => {
   return findProcessByKeywords(tasks).then((processList) => {
     const pids = processList.map((item) => item.pid);
 
-    console.log('Target to force kill processList ', processList);
+    kfLogger.info('Target to force kill processList ', processList);
     return fkill(pids, {
       force: true,
       tree: isWin ? true : false,
       ignoreCase: true,
       silent: process.env.NODE_ENV === 'development' ? true : false,
     }).catch((err) => {
-      console.warn((<Error>err).message);
+      kfLogger.warn((<Error>err).message);
     });
   });
 };
