@@ -314,6 +314,39 @@ export const loopToRunProcess = async <T>(
   return resList;
 };
 
+export const getResultUntilValuable = <T>(
+  getter: (...args) => T | false,
+  timeout = 5000,
+): Promise<T> => {
+  return new Promise((resolve, reject) => {
+    let count = 0;
+    const getterResolved = () => {
+      setTimeout(() => {
+        try {
+          const result = getter();
+          if (result) {
+            resolve(result);
+          } else {
+            if (++count * 16 > timeout) {
+              reject(new Error('timeout'));
+            } else {
+              getterResolved();
+            }
+          }
+        } catch (err) {
+          if (++count * 16 > timeout) {
+            reject(err);
+          } else {
+            getterResolved();
+          }
+        }
+      }, 16);
+    };
+
+    getterResolved();
+  });
+};
+
 export const delayMilliSeconds = (miliSeconds: number): Promise<void> => {
   return new Promise((resolve) => {
     const timer = setTimeout(() => {

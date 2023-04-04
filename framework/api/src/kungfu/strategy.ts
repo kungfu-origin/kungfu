@@ -4,16 +4,16 @@ export const getStrategyById = (
   strategyId: string,
 ): Promise<Array<Code.Strategy>> => {
   return new Promise((resolve, reject) => {
-    const strategyData: KungfuApi.KfConfig | false = getKfConfig(strategyId);
-    if (!strategyData) {
-      reject(new Error('Failed to get strategy'));
-      return;
-    }
-
-    const strategy: Array<Code.Strategy> = [
-      { ...JSON.parse(strategyData.value || '{}') },
-    ];
-    resolve(strategy);
+    getKfConfig(strategyId)
+      .then((strategyData) => {
+        const strategy: Array<Code.Strategy> = [
+          { ...JSON.parse(strategyData.value || '{}') },
+        ];
+        resolve(strategy);
+      })
+      .catch(() => {
+        reject(new Error('Failed to get strategy'));
+      });
   });
 };
 
@@ -28,14 +28,15 @@ export const updateStrategyPath = async (
     addTime = strategyOld[0].add_time;
   }
   return new Promise((resolve) => {
-    const strategy = setKfConfig(
+    setKfConfig(
       kfLocation,
       JSON.stringify({
         strategy_id: strategyId,
         strategy_path: strategyPath,
         add_time: addTime,
       }),
-    );
-    resolve(strategy);
+    ).then((strategy) => {
+      resolve(strategy);
+    });
   });
 };
