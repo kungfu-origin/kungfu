@@ -79,11 +79,16 @@ export function downloadProcessUpdate(
   mainWindow: BrowserWindow,
   process: number,
 ): void {
-  sendMsgToMainWindow(mainWindow, 'auto-update-download-process', { process });
+  sendMsgToMainWindow(
+    mainWindow,
+    'auto-update-download-process',
+    { process },
+    { slient: true },
+  );
 }
 
 export function updateNotAvailable(mainWindow: BrowserWindow): void {
-  sendMsgToMainWindow(mainWindow, 'auto-update-up-to-date');
+  sendMsgToMainWindow(mainWindow, 'auto-update-up-to-date', { slient: true });
 }
 
 export function sendUpdatingError(
@@ -96,10 +101,14 @@ export function sendUpdatingError(
 function sendMsgToMainWindow(
   mainWindow: BrowserWindow,
   msg: string,
-  payload?: object,
+  payload: object = {},
+  options?: {
+    slient?: boolean;
+  },
 ): void {
   if (mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents) {
     mainWindow.webContents.send('main-process-messages', msg, payload);
-    mainWindow.focus();
+    const slientResolved = options?.slient === undefined || options?.slient;
+    slientResolved && mainWindow.focus();
   }
 }
