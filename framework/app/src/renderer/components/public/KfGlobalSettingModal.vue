@@ -108,7 +108,7 @@ function handleSaveCommission() {
     })
     .catch((err: Error) => {
       messagePrompt().error(
-        `${t('operation_failed')}, ${t('please_wait_and_retry')}`,
+        `${t('database_locked')}, ${t('please_wait_and_retry')}`,
       );
       kfLogger.error(err);
     });

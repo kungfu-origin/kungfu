@@ -75,7 +75,8 @@ export default {
   add_config_modal:
     '{category} ID unique in the system. {changeTypeName} cannot be modified after it succeeds.',
   update_config_modal: 'Confirm {key} configurations',
-  database_locked:
+  database_locked: 'Detect there are some trading, database has been used',
+  export_database_locked:
     'Detect there are some trading, should make sure the trading data be saved, suggest do this after closing quotation.',
 
   MakeOrder: 'Order Dashboard',

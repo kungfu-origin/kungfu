@@ -338,7 +338,7 @@ export const useAddUpdateRemoveKfConfig = (): {
               resolve();
             })
             .catch((err) => {
-              error(`${t('operation_failed')}, ${t('please_wait_and_retry')}`);
+              error(`${t('database_locked')}, ${t('please_wait_and_retry')}`);
               kfLogger.error(err);
               reject(err);
             });
@@ -403,7 +403,7 @@ export const useAddUpdateRemoveKfConfig = (): {
               })
               .catch((err: Error) => {
                 error(
-                  `${t('operation_failed')}, ${t('please_wait_and_retry')}`,
+                  `${t('database_locked')}, ${t('please_wait_and_retry')}`,
                 );
                 kfLogger.error(err);
                 reject(err);
@@ -470,7 +470,7 @@ export const useDealExportHistoryTradingData = (): {
       } catch (err) {
         if (err instanceof Error) {
           if (err.message === 'database_locked') {
-            error(t('database_locked'));
+            error(t('export_database_locked'));
           } else {
             console.error(err);
           }
@@ -585,7 +585,7 @@ export const useDealExportHistoryTradingData = (): {
     } catch (err) {
       if (err instanceof Error) {
         if (err.message === 'database_locked') {
-          error(t('database_locked'));
+          error(t('export_database_locked'));
         } else {
           console.error(err);
         }
