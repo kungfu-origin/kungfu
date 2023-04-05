@@ -183,6 +183,11 @@ void cached::make_cache_shift(uint32_t source_id, uint32_t dest_id) {
 void cached::register_trigger_listen_public(int64_t gen_time, const Register &register_data) {
   auto app_uid = register_data.location_uid;
   auto app_location = get_location(app_uid);
+
+  if (app_location->category != category::TD) {
+    return;
+  }
+
   reader_->join(app_location, location::PUBLIC, gen_time);
   make_cache_shift(app_uid, location::PUBLIC);
   reader_->join(app_location, location::SYNC, gen_time);
