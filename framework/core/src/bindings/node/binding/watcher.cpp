@@ -402,7 +402,7 @@ void Watcher::on_react() {
   // for receive history data
   auto before_start_events = events_ | take_until(events_ | is(RequestStart::tag));
   before_start_events | is(Instrument::tag) | $$(Feed(event, event->data<Instrument>()));
-  // bookkeeper restore, only Instrument and Commission, 
+  // bookkeeper restore, only Instrument and Commission,
   // for hidden pos && asset
   before_start_events | is(Instrument::tag, Commission::tag) | $$(feed_state_data(event, state_bank_));
 }
@@ -669,7 +669,7 @@ void Watcher::StartWorker() {
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     auto watcher = static_cast<Watcher *>(req->data);
     // have to be at this position, for deleting old journal securitily
-    auto& info = *static_cast<Napi::CallbackInfo *>(req->data);
+    auto &info = *static_cast<Napi::CallbackInfo *>(req->data);
     watcher->AfterMasterDown(info);
     watcher->set_begin_time(time::now_in_nano());
     SPDLOG_INFO("Restart watcher uv loop");
