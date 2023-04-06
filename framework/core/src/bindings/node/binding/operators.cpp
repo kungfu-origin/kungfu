@@ -23,7 +23,7 @@ void InitStateMap(Napi::ObjectReference &state, const std::string &name) {
   state.Value().DefineProperty(Napi::PropertyDescriptor::Value("state_name", Napi::String::New(state.Env(), name)));
 }
 
-void InitTradingDataMap(Napi::ObjectReference &state, const std::string &name) {
+void InitTradingDataInStateMap(Napi::ObjectReference &state, const std::string &name) {
   boost::hana::for_each(longfist::TradingDataTypes, [&](auto it) {
     auto name = std::string(boost::hana::first(it).c_str());
     state.Set(name, DataTable::NewInstance(state.Value()));

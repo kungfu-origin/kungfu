@@ -381,7 +381,7 @@ private:
 
 void InitStateMap(Napi::ObjectReference &state, const std::string &name);
 
-void InitTradingDataMap(Napi::ObjectReference &state, const std::string &name);
+void InitTradingDataInStateMap(Napi::ObjectReference &state, const std::string &name);
 } // namespace kungfu::node::serialize
 
 #endif // KUNGFU_NODE_SERIALIZE_H
