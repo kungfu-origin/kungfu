@@ -161,10 +161,12 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
       }
     }
     RestoreState(saved_location, today, INT64_MAX, sync_schema);
-    shift(saved_location) >> state_bank_;
+    // for hidden pos && asset
+    // shift(saved_location) >> state_bank_;
   }
   RestoreState(ledger_home_location_, today, INT64_MAX, sync_schema);
-  shift(ledger_home_location_) >> state_bank_; // Load positions to restore bookkeeper
+  // for hidden pos && asset
+  // shift(ledger_home_location_) >> state_bank_; // Load positions to restore bookkeeper
 }
 
 Watcher::~Watcher() {
@@ -398,12 +400,13 @@ void Watcher::on_react() {
 
   // for receive history data
   auto before_start_events = events_ | take_until(events_ | is(RequestStart::tag));
-  // before_start_events | is_subscribed(subscribed_instruments_) | $$(feed_state_data(event, data_bank_));
   before_start_events | is(Instrument::tag) | $$(Feed(event, event->data<Instrument>()));
-  // before_start_events | skip_while(while_is(Quote::tag)) | is_trading_data() |
-  //     $$(feed_trading_data(event, trading_bank_));
-  before_start_events | skip_while(while_is(Quote::tag, Instrument::tag)) | skip_while(while_is_trading_data) |
-      $$(feed_state_data(event, data_bank_));
+  // bookkeeper restore
+  before_start_events | is(Instrument::tag, Commission::tag) | $$(feed_state_data(event, state_bank_));
+  // for hidden pos && asset
+  before_start_events | is(Instrument::tag, Commission::tag) | $([&](const event_ptr &event) {
+    SPDLOG_INFO("msg_type {} source {} dest {}", event->msg_type(), event->source(), event->dest());
+  });
 }
 
 void Watcher::on_start() {
@@ -478,7 +481,8 @@ void Watcher::Feed(const event_ptr &event, const Instrument &instrument) {
 
 void Watcher::RestoreState(const location_ptr &state_location, int64_t from, int64_t to, bool sync_schema) {
   add_location(0, state_location);
-  serialize::JsRestoreState(ledger_ref_, state_location)(from, to, sync_schema);
+  // for hidden pos && asset
+  serialize::JsRestoreState(ledger_ref_, state_location).filter_no<Position, Asset>(from, to, sync_schema);
 }
 
 Napi::Value Watcher::Start(const Napi::CallbackInfo &info) {
@@ -683,7 +687,7 @@ void Watcher::Quit(const Napi::CallbackInfo &info) { uv_work_live_ = false; }
 void Watcher::AfterMasterDown() {
   reader_->disjoin(master_cmd_location_->uid);
   writers_.clear();
-  serialize::InitTradingDataMap(ledger_ref_, "ledger");
+  TryRefreshTradingData();
 }
 
 void Watcher::UpdateBrokerState(uint32_t source_id, uint32_t dest_id, const BrokerStateUpdate &state) {

@@ -30,6 +30,7 @@ cached::cached(locator_ptr locator, mode m, bool low_latency)
 void cached::on_react() {
   events_ | is(Location::tag) | $$(on_location(event));
   events_ | is(Register::tag) | $$(register_triggger_clear_cache_shift(event->data<Register>()));
+  events_ | is(Register::tag) | $$(register_trigger_listen_public(event->gen_time(), event->data<Register>()));
   events_ | is(RequestCached::tag) | $([&](const event_ptr &event) {
     auto source_id = event->source();
 
@@ -72,11 +73,15 @@ void cached::on_start() {
 void cached::on_frame() {}
 
 void cached::on_active() {
+  SPDLOG_TRACE("cached::on_active");
   handle_cached_feeds(store_volume_every_loop_);
   handle_profile_feeds(store_volume_every_loop_);
 }
 
-void cached::on_notify() { handle_cached_feeds(LOW_LATENCY_STORE_VOLUME_BY_INTERVAL); }
+void cached::on_notify() {
+  SPDLOG_TRACE("cached::on_notify");
+  handle_cached_feeds(LOW_LATENCY_STORE_VOLUME_BY_INTERVAL);
+}
 
 void cached::mark_request_cached_done(uint32_t dest_id) {
   auto writer = get_writer(master_cmd_location_->uid);
@@ -155,15 +160,11 @@ void cached::on_location(const event_ptr &event) { profile_bank_ << typed_event_
 void cached::inspect_channel(int64_t trigger_time, const Channel &channel) {
   if (channel.source_id != get_live_home_uid() and channel.dest_id != get_live_home_uid()) {
     reader_->join(get_location(channel.source_id), channel.dest_id, trigger_time);
-    reader_->join(get_location(channel.source_id), location::PUBLIC, trigger_time);
-    channel_trigger_make_cache_shift(channel);
+    make_cache_shift(channel.source_id, channel.dest_id);
   }
 }
 
-void cached::channel_trigger_make_cache_shift(const Channel &channel) {
-  uint32_t source_id = channel.source_id;
-  uint32_t dest_id = channel.dest_id;
-
+void cached::make_cache_shift(uint32_t source_id, uint32_t dest_id) {
   if (locations_.find(source_id) == locations_.end()) {
     SPDLOG_ERROR("no source {} in locations_", get_location_uname(source_id));
     return;
@@ -177,8 +178,21 @@ void cached::channel_trigger_make_cache_shift(const Channel &channel) {
   const location_ptr &location = locations_.at(source_id);
   app_cache_shift_.emplace(source_id, location);
   ensure_cached_storage(source_id, dest_id);
-  ensure_cached_storage(source_id, location::PUBLIC);
-  ensure_cached_storage(source_id, location::SYNC);
+}
+
+void cached::register_trigger_listen_public(int64_t gen_time, const Register &register_data) {
+  auto app_uid = register_data.location_uid;
+  auto app_location = get_location(app_uid);
+
+  if (app_location->category != category::TD) {
+    return;
+  }
+
+  reader_->join(app_location, location::PUBLIC, gen_time);
+  make_cache_shift(app_uid, location::PUBLIC);
+  reader_->join(app_location, location::SYNC, gen_time);
+  make_cache_shift(app_uid, location::SYNC);
+  SPDLOG_INFO("resume {} connection from {}", get_location_uname(app_uid), time::strftime(gen_time));
 }
 
 void cached::register_triggger_clear_cache_shift(const Register &register_data) {
