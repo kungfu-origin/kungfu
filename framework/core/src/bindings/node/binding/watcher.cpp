@@ -170,6 +170,7 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
 }
 
 Watcher::~Watcher() {
+  SPDLOG_INFO("~Watcher");
   uv_work_.data = nullptr;
   strategy_states_ref_.Unref();
   config_ref_.Unref();
@@ -401,12 +402,9 @@ void Watcher::on_react() {
   // for receive history data
   auto before_start_events = events_ | take_until(events_ | is(RequestStart::tag));
   before_start_events | is(Instrument::tag) | $$(Feed(event, event->data<Instrument>()));
-  // bookkeeper restore
-  before_start_events | is(Instrument::tag, Commission::tag) | $$(feed_state_data(event, state_bank_));
+  // bookkeeper restore, only Instrument and Commission, 
   // for hidden pos && asset
-  before_start_events | is(Instrument::tag, Commission::tag) | $([&](const event_ptr &event) {
-    SPDLOG_INFO("msg_type {} source {} dest {}", event->msg_type(), event->source(), event->dest());
-  });
+  before_start_events | is(Instrument::tag, Commission::tag) | $$(feed_state_data(event, state_bank_));
 }
 
 void Watcher::on_start() {
@@ -486,6 +484,7 @@ void Watcher::RestoreState(const location_ptr &state_location, int64_t from, int
 }
 
 Napi::Value Watcher::Start(const Napi::CallbackInfo &info) {
+  SPDLOG_INFO("start");
   StartWorker();
   return {};
 }
@@ -506,7 +505,7 @@ void Watcher::SyncLedger() {
 
 void Watcher::TryRefreshTradingData() {
   if (refresh_trading_data_before_sync_) {
-    serialize::InitTradingDataMap(ledger_ref_, "ledger");
+    serialize::InitTradingDataInStateMap(ledger_ref_, "ledger");
   }
 }
 
@@ -670,7 +669,8 @@ void Watcher::StartWorker() {
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     auto watcher = static_cast<Watcher *>(req->data);
     // have to be at this position, for deleting old journal securitily
-    watcher->AfterMasterDown();
+    auto& info = *static_cast<Napi::CallbackInfo *>(req->data);
+    watcher->AfterMasterDown(info);
     watcher->set_begin_time(time::now_in_nano());
     SPDLOG_INFO("Restart watcher uv loop");
     // master may quit within watcher running time,
@@ -684,10 +684,12 @@ void Watcher::CancelWorker() { uv_work_live_ = false; }
 
 void Watcher::Quit(const Napi::CallbackInfo &info) { uv_work_live_ = false; }
 
-void Watcher::AfterMasterDown() {
+void Watcher::AfterMasterDown(const Napi::CallbackInfo &info) {
+  SPDLOG_INFO("after master down");
+  Napi::HandleScope scope(info.Env());
   reader_->disjoin(master_cmd_location_->uid);
   writers_.clear();
-  TryRefreshTradingData();
+  serialize::InitTradingDataInStateMap(ledger_ref_, "ledger");
 }
 
 void Watcher::UpdateBrokerState(uint32_t source_id, uint32_t dest_id, const BrokerStateUpdate &state) {
