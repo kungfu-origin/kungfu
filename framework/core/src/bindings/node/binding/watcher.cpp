@@ -687,7 +687,7 @@ void Watcher::Quit(const Napi::CallbackInfo &info) { uv_work_live_ = false; }
 void Watcher::AfterMasterDown() {
   reader_->disjoin(master_cmd_location_->uid);
   writers_.clear();
-  serialize::InitTradingDataMap(ledger_ref_, "ledger");
+  TryRefreshTradingData();
 }
 
 void Watcher::UpdateBrokerState(uint32_t source_id, uint32_t dest_id, const BrokerStateUpdate &state) {
