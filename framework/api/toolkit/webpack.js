@@ -2,7 +2,6 @@ const path = require('path');
 const TerserPlugin = require('terser-webpack-plugin');
 const ESLintPlugin = require('eslint-webpack-plugin');
 const { isProduction, getAppDir } = require('./utils');
-const webpack = require('webpack');
 
 module.exports = {
   makeConfig: (argv) => {
@@ -13,6 +12,15 @@ module.exports = {
       optimization: {
         minimize: true,
         minimizer: [new TerserPlugin()],
+        splitChunks: {
+          chunks: 'all',
+        },
+      },
+      cache: {
+        type: 'filesystem',
+        buildDependencies: {
+          config: [__filename],
+        },
       },
       module: {
         rules: [

@@ -936,6 +936,7 @@ declare namespace KungfuApi {
   }
 
   export interface Kungfu {
+    shutdown(): void;
     ConfigStore(kfHome: string): ConfigStore;
     RiskSettingStore(kfHome: string): RiskSettingStore;
     CommissionStore(kfHome: string): CommissionStore;

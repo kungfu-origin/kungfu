@@ -100,7 +100,6 @@ Napi::Value ParseTime(const Napi::CallbackInfo &info) {
 void Shutdown(const Napi::CallbackInfo &info) { ensure_sqlite_shutdown(); }
 
 Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
-
   ensure_sqlite_initilize();
   Longfist::Init(env, exports);
   History::Init(env, exports);
