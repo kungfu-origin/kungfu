@@ -196,11 +196,12 @@ public:
         const auto &commission = book->commissions.at(product_key);
         auto close_today_volume = double(position.volume - position.yesterday_volume);
         if (commission.mode == CommissionRateMode::ByAmount) {
-          cost = (position.last_price /** cm_mr.exchange_rate*/ * position.yesterday_volume * commission.close_ratio) +
-                 (position.last_price /** cm_mr.exchange_rate*/ * close_today_volume * commission.close_today_ratio);
+          cost = (position.last_price * position.yesterday_volume * commission.close_ratio) +
+                 (position.last_price * close_today_volume * commission.close_today_ratio);
 
           cost = cost * contract_multiplier;
         } else {
+          // by volume calculate
           cost = (position.yesterday_volume * commission.close_ratio) +
                  (close_today_volume * commission.close_today_ratio);
         }
@@ -209,7 +210,7 @@ public:
       auto multiplier = contract_multiplier * (position.direction == Direction::Long ? 1 : -1);
       auto price_diff = position.last_price - position.avg_open_price;
       // 浮动盈亏
-      position.unrealized_pnl = (price_diff * position.volume) /** cm_mr.exchange_rate*/ * multiplier - cost;
+      position.unrealized_pnl = (price_diff * position.volume) * multiplier - cost;
     }
   }
 
@@ -221,7 +222,7 @@ private:
     auto contract_multiplier = cm_mr.contract_multiplier;
     auto margin_ratio_by_pos = cm_mr.margin_ratio;
     auto margin = contract_multiplier * trade.price * cm_mr.exchange_rate * trade.volume * margin_ratio_by_pos;
-    auto commission = calculate_commission(book, trade, position, 0);
+    auto commission = calculate_commission(book, trade, position, 0) * cm_mr.exchange_rate;
     auto frozen_margin = contract_multiplier * book->get_frozen_price(trade.order_id) * cm_mr.exchange_rate *
                          trade.volume * margin_ratio_by_pos;
     position.margin += margin;
@@ -259,9 +260,8 @@ private:
       close_today_volume = trade.volume;
     }
 
-    auto commission = calculate_commission(book, trade, position, close_today_volume);
-    auto realized_pnl =
-        (trade.price - position.avg_open_price) /** cm_mr.exchange_rate*/ * trade.volume * contract_multiplier;
+    auto commission = calculate_commission(book, trade, position, close_today_volume) * cm_mr.exchange_rate;
+    auto realized_pnl = (trade.price - position.avg_open_price) * trade.volume * contract_multiplier;
     if (position.direction == Direction::Short) {
       realized_pnl = -realized_pnl;
     }
@@ -327,17 +327,15 @@ private:
         return trade.price * cm_mr.exchange_rate * trade.volume * contract_multiplier * commission.open_ratio;
       } else {
         auto volume_left = double(trade.volume) - close_today_volume;
-        return (trade.price * cm_mr.exchange_rate * volume_left * contract_multiplier * commission.close_ratio) +
-               (trade.price * cm_mr.exchange_rate * close_today_volume * contract_multiplier *
-                commission.close_today_ratio);
+        return (trade.price * volume_left * contract_multiplier * commission.close_ratio) +
+               (trade.price * close_today_volume * contract_multiplier * commission.close_today_ratio);
       }
     } else {
       if (trade.offset == Offset::Open) {
-        return double(trade.volume) * contract_multiplier * commission.open_ratio;
+        return double(trade.volume) * commission.open_ratio;
       } else {
         auto volume_left = double(trade.volume - close_today_volume);
-        return (volume_left * contract_multiplier * commission.close_ratio) +
-               (close_today_volume * contract_multiplier * commission.close_today_ratio);
+        return (volume_left * commission.close_ratio) + (close_today_volume * commission.close_today_ratio);
       }
     }
   }
