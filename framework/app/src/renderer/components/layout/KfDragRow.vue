@@ -24,7 +24,6 @@ import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/ind
 
 interface KfDragRowData {
   resizeing: boolean;
-  isOutOfBoardListenerAdded: boolean;
   leftCol$: HTMLElement | null;
   leftBoardId: string;
   leftColWidth: number;
@@ -48,7 +47,6 @@ export default defineComponent({
   setup() {
     const rowData = reactive<KfDragRowData>({
       resizeing: false,
-      isOutOfBoardListenerAdded: false,
       leftCol$: null,
       leftBoardId: '',
       leftColWidth: 0,
@@ -88,16 +86,17 @@ export default defineComponent({
     },
   },
 
-  methods: {
-    isMouseOutOfParent(currentX: number, currentY: number) {
-      return (
-        currentX <= this.paBoundingRect.left + 16 ||
-        currentX >= this.paBoundingRect.right - 16 ||
-        currentY <= this.paBoundingRect.top + 16 ||
-        currentY >= this.paBoundingRect.bottom - 16
-      );
-    },
+  mounted() {
+    this.$el.addEventListener('mouseleave', this.handleMouseLeave);
+    this.$el.addEventListener('mouseenter', this.handleMouseEnter);
+  },
 
+  beforeUnmount() {
+    this.$el.removeEventListener('mouseleave', this.handleMouseLeave);
+    this.$el.removeEventListener('mouseenter', this.handleMouseEnter);
+  },
+
+  methods: {
     handleMouseDown(e: MouseEvent) {
       const target = e.target as HTMLElement;
 
@@ -120,18 +119,8 @@ export default defineComponent({
     handleMouseMove(e: MouseEvent) {
       if (!this.resizeing) return;
 
-      const currentY: number = e.y;
       const currentX: number = e.x;
       const deltaX = currentX - this.preX;
-
-      if (
-        this.paBoundingRect &&
-        this.isMouseOutOfParent(currentX, currentY) &&
-        !this.isOutOfBoardListenerAdded
-      ) {
-        document.addEventListener('mouseup', this.handleMouseUp);
-        this.isOutOfBoardListenerAdded = true;
-      }
 
       if (
         !this.leftCol$ ||
@@ -188,9 +177,20 @@ export default defineComponent({
       this.clearState();
     },
 
+    handleMouseLeave() {
+      if (this.resizeing) {
+        document.addEventListener('mouseup', this.handleMouseUp);
+      }
+    },
+
+    handleMouseEnter() {
+      if (!this.resizeing) {
+        document.removeEventListener('mouseup', this.handleMouseUp);
+      }
+    },
+
     clearState() {
       this.resizeing = false;
-      this.isOutOfBoardListenerAdded = false;
       this.leftCol$ = null;
       this.leftColWidth = 0;
       this.rightCol$ = null;

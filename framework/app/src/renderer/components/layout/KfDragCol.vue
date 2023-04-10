@@ -30,7 +30,6 @@ export default defineComponent({
   setup() {
     const colData = reactive<{
       resizeing: boolean;
-      isOutOfBoardListenerAdded: boolean;
       upRow$: HTMLElement | null;
       upBoardId: string;
       upRowHeight: number;
@@ -41,7 +40,6 @@ export default defineComponent({
       preY: number;
     }>({
       resizeing: false,
-      isOutOfBoardListenerAdded: false,
       upRow$: null,
       upBoardId: '',
       upRowHeight: 0,
@@ -80,16 +78,17 @@ export default defineComponent({
     },
   },
 
-  methods: {
-    isMouseOutOfParent(currentX: number, currentY: number) {
-      return (
-        currentX <= this.paBoundingRect.left + 16 ||
-        currentX >= this.paBoundingRect.right - 16 ||
-        currentY <= this.paBoundingRect.top + 16 ||
-        currentY >= this.paBoundingRect.bottom - 16
-      );
-    },
+  mounted() {
+    this.$el.addEventListener('mouseleave', this.handleMouseLeave);
+    this.$el.addEventListener('mouseenter', this.handleMouseEnter);
+  },
 
+  beforeUnmount() {
+    this.$el.removeEventListener('mouseleave', this.handleMouseLeave);
+    this.$el.removeEventListener('mouseenter', this.handleMouseEnter);
+  },
+
+  methods: {
     handleMouseDown(e: MouseEvent) {
       const target = e.target as HTMLElement;
 
@@ -113,17 +112,7 @@ export default defineComponent({
       if (!this.resizeing) return;
 
       const currentY: number = e.y;
-      const currentX: number = e.x;
       const deltaY = currentY - this.preY;
-
-      if (
-        this.paBoundingRect &&
-        this.isMouseOutOfParent(currentX, currentY) &&
-        !this.isOutOfBoardListenerAdded
-      ) {
-        document.addEventListener('mouseup', this.handleMouseUp);
-        this.isOutOfBoardListenerAdded = true;
-      }
 
       if (
         !this.upRow$ ||
@@ -187,9 +176,20 @@ export default defineComponent({
       this.clearState();
     },
 
+    handleMouseLeave() {
+      if (this.resizeing) {
+        document.addEventListener('mouseup', this.handleMouseUp);
+      }
+    },
+
+    handleMouseEnter() {
+      if (!this.resizeing) {
+        document.removeEventListener('mouseup', this.handleMouseUp);
+      }
+    },
+
     clearState() {
       this.resizeing = false;
-      this.isOutOfBoardListenerAdded = false;
       this.upRow$ = null;
       this.upRowHeight = 0;
       this.bottomRow$ = null;
