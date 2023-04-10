@@ -49,6 +49,33 @@ KF_DEFINE_MARK_TYPE(AlgoOrderInput, 20010);
 KF_DEFINE_MARK_TYPE(AlgoOrderReport, 20011);
 KF_DEFINE_MARK_TYPE(AlgoOrderModify, 20012);
 
+KF_DEFINE_PACK_TYPE(                                    //
+    frame_header, 0, PK(gen_time), TIMESTAMP(gen_time), //
+    /** total frame length (including header and data body) */
+    (volatile uint32_t, length), //
+    /** header length */
+    (uint32_t, header_length), //
+    /** generate time of the frame data */
+    (int64_t, gen_time), //
+    /** trigger time for this frame, use for latency stats */
+    (int64_t, trigger_time), //
+    /** msg type of the data in frame */
+    (volatile int32_t, msg_type), //
+    /** source of this frame */
+    (uint32_t, source), //
+    /** dest of this frame */
+    (uint32_t, dest) //
+);
+
+KF_DEFINE_PACK_TYPE(                          //
+    page_header, 1, PK(version), PERPETUAL(), //
+    (uint32_t, version),                      //
+    (uint32_t, page_header_length),           //
+    (uint32_t, page_size),                    //
+    (uint32_t, frame_header_length),          //
+    (uint64_t, last_frame_position)           //
+);
+
 KF_DEFINE_DATA_TYPE(                              //
     Config, 10005, PK(location_uid), PERPETUAL(), //
     (uint32_t, location_uid),                     //

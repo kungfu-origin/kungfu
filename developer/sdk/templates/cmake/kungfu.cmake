@@ -40,7 +40,7 @@ macro(kungfu_setup MODULE_NAME)
 
   add_subdirectory("<%- kfcDir -%>/pybind11" "${PROJECT_BINARY_DIR}/pybind11")
 
-  <%- makeTarget %>(${MODULE_NAME} SHARED ${SOURCES})
+  <%- makeTarget %>(${MODULE_NAME} <%- makeTargetLinkType %> ${SOURCES})
   target_link_libraries(${MODULE_NAME} PRIVATE kungfu <%- targetLinks %>)
   set_target_properties(${MODULE_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${BUILD_OUTPUT_DIR})
   set_target_properties(${MODULE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE ${BUILD_OUTPUT_DIR})

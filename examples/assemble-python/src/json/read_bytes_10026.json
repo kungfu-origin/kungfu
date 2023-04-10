@@ -1,0 +1,21 @@
+{
+  "AssembleMode": "write",
+  "source": {
+    "mode": "live",
+    "tags": [],
+    "category": "system",
+    "group": "service",
+    "name": "cached"
+  },
+  "dest": {
+    "dest_id": 0
+  },
+  "function": "read_bytes",
+  "arguments": [
+    10026
+  ],
+  "export": [
+    "xls",
+    ""
+  ]
+}

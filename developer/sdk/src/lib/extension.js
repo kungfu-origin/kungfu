@@ -59,6 +59,7 @@ function detectPlatform() {
   }
   return osName;
 }
+
 exports.detectPlatform = detectPlatform;
 
 function hasSourceFor(packageJson, language) {
@@ -81,6 +82,12 @@ function generateCMakeFiles(projectName, kungfuBuild) {
     exe: 'add_executable',
     'bind/python': 'pybind11_add_module',
     'bind/node': 'add_library',
+  };
+
+  const targetLinkTypes = {
+    exe: '',
+    'bind/python': 'SHARED',
+    'bind/node': 'SHARED',
   };
 
   kungfuBuild = kungfuBuild || { cpp: { target: 'bind/python' } };
@@ -107,6 +114,7 @@ function generateCMakeFiles(projectName, kungfuBuild) {
       sources: cppSources,
       extraSource: extraSources[kungfuBuild.cpp.target],
       makeTarget: targetMakers[kungfuBuild.cpp.target],
+      makeTargetLinkType: targetLinkTypes[kungfuBuild.cpp.target],
       targetLinks: (cppLinks || ['']).join(' '),
     },
     (err, str) => {

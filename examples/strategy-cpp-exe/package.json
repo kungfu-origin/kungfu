@@ -1,0 +1,31 @@
+{
+  "name": "@kungfu-trader/examples-strategy-cpp-exe",
+  "author": "kungfu-trader",
+  "version": "2.4.61-alpha.0",
+  "description": "KungFu Strategy 101 - C++ Demo",
+  "license": "Apache-2.0",
+  "private": true,
+  "kungfuConfig": {
+    "key": "KungfuStrategy101CppExe"
+  },
+  "kungfuBuild": {
+    "cpp": {
+      "cmakeOverride": false,
+      "target": "exe"
+    }
+  },
+  "scripts": {
+    "clean": "kfs strategy clean",
+    "build": "kfs strategy build",
+    "package": "kfs strategy package",
+    "format": "node ../../framework/core/.gyp/run-format-cpp.js src",
+    "master": "kfc -l debug run -c system -g master -n master",
+    "cached": "kfc -l debug run -c system -g service -n cached"
+  },
+  "devDependencies": {
+    "@kungfu-trader/kungfu-sdk": "^2.4.61-alpha.0"
+  },
+  "repository": {
+    "url": "https://github.com/kungfu-trader/kungfu.git"
+  }
+}

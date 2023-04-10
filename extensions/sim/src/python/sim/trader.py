@@ -48,6 +48,9 @@ class TraderSim(wc.Trader):
 
         self.ctx.orders = {}
 
+        for k, v in self.orders.items():
+            self.ctx.orders[k] = v.data
+
         if self.match_mode == MatchMode.Custom:
             path = config.get("path")
             simulator_dir = os.path.dirname(path)
@@ -94,6 +97,7 @@ class TraderSim(wc.Trader):
             writer = self.get_writer(event.source)
             # order_input = event.OrderInput()
             order = wc.utils.order_from_input(order_input)
+            order.external_order_id = str(order.order_id)
             order.insert_time = event.gen_time
             order.update_time = event.gen_time
             order.trading_day = kft.strfnow("%Y%m%d")

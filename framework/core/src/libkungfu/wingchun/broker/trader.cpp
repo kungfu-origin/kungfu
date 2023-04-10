@@ -52,7 +52,7 @@ void TraderVendor::on_start() {
     return event->msg_type() == BatchOrderBegin::tag or event->msg_type() == BatchOrderEnd::tag;
   }) | $$(service_->handle_batch_order_tag(event));
 
-  clean_orders();
+  //  clean_orders();
   service_->recover();
   service_->on_recover();
   service_->on_start();
@@ -237,7 +237,17 @@ void Trader::recover() {
     return;
   }
 
-  auto deal_write_frame = [&](const frame_ptr &frame) {
+  deal_write_frame();
+  deal_read_frame();
+}
+
+void Trader::deal_write_frame() {
+  assemble asb_write(get_home(), location::PUBLIC, AssembleMode::Write);
+  asb_write.seek_to_time(time::today_start()); // recover from today
+  SPDLOG_DEBUG("before assemble read");
+  int64_t count = 0;
+  while (asb_write.data_available()) {
+    const auto &frame = asb_write.current_frame();
     if (frame->msg_type() == Order::tag) {
       const Order &order = frame->data<Order>();
       orders_.insert_or_assign(order.order_id, state<Order>(frame->source(), frame->dest(), frame->gen_time(), order));
@@ -247,51 +257,48 @@ void Trader::recover() {
       const Trade &trade = frame->data<Trade>();
       trades_.insert_or_assign(trade.trade_id, state<Trade>(frame->source(), frame->dest(), frame->gen_time(), trade));
     }
-  };
-
-  assemble asb_write(get_home(), location::PUBLIC, AssembleMode::Write);
-  asb_write.seek_to_time(time::today_start()); // recover from today
-  while (asb_write.data_available()) {
-    auto frame = asb_write.current_frame();
-    deal_write_frame(frame);
     asb_write.next();
+    ++count;
   }
+  SPDLOG_DEBUG("after assemble read, count: {}", count);
 
   // set order as Lost which without external_order_id
   for (auto &pair : orders_) {
-    if (not has_writer(pair.second.dest)) {
-      continue;
-    }
     Order &order = pair.second.data;
     if (not is_final_status(order.status) and order.external_order_id.to_string().empty()) {
       order.status = OrderStatus::Lost;
-      write_to(order, pair.second.dest);
+      order.update_time = time::now_in_nano();
+
+      if (has_writer(pair.second.dest)) {
+        write_to(order, pair.second.dest);
+      }
     }
   }
+}
 
+void Trader::deal_read_frame() {
   // write a Lost Order to journal when read an OrderInput whose order_id not in orders_
-  auto deal_read_frame = [&](const frame_ptr &frame) {
-    if (frame->msg_type() == OrderInput::tag) {
-      if (not has_writer(frame->source())) {
-        return;
-      }
-      const OrderInput &order_input = frame->data<OrderInput>();
-      if (orders_.find(order_input.order_id) != orders_.end()) {
-        return;
-      }
-      Order &order = get_writer(frame->source())->open_data<Order>();
-      order_from_input(order_input, order);
-      order.status = OrderStatus::Lost;
-      get_writer(frame->source())->close_data();
-    }
-  };
-
   assemble asb_read(get_home(), get_home_uid(), AssembleMode::Read);
+  SPDLOG_DEBUG("before assemble read");
+  int64_t count = 0;
   while (asb_read.data_available()) {
-    auto frame = asb_read.current_frame();
-    deal_read_frame(frame);
+    const auto &frame = asb_read.current_frame();
+    if (frame->msg_type() == OrderInput::tag) {
+      const OrderInput &order_input = frame->data<OrderInput>();
+      if (orders_.find(order_input.order_id) == orders_.end()) {
+        if (has_writer(frame->dest())) {
+          Order &order = get_writer(frame->dest())->open_data<Order>();
+          order_from_input(order_input, order);
+          order.status = OrderStatus::Lost;
+          order.update_time = time::now_in_nano();
+          get_writer(frame->dest())->close_data();
+        }
+      }
+    }
     asb_read.next();
+    ++count;
   }
+  SPDLOG_DEBUG("after assemble read, count: {}", count);
 }
 
 void Trader::clear_order_inputs(const uint64_t location_uid) { order_inputs_.erase(location_uid); }
