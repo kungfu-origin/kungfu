@@ -186,6 +186,18 @@ export default defineComponent({
 
       this.clearState();
     },
+    
+    handleMouseLeave() {
+      if (this.resizeing) {
+        document.addEventListener('mouseup', this.handleMouseUp);
+      }
+    },
+
+    handleMouseEnter() {
+      if (!this.resizeing) {
+        document.removeEventListener('mouseup', this.handleMouseUp);
+      }
+    },
 
     clearState() {
       this.resizeing = false;
@@ -198,6 +210,16 @@ export default defineComponent({
       this.preY = 0;
       document.removeEventListener('mouseup', this.handleMouseUp);
     },
+  },
+
+  mounted() {
+    this.$el.addEventListener('mouseleave', this.handleMouseLeave);
+    this.$el.addEventListener('mouseenter', this.handleMouseEnter);
+  },
+
+  beforeUnmount() {
+    this.$el.removeEventListener('mouseleave', this.handleMouseLeave);
+    this.$el.removeEventListener('mouseenter', this.handleMouseEnter);
   },
 });
 </script>
