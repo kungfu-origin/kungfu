@@ -120,6 +120,10 @@ public:
 
   [[maybe_unused]] [[nodiscard]] const std::vector<reader_ptr> &get_readers() const { return readers_; }
 
+  void disjoin(uint32_t location_uid);
+
+  void disjoin_channel(uint32_t location_uid, uint32_t dest_id);
+
 protected:
   std::vector<reader_ptr> readers_ = {};
   reader_ptr current_reader_ = {};

@@ -279,6 +279,7 @@ void Trader::deal_write_frame() {
 void Trader::deal_read_frame() {
   // write a Lost Order to journal when read an OrderInput whose order_id not in orders_
   assemble asb_read(get_home(), get_home_uid(), AssembleMode::Read);
+  asb_read.disjoin(get_vendor().get_ledger_home_location()->location_uid);
   SPDLOG_DEBUG("before assemble read");
   int64_t count = 0;
   while (asb_read.data_available()) {

@@ -280,6 +280,7 @@ void bind_enums(py::module &m) {
       .def_readonly_static("Write", &AssembleMode::Write)
       .def_readonly_static("Read", &AssembleMode::Read)
       .def_readonly_static("Public", &AssembleMode::Public)
+      .def_readonly_static("Sync", &AssembleMode::Sync)
       .def_readonly_static("All", &AssembleMode::All);
 }
 } // namespace kungfu::longfist::pybind

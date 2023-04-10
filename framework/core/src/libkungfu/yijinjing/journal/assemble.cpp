@@ -135,6 +135,7 @@ assemble::assemble(const data::location_ptr &source_location, uint32_t dest_id, 
   // scan all locations, join dest_id or PUBLIC
   bool b_read = assemble_mode & AssembleMode::Read;
   bool b_public = assemble_mode & AssembleMode::Public;
+  bool b_sync = assemble_mode & AssembleMode::Sync;
   bool b_all = assemble_mode & AssembleMode::All;
   if (b_read or b_public or b_all) {
     for (auto &location : l.list_locations("*", "*", "*", "*")) {
@@ -145,6 +146,8 @@ assemble::assemble(const data::location_ptr &source_location, uint32_t dest_id, 
           reader->join(location, dest_id, from_time);
         } else if (b_public and dest == data::location::PUBLIC) {
           reader->join(location, data::location::PUBLIC, from_time);
+        } else if (b_sync and dest == data::location::SYNC) {
+          reader->join(location, data::location::SYNC, from_time);
         }
       }
     }
@@ -183,6 +186,18 @@ std::vector<std::pair<longfist::types::frame_header, std::vector<uint8_t>>> asse
     next();
   }
   return v;
+}
+
+void assemble::disjoin(uint32_t location_uid) {
+  for (auto &reader : readers_) {
+    reader->disjoin(location_uid);
+  }
+}
+
+void assemble::disjoin_channel(uint32_t location_uid, uint32_t dest_id) {
+  for (auto &reader : readers_) {
+    reader->disjoin_channel(location_uid, dest_id);
+  }
 }
 
 } // namespace kungfu::yijinjing::journal
