@@ -20,6 +20,7 @@ import { removeTargetFilesInFolder } from '@kungfu-trader/kungfu-js-api/utils/fi
 import { RootConfigJSON } from '@kungfu-trader/kungfu-js-api/typings/global';
 
 autoUpdater.logger = kfLogger;
+let isRendererReady = false;
 
 const getChannel = (isPrerelease: boolean) => {
   const prefix = 'kungfu-update';
@@ -40,7 +41,14 @@ const getProjectName = (rootConfigJson: RootConfigJSON): string => {
   return `kungfu-project-name-undefined-${new Date().toDateString()}`;
 };
 
-function handleUpdateKungfu(MainWindow: BrowserWindow | null) {
+const getAlphaReleaseVersion = (version: semver.SemVer) => {
+  return `${version.major}.${version.minor}.${version.patch}`;
+};
+
+function handleUpdateKungfu(
+  MainWindow: BrowserWindow | null,
+  targetVersions: string[] = [],
+) {
   kfLogger.info('Kungfu client version: ', app.getVersion());
   kfLogger.info('Kungfu client isPacked: ', app.isPackaged);
   if (!app.isPackaged) return;
@@ -54,14 +62,36 @@ function handleUpdateKungfu(MainWindow: BrowserWindow | null) {
   const version = semver.parse(
     rootPackageJson.version as string,
   ) as semver.SemVer;
-  const targetVersion = version.prerelease.length
-    ? semver.inc(version, 'prerelease', 'alpha')
-    : semver.inc(version, 'patch');
-  const artifactPath = `${projectName}/v${version.major}/v${targetVersion}`;
+
+  if (!targetVersions.length) {
+    const isPrerelease = !!version.prerelease.length;
+    if (isPrerelease) {
+      targetVersions.push(
+        semver.inc(version, 'prerelease', 'alpha') || 'kungfu-version-unknow',
+        getAlphaReleaseVersion(version),
+      );
+    } else {
+      targetVersions.push(
+        semver.inc(version, 'patch') || 'kungfu-version-unknow',
+      );
+    }
+  }
+
+  if (!targetVersions.length) return;
+
+  kfLogger.info(
+    'Kungfu autoUpdater all target versions: ',
+    JSON.stringify(targetVersions),
+  );
+
+  const curTargetVersion = targetVersions.shift();
+  if (!curTargetVersion) return;
+
+  const artifactPath = `${projectName}/v${version.major}/v${curTargetVersion}`;
 
   kfLogger.info('Kungfu autoUpdater artifact path: ', artifactPath);
 
-  updaterOption.channel = getChannel(!!version.prerelease.length);
+  updaterOption.channel = getChannel(curTargetVersion.includes('-alpha'));
 
   if (updaterOption.provider === 'generic') {
     updaterOption.url = `${updaterOption.url}/${artifactPath}`;
@@ -75,12 +105,21 @@ function handleUpdateKungfu(MainWindow: BrowserWindow | null) {
   autoUpdater.autoInstallOnAppQuit = false;
   autoUpdater.autoRunAppAfterInstall = true;
   autoUpdater.setFeedURL(updaterOption);
+  autoUpdater.removeAllListeners();
 
+  let curErrorCalledNext = false;
   autoUpdater.on('error', (error) => {
-    kfLogger.error(
-      error == null ? 'unknown' : (error.stack || error).toString(),
-    );
+    kfLogger.error('Kungfu autoUpdater error message: ', error?.message);
     MainWindow && sendUpdatingError(MainWindow, error);
+
+    if (
+      !curErrorCalledNext &&
+      error.message.indexOf('Cannot find channel') !== -1 &&
+      targetVersions.length
+    ) {
+      curErrorCalledNext = true;
+      handleUpdateKungfu(MainWindow, targetVersions);
+    }
   });
 
   autoUpdater.on('checking-for-update', () => {
@@ -109,6 +148,7 @@ function handleUpdateKungfu(MainWindow: BrowserWindow | null) {
   autoUpdater.on('update-not-available', (info) => {
     kfLogger.info('Current version is up-to-date', JSON.stringify(info));
     MainWindow && updateNotAvailable(MainWindow);
+    if (targetVersions.length) handleUpdateKungfu(MainWindow, targetVersions);
   });
 
   autoUpdater.on('update-downloaded', (info) => {
@@ -141,10 +181,15 @@ function handleUpdateKungfu(MainWindow: BrowserWindow | null) {
     MainWindow && downloadProcessUpdate(MainWindow, progressInfo.percent);
   });
 
-  ipcMain.on('auto-update-renderer-ready', () => {
-    kfLogger.info('auto-update-renderer-ready');
+  if (isRendererReady) {
     autoUpdater.checkForUpdates();
-  });
+  } else {
+    ipcMain.on('auto-update-renderer-ready', () => {
+      kfLogger.info('auto-update-renderer-ready');
+      autoUpdater.checkForUpdates();
+      isRendererReady = true;
+    });
+  }
 }
 
 export { handleUpdateKungfu };
