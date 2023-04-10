@@ -9,6 +9,7 @@
 
 using namespace kungfu::longfist;
 using namespace kungfu::longfist::types;
+using namespace kungfu::longfist::enums;
 using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
 
@@ -40,7 +41,7 @@ Napi::Value ConfigStore::SetConfig(const Napi::CallbackInfo &info) {
     config.value = info[valueIndex].ToString().Utf8Value();
   }
   try {
-    profile_.set(config);
+    profile_ << state<Config>(location::PUBLIC, location::PUBLIC, time::now_in_nano(), config);
   } catch (const std::exception &ex) {
     SPDLOG_ERROR("failed to SetConfig {}", ex.what());
     yijinjing::util::print_stack_trace();
