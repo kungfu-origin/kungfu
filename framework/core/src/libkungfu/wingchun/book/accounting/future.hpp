@@ -222,7 +222,6 @@ private:
     auto contract_multiplier = cm_mr.contract_multiplier;
     auto margin_ratio_by_pos = cm_mr.margin_ratio;
     auto margin = contract_multiplier * trade.price * cm_mr.exchange_rate * trade.volume * margin_ratio_by_pos;
-    auto commission = calculate_commission(book, trade, position, 0) * cm_mr.exchange_rate;
     auto frozen_margin = contract_multiplier * book->get_frozen_price(trade.order_id) * cm_mr.exchange_rate *
                          trade.volume * margin_ratio_by_pos;
     position.margin += margin;
@@ -235,6 +234,7 @@ private:
     book->asset.frozen_cash -= frozen_margin;
     book->asset.frozen_margin -= frozen_margin;
 
+    auto commission = calculate_commission(book, trade, position, 0) * cm_mr.exchange_rate;
     book->asset.avail -= commission;
     book->asset.avail -= margin;
     book->asset.accumulated_fee += commission;
@@ -260,13 +260,14 @@ private:
       close_today_volume = trade.volume;
     }
 
-    auto commission = calculate_commission(book, trade, position, close_today_volume) * cm_mr.exchange_rate;
     auto realized_pnl = (trade.price - position.avg_open_price) * trade.volume * contract_multiplier;
     if (position.direction == Direction::Short) {
       realized_pnl = -realized_pnl;
     }
     position.realized_pnl += realized_pnl;
     update_position(book, position);
+
+    auto commission = calculate_commission(book, trade, position, close_today_volume) * cm_mr.exchange_rate;
     book->asset.realized_pnl += realized_pnl * cm_mr.exchange_rate;
     book->asset.avail += delta_margin;
     book->asset.avail -= commission;
