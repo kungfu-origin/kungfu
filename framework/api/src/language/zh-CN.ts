@@ -75,8 +75,9 @@ export default {
   add_config_modal:
     '{category}ID系统唯一, {changeTypeName} 成功后不可修改, 确认 {key}',
   update_config_modal: '确认{key} 相关配置',
-  database_locked:
-    '检测到当前有交易进行，为不影响交易数据落地，建议收盘后尝试进行此操作',
+  database_locked: '检测到当前有交易进行, 数据库被占用',
+  export_database_locked:
+    '检测到当前有交易进行, 为不影响交易数据落地, 建议收盘后尝试进行此操作',
 
   MakeOrder: '下单面板',
   FutureArbitrage: '套利指令',
@@ -93,6 +94,7 @@ export default {
   Pos: '持仓',
 
   please_wait: '请稍后',
+  please_wait_and_retry: '请稍后重试',
 
   baseConfig: {
     main_panel: '主面板',
@@ -612,6 +614,7 @@ export default {
     comission: '期货手续费',
     varieties: '品种',
     add_comission: '添加',
+    save_comission: '保存',
     exchange_id: '交易所',
     open: '开仓',
     close_today: '平今',

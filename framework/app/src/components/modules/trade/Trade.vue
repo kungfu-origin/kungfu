@@ -168,7 +168,7 @@ watch(historyDate, async (newDate) => {
     })
     .catch((err) => {
       if (err.message === 'database_locked') {
-        messagePrompt().error(t('database_locked'));
+        messagePrompt().error(t('export_database_locked'));
       } else {
         console.error(err.message);
       }

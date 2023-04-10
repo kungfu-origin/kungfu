@@ -104,12 +104,14 @@ export const categoryRegisterConfig: DealTradingDataGetter = {
   },
   position: {
     getter(watcher, position, kfLocation) {
-      const { group, name } = kfLocation;
+      const { group, name, direction } =
+        kfLocation as KungfuApi.KfExtraLocation;
       return position
         .nofilter('volume', BigInt(0))
         .filter('ledger_category', LedgerCategoryEnum.td)
         .filter('exchange_id', group)
         .filter('instrument_id', name)
+        .filter('direction', direction)
         .sort(positionSortKey)
         .reverse();
     },

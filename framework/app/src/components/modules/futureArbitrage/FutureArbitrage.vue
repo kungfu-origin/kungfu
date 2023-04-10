@@ -46,6 +46,13 @@ const isShowCurrentGlobalKfLocationTitle = computed(() => {
   );
 });
 
+const tdList = computed<KungfuApi.KfLocation[] | null | undefined>(() => {
+  return currentGlobalKfLocation.value &&
+    'children' in currentGlobalKfLocation.value
+    ? currentGlobalKfLocation.value.children
+    : null;
+});
+
 const configSettings = computed(() => {
   if (!currentGlobalKfLocation.value) {
     return getConfigSettings();
@@ -237,6 +244,7 @@ function handleMakeOrder() {
             ref="formRef"
             v-model:formState="formState"
             :configSettings="configSettings"
+            :tdList="tdList"
             changeType="add"
             :label-col="6"
             :wrapper-col="14"

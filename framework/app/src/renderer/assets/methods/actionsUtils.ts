@@ -48,6 +48,7 @@ import {
   getTradingDataSortKey,
   isUpdateVersionLogicEnable,
   isCheckVersionLogicEnable,
+  kfLogger,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { BasketVolumeType } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import { writeCsvWithUTF8Bom } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
@@ -168,7 +169,7 @@ export const useUpdateVersion = () => {
         }
 
         if (data.name === 'auto-update-download-process') {
-          process.value = +data.payload.process;
+          process.value = Number((+data.payload.process).toFixed(2));
           if (process.value === 100) {
             progressStatus.value = 'success';
           } else {
@@ -337,6 +338,8 @@ export const useAddUpdateRemoveKfConfig = (): {
               resolve();
             })
             .catch((err) => {
+              error(`${t('database_locked')}, ${t('please_wait_and_retry')}`);
+              kfLogger.error(err);
               reject(err);
             });
         },
@@ -383,25 +386,27 @@ export const useAddUpdateRemoveKfConfig = (): {
             mode: 'live',
           };
 
-          return setKfConfig(
-            kfLocation,
-            JSON.stringify({
-              ...formState,
-              add_time: +new Date().getTime() * Math.pow(10, 6),
-            }),
-          )
-            .then(() => {
-              success();
-            })
-            .then(() => {
-              useGlobalStore().setKfConfigList();
-            })
-            .catch((err: Error) => {
-              error(t('operation_failed') + err.message);
-            })
-            .finally(() => {
-              resolve();
-            });
+          return new Promise<void>((resolve, reject) => {
+            setKfConfig(
+              kfLocation,
+              JSON.stringify({
+                ...formState,
+                add_time: +new Date().getTime() * Math.pow(10, 6),
+              }),
+            )
+              .then(() => {
+                success();
+              })
+              .then(() => {
+                useGlobalStore().setKfConfigList();
+                resolve();
+              })
+              .catch((err: Error) => {
+                error(`${t('database_locked')}, ${t('please_wait_and_retry')}`);
+                kfLogger.error(err);
+                reject(err);
+              });
+          });
         },
         onCancel() {
           resolve();
@@ -444,7 +449,6 @@ export const useDealExportHistoryTradingData = (): {
     if (!exportEventData.value) {
       throw new Error('exportEventData is undefined');
     }
-
     const { currentKfLocation, tradingDataType } =
       exportEventData.value || ({} as KfEvent.ExportTradingDataEvent);
     const { date, dateType } = formState;
@@ -464,7 +468,7 @@ export const useDealExportHistoryTradingData = (): {
       } catch (err) {
         if (err instanceof Error) {
           if (err.message === 'database_locked') {
-            error(t('database_locked'));
+            error(t('export_database_locked'));
           } else {
             console.error(err);
           }
@@ -486,6 +490,8 @@ export const useDealExportHistoryTradingData = (): {
       const positions = tradingData.Position.sort(positionSortKey);
       const assetSortKey = getTradingDataSortKey('Asset');
       const assets = tradingData.Asset.sort(assetSortKey);
+      const orderInputSortKey = getTradingDataSortKey('OrderInput');
+      const orderInputs = tradingData.OrderInput.sort(orderInputSortKey);
 
       const { filePaths } = await dialog.showOpenDialog({
         properties: ['openDirectory'],
@@ -494,9 +500,7 @@ export const useDealExportHistoryTradingData = (): {
       if (!filePaths) {
         return;
       }
-
       const targetFolder = filePaths[0];
-
       const ordersFilename = path.join(
         targetFolder,
         `orders-${dateResolved}.csv`,
@@ -513,6 +517,10 @@ export const useDealExportHistoryTradingData = (): {
       const assetFilename = path.join(
         targetFolder,
         `assets-${dateResolved}.csv`,
+      );
+      const orderInputsFilename = path.join(
+        targetFolder,
+        `orderInputs-${dateResolved}.csv`,
       );
 
       return Promise.all([
@@ -539,6 +547,11 @@ export const useDealExportHistoryTradingData = (): {
         writeCsvWithUTF8Bom(
           assetFilename,
           assets,
+          dealTradingDataItemResolved(),
+        ),
+        writeCsvWithUTF8Bom(
+          orderInputsFilename,
+          orderInputs,
           dealTradingDataItemResolved(),
         ),
       ])
@@ -570,7 +583,7 @@ export const useDealExportHistoryTradingData = (): {
     } catch (err) {
       if (err instanceof Error) {
         if (err.message === 'database_locked') {
-          error(t('database_locked'));
+          error(t('export_database_locked'));
         } else {
           console.error(err);
         }
@@ -973,14 +986,15 @@ export const usePreStartAndQuitApp = (): {
 
   startGetWatcherStatus();
 
-  onMounted(async () => {
-    if (
-      booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED) &&
-      (await isAllMainProcessRunning())
-    ) {
-      preStartSystemLoadingData.cpusSafeNumChecking = 'done';
-      preStartSystemLoadingData.archive = 'done';
-      preStartSystemLoadingData.extraResourcesLoading = 'done';
+  onMounted(() => {
+    if (booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED)) {
+      isAllMainProcessRunning().then((flag) => {
+        if (flag) {
+          preStartSystemLoadingData.cpusSafeNumChecking = 'done';
+          preStartSystemLoadingData.archive = 'done';
+          preStartSystemLoadingData.extraResourcesLoading = 'done';
+        }
+      });
     }
 
     if (app?.proxy) {
@@ -1591,7 +1605,7 @@ export const useCurrentGlobalKfLocation = (
   watcher: KungfuApi.Watcher | null,
 ): {
   currentGlobalKfLocation: Ref<
-    KungfuApi.KfLocation | KungfuApi.KfConfig | null
+    KungfuApi.KfLocation | KungfuApi.KfLocationGroup | KungfuApi.KfConfig | null
   >;
   currentCategoryData: ComputedRef<KungfuApi.KfTradeValueCommonData | null>;
   currentUID: ComputedRef<string>;
