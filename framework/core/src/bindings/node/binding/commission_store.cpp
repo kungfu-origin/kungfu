@@ -9,6 +9,7 @@
 
 using namespace kungfu::longfist;
 using namespace kungfu::longfist::types;
+using namespace kungfu::longfist::enums;
 using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
 
@@ -20,7 +21,8 @@ CommissionStore::CommissionStore(const Napi::CallbackInfo &info)
 
 Napi::Value CommissionStore::SetCommission(const Napi::CallbackInfo &info) {
   try {
-    profile_.set(ExtractCommission(info));
+    // profile_.set(ExtractCommission(info));
+    profile_ << state<Commission>(location::PUBLIC, location::PUBLIC, time::now_in_nano(), ExtractCommission(info));
   } catch (const std::exception &ex) {
     SPDLOG_ERROR("failed to SetCommission {}", ex.what());
     yijinjing::util::print_stack_trace();
@@ -55,7 +57,8 @@ Napi::Value CommissionStore::SetAllCommission(const Napi::CallbackInfo &info) {
     try {
       profile_.remove_all<Commission>();
       for (auto commission : commissions) {
-        profile_.set(commission);
+        // profile_.set(commission);
+        profile_ << state<Commission>(location::PUBLIC, location::PUBLIC, time::now_in_nano(), commission);
       }
     } catch (const std::exception &ex) {
       SPDLOG_ERROR("failed to SetAllCommission {}", ex.what());
