@@ -19,11 +19,7 @@ public:
   void setup();
 
   template <typename DataType> void set(const DataType &data) {
-    try {
-      get_storage()->replace(data);
-    } catch (const std::exception &e) {
-      SPDLOG_ERROR("Unexpected exception by profile set {}", e.what());
-    }
+    get_storage()->replace(data);
   }
 
   template <typename DataType> DataType get(const DataType &query) {
