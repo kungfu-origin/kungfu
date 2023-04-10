@@ -177,6 +177,7 @@ Watcher::~Watcher() {
   app_states_ref_.Unref();
   ledger_ref_.Unref();
   state_ref_.Unref();
+  SPDLOG_INFO("~Watcher Done");
 }
 
 void Watcher::NoSet(const Napi::CallbackInfo &info, const Napi::Value &value) {
