@@ -28,8 +28,7 @@ Napi::Value BasketStore::SetAllBasket(const Napi::CallbackInfo &info) {
     try {
       profile_.remove_all<Basket>();
       for (auto basket : baskets) {
-        // profile_.set(basket);
-        profile_ << state<Basket>(location::PUBLIC, location::PUBLIC, time::now_in_nano(), basket);
+        profile_.set(basket);
       }
     } catch (const std::exception &ex) {
       SPDLOG_ERROR("failed to SetAllBasket {}", ex.what());
