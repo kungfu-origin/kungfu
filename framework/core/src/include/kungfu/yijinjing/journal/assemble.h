@@ -54,6 +54,10 @@ public:
 
   assemble operator+(assemble &other);
 
+  assemble &operator+=(const assemble &other);
+
+  assemble &operator-=(const assemble &other);
+
   void operator>>(const sink_ptr &sink);
 
   bool data_available();
@@ -135,6 +139,7 @@ private:
   const std::string &name_;
   publisher_ptr publisher_;
   std::vector<data::locator_ptr> locators_ = {};
+  int64_t from_time_ = 0;
 
   void sort();
 };

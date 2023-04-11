@@ -90,6 +90,8 @@ public:
 
   [[nodiscard]] virtual std::vector<uint32_t> list_location_dest_by_db(const location_ptr &location) const;
 
+  bool operator==(const locator &another) const;
+
 private:
   std::filesystem::path root_;
   longfist::enums::mode dir_mode_;

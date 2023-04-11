@@ -67,7 +67,9 @@ std::string get_root_dir(es::mode m, const std::vector<std::string> &tags) {
 
 locator::locator() : root_(get_runtime_dir()), dir_mode_(es::mode::LIVE) {}
 
-locator::locator(es::mode m, const std::vector<std::string> &tags) : dir_mode_(m) { root_ = get_root_dir(m, tags); }
+locator::locator(es::mode m, const std::vector<std::string> &tags) : dir_mode_(m) {
+  root_ = get_root_dir(dir_mode_, tags);
+}
 
 bool locator::has_env(const std::string &name) const { return std::getenv(name.c_str()) != nullptr; }
 
@@ -169,5 +171,9 @@ std::vector<uint32_t> locator::list_location_dest_by_db(const location_ptr &loca
     }
   }
   return std::vector<uint32_t>{set.begin(), set.end()};
+}
+
+bool locator::operator==(const locator &another) const {
+  return dir_mode_ == another.dir_mode_ and root_.string() == another.root_.string();
 }
 } // namespace kungfu::yijinjing::data

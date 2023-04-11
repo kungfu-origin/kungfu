@@ -35,7 +35,6 @@ ASSEMBLE_MODE = {
     "read": lf.enums.AssembleMode.Read,
     "public": lf.enums.AssembleMode.Public,
     "sync": lf.enums.AssembleMode.Sync,
-
 }
 
 
