@@ -1,0 +1,18 @@
+{
+  "name": "@kungfu-trader/examples-assemble-python",
+  "author": "kungfu-trader",
+  "version": "2.4.62-alpha.0",
+  "description": "KungFu Example Assemble Python",
+  "license": "Apache-2.0",
+  "private": true,
+  "scripts": {
+    "format": "node ../../framework/core/.gyp/run-format-cpp.js src",
+    "read_headers": "kfc -l debug assemble src/json/read_headers_10026.json",
+    "read_all": "kfc -l debug assemble src/json/read_all_Location.json",
+    "read_header_data": "kfc -l debug assemble src/json/read_header_data_Location.json",
+    "read_bytes": "kfc -l debug assemble src/json/read_bytes_10026.json"
+  },
+  "devDependencies": {
+    "@kungfu-trader/kungfu-sdk": "^2.4.62-alpha.0"
+  }
+}

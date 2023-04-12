@@ -1,0 +1,25 @@
+{
+  "AssembleMode": "All",
+  "source": {
+    "mode": "live",
+    "tags": [],
+    "category": "MD",
+    "group": "sim",
+    "name": "sim"
+  },
+  "dest": {
+    "mode": "live",
+    "category": "TD",
+    "group": "sim",
+    "name": "fill"
+  },
+  "function": "read_header_data",
+  "arguments": [
+    "Location"
+  ],
+  "export": [
+    "csv",
+    "xls",
+    ""
+  ]
+}

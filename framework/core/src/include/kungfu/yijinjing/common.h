@@ -62,7 +62,9 @@ class locator {
 public:
   locator();
 
-  explicit locator(const std::string &root) : root_(root) {}
+  explicit locator(longfist::enums::mode m, const std::vector<std::string> &tag = {});
+
+  explicit locator(const std::string &root) : root_(root), dir_mode_(longfist::enums::mode::LIVE) {}
 
   virtual ~locator() = default;
 
@@ -88,8 +90,11 @@ public:
 
   [[nodiscard]] virtual std::vector<uint32_t> list_location_dest_by_db(const location_ptr &location) const;
 
+  bool operator==(const locator &another) const;
+
 private:
   std::filesystem::path root_;
+  longfist::enums::mode dir_mode_;
 };
 
 struct location : public std::enable_shared_from_this<location>, public longfist::types::Location {
