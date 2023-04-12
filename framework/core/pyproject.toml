@@ -35,6 +35,7 @@ numpy = "~1.24.0"
 pandas = "~1.5.0"
 scipy = "~1.8.0"
 statsmodels = "~0.13.5"
+openpyxl = "~3.1.2"
 
 #### Dependencies #########################################
 chardet = "~5.1.0"

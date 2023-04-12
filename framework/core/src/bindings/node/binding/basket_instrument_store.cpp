@@ -25,8 +25,7 @@ Napi::Value BasketInstrumentStore::SetAllBasketInstruments(const Napi::CallbackI
     try {
       profile_.remove_all<BasketInstrument>();
       for (auto basket : basket_instruments) {
-        // profile_.set(basket);
-        profile_ << state<BasketInstrument>(location::PUBLIC, location::PUBLIC, time::now_in_nano(), basket);
+        profile_.set(basket);
       }
     } catch (const std::exception &ex) {
       SPDLOG_ERROR("failed to SetAllBasketInstruments {}", ex.what());
@@ -74,8 +73,7 @@ Napi::Value BasketInstrumentStore::SetBasketInstrument(const Napi::CallbackInfo 
     BasketInstrument basket_instrument = {};
     get(info[0].ToObject(), basket_instrument);
 
-    // profile_.set(basket_instrument);
-    profile_ << state<BasketInstrument>(location::PUBLIC, location::PUBLIC, time::now_in_nano(), basket_instrument);
+    profile_.set(basket_instrument);
   } catch (const std::exception &ex) {
     SPDLOG_ERROR("failed to SetBasketInstrument {}", ex.what());
     yijinjing::util::print_stack_trace();

@@ -6,6 +6,8 @@
 #include <kungfu/yijinjing/journal/journal.h>
 
 namespace kungfu::yijinjing::journal {
+using namespace longfist::types;
+
 constexpr uint32_t PAGE_ID_TRANC = 0xFFFF0000;
 constexpr uint32_t FRAME_ID_TRANC = 0x0000FFFF;
 

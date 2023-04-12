@@ -97,6 +97,8 @@ public:
 
   std::unordered_map<uint64_t, std::vector<longfist::types::OrderInput>> &get_order_inputs() { return order_inputs_; }
 
+  OrderMap &get_orders() { return orders_; }
+
   void enable_self_detect();
 
   [[maybe_unused]] void disable_recover();
@@ -127,6 +129,8 @@ private:
   void handle_batch_order_tag(const event_ptr &event);
   bool has_self_deal_risk(const event_ptr &event);
   void recover();
+  void deal_write_frame();
+  void deal_read_frame();
 };
 } // namespace kungfu::wingchun::broker
 
