@@ -35,7 +35,7 @@ public:
 
   Napi::Value OpenReader(const Napi::CallbackInfo &info);
 
-  static yijinjing::data::locator_ptr GetLocator(const Napi::CallbackInfo &info, int index = 0);
+  static yijinjing::data::locator_ptr GetLocator(const Napi::Array& locators, int index = 0);
 
   static yijinjing::data::location_ptr GetLocation(const Napi::CallbackInfo &info);
 
