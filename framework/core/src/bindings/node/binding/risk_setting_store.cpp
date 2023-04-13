@@ -41,8 +41,7 @@ Napi::Value RiskSettingStore::SetRiskSetting(const Napi::CallbackInfo &info) {
     risk_setting.value = info[valueIndex].ToString().Utf8Value();
   }
   try {
-    // profile_.set(risk_setting);
-    profile_ << state<RiskSetting>(location::PUBLIC, location::PUBLIC, time::now_in_nano(), risk_setting);
+    profile_.set(risk_setting);
   } catch (const std::exception &ex) {
     SPDLOG_ERROR("failed to SetRiskSetting {}", ex.what());
     return Napi::Boolean::New(info.Env(), false);
@@ -91,8 +90,7 @@ Napi::Value RiskSettingStore::SetAllRiskSetting(const Napi::CallbackInfo &info) 
       try {
         profile_.remove_all<RiskSetting>();
         for (auto risk_setting : risk_settings) {
-          // profile_.set(risk_setting);
-          profile_ << state<RiskSetting>(location::PUBLIC, location::PUBLIC, time::now_in_nano(), risk_setting);
+          profile_.set(risk_setting);
         }
       } catch (const std::exception &ex) {
         SPDLOG_ERROR("failed to SetAllRiskSetting {}", ex.what());

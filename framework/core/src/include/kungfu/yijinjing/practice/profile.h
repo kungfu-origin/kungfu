@@ -18,13 +18,7 @@ public:
 
   void setup();
 
-  template <typename DataType> void set(const DataType &data) {
-    try {
-      get_storage()->replace(data);
-    } catch (const std::exception &e) {
-      SPDLOG_ERROR("Unexpected exception by profile set {}", e.what());
-    }
-  }
+  template <typename DataType> void set(const DataType &data) { get_storage()->replace(data); }
 
   template <typename DataType> DataType get(const DataType &query) {
     auto pk_members = boost::hana::transform(DataType::primary_keys, [&](auto pk) {
