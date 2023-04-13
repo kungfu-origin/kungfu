@@ -20,6 +20,11 @@ inline bool IsValid(const Napi::CallbackInfo &info, int i, MemberPtr ptr) {
   return info.Length() > i and not info[i].IsEmpty() and not info[i].IsUndefined() and (info[i].*ptr)();
 }
 
+template <typename MemberPtr = bool (Napi::Value::*)() const>
+inline bool IsValid(const Napi::Array &info, int i, MemberPtr ptr) {
+  return info.Length() > i and not info[i].IsEmpty() and not info[i].IsUndefined() and (info[i].*ptr)();
+}
+
 inline int64_t TryParseTime(const Napi::CallbackInfo &info, int i) {
   typedef yijinjing::time time;
   if (IsValid(info, i, &Napi::Value::IsString)) {
