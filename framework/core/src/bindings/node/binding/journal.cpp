@@ -204,7 +204,7 @@ std::vector<locator_ptr> Assemble::ExtractLocator(const Napi::CallbackInfo &info
   std::vector<locator_ptr> result = {};
   // auto locators = info[0].As<Napi::Array>();
   // for (int i = 0; i < locators.Length(); i++) {
-    // result.push_back(IODevice::GetLocator(locators, i));
+  // result.push_back(IODevice::GetLocator(locators, i));
   // }
   return result;
 }
