@@ -11,8 +11,21 @@
 using namespace std::chrono;
 
 namespace kungfu::yijinjing {
+
+#ifdef SYS_LINUX
+timespec get_time() {
+  timespec ts;
+  clock_gettime(CLOCK_REALTIME, &ts);
+  return ts;
+}
+#endif
+
+inline system_clock::time_point system_clock_now() { return system_clock::now(); }
+
+inline steady_clock::time_point steady_clock_now() { return steady_clock::now(); }
+
 int64_t time::now_in_nano() {
-  auto duration = steady_clock::now().time_since_epoch().count() - get_instance().base_.steady_clock_count;
+  auto duration = steady_clock_now().time_since_epoch().count() - get_instance().base_.steady_clock_count;
   return get_instance().base_.system_clock_count + duration;
 }
 
@@ -123,10 +136,10 @@ void time::reset(int64_t system_clock_count, int64_t steady_clock_count) {
  * start_time_steady_ sample: 867884767983511
  */
 time::time() : base_() {
-  auto system_clock_now = system_clock::now();
-  auto steady_clock_now = steady_clock::now();
-  base_.system_clock_count = duration_cast<nanoseconds>(system_clock_now.time_since_epoch()).count();
-  base_.steady_clock_count = steady_clock_now.time_since_epoch().count();
+  auto system_clock_now_t = system_clock_now().time_since_epoch();
+  auto steady_clock_now_t = steady_clock_now().time_since_epoch();
+  base_.system_clock_count = duration_cast<nanoseconds>(system_clock_now_t).count();
+  base_.steady_clock_count = steady_clock_now_t.count();
 }
 
 const time &time::get_instance() {
