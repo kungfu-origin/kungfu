@@ -1,0 +1,20 @@
+--- D:\Code\reference\sqlite_orm\include\sqlite_orm\sqlite_orm.h
++++ D:\Code\linux\kungfu\framework\core\.deps\sqlite_orm-1.17.1\include\sqlite_orm\sqlite_orm.h
+@@ -8930,7 +8930,7 @@
+ 
+             void rename_table(sqlite3* db, const std::string& oldName, const std::string& newName) const {
+                 std::stringstream ss;
+-                ss << "ALTER TABLE " << oldName << " RENAME TO " << newName;
++                ss << "ALTER TABLE '" << oldName << "' RENAME TO '" << newName << "'";
+                 perform_void_exec(db, ss.str());
+             }
+ 
+@@ -9125,7 +9125,7 @@
+ 
+             void add_column(const table_info& ti, sqlite3* db) const {
+                 std::stringstream ss;
+-                ss << "ALTER TABLE " << this->table.name << " ADD COLUMN " << ti.name;
++                ss << "ALTER TABLE '" << this->table.name << "' ADD COLUMN '" << ti.name << "'";
+                 ss << " " << ti.type;
+                 if(ti.pk) {
+                     ss << " PRIMARY KEY";
