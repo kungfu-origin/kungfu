@@ -333,7 +333,15 @@ class KungfuCoreConan(ConanFile):
         shutil.rmtree(self.kfs_dir)
 
         if tools.detected_os() == "Linux":
+            print("----------------------------------------")
+            print("imported from conan:")
+            print("----------------------------------------")
+            subprocess.Popen(["ls", "-R", "../build/include/spdlog"]).wait()
+            print("----------------------------------------")
+            print("copied to kfc dist:")
+            print("----------------------------------------")
             subprocess.Popen(["ls", "-R", "../dist/kfc/include/spdlog"]).wait()
+            print("----------------------------------------")
 
         self.output.success("PyInstaller done")
 
