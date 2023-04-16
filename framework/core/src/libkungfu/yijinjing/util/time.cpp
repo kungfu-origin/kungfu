@@ -12,11 +12,11 @@ using namespace std::chrono;
 
 namespace kungfu::yijinjing {
 
-#ifdef SYS_LINUX
-timespec get_time() {
+#ifdef __linux__
+inline int64_t get_clock_count(clockid_t clk_id) {
   timespec ts;
-  clock_gettime(CLOCK_REALTIME, &ts);
-  return ts;
+  clock_gettime(clk_id, &ts);
+  return ts.tv_sec * time_unit::NANOSECONDS_PER_SECOND + ts.tv_nsec;
 }
 #endif
 
@@ -73,7 +73,6 @@ int64_t time::strptime(const std::string &time_string, const std::string &format
   }
 
   std::tm result = {};
-  // std::istringstream iss(time_string);
   std::istringstream iss(normal_timestr);
   iss >> std::get_time(&result, normal_format.c_str());
   std::time_t parsed_time = std::mktime(&result);

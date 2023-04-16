@@ -332,17 +332,6 @@ class KungfuCoreConan(ConanFile):
             shutil.copy(path.join(self.kfs_dir, file), self.kfc_dir)
         shutil.rmtree(self.kfs_dir)
 
-        if tools.detected_os() == "Linux":
-            print("----------------------------------------")
-            print("imported from conan:")
-            print("----------------------------------------")
-            subprocess.Popen(["ls", "-R", "../build/include/spdlog"]).wait()
-            print("----------------------------------------")
-            print("copied to kfc dist:")
-            print("----------------------------------------")
-            subprocess.Popen(["ls", "-R", "../dist/kfc/include/spdlog"]).wait()
-            print("----------------------------------------")
-
         self.output.success("PyInstaller done")
 
     def __run_nuitka(self, build_type):
