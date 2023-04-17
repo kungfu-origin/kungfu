@@ -64,6 +64,7 @@ const { handleBodySizeChange } = useDashboardBodySize();
 
 const { processStatusData } = useProcessStatusDetailData();
 const orders = ref<KungfuApi.OrderResolved[]>([]);
+const allOrders = ref<KungfuApi.OrderResolved[]>([]);
 const { searchKeyword, tableData } =
   useTableSearchKeyword<KungfuApi.OrderResolved>(orders, [
     'order_id',
@@ -127,24 +128,41 @@ onMounted(() => {
           ) as KungfuApi.Order[];
 
         if (unfinishedOrder.value) {
+          const tempAllOrders = ordersResolved.map((item) =>
+            toRaw(dealOrder(watcher, item, watcher.ledger.OrderStat)),
+          );
+          allOrders.value = tempAllOrders;
           orders.value = toRaw(
-            ordersResolved
-              .slice(0, 2000)
-              .filter((item) => !isFinishedOrderStatus(item.status))
-              .map((item) =>
-                toRaw(dealOrder(watcher, item, watcher.ledger.OrderStat)),
-              ),
+            tempAllOrders.filter((item) => !isFinishedOrderStatus(item.status)),
           );
           return;
         }
 
-        orders.value = toRaw(
-          ordersResolved
-            .slice(0, 500)
-            .map((item) =>
-              toRaw(dealOrder(watcher, item, watcher.ledger.OrderStat)),
-            ),
+        let finishedOrdersCount = 0;
+        const { totalOrders, ordersForTable } = ordersResolved.reduce(
+          (preOrders, curOrder) => {
+            const orderResolved = toRaw(
+              dealOrder(watcher, curOrder, watcher.ledger.OrderStat),
+            );
+            preOrders.totalOrders.push(orderResolved);
+            if (isFinishedOrderStatus(curOrder.status)) {
+              if (finishedOrdersCount < 500) {
+                finishedOrdersCount++;
+                preOrders.ordersForTable.push(orderResolved);
+              }
+            } else {
+              preOrders.ordersForTable.push(orderResolved);
+            }
+            return preOrders;
+          },
+          { totalOrders: [], ordersForTable: [] } as {
+            totalOrders: KungfuApi.OrderResolved[];
+            ordersForTable: KungfuApi.OrderResolved[];
+          },
         );
+
+        allOrders.value = toRaw(totalOrders);
+        orders.value = toRaw(ordersForTable);
       },
     );
 
@@ -156,6 +174,7 @@ onMounted(() => {
 
 watch(currentGlobalKfLocation, () => {
   historyDate.value = undefined;
+  allOrders.value = [];
   orders.value = [];
 });
 
@@ -169,6 +188,7 @@ watch(historyDate, async (newDate) => {
   }
 
   orders.value = [];
+  allOrders.value = [];
   historyDataLoading.value = true;
   delayMilliSeconds(500)
     .then(() =>
@@ -192,11 +212,13 @@ watch(historyDate, async (newDate) => {
           'order',
         ) as KungfuApi.Order[];
 
-      orders.value = toRaw(
+      const tempAllOrders = toRaw(
         orderResolved.map((item) =>
           toRaw(dealOrder(window.watcher, item, tradingData.OrderStat, true)),
         ),
       );
+      allOrders.value = tempAllOrders;
+      orders.value = tempAllOrders;
     })
     .catch((err) => {
       if (err.message === 'database_locked') {
@@ -594,7 +616,7 @@ function testOrderSourceIsOnline(order: KungfuApi.OrderResolved) {
     <StatisticModal
       v-if="statisticModalVisible"
       v-model:visible="statisticModalVisible"
-      :orders="tableData"
+      :orders="allOrders"
       :is-unfinished-order="unfinishedOrder"
       :history-date="historyDate"
     ></StatisticModal>

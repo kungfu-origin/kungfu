@@ -49,6 +49,7 @@ const app = getCurrentInstance();
 const { handleBodySizeChange } = useDashboardBodySize();
 
 const trades = ref<KungfuApi.TradeResolved[]>([]);
+const allTrades = ref<KungfuApi.TradeResolved[]>([]);
 const { searchKeyword, tableData } =
   useTableSearchKeyword<KungfuApi.TradeResolved>(trades, [
     'order_id',
@@ -106,13 +107,13 @@ onMounted(() => {
             'trade',
           ) as KungfuApi.Trade[];
 
-        trades.value = toRaw(
-          tradesResolved
-            .slice(0, 500)
-            .map((item) =>
-              toRaw(dealTrade(watcher, item, watcher.ledger.OrderStat)),
-            ),
+        const tempAllTrades = toRaw(
+          tradesResolved.map((item) =>
+            toRaw(dealTrade(watcher, item, watcher.ledger.OrderStat)),
+          ),
         );
+        allTrades.value = tempAllTrades;
+        trades.value = tempAllTrades.slice(0, 2000);
       },
     );
 
@@ -125,6 +126,7 @@ onMounted(() => {
 watch(currentGlobalKfLocation, () => {
   historyDate.value = undefined;
   trades.value = [];
+  allTrades.value = [];
 });
 
 watch(historyDate, async (newDate) => {
@@ -137,6 +139,7 @@ watch(historyDate, async (newDate) => {
   }
 
   trades.value = [];
+  allTrades.value = [];
   historyDataLoading.value = true;
   delayMilliSeconds(500)
     .then(() =>
@@ -160,11 +163,14 @@ watch(historyDate, async (newDate) => {
           'trade',
         ) as KungfuApi.Trade[];
 
-      trades.value = toRaw(
+      const tempAllTrades = toRaw(
         tradesResolved.map((item) =>
           toRaw(dealTrade(window.watcher, item, tradingData.OrderStat, true)),
         ),
       );
+
+      trades.value = tempAllTrades;
+      allTrades.value = tempAllTrades;
     })
     .catch((err) => {
       if (err.message === 'database_locked') {
@@ -284,7 +290,7 @@ function handleShowTradingDataDetail({
     <TradeStatisticModal
       v-if="statisticModalVisible"
       v-model:visible="statisticModalVisible"
-      :trades="tableData"
+      :trades="allTrades"
       :historyDate="historyDate"
     ></TradeStatisticModal>
   </div>
