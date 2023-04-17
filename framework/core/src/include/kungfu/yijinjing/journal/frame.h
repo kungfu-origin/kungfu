@@ -7,23 +7,23 @@
 
 namespace kungfu::yijinjing::journal {
 
-KF_DEFINE_PACK_TYPE(                                    //
-    frame_header, 0, PK(gen_time), TIMESTAMP(gen_time), //
-    /** total frame length (including header and data body) */
-    (volatile uint32_t, length), //
-    /** header length */
-    (uint32_t, header_length), //
-    /** generate time of the frame data */
-    (int64_t, gen_time), //
-    /** trigger time for this frame, use for latency stats */
-    (int64_t, trigger_time), //
-    /** msg type of the data in frame */
-    (volatile int32_t, msg_type), //
-    /** source of this frame */
-    (uint32_t, source), //
-    /** dest of this frame */
-    (uint32_t, dest) //
-);
+// KF_DEFINE_PACK_TYPE(                                    //
+//     frame_header, 0, PK(gen_time), TIMESTAMP(gen_time), //
+//     /** total frame length (including header and data body) */
+//     (volatile uint32_t, length), //
+//     /** header length */
+//     (uint32_t, header_length), //
+//     /** generate time of the frame data */
+//     (int64_t, gen_time), //
+//     /** trigger time for this frame, use for latency stats */
+//     (int64_t, trigger_time), //
+//     /** msg type of the data in frame */
+//     (volatile int32_t, msg_type), //
+//     /** source of this frame */
+//     (uint32_t, source), //
+//     /** dest of this frame */
+//     (uint32_t, dest) //
+//);
 
 /**
  * Basic memory unit,
@@ -73,15 +73,15 @@ struct frame : event {
 private:
   /** address with type,
    * will keep moving forward until change page */
-  frame_header *header_ = nullptr;
+  longfist::types::frame_header *header_ = nullptr;
 
   frame() = default;
 
-  void set_address(uintptr_t address) { header_ = reinterpret_cast<frame_header *>(address); }
+  void set_address(uintptr_t address) { header_ = reinterpret_cast<longfist::types::frame_header *>(address); }
 
   void move_to_next() { set_address(address() + frame_length()); }
 
-  void set_header_length() { header_->header_length = sizeof(frame_header); }
+  void set_header_length() { header_->header_length = sizeof(longfist::types::frame_header); }
 
   void set_data_length(uint32_t length) { header_->length = header_length() + length; }
 

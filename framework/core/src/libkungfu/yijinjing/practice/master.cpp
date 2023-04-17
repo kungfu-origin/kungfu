@@ -187,16 +187,16 @@ void master::react() {
   events_ | instanceof <journal::frame>() | $$(feed(event));
 }
 
-void master::on_active() { on_frame(); }
-
-void master::on_frame() {
+void master::on_active() {
   auto now = time::now_in_nano();
   if (last_check_ + time_unit::NANOSECONDS_PER_SECOND < now) {
     on_interval_check(now);
     last_check_ = now;
   }
-  handle_timer_tasks();
+  on_frame();
 }
+
+void master::on_frame() { handle_timer_tasks(); }
 
 void master::handle_timer_tasks() {
   auto now = time::now_in_nano();

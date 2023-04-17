@@ -207,6 +207,8 @@ void bind(pybind11::module &&m) {
   py::class_<locator, PyLocator, locator_ptr>(m, "locator")
       .def(py::init())
       .def(py::init<const std::string &>())
+      .def(py::init<mode, const std::vector<std::string> &>(), py::arg("mode"),
+           py::arg("tags") = std::vector<std::string>{})
       .def("has_env", &locator::has_env)
       .def("get_env", &locator::get_env)
       .def("layout_dir", &locator::layout_dir)
@@ -273,13 +275,36 @@ void bind(pybind11::module &&m) {
       .def(py::init<data::locator_ptr>())
       .def("put", &copy_sink::put);
 
-  py::class_<assemble, assemble_ptr>(m, "assemble")
+  auto assemble_class = py::class_<assemble, assemble_ptr>(m, "assemble");
+  assemble_class
       .def(py::init<const std::vector<data::locator_ptr> &, const std::string &, const std::string &,
                     const std::string &, const std::string &>(),
            py::arg("locators"), py::arg("mode") = "*", py::arg("category") = "*", py::arg("group") = "*",
            py::arg("name") = "*")
+      .def(py::init<const data::location_ptr &, uint32_t, uint32_t, int64_t>(), py::arg("source_location"),
+           py::arg("dest_id"), py::arg("assemble_mode") = longfist::enums::AssembleMode::Channel,
+           py::arg("from_time") = 0)
+      .def("read_headers", (std::vector<frame_header>(assemble::*)(int32_t, int64_t)) & assemble::read_headers,
+           py::arg("msg_type"), py::arg("end_time") = INT64_MAX, py::return_value_policy::move)
+      .def(
+          "read_bytes",
+          (std::vector<std::pair<longfist::types::frame_header, std::vector<uint8_t>>>(assemble::*)(int32_t, int64_t)) &
+              assemble::read_bytes,
+          py::arg("msg_type"), py::arg("end_time") = INT64_MAX, py::return_value_policy::move)
       .def("__plus__", &assemble::operator+)
       .def("__rshift__", &assemble::operator>>);
+  boost::hana::for_each(AllDataTypes, [&](auto type) {
+    using DataType = typename decltype(+boost::hana::second(type))::type;
+    assemble_class.def("read_all", py::overload_cast<const DataType &, int64_t>(&assemble::read_all<DataType>),
+                       py::arg("data"), py::arg("end_time") = INT64_MAX, py::return_value_policy::move);
+    assemble_class.def("read_header_data",
+                       py::overload_cast<const DataType &, int64_t>(&assemble::read_header_data<DataType>),
+                       py::arg("data"), py::arg("end_time") = INT64_MAX, py::return_value_policy::move);
+    assemble_class.def("read_headers", py::overload_cast<const DataType &, int64_t>(&assemble::read_headers<DataType>),
+                       py::arg("data") = DataType{}, py::arg("end_time") = INT64_MAX, py::return_value_policy::move);
+    assemble_class.def("read_bytes", py::overload_cast<const DataType &, int64_t>(&assemble::read_bytes<DataType>),
+                       py::arg("data") = DataType{}, py::arg("end_time") = INT64_MAX, py::return_value_policy::move);
+  });
 
   py::class_<io_device, io_device_ptr>(m, "io_device")
       .def(py::init<location_ptr, bool, bool>(), py::arg("home"), py::arg("low_latency") = false,

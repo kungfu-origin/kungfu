@@ -6,6 +6,7 @@ macro(kungfu_setup MODULE_NAME)
   add_compile_definitions(SPDLOG_ACTIVE_LEVEL=0)
   add_compile_definitions(SPDLOG_NO_NAME)
   add_compile_definitions(SPDLOG_NO_ATOMIC_LEVELS)
+  add_compile_definitions(SPDLOG_FMT_EXTERNAL)
 
   message(STATUS "CMAKE_BUILD_TYPE set to ${CMAKE_BUILD_TYPE}")
 
@@ -40,7 +41,7 @@ macro(kungfu_setup MODULE_NAME)
 
   add_subdirectory("<%- kfcDir -%>/pybind11" "${PROJECT_BINARY_DIR}/pybind11")
 
-  <%- makeTarget %>(${MODULE_NAME} SHARED ${SOURCES})
+  <%- makeTarget %>(${MODULE_NAME} <%- makeTargetLinkType %> ${SOURCES})
   target_link_libraries(${MODULE_NAME} PRIVATE kungfu <%- targetLinks %>)
   set_target_properties(${MODULE_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${BUILD_OUTPUT_DIR})
   set_target_properties(${MODULE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE ${BUILD_OUTPUT_DIR})

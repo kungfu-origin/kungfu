@@ -5,6 +5,8 @@
 #include <kungfu/yijinjing/util/os.h>
 
 namespace kungfu::yijinjing::journal {
+using namespace longfist::types;
+
 page::page(data::location_ptr location, uint32_t dest_id, const uint32_t page_id, const size_t size, const bool lazy,
            uintptr_t address)
     : location_(std::move(location)), dest_id_(dest_id), page_id_(page_id), lazy_(lazy), size_(size),

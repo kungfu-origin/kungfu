@@ -81,6 +81,8 @@ public:
 
   void disjoin(uint32_t location_uid);
 
+  void disjoin_channel(uint32_t location_uid, uint32_t dest_id);
+
   [[nodiscard]] frame_ptr current_frame() const { return current_->current_frame(); }
 
   [[nodiscard]] page_ptr current_page() const { return current_->current_page(); }

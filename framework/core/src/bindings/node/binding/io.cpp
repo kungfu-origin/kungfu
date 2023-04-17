@@ -44,7 +44,7 @@ IODevice::IODevice(const Napi::CallbackInfo &info) : ObjectWrap(info), io_device
 Napi::Value IODevice::OpenReader(const Napi::CallbackInfo &info) { return Reader::NewInstance(info.This()); }
 
 locator_ptr IODevice::GetLocator(const Napi::CallbackInfo &info, int index) {
-  if (not IsValid(info, index, &Napi::Value::IsObject)) {
+  if (not IsValid(info, index, &Napi::Value::IsString)) {
     throw Napi::Error::New(info.Env(), "Invalid locator argument");
   }
 
