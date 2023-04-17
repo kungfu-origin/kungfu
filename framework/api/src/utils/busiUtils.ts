@@ -59,6 +59,7 @@ import {
   UnderweightEnum,
   PriceLevelEnum,
   CurrencyEnum,
+  HistoryDateEnum,
 } from '../typings/enums';
 import {
   graceDeleteProcess,
@@ -1352,6 +1353,41 @@ export const isKfColor = (color: string) => color.startsWith('kf-color');
 
 export const isHexOrRgbColor = (color: string) =>
   color.startsWith('#') || color.startsWith('rgb') || color.startsWith('rgba');
+
+export const dealMillionSencond2NanoSecond = (ms: number | bigint) =>
+  BigInt(ms) * 1000000n;
+
+export const dealDateToNanotimeRange = (
+  date: string | number,
+  dateType = HistoryDateEnum.naturalDate,
+): {
+  from: bigint;
+  to: bigint;
+} | null => {
+  const day = dayjs(date);
+  if (!day.isValid()) return null;
+
+  const dayOfWeek = day.day();
+  const isTradingDay = dateType === HistoryDateEnum.tradingDate;
+
+  const startTime = (
+    isTradingDay
+      ? day.add(dayOfWeek === 1 ? -3 : -1, 'day').hour(15) // last trading day 15:00
+      : day.hour(0)
+  )
+    .minute(0)
+    .second(0);
+  const from = dealMillionSencond2NanoSecond(startTime.valueOf());
+  const endTime = (isTradingDay ? day.hour(15) : day.add(1, 'day').hour(0))
+    .minute(0)
+    .second(0);
+  const to = dealMillionSencond2NanoSecond(endTime.valueOf());
+
+  return {
+    from,
+    to,
+  };
+};
 
 export const dealKfNumber = (
   preNumber: bigint | number | undefined | unknown,
