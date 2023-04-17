@@ -45,6 +45,10 @@ const getAlphaReleaseVersion = (version: semver.SemVer) => {
   return `${version.major}.${version.minor}.${version.patch}`;
 };
 
+const getNextMinorReleaseVersion = (version: semver.SemVer) => {
+  return `${version.major}.${version.minor + 1}.0`;
+};
+
 function handleUpdateKungfu(
   MainWindow: BrowserWindow | null,
   targetVersions: string[] = [],
@@ -73,6 +77,7 @@ function handleUpdateKungfu(
     } else {
       targetVersions.push(
         semver.inc(version, 'patch') || 'kungfu-version-unknow',
+        getNextMinorReleaseVersion(version),
       );
     }
   }
