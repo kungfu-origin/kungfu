@@ -1,7 +1,7 @@
 <template>
   <a-popover
     v-model:visible="popoverVisible"
-    :overlay-style="{ width: '400px' }"
+    :overlay-style="{ width: '420px' }"
     placement="topRight"
     trigger="click"
   >
@@ -13,7 +13,7 @@
     </template>
     <template #content>
       <template v-if="hasNewVersion">
-        <template v-if="downloadStarted">
+        <div v-if="downloadStarted" style="padding-right: 16px">
           <a-progress
             :percent="process"
             :status="progressStatus"
@@ -32,15 +32,15 @@
           <div v-else-if="errorMessage">
             <span class="color-red">{{ errorMessage }}</span>
           </div>
-        </template>
-        <template v-else>
+        </div>
+        <div v-else>
           <span>
             {{ $t('globalSettingConfig.new_version') + ': ' + newVersion }}
           </span>
           <a-button type="link" @click="handleToStartDownload">
             {{ $t('globalSettingConfig.start_download') }}
           </a-button>
-        </template>
+        </div>
       </template>
       <template v-else>
         <div>
