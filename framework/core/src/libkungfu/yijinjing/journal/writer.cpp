@@ -62,6 +62,11 @@ void writer::close_frame(size_t data_length, int64_t gen_time) {
 }
 
 void writer::copy_frame(const frame_ptr &source) {
+  assert(source->frame_length() + sizeof(frame_header) <= journal_.page_->get_page_size());
+  if (journal_.current_frame()->address() + source->frame_length() >= journal_.page_->address_border()) {
+    close_page(yijinjing::time::now_in_nano());
+  }
+
   auto frame = journal_.current_frame();
   frame->copy(*source);
   journal_.next();
