@@ -117,11 +117,7 @@ function handleUpdateKungfu(
     kfLogger.error('Kungfu autoUpdater error message: ', error?.message);
     MainWindow && sendUpdatingError(MainWindow, error);
 
-    if (
-      !curErrorCalledNext &&
-      error.message.indexOf('Cannot find channel') !== -1 &&
-      targetVersions.length
-    ) {
+    if (!curErrorCalledNext && targetVersions.length) {
       curErrorCalledNext = true;
       handleUpdateKungfu(MainWindow, targetVersions);
     }
