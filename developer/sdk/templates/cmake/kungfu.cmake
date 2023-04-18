@@ -6,6 +6,7 @@ macro(kungfu_setup MODULE_NAME)
   add_compile_definitions(SPDLOG_ACTIVE_LEVEL=0)
   add_compile_definitions(SPDLOG_NO_NAME)
   add_compile_definitions(SPDLOG_NO_ATOMIC_LEVELS)
+  add_compile_definitions(SPDLOG_FMT_EXTERNAL)
 
   message(STATUS "CMAKE_BUILD_TYPE set to ${CMAKE_BUILD_TYPE}")
 
