@@ -12,6 +12,7 @@
 #include <kungfu/longfist/longfist.h>
 #include <kungfu/yijinjing/util/stacktrace.h>
 #include <kungfu/yijinjing/util/util.h>
+#include <nng/compat/nanomsg/nn.h>
 
 namespace kungfu {
 namespace yijinjing {
@@ -37,7 +38,7 @@ public:
 
   virtual int notify() = 0;
 
-  virtual int publish(const std::string &json_message) = 0;
+  virtual int publish(const std::string &json_message, int flags = NN_DONTWAIT) = 0;
 };
 
 DECLARE_PTR(publisher)

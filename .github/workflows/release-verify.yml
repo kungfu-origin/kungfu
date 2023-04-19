@@ -15,6 +15,7 @@ jobs:
     with:
       build-runner-linux: kungfu-builder-linux
       build-runner-windows: kungfu-builder-windows
+      build-runner-macos: macos-12-xl
       use-pipenv: true
       use-poetry: true
       build-timeout-minutes: 150
