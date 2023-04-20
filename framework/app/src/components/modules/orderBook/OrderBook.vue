@@ -179,7 +179,7 @@ function toLedgalPriceVolume(num: number | bigint) {
         <div class="left_warp"></div>
         <div class="price">
           {{
-            limitPrices[0] !== 0 || limitPrices[0] !== undefined
+            limitPrices[0] !== 0 && limitPrices[0] !== undefined
               ? dealKfPrice(toLedgalPriceVolume(limitPrices[0]))
               : '--'
           }}
@@ -276,7 +276,7 @@ function toLedgalPriceVolume(num: number | bigint) {
         <div class="left_warp"></div>
         <div class="price">
           {{
-            limitPrices[1] !== 0 || limitPrices[1] !== undefined
+            limitPrices[1] !== 0 && limitPrices[1] !== undefined
               ? dealKfPrice(toLedgalPriceVolume(limitPrices[1]))
               : '--'
           }}
