@@ -178,7 +178,11 @@ function toLedgalPriceVolume(num: number | bigint) {
       <div class="level-row">
         <div class="left_warp"></div>
         <div class="price">
-          {{ dealKfPrice(toLedgalPriceVolume(limitPrices[0])) }}
+          {{
+            limitPrices[0] !== 0 || limitPrices[0] !== undefined
+              ? dealKfPrice(toLedgalPriceVolume(limitPrices[0]))
+              : '--'
+          }}
         </div>
         <div class="limit_price_name">
           {{ t('tradingConfig.up_limit_price') }}
@@ -271,7 +275,11 @@ function toLedgalPriceVolume(num: number | bigint) {
       <div class="level-row">
         <div class="left_warp"></div>
         <div class="price">
-          {{ dealKfPrice(toLedgalPriceVolume(limitPrices[1])) }}
+          {{
+            limitPrices[1] !== 0 || limitPrices[1] !== undefined
+              ? dealKfPrice(toLedgalPriceVolume(limitPrices[1]))
+              : '--'
+          }}
         </div>
         <div class="limit_price_name">
           {{ t('tradingConfig.low_limit_price') }}
