@@ -38,9 +38,9 @@ void journal::seek_to_time(int64_t nanotime) {
 void journal::load_page(int page_id) {
   if (page_.get() == nullptr or page_->get_page_id() != page_id) {
     page_ = page::load(location_, dest_id_, page_id, is_writing_, lazy_);
-    frame_->set_address(page_->first_frame_address());
-    page_frame_nb_ = 0u;
   }
+  frame_->set_address(page_->first_frame_address());
+  page_frame_nb_ = 0u;
 }
 
 void journal::load_next_page() { load_page(page_->get_page_id() + 1); }

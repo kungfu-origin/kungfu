@@ -77,6 +77,24 @@ export const readCSV = <T>(
   });
 };
 
+export const createWriteCsvStream = (
+  filePath: string,
+  transform?: (row: KungfuApi.TradingDataTypes) => FormatterRow,
+) => {
+  const csvStream = csv.format({ headers: true, transform });
+  const fileWriteStream = fse.createWriteStream(path.normalize(filePath));
+  // 解决Excel导出乱码的问题
+  fileWriteStream.write(Buffer.from('\xEF\xBB\xBF', 'binary'));
+  csvStream
+    .on('data', (chunk) => {
+      fileWriteStream.write(chunk);
+    })
+    .on('end', () => {
+      fileWriteStream.end();
+    });
+  return csvStream;
+};
+
 export const writeCsvWithUTF8Bom = (
   filePath: string,
   rows: KungfuApi.TradingDataTypes[],

@@ -20,7 +20,7 @@ struct noop_publisher : public publisher {
   bool is_usable() override { return true; }
   void setup() override {}
   int notify() override { return 0; }
-  int publish(const std::string &json_message) override { return 0; }
+  int publish(const std::string &json_message, int flags = NN_DONTWAIT) override { return 0; }
 };
 
 struct assemble_exception : std::runtime_error {

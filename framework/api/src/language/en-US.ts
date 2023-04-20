@@ -378,7 +378,7 @@ export default {
     confirm: 'confirm',
 
     entrust_statistical: 'Entrust Statistical',
-    statistical_desc: 'Real-time (latest {count} pieces of data)',
+    statistical_desc: 'Real-time',
     entrust_statistical_number: 'Entrust Statistical Number',
     entrust_statistical_price: 'Entrust Statistical Price',
     average_withdrawal_ratio:
@@ -508,7 +508,7 @@ export default {
     statistical: 'Transaction Statistical',
     statistical_count: 'Statistics of transaction quantity',
     statistical_price: 'Transaction price statistics',
-    statistical_desc: 'Real-time (latest 500 pieces of data)',
+    statistical_desc: 'Real-time',
     average_trade_latency: 'Average transaction delay(μs)',
     max_trade_latency: 'Max transaction delay(μs)',
     min_trade_latency: 'Min transaction delay(μs)',

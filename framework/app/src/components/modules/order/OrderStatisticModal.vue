@@ -185,9 +185,7 @@ const priceVolumeStats = computed(() => {
     :title="`${$t('orderConfig.entrust_statistical')} ${
       !!historyDate
         ? historyDate.format('YYYY-MM-DD')
-        : $t('orderConfig.statistical_desc', {
-            count: isUnfinishedOrder ? 2000 : 500,
-          })
+        : $t('orderConfig.statistical_desc')
     }`"
     :destroyOnClose="true"
     :footer="null"

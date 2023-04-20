@@ -154,6 +154,7 @@ export const useUpdateVersion = () => {
         if (data.name === 'auto-update-find-new-version') {
           hasNewVersion.value = true;
           newVersion.value = data.payload.newVersion;
+          errorMessage.value = '';
           isCheckVersionLogicEnable() &&
             handleToConfirmStartUpdate(data.payload.newVersion);
         }
@@ -166,12 +167,14 @@ export const useUpdateVersion = () => {
           downloadStarted.value = true;
           progressStatus.value = 'active';
           popoverVisible.value = true;
+          errorMessage.value = '';
         }
 
         if (data.name === 'auto-update-download-process') {
           process.value = Number((+data.payload.process).toFixed(2));
           if (process.value === 100) {
             progressStatus.value = 'success';
+            errorMessage.value = '';
           } else {
             progressStatus.value = 'active';
           }

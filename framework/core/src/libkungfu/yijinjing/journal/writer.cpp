@@ -62,8 +62,17 @@ void writer::close_frame(size_t data_length, int64_t gen_time) {
 }
 
 void writer::copy_frame(const frame_ptr &source) {
+  assert(source->frame_length() + sizeof(frame_header) <= journal_.page_->get_page_size());
+  if (journal_.current_frame()->address() + source->frame_length() >= journal_.page_->address_border()) {
+    close_page(yijinjing::time::now_in_nano());
+  }
+
   auto frame = journal_.current_frame();
   frame->copy(*source);
+
+  auto next_frame_address = frame->address() + frame->header_length() + frame->data_length();
+  memset(reinterpret_cast<void *>(next_frame_address), 0, sizeof(frame_header));
+  journal_.page_->set_last_frame_position(frame->address() - journal_.page_->address());
   journal_.next();
   publisher_->notify();
 }

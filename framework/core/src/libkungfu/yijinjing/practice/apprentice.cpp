@@ -289,7 +289,7 @@ void apprentice::checkin() {
   data["last_active_time"] = now;
   request["data"] = data;
 
-  get_io_device()->get_publisher()->publish(request.dump());
+  get_io_device()->get_publisher()->publish(request.dump(), 0);
 }
 
 void apprentice::expect_start() {
