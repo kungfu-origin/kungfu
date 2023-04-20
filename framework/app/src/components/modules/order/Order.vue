@@ -51,6 +51,7 @@ import {
 import {
   showTradingDataDetail,
   useCurrentGlobalKfLocation,
+  useDealDataWithCaches,
   useProcessStatusDetailData,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import StatisticModal from './OrderStatisticModal.vue';
@@ -63,6 +64,10 @@ const app = getCurrentInstance();
 const { handleBodySizeChange } = useDashboardBodySize();
 
 const { processStatusData } = useProcessStatusDetailData();
+const { dealerResolved, clearCaches } = useDealDataWithCaches<
+  KungfuApi.Order,
+  KungfuApi.OrderResolved
+>(['uid_key', 'update_time']);
 const orders = ref<KungfuApi.OrderResolved[]>([]);
 const allOrders = ref<KungfuApi.OrderResolved[]>([]);
 const { searchKeyword, tableData } =
@@ -103,6 +108,15 @@ const columns = computed(() => {
   return getColumns(currentGlobalKfLocation.value, !!historyDate.value);
 });
 
+// const dealAllOrders = (
+//   watcher: KungfuApi.Watcher,
+//   orders: KungfuApi.Order[],
+//   orderStats: KungfuApi.DataTable<KungfuApi.OrderStat>,
+//   callback: (data: KungfuApi.OrderResolved) => void,
+// ) => {
+//   return ;
+// };
+
 onMounted(() => {
   if (app?.proxy) {
     const subscription = app.proxy.$tradingDataSubject.subscribe(
@@ -129,7 +143,11 @@ onMounted(() => {
 
         if (unfinishedOrder.value) {
           const tempAllOrders = ordersResolved.map((item) =>
-            toRaw(dealOrder(watcher, item, watcher.ledger.OrderStat)),
+            toRaw(
+              dealerResolved(item, () =>
+                dealOrder(watcher, item, watcher.ledger.OrderStat),
+              ),
+            ),
           );
           allOrders.value = tempAllOrders;
           orders.value = toRaw(
@@ -139,10 +157,13 @@ onMounted(() => {
         }
 
         let finishedOrdersCount = 0;
+        const s = new Date().getTime();
         const { totalOrders, ordersForTable } = ordersResolved.reduce(
           (preOrders, curOrder) => {
             const orderResolved = toRaw(
-              dealOrder(watcher, curOrder, watcher.ledger.OrderStat),
+              dealerResolved(curOrder, () =>
+                dealOrder(watcher, curOrder, watcher.ledger.OrderStat),
+              ),
             );
             preOrders.totalOrders.push(orderResolved);
             if (isFinishedOrderStatus(curOrder.status)) {
@@ -163,6 +184,8 @@ onMounted(() => {
 
         allOrders.value = toRaw(totalOrders);
         orders.value = toRaw(ordersForTable);
+        const e = new Date().getTime();
+        console.log('time: ', e - s, 'len: ', totalOrders.length);
       },
     );
 
@@ -176,9 +199,11 @@ watch(currentGlobalKfLocation, () => {
   historyDate.value = undefined;
   allOrders.value = [];
   orders.value = [];
+  clearCaches();
 });
 
 watch(historyDate, async (newDate) => {
+  clearCaches();
   if (!newDate) {
     return;
   }
@@ -214,7 +239,11 @@ watch(historyDate, async (newDate) => {
 
       const tempAllOrders = toRaw(
         orderResolved.map((item) =>
-          toRaw(dealOrder(window.watcher, item, tradingData.OrderStat, true)),
+          toRaw(
+            dealerResolved(item, () =>
+              dealOrder(window.watcher, item, tradingData.OrderStat, true),
+            ),
+          ),
         ),
       );
       allOrders.value = tempAllOrders;
