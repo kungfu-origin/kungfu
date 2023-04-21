@@ -69,6 +69,10 @@ void writer::copy_frame(const frame_ptr &source) {
 
   auto frame = journal_.current_frame();
   frame->copy(*source);
+
+  auto next_frame_address = frame->address() + frame->header_length() + frame->data_length();
+  memset(reinterpret_cast<void *>(next_frame_address), 0, sizeof(frame_header));
+  journal_.page_->set_last_frame_position(frame->address() - journal_.page_->address());
   journal_.next();
   publisher_->notify();
 }
