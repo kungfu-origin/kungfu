@@ -26,6 +26,8 @@ void BrokerVendor::on_start() {
       $$(notify_broker_state());
 }
 
+void BrokerVendor::on_active() { get_service()->on_active(); }
+
 void BrokerVendor::on_exit() {
   auto service = get_service();
   service->on_exit();
@@ -39,6 +41,8 @@ void BrokerVendor::notify_broker_state() {
 BrokerService::BrokerService(BrokerVendor &vendor) : vendor_(vendor), state_(BrokerState::Pending) {}
 
 void BrokerService::on_start() {}
+
+void BrokerService::on_active() {}
 
 void BrokerService::on_exit() {}
 
