@@ -692,8 +692,8 @@ export default {
   kungfu: '功夫交易系统',
 
   system_prompt: '系统提示',
-  computer_performance_done: '电脑性能检测已完成 ✓',
-  computer_performance_detecting: '电脑性能检测中...',
+  computer_performance_done: '性能检测已完成 ✓',
+  computer_performance_detecting: '性能检测中...',
   archive_done: '功夫归档完成 ✓',
   archive_loading: '功夫归档中...',
   environment_done: '功夫环境准备完成 ✓',
