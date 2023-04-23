@@ -9,6 +9,9 @@ import {
   Component,
   App,
   h,
+  InjectionKey,
+  inject,
+  provide,
 } from 'vue';
 import {
   ARCHIVE_DIR,
@@ -839,4 +842,16 @@ export const dealKungfuColorToStyleColor = (
   color: KungfuApi.AntInKungfuColorTypes,
 ) => {
   return isKfColor(color) ? '' : color;
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const vueProvideBaseOnParent = <T extends { [x: string]: any }>(
+  key: InjectionKey<T> | string,
+  value: T,
+) => {
+  const parentProvide = inject(key);
+  if (!parentProvide) return provide(key, value);
+  if (typeof parentProvide !== 'object' || typeof value !== 'object')
+    return provide(key, value);
+  return provide(key, Object.assign(parentProvide, value));
 };

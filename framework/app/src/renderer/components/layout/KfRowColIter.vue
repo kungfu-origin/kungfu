@@ -7,7 +7,6 @@
       <KfRowColIter
         :board-id="childBoardId"
         :closable="closable"
-        :props-map-by-component="propsMapByComponent"
       ></KfRowColIter>
     </template>
     <template v-if="contents.length">
@@ -44,7 +43,6 @@
               v-if="hasComponent(content) && content === boardInfo.current"
               :is="content"
               :id="content"
-              :props-map-by-component="propsMapByComponent"
             ></component>
             <KfNoData
               v-else
@@ -65,7 +63,6 @@
       <KfRowColIter
         :board-id="childBoardId"
         :closable="closable"
-        :props-map-by-component="propsMapByComponent"
       ></KfRowColIter>
     </template>
     <template v-if="contents.length">
@@ -102,7 +99,6 @@
               v-if="hasComponent(content) && content === boardInfo.current"
               :is="content"
               :id="content"
-              :props-map-by-component="propsMapByComponent"
             ></component>
             <KfNoData
               v-else
@@ -162,11 +158,6 @@ export default defineComponent({
     closable: {
       type: Boolean as PropType<boolean>,
       default: false,
-    },
-
-    propsMapByComponent: {
-      type: Object as PropType<BuiltinComponentProps['propsMapByComponent']>,
-      default: () => ({}),
     },
   },
 
