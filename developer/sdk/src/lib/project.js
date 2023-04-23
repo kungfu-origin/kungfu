@@ -19,31 +19,34 @@ exports.configure = (writePackageJson = false, writeWorkflows = true) => {
     const sdkDir = path.dirname(
       path.dirname(customResolve('@kungfu-trader/kungfu-sdk')),
     );
-    const githubTemplateDir = path.join(sdkDir, "templates","github");
-    const githubConfigDir = path.join(projectDir, ".github");
-    glob.sync(`${githubTemplateDir}/**`, {}).filter((p) => path.resolve(p) !== githubTemplateDir).forEach((p) => {
-      const config = path.relative(githubTemplateDir, p);
-      if (fse.statSync(p).isDirectory()) {
-        const targetDir = path.join(githubConfigDir, config);
-        if (!fse.pathExistsSync(targetDir)) {
-          console.log('> mkdir', targetDir);
-          fse.mkdirSync(targetDir, { recursive: true });
+    const githubTemplateDir = path.join(sdkDir, 'templates', 'github');
+    const githubConfigDir = path.join(projectDir, '.github');
+    glob
+      .sync(`${githubTemplateDir}/**`, {})
+      .filter((p) => path.resolve(p) !== githubTemplateDir)
+      .forEach((p) => {
+        const config = path.relative(githubTemplateDir, p);
+        if (fse.statSync(p).isDirectory()) {
+          const targetDir = path.join(githubConfigDir, config);
+          if (!fse.pathExistsSync(targetDir)) {
+            console.log('> mkdir', targetDir);
+            fse.mkdirSync(targetDir, { recursive: true });
+          }
+          return;
         }
-        return;
-      }
-      const targetFile = path.join(githubConfigDir, config);
-      if (fse.pathExistsSync(targetFile)) {
-        console.log(`> ${targetFile} exists, skip copy`);
-        return;
-      }
-      try {
-        fse.copySync(p, targetFile);
-        console.log(`> copy ${config} to ${targetFile}`);
-      } catch (e) {
-        console.error(`> copy ${config} to ${targetFile} failed`);
-        console.error(e);
-      }
-    });
+        const targetFile = path.join(githubConfigDir, config);
+        if (fse.pathExistsSync(targetFile)) {
+          console.log(`> ${targetFile} exists, skip copy`);
+          return;
+        }
+        try {
+          fse.copySync(p, targetFile);
+          console.log(`> copy ${config} to ${targetFile}`);
+        } catch (e) {
+          console.error(`> copy ${config} to ${targetFile} failed`);
+          console.error(e);
+        }
+      });
   }
 };
 
