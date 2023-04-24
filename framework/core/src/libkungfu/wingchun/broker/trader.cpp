@@ -281,7 +281,6 @@ void Trader::deal_read_frame() {
   assemble asb_read(get_home(), get_home_uid(), AssembleMode::Read);
   asb_read.disjoin(get_vendor().get_ledger_home_location()->location_uid); // ledger
   asb_read.disjoin(get_vendor().get_master_home_location()->location_uid); // master
-  asb_read.disjoin(get_vendor().get_cached_home_location()->location_uid); // cached
   asb_read.seek_to_time(time::today_start());                              // recover from today
   SPDLOG_DEBUG("before assemble read");
   int64_t count = 0;

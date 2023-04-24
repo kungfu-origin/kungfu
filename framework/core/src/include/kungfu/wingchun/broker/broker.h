@@ -33,8 +33,6 @@ protected:
 
   void on_start() override;
 
-  void on_active() override;
-
 private:
   void notify_broker_state();
 };
@@ -48,8 +46,6 @@ public:
   virtual ~BrokerService() = default;
 
   virtual void on_start();
-
-  virtual void on_active();
 
   virtual void on_exit();
 
