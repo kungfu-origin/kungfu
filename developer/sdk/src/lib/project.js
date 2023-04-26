@@ -9,11 +9,12 @@ exports.configure = (writePackageJson = false, writeWorkflows = true) => {
   const packageJsonPath = path.join(cwd.toString(), 'package.json');
   const packageJson = require(packageJsonPath);
   if (writePackageJson) {
-    console.log('> write package.json');
+    console.log('-- writing package.json ...');
     fse.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
+    console.log(`-- written to ${packageJsonPath}`);
   }
   if (writeWorkflows) {
-    console.log('> write workflows');
+    console.log('-- writing workflows ...');
     const findWorkspaceRoot = require('find-yarn-workspace-root');
     const projectDir = findWorkspaceRoot() || cwd;
     const sdkDir = path.dirname(
@@ -29,24 +30,25 @@ exports.configure = (writePackageJson = false, writeWorkflows = true) => {
         if (fse.statSync(p).isDirectory()) {
           const targetDir = path.join(githubConfigDir, config);
           if (!fse.pathExistsSync(targetDir)) {
-            console.log('> mkdir', targetDir);
+            console.log('-- mkdir', targetDir);
             fse.mkdirSync(targetDir, { recursive: true });
           }
           return;
         }
         const targetFile = path.join(githubConfigDir, config);
         if (fse.pathExistsSync(targetFile)) {
-          console.log(`> ${targetFile} exists, skip copy`);
+          console.debug(`-- ${targetFile} exists, skip copy`);
           return;
         }
         try {
           fse.copySync(p, targetFile);
-          console.log(`> copy ${config} to ${targetFile}`);
+          console.log(`-- copy ${config} to ${targetFile}`);
         } catch (e) {
-          console.error(`> copy ${config} to ${targetFile} failed`);
+          console.error(`-- copy ${config} to ${targetFile} failed`);
           console.error(e);
         }
       });
+    console.log(`-- written to ${githubConfigDir}`);
   }
 };
 
