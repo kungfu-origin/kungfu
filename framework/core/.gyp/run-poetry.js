@@ -3,6 +3,7 @@
 const { shell } = require('../lib');
 
 function poetry(args) {
+  console.log(process.env);
   shell.run('pipenv', ['run', 'python', '-m', 'poetry', ...args]);
 }
 
