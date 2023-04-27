@@ -3,11 +3,14 @@
 const { shell } = require('../lib');
 
 function poetry(args) {
-  // delete DevEnvDir and VSINSTALLDIR from environment variables for cython build
-  // ref: https://learn.microsoft.com/en-us/answers/questions/888015/broken-ms-c-build-tools-2022
+  // strip msvc environment variables for cython ext install (i.e. orderedset)
   const env = process.env;
-  delete env['DevEnvDir'];
-  delete env['VSINSTALLDIR'];
+  for (key in process.env) {
+    if (['__', 'Dev', 'npm', 'VC', 'VS'].map(p => key.startsWith(p)).reduce((a, b) => a || b)) {
+      console.log(`-- delete environment variable ${key}`);
+      delete env[key];
+    }
+  }
   console.log(env);
   shell.run('pipenv', ['run', 'python', '-m', 'poetry', ...args], true, {
     env: env,
