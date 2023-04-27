@@ -3,17 +3,15 @@
 const { shell } = require('../lib');
 
 function poetry(args) {
-  // delete DevEnvDir and VCINSTALLDIR from environment variables for cython build
+  // delete DevEnvDir and VSINSTALLDIR from environment variables for cython build
   // ref: https://learn.microsoft.com/en-us/answers/questions/888015/broken-ms-c-build-tools-2022
   const env = process.env;
   delete env['DevEnvDir'];
-  delete env['VCINSTALLDIR'];
+  delete env['VSINSTALLDIR'];
   console.log(env);
-  shell.run(
-    'pipenv',
-    ['run', 'python', '-m', 'poetry', ...args],
-    (opts = { env: env }),
-  );
+  shell.run('pipenv', ['run', 'python', '-m', 'poetry', ...args], true, {
+    env: env,
+  });
 }
 
 function toPoetryArgs(argv) {
