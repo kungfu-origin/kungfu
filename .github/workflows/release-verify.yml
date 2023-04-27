@@ -11,7 +11,7 @@ on:
 
 jobs:
   try:
-    uses: kungfu-trader/workflows/.github/workflows/.release-verify.yml@msvc
+    uses: kungfu-trader/workflows/.github/workflows/.release-verify.yml@dev/v1/v1.2
     with:
       build-runner-linux: kungfu-builder-linux
       build-runner-windows: kungfu-builder-windows
@@ -20,8 +20,8 @@ jobs:
       use-poetry: true
       build-timeout-minutes: 150
       max-build-attempts: 3
-      enable-linux: true
-      enable-macos: true
+      enable-linux: false
+      enable-macos: false
       enable-windows: true
     secrets:
       AWS_CI_ACCESS_KEY_ID: ${{ secrets.AWS_CI_ACCESS_KEY_ID }}
