@@ -11,7 +11,7 @@ on:
 
 jobs:
   try:
-    uses: kungfu-trader/workflows/.github/workflows/.release-verify.yml@v1
+    uses: kungfu-trader/workflows/.github/workflows/.release-verify.yml@msvc
     with:
       build-runner-linux: kungfu-builder-linux
       build-runner-windows: kungfu-builder-windows
