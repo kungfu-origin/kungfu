@@ -9,7 +9,11 @@ function poetry(args) {
   delete env['DevEnvDir'];
   delete env['VCINSTALLDIR'];
   console.log(env);
-  shell.run('pipenv', ['run', 'python', '-m', 'poetry', ...args], opts={env: env});
+  shell.run(
+    'pipenv',
+    ['run', 'python', '-m', 'poetry', ...args],
+    (opts = { env: env }),
+  );
 }
 
 function toPoetryArgs(argv) {
