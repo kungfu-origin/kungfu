@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
+const path = require('path');
 const { shell } = require('../lib');
 
 function poetry(args) {
@@ -11,7 +12,6 @@ function poetry(args) {
       'Dev',
       'Framework',
       'npm',
-      'Path',
       'VC',
       'VS',
       'Visual',
@@ -23,6 +23,17 @@ function poetry(args) {
       console.log(`-- delete environment variable ${key}`);
       delete env[key];
     }
+  }
+  if (process.platform === 'win32') {
+    pathVar = [];
+    env.Path.split(path.delimiter).forEach((p) => {
+      if (!p.includes('Visual Studio')) {
+        pathVar.push(p);
+      } else {
+        console.log(`-- pop ${p}`);
+      }
+    });
+    env.Path = pathVar.join(path.delimiter);
   }
   console.log(env);
   shell.run('pipenv', ['run', 'python', '-m', 'poetry', ...args], true, {
