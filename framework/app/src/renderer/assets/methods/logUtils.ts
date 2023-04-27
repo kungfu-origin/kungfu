@@ -174,20 +174,16 @@ export const useLogSearch = (
     if (searchKeywordReg.value === null) return '';
     if (currentPointer) {
       return dealLogMessage(
-        preDealLogMessage(
-          item.messageOrigin.replace(
-            searchKeywordReg.value,
-            `<font class="search-keyword current-search-pointer">${searchKeyword.value}</font>`,
-          ),
+        preDealLogMessage(item.messageOrigin).replace(
+          searchKeywordReg.value,
+          `<font class="search-keyword current-search-pointer">${searchKeyword.value}</font>`,
         ),
       );
     } else {
       return dealLogMessage(
-        preDealLogMessage(
-          item.messageOrigin.replace(
-            searchKeywordReg.value,
-            `<font class="search-keyword">${searchKeyword.value}</font>`,
-          ),
+        preDealLogMessage(item.messageOrigin).replace(
+          searchKeywordReg.value,
+          `<font class="search-keyword">${searchKeyword.value}</font>`,
         ),
       );
     }
