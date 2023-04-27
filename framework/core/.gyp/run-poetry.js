@@ -11,6 +11,7 @@ function poetry(args) {
       'Dev',
       'Framework',
       'npm',
+      'Path',
       'VC',
       'VS',
       'Visual',
