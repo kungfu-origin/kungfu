@@ -6,7 +6,10 @@ function poetry(args) {
   // strip msvc environment variables for cython ext install (i.e. orderedset)
   const env = process.env;
   for (key in process.env) {
-    if (['__', 'Dev', 'npm', 'VC', 'VS'].map(p => key.startsWith(p)).reduce((a, b) => a || b)) {
+    const deleteKeyPrefix = ['__', 'Dev', 'npm', 'VC', 'VS'];
+    if (
+      deleteKeyPrefix.map((p) => key.startsWith(p)).reduce((a, b) => a || b)
+    ) {
       console.log(`-- delete environment variable ${key}`);
       delete env[key];
     }
