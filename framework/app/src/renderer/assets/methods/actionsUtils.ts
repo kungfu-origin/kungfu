@@ -1423,6 +1423,19 @@ export const useDealInstruments = (): void => {
   };
 };
 
+export const hashInstrumentUKeyResolved = (
+  instrumentId: string,
+  exchangeId: string,
+) => {
+  if (!window.ukeyCacheMap) window.ukeyCacheMap = new Map<string, string>();
+  const ukeyCacheMap = window.ukeyCacheMap;
+  const cacheKey = `${instrumentId}_${exchangeId}`;
+  if (!ukeyCacheMap.has(cacheKey))
+    ukeyCacheMap.set(cacheKey, hashInstrumentUKey(instrumentId, exchangeId));
+
+  return ukeyCacheMap.get(cacheKey) || '';
+};
+
 export const useActiveInstruments = () => {
   const { instrumentsMap } = useGlobalStore();
 
@@ -1431,7 +1444,7 @@ export const useActiveInstruments = () => {
     exchangeId: string,
     forceConvert = false,
   ) => {
-    const ukey = hashInstrumentUKey(instrumentId, exchangeId);
+    const ukey = hashInstrumentUKeyResolved(instrumentId, exchangeId);
     const instrumentResolved = instrumentsMap[ukey];
 
     if (instrumentResolved) {
@@ -1457,18 +1470,10 @@ export const useActiveInstruments = () => {
     instrumentId: string,
     exchangeId: string,
   ) => {
-    const ukey = hashInstrumentUKey(instrumentId, exchangeId);
+    const ukey = hashInstrumentUKeyResolved(instrumentId, exchangeId);
     const watcher = window.watcher as KungfuApi.Watcher;
     const instrument = watcher.ledger.Instrument[ukey];
     if (instrument) return instrument;
-
-    const instruments = watcher.ledger.Instrument.filter(
-      'instrument_id',
-      instrumentId,
-    )
-      .filter('exchange_id', exchangeId)
-      .list();
-    if (instruments.length) return instruments[0];
 
     return null;
   };

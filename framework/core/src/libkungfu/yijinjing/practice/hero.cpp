@@ -184,9 +184,9 @@ void hero::on_exit() { SPDLOG_INFO("default on_exit"); }
 
 location_ptr hero::get_ledger_home_location() const { return ledger_home_location_; }
 
-[[maybe_unused]] location_ptr hero::get_master_home_location() const { return master_home_location_; }
+location_ptr hero::get_master_home_location() const { return master_home_location_; }
 
-[[maybe_unused]] location_ptr hero::get_master_cmd_location() const { return master_cmd_location_; }
+location_ptr hero::get_master_cmd_location() const { return master_cmd_location_; }
 
 const rx::connectable_observable<event_ptr> &hero::get_events() const { return events_; }
 

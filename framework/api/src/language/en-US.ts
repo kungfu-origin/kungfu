@@ -707,8 +707,8 @@ export default {
   kungfu: 'Kungfu',
 
   system_prompt: 'System Prompt',
-  computer_performance_done: 'Computer performance detecting done ✓',
-  computer_performance_detecting: 'Computer performance detecting...',
+  computer_performance_done: 'Performance detecting done ✓',
+  computer_performance_detecting: 'Performance detecting...',
   archive_done: 'Kungfu archive done',
   archive_loading: 'Kungfu archive loading...',
   environment_done: 'Kungfu environment done ✓',

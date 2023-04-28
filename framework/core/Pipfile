@@ -8,3 +8,4 @@ pip = "==23.0"
 setuptools = "==67.2.0"
 virtualenv = "==20.19.0"
 wheel = "==0.38.4"
+xattr = {version = "==0.9.9", sys_platform = "!= 'win32'"}

@@ -21,6 +21,7 @@ declare global {
     fileId: number;
     testCase: Record<string, any>;
     pm2: any;
+    ukeyCacheMap?: Map<string, string>;
   }
 
   namespace NodeJS {
