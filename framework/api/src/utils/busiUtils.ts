@@ -1878,7 +1878,7 @@ export const getCombineValueByPrimaryKeys = (
 ) => {
   return [extraValue || '', ...primaryKeys.map((key) => formState[key])]
     .filter((item) => item !== '')
-    .join('_');
+    .join('-');
 };
 
 export const transformSearchInstrumentResultToInstrument = (
