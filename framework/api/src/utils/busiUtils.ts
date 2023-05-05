@@ -1871,7 +1871,7 @@ export const getPrimaryKeys = (
   return settings.filter((item) => item.primary).map((item) => item.key);
 };
 export const replaceNonAlphaNumericWithSpace = (str: string) => {
-  return str.replace(/[^a-zA-Z0-9]+/g, ' ');
+  return str.replace(/[^a-zA-Z0-9]+/g, '');
 };
 
 export const getCombineValueByPrimaryKeys = (
@@ -1879,11 +1879,6 @@ export const getCombineValueByPrimaryKeys = (
   formState: Record<string, KungfuApi.KfConfigValue>,
   extraValue = '',
 ) => {
-  console.log('getCombineValueByPrimaryKeys', {
-    primaryKeys,
-    formState,
-    extraValue,
-  });
   return [
     extraValue || '',
     ...primaryKeys.map((key) =>
