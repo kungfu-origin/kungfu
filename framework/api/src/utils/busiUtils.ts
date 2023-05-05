@@ -1188,7 +1188,7 @@ export const buildIdByKeysFromKfConfigSettings = (
   keys: string[],
 ) => {
   return keys
-    .map((key) => kfConfigState[key])
+    .map((key) => replaceNonAlphaNumericWithSpace(kfConfigState[key]))
     .filter((value) => value !== undefined)
     .join('-');
 };
