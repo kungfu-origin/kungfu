@@ -1870,13 +1870,26 @@ export const getPrimaryKeys = (
 ): string[] => {
   return settings.filter((item) => item.primary).map((item) => item.key);
 };
+export const replaceNonAlphaNumericWithSpace = (str: string) => {
+  return str.replace(/[^a-zA-Z0-9]+/g, ' ');
+};
 
 export const getCombineValueByPrimaryKeys = (
   primaryKeys: string[],
   formState: Record<string, KungfuApi.KfConfigValue>,
   extraValue = '',
 ) => {
-  return [extraValue || '', ...primaryKeys.map((key) => formState[key])]
+  console.log('getCombineValueByPrimaryKeys', {
+    primaryKeys,
+    formState,
+    extraValue,
+  });
+  return [
+    extraValue || '',
+    ...primaryKeys.map((key) =>
+      replaceNonAlphaNumericWithSpace(formState[key]),
+    ),
+  ]
     .filter((item) => item !== '')
     .join('-');
 };
