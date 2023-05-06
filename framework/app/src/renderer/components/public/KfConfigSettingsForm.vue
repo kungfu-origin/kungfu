@@ -393,13 +393,6 @@ function primaryKeyValidator(_rule: RuleObject, value: string): Promise<void> {
     formState.value,
     props.primaryKeyAvoidRepeatCompareExtra,
   );
-  console.log(
-    'validate',
-    props.primaryKeyAvoidRepeatCompareTarget
-      .map((item): string => item.toLowerCase())
-      .includes(combineValue.toLowerCase()),
-    props.primaryKeyAvoidRepeatCompareTarget,
-  );
   if (
     props.primaryKeyAvoidRepeatCompareTarget
       .map((item): string => item.toLowerCase())
