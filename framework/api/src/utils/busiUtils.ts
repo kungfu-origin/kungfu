@@ -1188,9 +1188,9 @@ export const buildIdByKeysFromKfConfigSettings = (
   keys: string[],
 ) => {
   return keys
-    .map((key) => kfConfigState[key])
+    .map((key) => replaceNonAlphaNumericWithSpace(kfConfigState[key]))
     .filter((value) => value !== undefined)
-    .join('_');
+    .join('-');
 };
 
 const startProcessByKfLocation = async (
@@ -1870,15 +1870,23 @@ export const getPrimaryKeys = (
 ): string[] => {
   return settings.filter((item) => item.primary).map((item) => item.key);
 };
+export const replaceNonAlphaNumericWithSpace = (str: string) => {
+  return str.replace(/[^a-zA-Z0-9]+/g, '');
+};
 
 export const getCombineValueByPrimaryKeys = (
   primaryKeys: string[],
   formState: Record<string, KungfuApi.KfConfigValue>,
   extraValue = '',
 ) => {
-  return [extraValue || '', ...primaryKeys.map((key) => formState[key])]
+  return [
+    extraValue || '',
+    ...primaryKeys.map((key) =>
+      replaceNonAlphaNumericWithSpace(formState[key]),
+    ),
+  ]
     .filter((item) => item !== '')
-    .join('_');
+    .join('-');
 };
 
 export const transformSearchInstrumentResultToInstrument = (
@@ -2288,6 +2296,7 @@ export const fromProcessArgsToKfConfigItems = (
 export const getTaskListFromProcessStatusData = (
   taskPrefixs: string[],
   psDetail: Pm2ProcessStatusDetailData,
+  sorter?: (a: Pm2ProcessStatusDetail, b: Pm2ProcessStatusDetail) => number,
 ): Pm2ProcessStatusDetail[] => {
   return Object.keys(psDetail)
     .filter((processId) => {
@@ -2298,11 +2307,15 @@ export const getTaskListFromProcessStatusData = (
       );
     })
     .map((processId) => psDetail[processId])
-    .sort((a, b) => {
-      const aCreateTime = +(a.name?.toKfName() || 0);
-      const bCreateTime = +(b.name?.toKfName() || 0);
-      return aCreateTime - bCreateTime;
-    });
+    .sort(
+      sorter
+        ? sorter
+        : (a, b) => {
+            const aCreateTime = +(a.name?.toKfName() || 0);
+            const bCreateTime = +(b.name?.toKfName() || 0);
+            return aCreateTime - bCreateTime;
+          },
+    );
 };
 
 export function dealTradingTaskName(

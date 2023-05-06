@@ -4,7 +4,8 @@ set(CMAKE_CXX_STANDARD 20)
 
 ############################################################
 
-# set the global compile options. some of which may replaced by target_compiles_options at rumtime.
+# Set the global compile options.
+# Some of the options may be override by target_compiles_options later in sub-projects.
 if (UNIX)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC") # set -fPIC for nng
   set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
@@ -29,10 +30,10 @@ if (APPLE)
       "@loader_path/../../"
       "@executable_path/../../../../Resources/kfc"
       )
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-value")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations -Wno-unqualified-std-cast-call -Wno-unused-value")
   set(CMAKE_INSTALL_RPATH "${KFC_INSTALL_RPATH}")
   set(CMAKE_MACOSX_RPATH ON)
-  set(CONAN_DISABLE_CHECK_COMPILER on)
+  set(CONAN_DISABLE_CHECK_COMPILER ON)
 endif ()
 if (MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /utf-8 /permissive- /bigobj /W0 /Zc:__cplusplus")

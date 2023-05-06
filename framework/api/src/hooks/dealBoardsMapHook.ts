@@ -27,7 +27,7 @@ export class DealBoardsMapHook {
 
   register(callback: dealBoardsMapCB) {
     this.callbacks.push(callback);
-    kfLogger.info('DealBoardsMapHook has register. Callback: ', callback);
+    kfLogger.info('DealBoardsMapHook has registered.');
   }
 
   trigger(defaultBoardsMap: BoardsMap) {

@@ -49,10 +49,6 @@ class MakeupCommand(BaseCommand):
         dependencies = python_config.get("dependencies", {})
 
         pdm_project = Project(Core(), ".")
-        # PDM_PYTHON is not working perfectly, have to manipulate .pdm.toml
-        # to enforce using kfc as interpreter.
-        pdm_project.project_config["python.path"] = sys.executable
-        pathlib.Path(pdm_project.root / pdm_project.PYPROJECT_FILENAME).touch()
 
         project = pdm_project.pyproject.metadata
         project["name"] = package_json.get("name", "").split("/").pop()
@@ -165,6 +161,7 @@ def main():
     variants.enable("python")
     os.environ.update(
         {
+            "PDM_PYTHON": sys.executable,
             "PDM_CHECK_UPDATE": "false",
             "PDM_USE_VENV": "0",
         }
