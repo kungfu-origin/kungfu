@@ -1187,10 +1187,12 @@ export const buildIdByKeysFromKfConfigSettings = (
   kfConfigState: Record<string, KungfuApi.KfConfigValue>,
   keys: string[],
 ) => {
-  return keys
+  let b = keys
     .map((key) => replaceNonAlphaNumericWithSpace(kfConfigState[key]))
     .filter((value) => value !== undefined)
     .join('-');
+  console.log('getbb', b, { kfConfigState, keys });
+  return b;
 };
 
 const startProcessByKfLocation = async (
@@ -1873,20 +1875,39 @@ export const getPrimaryKeys = (
 export const replaceNonAlphaNumericWithSpace = (str: string) => {
   return str.replace(/[^a-zA-Z0-9]+/g, '');
 };
+function joinStringArray(arr) {
+  if (arr.length === 0) return '';
+
+  let result = arr[0];
+
+  if (arr.length > 1) {
+    result += '_' + arr[1];
+  }
+
+  if (arr.length > 2) {
+    for (let i = 2; i < arr.length; i++) {
+      result += '-' + arr[i];
+    }
+  }
+
+  return result;
+}
 
 export const getCombineValueByPrimaryKeys = (
   primaryKeys: string[],
   formState: Record<string, KungfuApi.KfConfigValue>,
   extraValue = '',
 ) => {
-  return [
-    extraValue || '',
-    ...primaryKeys.map((key) =>
-      replaceNonAlphaNumericWithSpace(formState[key]),
-    ),
-  ]
-    .filter((item) => item !== '')
-    .join('-');
+  let a = joinStringArray(
+    [
+      extraValue || '',
+      ...primaryKeys.map((key) =>
+        replaceNonAlphaNumericWithSpace(formState[key]),
+      ),
+    ].filter((item) => item !== ''),
+  );
+  console.log('check', a, { extraValue, primaryKeys, formState });
+  return a;
 };
 
 export const transformSearchInstrumentResultToInstrument = (
