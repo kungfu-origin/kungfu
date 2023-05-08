@@ -16,3 +16,4 @@ jobs:
       AWS_USER_ACCESS_KEY_ID: ${{ secrets.AWS_USER_ACCESS_KEY_ID }}
       AWS_USER_SECRET_ACCESS_KEY: ${{ secrets.AWS_USER_SECRET_ACCESS_KEY }}
       GITHUB_PUSH_TOKEN: ${{ secrets.KUNGFU_GITHUB_TOKEN }}
+      MONDAY_API_KEY: ${{ secrets.MONDAY_API_KEY }}

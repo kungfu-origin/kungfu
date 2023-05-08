@@ -199,8 +199,8 @@ def patchImportHardNodes():
                 level=0,
             )
 
-        def getUsedModules(self):
-            yield Importing.makeModuleUsageAttempt(
+        def getModulesUsageAttempt(self):
+            return Importing.makeModuleUsageAttempt(
                 module_name=self.module_name,
                 filename=self.module_filename,
                 module_kind=self.module_kind,

@@ -169,6 +169,8 @@ class TraderSim(wc.Trader):
             if volume_traded > 0 and self.match_mode != MatchMode.Multiple:
                 trade = lf.types.Trade()
                 trade.trade_id = writer.current_frame_uid()
+                trade.external_order_id = order.external_order_id
+                trade.external_trade_id = str(trade.trade_id)
                 trade.order_id = order.order_id
                 trade.volume = volume_traded
                 trade.price = order.limit_price
@@ -184,6 +186,8 @@ class TraderSim(wc.Trader):
                 while volume_traded > 0:
                     trade = lf.types.Trade()
                     trade.trade_id = writer.current_frame_uid()
+                    trade.external_order_id = order.external_order_id
+                    trade.external_trade_id = str(trade.trade_id)
                     trade.order_id = order.order_id
                     trade.volume = min_vol
                     trade.price = order.limit_price
