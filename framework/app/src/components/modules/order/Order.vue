@@ -108,15 +108,6 @@ const columns = computed(() => {
   return getColumns(currentGlobalKfLocation.value, !!historyDate.value);
 });
 
-// const dealAllOrders = (
-//   watcher: KungfuApi.Watcher,
-//   orders: KungfuApi.Order[],
-//   orderStats: KungfuApi.DataTable<KungfuApi.OrderStat>,
-//   callback: (data: KungfuApi.OrderResolved) => void,
-// ) => {
-//   return ;
-// };
-
 onMounted(() => {
   if (app?.proxy) {
     const subscription = app.proxy.$tradingDataSubject.subscribe(
