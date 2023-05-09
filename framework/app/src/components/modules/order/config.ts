@@ -121,33 +121,35 @@ export const getColumns = (
           ]),
     ]);
 
-export const statisColums: AntTableColumns = [
+export const statisColums: KfTradingDataTableHeaderConfig[] = [
   {
-    title: t('tradingConfig.instrument'),
+    name: t('tradingConfig.instrument'),
     dataIndex: 'instrumentId_exchangeId',
   },
   {
-    title: '',
+    name: '',
     dataIndex: 'side',
+    width: 40,
   },
   {
-    title: '',
+    name: '',
     dataIndex: 'offset',
+    width: 40,
   },
   {
-    title: t('orderConfig.mean'),
+    name: t('orderConfig.mean'),
     dataIndex: 'mean',
   },
   {
-    title: t('orderConfig.max'),
+    name: t('orderConfig.max'),
     dataIndex: 'max',
   },
   {
-    title: t('orderConfig.min'),
+    name: t('orderConfig.min'),
     dataIndex: 'min',
   },
   {
-    title: `${t('orderConfig.volume')}(${t('orderConfig.completed')}/${t(
+    name: `${t('orderConfig.volume')}(${t('orderConfig.completed')}/${t(
       'orderConfig.all',
     )})`,
     dataIndex: 'volume',

@@ -157,7 +157,6 @@ onMounted(() => {
         }
 
         let finishedOrdersCount = 0;
-        const s = new Date().getTime();
         const { totalOrders, ordersForTable } = ordersResolved.reduce(
           (preOrders, curOrder) => {
             const orderResolved = toRaw(
@@ -184,8 +183,6 @@ onMounted(() => {
 
         allOrders.value = toRaw(totalOrders);
         orders.value = toRaw(ordersForTable);
-        const e = new Date().getTime();
-        console.log('time: ', e - s, 'len: ', totalOrders.length);
       },
     );
 
