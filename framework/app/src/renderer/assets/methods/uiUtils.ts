@@ -32,6 +32,7 @@ import {
   removeArchiveBeforeToday,
   isKfColor,
   isHexOrRgbColor,
+  removeTodayArchive,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { readRootPackageJsonSync } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
@@ -307,7 +308,7 @@ const removeJournalBeforeStartAll = (): Promise<void> => {
   if (needClearJournal) {
     localStorage.setItem('needClearJournal', '0');
     kfLogger.info('Clear Journal Done', needClearJournal);
-    return removeJournal(KF_HOME);
+    return removeTodayArchive(ARCHIVE_DIR).then(() => removeJournal(KF_HOME));
   } else {
     return Promise.resolve();
   }
