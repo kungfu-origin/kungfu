@@ -871,15 +871,38 @@ export const removeArchiveBeforeToday = (
   const todayArchive = `KFA-${year}-${dealDateDayOrMonth(
     month,
   )}-${dealDateDayOrMonth(day)}.zip`;
-  return removeTargetFilesInFolder(targetFolder, ['.zip'], [todayArchive]);
+  return removeTargetFilesInFolder(targetFolder, ['.zip'], [todayArchive]).then(
+    (res) => {
+      res.errors.forEach((err) => kfLogger.error(err));
+    },
+  );
+};
+
+export const removeTodayArchive = (targetFolder: string): Promise<void> => {
+  const today = dayjs();
+  const year = today.year();
+  const month = today.month() + 1;
+  const day = today.date();
+  const todayArchive = `KFA-${year}-${dealDateDayOrMonth(
+    month,
+  )}-${dealDateDayOrMonth(day)}.zip`;
+  return removeTargetFilesInFolder(targetFolder, [todayArchive]).then((res) => {
+    res.errors.forEach((err) => kfLogger.error(err));
+  });
 };
 
 export const removeJournal = (targetFolder: string): Promise<void> => {
-  return removeTargetFilesInFolder(targetFolder, ['.journal']);
+  return removeTargetFilesInFolder(targetFolder, ['.journal']).then((res) => {
+    res.errors.forEach((err) => kfLogger.error(err));
+  });
 };
 
 export const removeDB = (targetFolder: string): Promise<void> => {
-  return removeTargetFilesInFolder(targetFolder, ['.db'], ['config.db']);
+  return removeTargetFilesInFolder(targetFolder, ['.db'], ['config.db']).then(
+    (res) => {
+      res.errors.forEach((err) => kfLogger.error(err));
+    },
+  );
 };
 
 export const getProcessIdByKfLocation = (
