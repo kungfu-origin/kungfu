@@ -246,12 +246,14 @@ export const removeTargetFilesInFolder = (
 };
 
 export const findPackageRoot = () => {
-  const cwd = process.cwd().toString();
-  const dirname = path.resolve(__dirname);
   let searchPath = '';
   if (process.env.NODE_ENV === 'production') {
+    const dirname = process.env.UI_EXT_TYPE
+      ? path.resolve(__dirname, '..')
+      : path.resolve(__dirname);
     searchPath = dirname;
   } else {
+    const cwd = process.cwd().toString();
     searchPath = cwd;
   }
   if (searchPath.includes('node_modules')) {
