@@ -73,9 +73,8 @@ const { searchKeyword, tableData } = useTableSearchKeyword<KungfuApi.KfConfig>(
 
 const tableDataResolved = computed(() => {
   return [...tableData.value].sort((a, b) => {
-    const aAddTime = JSON.parse(a.value).add_time;
-    const bAddTime = JSON.parse(b.value).add_time;
-
+    const aAddTime = getConfigValue(a).add_time || '';
+    const bAddTime = getConfigValue(b).add_time || '';
     return bAddTime - aAddTime;
   });
 });
