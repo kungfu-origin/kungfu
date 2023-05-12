@@ -70,6 +70,14 @@ const { searchKeyword, tableData } = useTableSearchKeyword<KungfuApi.KfConfig>(
   strategy as Ref<KungfuApi.KfConfig[]>,
   ['name'],
 );
+
+const tableDataResolved = computed(() => {
+  return [...tableData.value].sort((a, b) => {
+    const aAddTime = JSON.parse(a.value).add_time;
+    const bAddTime = JSON.parse(b.value).add_time;
+    return bAddTime - aAddTime;
+  });
+});
 const { getAssetsByKfConfig } = useAssets();
 
 const { handleConfirmAddUpdateKfConfig, handleRemoveKfConfig } =
@@ -175,7 +183,7 @@ function handleRemoveStrategy(record: KungfuApi.KfConfig) {
       <a-table
         class="kf-ant-table"
         :columns="columns"
-        :data-source="tableData"
+        :data-source="tableDataResolved"
         size="small"
         :pagination="false"
         :scroll="{ y: dashboardBodyHeight - 4 }"
