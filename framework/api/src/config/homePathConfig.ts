@@ -37,6 +37,8 @@ if (process.env.NODE_ENV === 'development') {
     path.join(globalThis.__kfResourcesPath, 'app', 'dist', 'public');
 }
 
+globalThis.__runtimeDir = globalThis.__runtimeDir || path.resolve(__dirname);
+
 export const KF_HOME_BASE_DIR_RESOLVE: string = getHomePath();
 
 if (process.env.APP_TYPE === 'renderer') {
