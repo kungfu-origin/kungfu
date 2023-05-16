@@ -260,11 +260,10 @@ export const removeTargetFilesInFolder = async (
 };
 
 export const findPackageRoot = () => {
-  const cwd = process.cwd().toString();
-  const dirname = path.resolve(__dirname);
   let searchPath = '';
+  const cwd = process.cwd().toString();
   if (process.env.NODE_ENV === 'production') {
-    searchPath = dirname;
+    searchPath = globalThis.__runtimeDir;
   } else {
     searchPath = cwd;
   }
