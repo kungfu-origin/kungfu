@@ -113,6 +113,10 @@ public:
 
   [[maybe_unused]] [[nodiscard]] uint32_t get_dest() const { return journal_.dest_id_; }
 
+  [[nodiscard]] const journal &get_journal() const { return journal_; }
+
+  [[nodiscard]] const page_ptr get_current_page() const { return journal_.page_; }
+
   uint64_t current_frame_uid();
 
   frame_ptr open_frame(int64_t trigger_time, int32_t msg_type, uint32_t length);
