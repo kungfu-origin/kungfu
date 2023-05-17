@@ -61,6 +61,25 @@ public:
     for (const auto &loc : l3) {
       SPDLOG_INFO("l3 : {}", loc.to_string());
     }
+
+    //    auto fn = [&](int i) {
+    //      int count = 0;
+    //      std::this_thread::sleep_for(std::chrono::seconds(1));
+    //      SPDLOG_INFO("thread");
+    //      while (count++ < 10000) {
+    //        context->insert_order("000001", "SZE", "sim", "fill", i, i * 100, PriceType::Limit, Side::Buy,
+    //        Offset::Open);
+    //      }
+    //    };
+    //
+    //    static std::vector<std::thread> threads{};
+    //    for (int idx = 0; idx < 32; ++idx) {
+    //      threads.push_back(std::move(std::thread(fn, idx)));
+    //    }
+    //
+    //    for (auto &t : threads) {
+    //      t.join();
+    //    }
   }
 
   void on_quote(Context_ptr &context, const Quote &quote, const location_ptr &location) override {
@@ -90,6 +109,13 @@ public:
 
   void on_tree(Context_ptr &context, const Tree &tree, const location_ptr &location) override {
     SPDLOG_INFO("on tree: {}", tree.to_string());
+  }
+
+  void on_order(Context_ptr &context, const Order &order, const location_ptr &location) override {
+    static int count = 0;
+    if (count++ % 1000 == 0) {
+      SPDLOG_INFO("Order: {}", order.to_string());
+    }
   }
 };
 

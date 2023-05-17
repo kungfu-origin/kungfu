@@ -18,6 +18,7 @@ using namespace kungfu::longfist::enums;
 using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
 using namespace kungfu::yijinjing::util;
+using namespace kungfu::yijinjing::journal;
 
 namespace kungfu::wingchun::strategy {
 
@@ -118,6 +119,7 @@ uint64_t RuntimeContext::insert_order(const std::string &instrument_id, const st
     return 0;
   }
   auto writer = app_.get_writer(account_location_uid);
+  page_ptr page = writer->get_current_page(); // prevent that page released after close_data before on_order_input
   OrderInput &input = writer->open_data<OrderInput>(app_.now());
   input.order_id = writer->current_frame_uid();
   strcpy(input.instrument_id, instrument_id.c_str());
@@ -134,13 +136,11 @@ uint64_t RuntimeContext::insert_order(const std::string &instrument_id, const st
   input.parent_id = parent_id;
   input.is_swap = is_swap;
   input.insert_time = insert_time;
-  OrderInput input_copy{};
-  memcpy(&input_copy, &input, sizeof(OrderInput));
   writer->close_data();
   if (not is_bypass_accounting()) {
-    bookkeeper_.on_order_input(app_.now(), app_.get_home_uid(), account_location_uid, input_copy);
+    bookkeeper_.on_order_input(app_.now(), app_.get_home_uid(), account_location_uid, input);
   }
-  return input_copy.order_id;
+  return input.order_id;
 }
 
 uint64_t RuntimeContext::insert_order_input(const std::string &source, const std::string &account,
@@ -159,16 +159,14 @@ uint64_t RuntimeContext::insert_order_input(const std::string &source, const std
   }
   auto writer = app_.get_writer(account_location_uid);
   OrderInput &input = writer->open_data<OrderInput>(app_.now());
+  order_input.order_id = order_input.order_id == 0 ? writer->current_frame_uid() : order_input.order_id;
+  order_input.insert_time = time::now_in_nano();
   memcpy(&input, &order_input, sizeof(input));
-  input.order_id = input.order_id == 0 ? writer->current_frame_uid() : input.order_id;
-  input.insert_time = time::now_in_nano();
-  OrderInput input_copy{};
-  memcpy(&input_copy, &input, sizeof(OrderInput));
   writer->close_data();
   if (not is_bypass_accounting()) {
-    bookkeeper_.on_order_input(app_.now(), app_.get_home_uid(), account_location_uid, input);
+    bookkeeper_.on_order_input(app_.now(), app_.get_home_uid(), account_location_uid, order_input);
   }
-  return input_copy.order_id;
+  return order_input.order_id;
 }
 
 std::vector<uint64_t> RuntimeContext::insert_batch_orders(
@@ -238,6 +236,7 @@ uint64_t RuntimeContext::insert_basket_order(uint64_t basket_id, const std::stri
   }
 
   auto writer = app_.get_writer(account_location_uid);
+  page_ptr page = writer->get_current_page(); // prevent that page released between close_data and insert_basket_order
   BasketOrder &input = writer->open_data<BasketOrder>(app_.now());
   input.order_id = writer->current_frame_uid();
   input.parent_id = basket_id;
@@ -251,11 +250,9 @@ uint64_t RuntimeContext::insert_basket_order(uint64_t basket_id, const std::stri
   input.insert_time = insert_time;
   input.calculation_mode =
       input.volume == VOLUME_ZERO ? BasketOrderCalculationMode::Dynamic : BasketOrderCalculationMode::Static;
-  BasketOrder input_copy{};
-  memcpy(&input_copy, &input, sizeof(BasketOrder));
   writer->close_data();
-  basketorder_engine_.insert_basket_order(app_.now(), input_copy);
-  return input_copy.order_id;
+  basketorder_engine_.insert_basket_order(app_.now(), input);
+  return input.order_id;
 }
 
 uint64_t RuntimeContext::cancel_order(uint64_t order_id) {
