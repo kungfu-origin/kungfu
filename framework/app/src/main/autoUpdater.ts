@@ -162,18 +162,35 @@ function handleUpdateKungfu(
       Promise.all([
         reqRecordBeforeQuit(MainWindow),
         killAllBeforeQuit(MainWindow),
-      ]).finally(() => {
-        delayMilliSeconds(1000).then(() => {
-          removeTargetFilesInFolder(
-            KF_HOME,
-            ['.db', '.journal'],
-            ['etc', 'config.db'],
-          ).then(() => {
-            autoUpdater.quitAndInstall(false, true);
-            app.exit();
+      ])
+        .catch((err) => {
+          kfLogger.error(err);
+        })
+        .finally(() => {
+          delayMilliSeconds(1000).then(() => {
+            removeTargetFilesInFolder(
+              KF_HOME,
+              ['.db', '.journal'],
+              ['etc', 'config.db'],
+            ).then((results) => {
+              MainWindow.webContents
+                .executeJavaScript(
+                  `localStorage.setItem('needClearJournal', '1');`,
+                  true,
+                )
+                .catch((err) => {
+                  kfLogger.error(err);
+                })
+                .finally(() => {
+                  results.errors.forEach((error) => kfLogger.error(error));
+                  delayMilliSeconds(1000).then(() => {
+                    autoUpdater.quitAndInstall(false, true);
+                    app.exit();
+                  });
+                });
+            });
           });
         });
-      });
     });
   });
 

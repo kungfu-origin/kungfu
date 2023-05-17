@@ -1,5 +1,6 @@
 import path from 'path';
 import fse from 'fs-extra';
+import fsPromise from 'fs/promises';
 import * as csv from 'fast-csv';
 import { FormatterRow, ParserOptionsArgs } from 'fast-csv';
 import stream from 'stream';
@@ -203,12 +204,16 @@ export const listDirSync = (filePath: string): string[] => {
   return fse.readdirSync(filePath);
 };
 
-export const removeTargetFilesInFolder = (
+export const removeTargetFilesInFolder = async (
   targetFolder: string,
   includes: string[],
   filters: string[] = [],
-): Promise<void> => {
-  const iterator = (folder: string) => {
+): Promise<{ successes: string[]; errors: string[] }> => {
+  const results: { successes: string[]; errors: string[] } = {
+    successes: [],
+    errors: [],
+  };
+  const iterator = async (folder: string) => {
     const items = listDirSync(folder);
 
     if (!items) return;
@@ -227,30 +232,38 @@ export const removeTargetFilesInFolder = (
       return false;
     });
 
-    files.forEach((f: string) => {
-      includes.forEach((n: string) => {
+    for (const f of files) {
+      for (const n of includes) {
         if (f.includes(n) && !filters.includes(f)) {
-          fse.removeSync(path.join(folder, f));
+          try {
+            const targetFile = path.join(folder, f);
+            await fsPromise.rm(targetFile);
+            results.successes.push(targetFile);
+          } catch (error) {
+            if (error instanceof Error) {
+              console.error(error);
+              results.errors.push(error.message);
+            }
+          }
         }
-      });
-    });
+      }
+    }
 
-    folders.forEach((f: string) => {
-      iterator(path.join(folder, f));
-    });
+    for (const f of folders) {
+      await iterator(path.join(folder, f));
+    }
   };
 
-  iterator(targetFolder);
+  await iterator(targetFolder);
 
-  return Promise.resolve();
+  return results;
 };
 
 export const findPackageRoot = () => {
-  const cwd = process.cwd().toString();
-  const dirname = path.resolve(__dirname);
   let searchPath = '';
+  const cwd = process.cwd().toString();
   if (process.env.NODE_ENV === 'production') {
-    searchPath = dirname;
+    searchPath = globalThis.__runtimeDir;
   } else {
     searchPath = cwd;
   }

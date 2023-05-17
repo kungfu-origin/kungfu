@@ -871,15 +871,38 @@ export const removeArchiveBeforeToday = (
   const todayArchive = `KFA-${year}-${dealDateDayOrMonth(
     month,
   )}-${dealDateDayOrMonth(day)}.zip`;
-  return removeTargetFilesInFolder(targetFolder, ['.zip'], [todayArchive]);
+  return removeTargetFilesInFolder(targetFolder, ['.zip'], [todayArchive]).then(
+    (res) => {
+      res.errors.forEach((err) => kfLogger.error(err));
+    },
+  );
+};
+
+export const removeTodayArchive = (targetFolder: string): Promise<void> => {
+  const today = dayjs();
+  const year = today.year();
+  const month = today.month() + 1;
+  const day = today.date();
+  const todayArchive = `KFA-${year}-${dealDateDayOrMonth(
+    month,
+  )}-${dealDateDayOrMonth(day)}.zip`;
+  return removeTargetFilesInFolder(targetFolder, [todayArchive]).then((res) => {
+    res.errors.forEach((err) => kfLogger.error(err));
+  });
 };
 
 export const removeJournal = (targetFolder: string): Promise<void> => {
-  return removeTargetFilesInFolder(targetFolder, ['.journal']);
+  return removeTargetFilesInFolder(targetFolder, ['.journal']).then((res) => {
+    res.errors.forEach((err) => kfLogger.error(err));
+  });
 };
 
 export const removeDB = (targetFolder: string): Promise<void> => {
-  return removeTargetFilesInFolder(targetFolder, ['.db'], ['config.db']);
+  return removeTargetFilesInFolder(targetFolder, ['.db'], ['config.db']).then(
+    (res) => {
+      res.errors.forEach((err) => kfLogger.error(err));
+    },
+  );
 };
 
 export const getProcessIdByKfLocation = (
@@ -1183,7 +1206,7 @@ export const getConfigValue = (kfConfig: KungfuApi.KfConfig) => {
   return JSON.parse(kfConfig.value || '{}');
 };
 
-export const buildIdByKeysFromKfConfigSettings = (
+export const buildIdByPrimaryKeysFromKfConfigSettings = (
   kfConfigState: Record<string, KungfuApi.KfConfigValue>,
   keys: string[],
 ) => {
@@ -1870,8 +1893,31 @@ export const getPrimaryKeys = (
 ): string[] => {
   return settings.filter((item) => item.primary).map((item) => item.key);
 };
-export const replaceNonAlphaNumericWithSpace = (str: string) => {
-  return str.replace(/[^a-zA-Z0-9]+/g, '');
+export const replaceNonAlphaNumericWithSpace = (
+  value: KungfuApi.KfConfigValue,
+) => {
+  if (typeof value === 'string') {
+    return value.replace(/[^a-zA-Z0-9]+/g, '');
+  } else {
+    return value;
+  }
+};
+const concatPrimaryKey = (arr: string[]) => {
+  if (arr.length === 0) return '';
+
+  let result = arr[0];
+
+  if (arr.length > 1) {
+    result += '_' + arr[1];
+  }
+
+  if (arr.length > 2) {
+    for (let i = 2; i < arr.length; i++) {
+      result += '-' + arr[i];
+    }
+  }
+
+  return result;
 };
 
 export const getCombineValueByPrimaryKeys = (
@@ -1879,14 +1925,14 @@ export const getCombineValueByPrimaryKeys = (
   formState: Record<string, KungfuApi.KfConfigValue>,
   extraValue = '',
 ) => {
-  return [
-    extraValue || '',
-    ...primaryKeys.map((key) =>
-      replaceNonAlphaNumericWithSpace(formState[key]),
-    ),
-  ]
-    .filter((item) => item !== '')
-    .join('-');
+  return concatPrimaryKey(
+    [
+      extraValue || '',
+      ...primaryKeys.map((key) =>
+        replaceNonAlphaNumericWithSpace(formState[key]),
+      ),
+    ].filter((item) => item !== ''),
+  );
 };
 
 export const transformSearchInstrumentResultToInstrument = (

@@ -2504,3 +2504,30 @@ export const useBasket = () => {
     updateBasketData,
   };
 };
+
+export const useDealDataWithCaches = <T, U>(keys: Array<keyof T>) => {
+  const caches = new Map<string, U>();
+
+  const dealerResolved = (data: T, dealer: () => U): U => {
+    const curKey = keys.map((key) => data[key]).join('_');
+    if (caches.has(curKey)) {
+      const value = caches.get(curKey);
+      if (value) {
+        return value;
+      }
+    }
+
+    const value = dealer();
+    caches.set(curKey, value);
+    return value;
+  };
+
+  const clearCaches = () => {
+    caches.clear();
+  };
+
+  return {
+    dealerResolved,
+    clearCaches,
+  };
+};
