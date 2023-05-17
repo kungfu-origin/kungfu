@@ -19,20 +19,31 @@ public:
   void pre_start(Context_ptr &context) override {
     SPDLOG_INFO("preparing strategy");
     SPDLOG_INFO("arguments: {}", context->arguments());
+    context->add_account("sim", "fill");
     context->subscribe("sim", {"600000"}, {"SSE"});
     // context->subscribe_operator("bar", "my-bar");
+    SPDLOG_INFO("is_bypass_accounting: {}", context->is_bypass_accounting());
+    //    context->bypass_accounting();
+    SPDLOG_INFO("is_bypass_accounting: {}", context->is_bypass_accounting());
   }
 
   void post_start(Context_ptr &context) override {
     SPDLOG_INFO("strategy started");
-    // auto &runtime = dynamic_cast<RuntimeContext &>(*context);
-    // auto &bookkeeper = runtime.get_bookkeeper();
-    // auto &books = bookkeeper.get_books();
-    // for (const auto &pair : books) {
-    //   auto &book = pair.second;
-    //   SPDLOG_INFO("book asset: {}", book->asset.to_string());
-    // }
-    auto l_ptr = location::make_shared(mode::LIVE, category::MD, "sim", "sim", {});
+    auto &runtime = dynamic_cast<RuntimeContext &>(*context);
+    auto &bookkeeper = runtime.get_bookkeeper();
+    const auto &books = bookkeeper.get_books();
+    SPDLOG_INFO("books.size(): {}", books.size());
+    for (const auto &book_pair : books) {
+      const auto &book = book_pair.second;
+      SPDLOG_INFO("book asset: {}", book->asset.to_string());
+      SPDLOG_INFO("long_positions.size(): {}", book->long_positions.size());
+      for (const auto &position_pair : book->long_positions) {
+        auto &position = position_pair.second;
+        SPDLOG_INFO("Position: {}", position.to_string());
+      }
+    }
+
+    auto l_ptr = location::make_shared(mode::LIVE, category::MD, "sim", "sim", std::make_shared<locator>());
     kungfu::yijinjing::journal::assemble asb(l_ptr, location::PUBLIC, AssembleMode::All);
     auto headers = asb.read_headers(Location{});
     for (const auto &head : headers) {
