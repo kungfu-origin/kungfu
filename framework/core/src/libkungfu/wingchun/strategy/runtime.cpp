@@ -28,7 +28,7 @@ RuntimeContext::RuntimeContext(apprentice &app, const rx::connectable_observable
 
 void RuntimeContext::on_start() {
   broker_client_.on_start(events_);
-  if (not is_skip_bookkeeper()) {
+  if (not is_bypass_accounting()) {
     bookkeeper_.on_start(events_);
     basketorder_engine_.on_start(events_);
   }
@@ -137,7 +137,7 @@ uint64_t RuntimeContext::insert_order(const std::string &instrument_id, const st
   OrderInput input_copy{};
   memcpy(&input_copy, &input, sizeof(OrderInput));
   writer->close_data();
-  if (not is_skip_bookkeeper()) {
+  if (not is_bypass_accounting()) {
     bookkeeper_.on_order_input(app_.now(), app_.get_home_uid(), account_location_uid, input_copy);
   }
   return input_copy.order_id;
@@ -165,7 +165,7 @@ uint64_t RuntimeContext::insert_order_input(const std::string &source, const std
   OrderInput input_copy{};
   memcpy(&input_copy, &input, sizeof(OrderInput));
   writer->close_data();
-  if (not is_skip_bookkeeper()) {
+  if (not is_bypass_accounting()) {
     bookkeeper_.on_order_input(app_.now(), app_.get_home_uid(), account_location_uid, input);
   }
   return input_copy.order_id;

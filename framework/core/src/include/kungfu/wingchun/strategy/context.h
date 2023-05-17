@@ -208,13 +208,13 @@ public:
   /**
    * Call to skip bookkeeper calculation
    */
-  void skip_bookkeeper();
+  void bypass_accounting();
 
   /**
    * Tells whether skip bookkeeper
    * @return true to skip bookkeeper, false to using bookkeeper
    */
-  bool is_skip_bookkeeper() const;
+  bool is_bypass_accounting() const;
 
   /**
    * request deregister.
@@ -246,7 +246,7 @@ public:
 private:
   bool book_held_ = false;
   bool positions_mirrored_ = true;
-  bool skip_bookkeeper_ = false;
+  bool bypass_accounting_ = false;
 };
 } // namespace kungfu::wingchun::strategy
 
