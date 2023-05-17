@@ -221,6 +221,8 @@ class Strategy(wc.Strategy):
         self.ctx.update_strategy_state = wc_context.update_strategy_state
         self.ctx.is_book_held = wc_context.is_book_held
         self.ctx.is_positions_mirrored = wc_context.is_positions_mirrored
+        self.ctx.is_bypass_accounting = wc_context.is_bypass_accounting
+        self.ctx.bypass_accounting = wc_context.bypass_accounting
         self.ctx.hold_book = wc_context.hold_book
         self.ctx.hold_positions = wc_context.hold_positions
         self.ctx.get_account_book = self.__get_account_book

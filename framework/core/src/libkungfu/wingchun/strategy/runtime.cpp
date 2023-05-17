@@ -28,7 +28,9 @@ RuntimeContext::RuntimeContext(apprentice &app, const rx::connectable_observable
 
 void RuntimeContext::on_start() {
   broker_client_.on_start(events_);
-  bookkeeper_.on_start(events_);
+  if (not is_bypass_accounting()) {
+    bookkeeper_.on_start(events_);
+  }
   basketorder_engine_.on_start(events_);
 }
 
@@ -94,8 +96,9 @@ uint64_t RuntimeContext::insert_block_message(const std::string &source, const s
   msg.match_number = match_number;
   msg.is_specific = is_specific;
   msg.block_id = writer->current_frame_uid();
+  uint64_t block_id = msg.block_id;
   writer->close_data();
-  return msg.block_id;
+  return block_id;
 }
 
 uint64_t RuntimeContext::insert_order(const std::string &instrument_id, const std::string &exchange_id,
@@ -131,9 +134,13 @@ uint64_t RuntimeContext::insert_order(const std::string &instrument_id, const st
   input.parent_id = parent_id;
   input.is_swap = is_swap;
   input.insert_time = insert_time;
+  OrderInput input_copy{};
+  memcpy(&input_copy, &input, sizeof(OrderInput));
   writer->close_data();
-  bookkeeper_.on_order_input(app_.now(), app_.get_home_uid(), account_location_uid, input);
-  return input.order_id;
+  if (not is_bypass_accounting()) {
+    bookkeeper_.on_order_input(app_.now(), app_.get_home_uid(), account_location_uid, input_copy);
+  }
+  return input_copy.order_id;
 }
 
 uint64_t RuntimeContext::insert_order_input(const std::string &source, const std::string &account,
@@ -155,9 +162,13 @@ uint64_t RuntimeContext::insert_order_input(const std::string &source, const std
   memcpy(&input, &order_input, sizeof(input));
   input.order_id = input.order_id == 0 ? writer->current_frame_uid() : input.order_id;
   input.insert_time = time::now_in_nano();
+  OrderInput input_copy{};
+  memcpy(&input_copy, &input, sizeof(OrderInput));
   writer->close_data();
-  bookkeeper_.on_order_input(app_.now(), app_.get_home_uid(), account_location_uid, input);
-  return input.order_id;
+  if (not is_bypass_accounting()) {
+    bookkeeper_.on_order_input(app_.now(), app_.get_home_uid(), account_location_uid, input);
+  }
+  return input_copy.order_id;
 }
 
 std::vector<uint64_t> RuntimeContext::insert_batch_orders(
@@ -240,10 +251,11 @@ uint64_t RuntimeContext::insert_basket_order(uint64_t basket_id, const std::stri
   input.insert_time = insert_time;
   input.calculation_mode =
       input.volume == VOLUME_ZERO ? BasketOrderCalculationMode::Dynamic : BasketOrderCalculationMode::Static;
-
+  BasketOrder input_copy{};
+  memcpy(&input_copy, &input, sizeof(BasketOrder));
   writer->close_data();
-  basketorder_engine_.insert_basket_order(app_.now(), input);
-  return input.order_id;
+  basketorder_engine_.insert_basket_order(app_.now(), input_copy);
+  return input_copy.order_id;
 }
 
 uint64_t RuntimeContext::cancel_order(uint64_t order_id) {
@@ -260,8 +272,9 @@ uint64_t RuntimeContext::cancel_order(uint64_t order_id) {
   action.order_id = order_id;
   action.action_flag = OrderActionFlag::Cancel;
 
+  uint64_t order_action_id = action.order_action_id;
   writer->close_data();
-  return action.order_action_id;
+  return order_action_id;
 }
 
 const location_map &RuntimeContext::list_md() const { return md_locations_; }
