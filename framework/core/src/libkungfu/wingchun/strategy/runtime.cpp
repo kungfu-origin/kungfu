@@ -30,8 +30,8 @@ void RuntimeContext::on_start() {
   broker_client_.on_start(events_);
   if (not is_bypass_accounting()) {
     bookkeeper_.on_start(events_);
-    basketorder_engine_.on_start(events_);
   }
+  basketorder_engine_.on_start(events_);
 }
 
 int64_t RuntimeContext::now() const { return app_.now(); }
