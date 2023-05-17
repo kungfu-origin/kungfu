@@ -24,4 +24,8 @@ void Context::hold_book() { book_held_ = true; }
 
 void Context::hold_positions() { positions_mirrored_ = false; }
 
+void Context::skip_bookkeeper() { skip_bookkeeper_ = true; }
+
+bool Context::is_skip_bookkeeper() const { return skip_bookkeeper_; }
+
 } // namespace kungfu::wingchun::strategy

@@ -206,6 +206,17 @@ public:
   void hold_positions();
 
   /**
+   * Call to skip bookkeeper calculation
+   */
+  void skip_bookkeeper();
+
+  /**
+   * Tells whether skip bookkeeper
+   * @return true to skip bookkeeper, false to using bookkeeper
+   */
+  bool is_skip_bookkeeper() const;
+
+  /**
    * request deregister.
    * @return void
    */
@@ -235,6 +246,7 @@ public:
 private:
   bool book_held_ = false;
   bool positions_mirrored_ = true;
+  bool skip_bookkeeper_ = false;
 };
 } // namespace kungfu::wingchun::strategy
 
