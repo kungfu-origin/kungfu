@@ -534,6 +534,7 @@ export const handleOpenLogviewByFile =
   (): Promise<Electron.BrowserWindow | void> => {
     return dialog
       .showOpenDialog({
+        defaultPath: KF_HOME,
         properties: ['openFile'],
       })
       .then((res): Promise<Electron.BrowserWindow | void> => {
