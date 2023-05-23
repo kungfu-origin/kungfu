@@ -37,11 +37,13 @@ void Runner::on_trading_day(const event_ptr &event, int64_t daytime) {
   invoke(&Strategy::on_trading_day, daytime);
 }
 
-void Runner::on_react() {
+void Runner::react() {
   context_ = make_context();
   context_->set_arguments(arguments_);
-  events_ | is(Channel::tag) | $$(inspect_channel(event));
+  apprentice::react();
 }
+
+void Runner::on_react() { events_ | is(Channel::tag) | $$(inspect_channel(event)); }
 
 void Runner::inspect_channel(const event_ptr &event) {
   auto channel = event->data<Channel>();
