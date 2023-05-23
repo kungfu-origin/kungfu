@@ -28,8 +28,6 @@ public:
   void on_trading_day(const event_ptr &event, int64_t daytime) override;
 
 protected:
-  void react() override;
-
   void on_react() override;
 
   void on_start() override;

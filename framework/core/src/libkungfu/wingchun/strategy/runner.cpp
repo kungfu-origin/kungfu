@@ -37,29 +37,11 @@ void Runner::on_trading_day(const event_ptr &event, int64_t daytime) {
   invoke(&Strategy::on_trading_day, daytime);
 }
 
-void Runner::react() {
+void Runner::on_react() {
   context_ = make_context();
   context_->set_arguments(arguments_);
-
-  auto start_events = events_ | skip_until(events_ | filter([&](auto e) { return started_; }));
-  start_events | is_own<Quote>(context_->get_broker_client()) |
-      $$(invoke(&Strategy::on_quote, event->data<Quote>(), get_location(event->source())));
-  start_events | is_own<Tree>(context_->get_broker_client()) |
-      $$(invoke(&Strategy::on_tree, event->data<Tree>(), get_location(event->source())));
-  start_events | is_own<Entrust>(context_->get_broker_client()) |
-      $$(invoke(&Strategy::on_entrust, event->data<Entrust>(), get_location(event->source())));
-  start_events | is_own<Transaction>(context_->get_broker_client()) |
-      $$(invoke(&Strategy::on_transaction, event->data<Transaction>(), get_location(event->source())));
-  start_events | is(Order::tag) | $$(invoke(&Strategy::on_order, event->data<Order>(), get_location(event->source())));
-  start_events | is(Trade::tag) | $$(invoke(&Strategy::on_trade, event->data<Trade>(), get_location(event->source())));
-  start_events | is_custom() |
-      $$(invoke(&Strategy::on_custom_data, event->msg_type(),
-                {event->data_as_bytes(), event->data_as_bytes() + event->data_length()}, event->data_length(),
-                get_location(event->source())));
-  apprentice::react();
+  events_ | is(Channel::tag) | $$(inspect_channel(event));
 }
-
-void Runner::on_react() { events_ | is(Channel::tag) | $$(inspect_channel(event)); }
 
 void Runner::inspect_channel(const event_ptr &event) {
   auto channel = event->data<Channel>();
@@ -94,6 +76,20 @@ void Runner::post_start() {
     return; // safe guard for live mode, in that case we will run truly when prepare process is done.
   }
 
+  events_ | is_own<Quote>(context_->get_broker_client()) |
+      $$(invoke(&Strategy::on_quote, event->data<Quote>(), get_location(event->source())));
+  events_ | is_own<Tree>(context_->get_broker_client()) |
+      $$(invoke(&Strategy::on_tree, event->data<Tree>(), get_location(event->source())));
+  events_ | is_own<Entrust>(context_->get_broker_client()) |
+      $$(invoke(&Strategy::on_entrust, event->data<Entrust>(), get_location(event->source())));
+  events_ | is_own<Transaction>(context_->get_broker_client()) |
+      $$(invoke(&Strategy::on_transaction, event->data<Transaction>(), get_location(event->source())));
+  events_ | is(Order::tag) | $$(invoke(&Strategy::on_order, event->data<Order>(), get_location(event->source())));
+  events_ | is(Trade::tag) | $$(invoke(&Strategy::on_trade, event->data<Trade>(), get_location(event->source())));
+  events_ | is_custom() |
+      $$(invoke(&Strategy::on_custom_data, event->msg_type(),
+                {event->data_as_bytes(), event->data_as_bytes() + event->data_length()}, event->data_length(),
+                get_location(event->source())));
   events_ | is(HistoryOrder::tag) |
       $$(invoke(&Strategy::on_history_order, event->data<HistoryOrder>(), get_location(event->source())));
   events_ | is(HistoryTrade::tag) |
