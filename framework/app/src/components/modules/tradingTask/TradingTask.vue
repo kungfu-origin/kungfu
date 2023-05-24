@@ -339,7 +339,7 @@ function getProcessStatusName(
       >
         <template #bodyCell="{ column, record }">
           <template v-if="column.dataIndex === 'name'">
-            {{ dealTradingTaskName(record.name, extConfigs) }}
+            {{ record.name_resolved }}
           </template>
           <template v-else-if="column.dataIndex === 'processStatus'">
             <a-switch
