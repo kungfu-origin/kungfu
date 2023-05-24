@@ -1414,14 +1414,16 @@ export const dealDateToNanotimeRange = (
 
 export const dealKfNumber = (
   preNumber: bigint | number | undefined | unknown,
-): string | number | bigint | unknown => {
-  if (preNumber === undefined) return '--';
-  if (preNumber === null) return '--';
-
-  if (Number.isNaN(Number(preNumber))) {
+): string | number | bigint => {
+  if (
+    preNumber === undefined ||
+    preNumber === null ||
+    Number.isNaN(Number(preNumber))
+  ) {
     return '--';
   }
-  return preNumber;
+
+  return Number(preNumber) || 0;
 };
 
 export const dealKfPrice = (
