@@ -192,7 +192,14 @@ export interface Pm2ProcessStatusDetail {
   args: string[];
 }
 
-export type Pm2ProcessStatusDetailData = Record<string, Pm2ProcessStatusDetail>;
+export interface Pm2ProcessStatusDetailResolved extends Pm2ProcessStatusDetail {
+  name_resolved?: string;
+}
+
+export type Pm2ProcessStatusDetailData = Record<
+  string,
+  Pm2ProcessStatusDetailResolved
+>;
 
 export interface Pm2Env {
   pm_cwd?: string;
