@@ -65,6 +65,7 @@ import {
   graceDeleteProcess,
   Pm2ProcessStatusData,
   Pm2ProcessStatusDetail,
+  Pm2ProcessStatusDetailResolved,
   Pm2ProcessStatusDetailData,
   startCacheD,
   startExtDaemon,
@@ -2347,7 +2348,7 @@ export const getTaskListFromProcessStatusData = (
   taskPrefixs: string[],
   psDetail: Pm2ProcessStatusDetailData,
   sorter?: (a: Pm2ProcessStatusDetail, b: Pm2ProcessStatusDetail) => number,
-): Pm2ProcessStatusDetail[] => {
+): Pm2ProcessStatusDetailResolved[] => {
   return Object.keys(psDetail)
     .filter((processId) => {
       return (
