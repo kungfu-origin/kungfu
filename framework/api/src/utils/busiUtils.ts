@@ -65,6 +65,7 @@ import {
   graceDeleteProcess,
   Pm2ProcessStatusData,
   Pm2ProcessStatusDetail,
+  Pm2ProcessStatusDetailResolved,
   Pm2ProcessStatusDetailData,
   startCacheD,
   startExtDaemon,
@@ -1414,14 +1415,18 @@ export const dealDateToNanotimeRange = (
 
 export const dealKfNumber = (
   preNumber: bigint | number | undefined | unknown,
-): string | number | bigint | unknown => {
-  if (preNumber === undefined) return '--';
-  if (preNumber === null) return '--';
-
-  if (Number.isNaN(Number(preNumber))) {
+): string | number | bigint => {
+  if (
+    preNumber === undefined ||
+    preNumber === null ||
+    preNumber === Infinity ||
+    preNumber === -Infinity ||
+    Number.isNaN(Number(preNumber))
+  ) {
     return '--';
   }
-  return preNumber;
+
+  return Number(preNumber) || 0;
 };
 
 export const dealKfPrice = (
@@ -2344,7 +2349,7 @@ export const getTaskListFromProcessStatusData = (
   taskPrefixs: string[],
   psDetail: Pm2ProcessStatusDetailData,
   sorter?: (a: Pm2ProcessStatusDetail, b: Pm2ProcessStatusDetail) => number,
-): Pm2ProcessStatusDetail[] => {
+): Pm2ProcessStatusDetailResolved[] => {
   return Object.keys(psDetail)
     .filter((processId) => {
       return (

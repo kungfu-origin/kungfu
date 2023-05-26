@@ -118,6 +118,7 @@ public:
                                   const kungfu::yijinjing::data::location_ptr &location) override {
     PYBIND11_OVERLOAD(void, strategy::Strategy, on_req_history_order_error, context, error, location);
   }
+
   void on_req_history_trade_error(strategy::Context_ptr &context, const RequestHistoryTradeError &error,
                                   const kungfu::yijinjing::data::location_ptr &location) override {
     PYBIND11_OVERLOAD(void, strategy::Strategy, on_req_history_trade_error, context, error, location);
@@ -193,7 +194,9 @@ void bind_strategy(pybind11::module &m) {
       .def("is_positions_mirrored", &strategy::Context::is_positions_mirrored)
       .def("req_deregister", &strategy::Context::req_deregister)
       .def("update_strategy_state", &strategy::Context::update_strategy_state)
-      .def("get_writer", &strategy::Context::get_writer);
+      .def("get_writer", &strategy::Context::get_writer)
+      .def("is_bypass_accounting", &strategy::Context::is_bypass_accounting)
+      .def("bypass_accounting", &strategy::Context::bypass_accounting);
 
   py::class_<strategy::RuntimeContext, strategy::Context, strategy::RuntimeContext_ptr>(m, "RuntimeContext")
       .def_property_readonly("bookkeeper", &strategy::RuntimeContext::get_bookkeeper,
