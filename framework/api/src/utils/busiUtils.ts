@@ -2020,6 +2020,7 @@ export const KfConfigValueArrayType = [
   'table',
   'csvTable',
   'rangePicker',
+  'multiSelect',
 ];
 
 export const KfConfigValueTimeType = [
