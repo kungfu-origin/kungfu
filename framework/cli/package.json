@@ -26,7 +26,7 @@
     "cli": "node lib/dev/cli.dev.js",
     "dev": "node lib/dev/run.js",
     "build": "node lib/webpack/build.js",
-    "clean": "rimraf build dist",
+    "clean": "rimraf build dist node_modules/.cache/webpack",
     "install": "node -e \"require('@kungfu-trader/kungfu-core').prebuilt('install')\"",
     "package": "node -e \"require('@kungfu-trader/kungfu-core').prebuilt('package')\"",
     "lint": "eslint src",
