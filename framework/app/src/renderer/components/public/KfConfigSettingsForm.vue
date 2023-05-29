@@ -1360,7 +1360,7 @@ defineExpose({
             option.key.toLowerCase().indexOf(inputValue.toLowerCase()) > -1
         "
         allow-clear
-        showSearch="true"
+        show-search
         :disabled="
           (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
           item.disabled
