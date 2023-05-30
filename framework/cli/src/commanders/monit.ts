@@ -34,6 +34,10 @@ export const monitPrompt = async (list: boolean) => {
     clearTimeout(timer);
   }, 1000);
 
+  process.on('exit', () => {
+    watcher?.quit();
+  });
+
   if (list) {
     const kfConfig = await selectTargetKfConfig(true);
 
