@@ -385,7 +385,7 @@ function isNumberInputType(type: string): boolean {
 }
 
 const SpecialWordsReg = new RegExp(
-  "[`~!@#$^&*()=|{}';',\\[\\]<>《》/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]",
+  "[`~!@#$^&*()=|{}';',\\[\\]<>《》?~！@#￥……&*（）——|{}【】‘；”“'。，、？_]",
 );
 function primaryKeyValidator(_rule: RuleObject, value: string): Promise<void> {
   const combineValue: string = getCombineValueByPrimaryKeys(
@@ -393,7 +393,6 @@ function primaryKeyValidator(_rule: RuleObject, value: string): Promise<void> {
     formState.value,
     props.primaryKeyAvoidRepeatCompareExtra,
   );
-
   if (
     props.primaryKeyAvoidRepeatCompareTarget
       .map((item): string => item.toLowerCase())
@@ -1353,10 +1352,55 @@ defineExpose({
         </a-select-option>
       </a-select>
       <a-select
+        v-else-if="item.type === 'multiSelect'"
+        v-model:value="formState[item.key]"
+        mode="multiple"
+        :filter-option="
+          (inputValue, option) =>
+            option.key.toLowerCase().indexOf(inputValue.toLowerCase()) > -1
+        "
+        allow-clear
+        show-search
+        :disabled="
+          (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
+          item.disabled
+        "
+      >
+        <a-select-option
+          v-for="option in item.options"
+          :key="option.label"
+          :value="option.value"
+        >
+          <a-tag
+            v-if="option.type === 'tag'"
+            :color="dealKungfuColorToStyleColor(option.color || 'default')"
+          >
+            {{
+              isLanguageKeyAvailable(option.label + '')
+                ? $t(option.label + '')
+                : option.label
+            }}
+          </a-tag>
+          <span
+            v-else
+            :class="dealKungfuColorToClassname(option.color || 'text')"
+            :style="{
+              color: dealKungfuColorToStyleColor(option.color || 'text'),
+            }"
+          >
+            {{
+              isLanguageKeyAvailable(option.label + '')
+                ? $t(option.label + '')
+                : option.label
+            }}
+          </span>
+        </a-select-option>
+      </a-select>
+      <a-select
         v-else-if="item.type === 'instrument'"
         :ref="item.key"
-        class="instrument-select"
         v-model:value="formState[item.key]"
+        class="instrument-select"
         :disabled="
           (changeType === 'update' && item.primary && !isPrimaryDisabled) ||
           item.disabled

@@ -11,7 +11,7 @@ import {
 import { useModalVisible } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 
 import {
-  buildIdByKeysFromKfConfigSettings,
+  buildIdByPrimaryKeysFromKfConfigSettings,
   initFormStateByConfig,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import KfConfigSettingsForm from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfConfigSettingsForm.vue';
@@ -125,7 +125,7 @@ function handleConfirm(): void {
         .filter((item) => item.primary)
         .map((item) => item.key);
 
-      const idByPrimaryKeys = buildIdByKeysFromKfConfigSettings(
+      const idByPrimaryKeys = buildIdByPrimaryKeysFromKfConfigSettings(
         formState.value,
         primaryKeys,
       );

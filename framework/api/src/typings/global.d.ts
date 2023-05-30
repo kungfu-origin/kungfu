@@ -68,6 +68,7 @@ declare module 'tail' {
 }
 
 declare module globalThis {
+  const __runtimeDir: string;
   const __publicResources: string;
   const __kfResourcesPath: string;
   const pm2: any;

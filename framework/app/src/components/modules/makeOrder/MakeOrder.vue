@@ -233,7 +233,7 @@ watch(
     const instrumentUKey = hashInstrumentUKey(instrumentId, exchangeId);
     formSteps.limit_price =
       (window.watcher.ledger.Instrument[instrumentUKey] as KungfuApi.Instrument)
-        ?.price_tick || 1;
+        ?.price_tick || 0.001;
 
     makeOrderInstrumentType.value = instrumentResolved.value.instrumentType;
   },

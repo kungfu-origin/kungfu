@@ -1,20 +1,28 @@
 // SPDX-License-Identifier: Apache-2.0
 
+const path = require('path');
 const { shell } = require('../lib');
 
 function poetry(args) {
-  // strip msvc environment variables for cython ext install (i.e. orderedset)
   const env = process.env;
-  for (key in process.env) {
-    const deleteKeyPrefix = ['__', 'Dev', 'npm', 'VC', 'VS'];
-    if (
-      deleteKeyPrefix.map((p) => key.startsWith(p)).reduce((a, b) => a || b)
-    ) {
-      console.log(`-- delete environment variable ${key}`);
-      delete env[key];
+  if (process.platform === 'win32') {
+    // strip msvc environment variables for cython ext install (i.e. orderedset)
+    for (key in process.env) {
+      const deleteKeyPrefix = ['Dev', 'VC', 'VS', 'Visual', 'Windows'];
+      if (
+        deleteKeyPrefix.map((p) => key.startsWith(p)).reduce((a, b) => a || b)
+      ) {
+        delete env[key];
+      }
     }
+    pathVar = [];
+    env.Path.split(path.delimiter).forEach((p) => {
+      if (!p.includes('Visual Studio')) {
+        pathVar.push(p);
+      }
+    });
+    env.Path = pathVar.join(path.delimiter);
   }
-  console.log(env);
   shell.run('pipenv', ['run', 'python', '-m', 'poetry', ...args], true, {
     env: env,
   });

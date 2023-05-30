@@ -32,6 +32,7 @@ import {
   removeArchiveBeforeToday,
   isKfColor,
   isHexOrRgbColor,
+  removeTodayArchive,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { readRootPackageJsonSync } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
@@ -205,6 +206,54 @@ export const useModalVisible = (
   };
 };
 
+export const useTreeTableSearchKeyword = <T extends { children?: T[] }>(
+  targetList: Ref<T[]> | ComputedRef<T[]>,
+  keys: string[],
+): {
+  searchKeyword: Ref<string>;
+  tableData: Ref<T[]>;
+} => {
+  const searchKeyword = ref<string>('');
+  function searchTree<T extends { children?: T[] }>(
+    tree: T[],
+    keys: string[],
+    searchKeyword: string,
+  ): T[] {
+    return tree
+      .filter((item) => {
+        const combinedValue = keys
+          .map((key: string) => {
+            const keyWord = (item as Record<string, unknown>)[
+              key
+            ] as unknown as string | number;
+            return keyWord ? keyWord.toString() : '';
+          })
+          .join('_');
+        const isMatch = new RegExp(searchKeyword, 'ig').test(combinedValue);
+        if (isMatch) return true;
+        const childMatch =
+          item.children && item.children.length > 0
+            ? searchTree(item.children, keys, searchKeyword).length > 0
+            : false;
+
+        return childMatch;
+      })
+      .map((item) => ({
+        ...item,
+        children: searchTree(item.children || [], keys, searchKeyword),
+      }));
+  }
+
+  const tableData = computed(() => {
+    return searchTree<T>(targetList.value, keys, searchKeyword.value);
+  });
+
+  return {
+    searchKeyword,
+    tableData,
+  };
+};
+
 export const useTableSearchKeyword = <T>(
   targetList: Ref<T[]> | ComputedRef<T[]>,
   keys: string[],
@@ -307,7 +356,7 @@ const removeJournalBeforeStartAll = (): Promise<void> => {
   if (needClearJournal) {
     localStorage.setItem('needClearJournal', '0');
     kfLogger.info('Clear Journal Done', needClearJournal);
-    return removeJournal(KF_HOME);
+    return removeTodayArchive(ARCHIVE_DIR).then(() => removeJournal(KF_HOME));
   } else {
     return Promise.resolve();
   }
@@ -533,6 +582,7 @@ export const handleOpenLogviewByFile =
   (): Promise<Electron.BrowserWindow | void> => {
     return dialog
       .showOpenDialog({
+        defaultPath: KF_HOME,
         properties: ['openFile'],
       })
       .then((res): Promise<Electron.BrowserWindow | void> => {
