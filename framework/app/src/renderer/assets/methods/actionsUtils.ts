@@ -490,7 +490,9 @@ export const useDealExportHistoryTradingData = (): {
       const orderStatSortKey = getTradingDataSortKey('OrderStat');
       const orderStat = tradingData.OrderStat.sort(orderStatSortKey);
       const positionSortKey = getTradingDataSortKey('Position');
-      const positions = tradingData.Position.sort(positionSortKey);
+      const positions = (
+        window.watcher as KungfuApi.Watcher
+      ).ledger.Position.sort(positionSortKey);
       const assetSortKey = getTradingDataSortKey('Asset');
       const assets = tradingData.Asset.sort(assetSortKey);
       const orderInputSortKey = getTradingDataSortKey('OrderInput');
@@ -576,22 +578,28 @@ export const useDealExportHistoryTradingData = (): {
       tradingData: KungfuApi.TradingData;
     } | null = null;
 
-    try {
-      historyData = await getKungfuHistoryData(
-        date,
-        dateType,
-        tradingDataType,
-        currentKfLocation,
-      );
-    } catch (err) {
-      if (err instanceof Error) {
-        if (err.message === 'database_locked') {
-          error(t('export_database_locked'));
+    if ((tradingDataType as KungfuApi.TradingDataTypeName) === 'Position') {
+      historyData = {
+        tradingData: (window.watcher as KungfuApi.Watcher).ledger,
+      };
+    } else {
+      try {
+        historyData = await getKungfuHistoryData(
+          date,
+          dateType,
+          tradingDataType,
+          currentKfLocation,
+        );
+      } catch (err) {
+        if (err instanceof Error) {
+          if (err.message === 'database_locked') {
+            error(t('export_database_locked'));
+          } else {
+            console.error(err);
+          }
         } else {
           console.error(err);
         }
-      } else {
-        console.error(err);
       }
     }
 
