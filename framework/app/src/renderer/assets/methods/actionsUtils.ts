@@ -5,7 +5,7 @@ import {
   dealPosition,
   dealTradingDataItem,
   getKungfuHistoryData,
-  hashInstrumentUKey,
+  hashInstrumentUKeyResolved,
   kfRequestMarketData,
 } from '@kungfu-trader/kungfu-js-api/kungfu';
 import { setKfConfig } from '@kungfu-trader/kungfu-js-api/kungfu/store';
@@ -1104,7 +1104,10 @@ export const useSubscibeInstrumentAtEntry = (
       .reverse()
       .slice(0, SUBSCRIBE_INSTRUMENTS_LIMIT)
       .map((item: KungfuApi.Position): KungfuApi.InstrumentForSub => {
-        const uidKey = hashInstrumentUKey(item.instrument_id, item.exchange_id);
+        const uidKey = hashInstrumentUKeyResolved(
+          item.instrument_id,
+          item.exchange_id,
+        );
         return {
           uidKey,
           exchangeId: item.exchange_id,
@@ -1201,7 +1204,7 @@ export const getInstrumentByInstrumentPair = (
   instruments: KungfuApi.InstrumentResolved[],
 ): KungfuApi.InstrumentResolved => {
   const { instrument_id, instrument_type, exchange_id } = instrumentPair;
-  const ukey = hashInstrumentUKey(instrument_id, exchange_id);
+  const ukey = hashInstrumentUKeyResolved(instrument_id, exchange_id);
   const targetInstrumnet: KungfuApi.InstrumentResolved | null =
     findTargetFromArray<KungfuApi.InstrumentResolved>(
       instruments,
@@ -1429,19 +1432,6 @@ export const useDealInstruments = (): void => {
       useGlobalStore().setInstrumentsMap(instruments);
     }
   };
-};
-
-export const hashInstrumentUKeyResolved = (
-  instrumentId: string,
-  exchangeId: string,
-) => {
-  if (!window.ukeyCacheMap) window.ukeyCacheMap = new Map<string, string>();
-  const ukeyCacheMap = window.ukeyCacheMap;
-  const cacheKey = `${instrumentId}_${exchangeId}`;
-  if (!ukeyCacheMap.has(cacheKey))
-    ukeyCacheMap.set(cacheKey, hashInstrumentUKey(instrumentId, exchangeId));
-
-  return ukeyCacheMap.get(cacheKey) || '';
 };
 
 export const useActiveInstruments = () => {
@@ -2516,7 +2506,7 @@ export const useBasket = () => {
 export const useDealDataWithCaches = <T, U>(keys: Array<keyof T>) => {
   const caches = new Map<string, U>();
 
-  const dealerResolved = (data: T, dealer: () => U): U => {
+  const getDealerWithCache = (data: T, dealer: () => U): U => {
     const curKey = keys.map((key) => data[key]).join('_');
     if (caches.has(curKey)) {
       const value = caches.get(curKey);
@@ -2534,8 +2524,12 @@ export const useDealDataWithCaches = <T, U>(keys: Array<keyof T>) => {
     caches.clear();
   };
 
+  onBeforeUnmount(() => {
+    caches.clear();
+  });
+
   return {
-    dealerResolved,
+    getDealerWithCache,
     clearCaches,
   };
 };
