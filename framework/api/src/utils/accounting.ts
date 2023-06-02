@@ -1,4 +1,4 @@
-import { hashInstrumentUKey } from '@kungfu-trader/kungfu-js-api/kungfu';
+import { hashInstrumentUKeyResolved } from '@kungfu-trader/kungfu-js-api/kungfu';
 import {
   DirectionEnum,
   InstrumentTypeEnum,
@@ -49,7 +49,7 @@ class BaseAccountingUsage implements AccountingUsage {
     instrumentId: string,
     exchangeId: string,
   ) {
-    const ukey = hashInstrumentUKey(instrumentId, exchangeId);
+    const ukey = hashInstrumentUKeyResolved(instrumentId, exchangeId);
     return watcher.ledger.Instrument[ukey] as KungfuApi.Instrument | null;
   }
 }

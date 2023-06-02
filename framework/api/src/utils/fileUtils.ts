@@ -3,7 +3,6 @@ import fse from 'fs-extra';
 import fsPromise from 'fs/promises';
 import * as csv from 'fast-csv';
 import { FormatterRow, ParserOptionsArgs } from 'fast-csv';
-import stream from 'stream';
 import findRoot from 'find-root';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import { RootConfigJSON } from '../typings/global';
@@ -78,10 +77,18 @@ export const readCSV = <T>(
   });
 };
 
+/**
+ * 返回的 `stream` 通过 `'finished'` 事件判断写入`csv`结束：
+ * ```
+ * csvStream.on('finished', () => {
+ *   ...
+ * });
+ * ```
+ */
 export const createWriteCsvStream = (
   filePath: string,
   transform?: (row: KungfuApi.TradingDataTypes) => FormatterRow,
-) => {
+): csv.CsvFormatterStream<KungfuApi.TradingDataTypes, csv.FormatterRow> => {
   const csvStream = csv.format({ headers: true, transform });
   const fileWriteStream = fse.createWriteStream(path.normalize(filePath));
   // 解决Excel导出乱码的问题
@@ -91,8 +98,19 @@ export const createWriteCsvStream = (
       fileWriteStream.write(chunk);
     })
     .on('end', () => {
-      fileWriteStream.end();
+      fileWriteStream.end(() => {
+        fileWriteStream.close((err) => {
+          if (!err) {
+            csvStream.emit('finished');
+          } else {
+            console.error(err);
+          }
+        });
+      });
     });
+  fileWriteStream.on('error', (err) => {
+    csvStream.emit('error', err);
+  });
   return csvStream;
 };
 
@@ -103,27 +121,18 @@ export const writeCsvWithUTF8Bom = (
 ) => {
   filePath = path.normalize(filePath);
   return new Promise<void>((resolve, reject) => {
-    const csvStream = csv.format({ headers: true, transform });
-    const outStream = new stream.PassThrough();
-    const buffers: Uint8Array[] = [];
-    csvStream
-      .pipe(outStream)
-      .on('data', (chunk) => {
-        buffers.push(chunk);
-      })
-      .on('end', () => {
-        // 解决Excel导出乱码的问题
-        const dataBuffer = Buffer.concat([
-          Buffer.from('\xEF\xBB\xBF', 'binary'),
-          Buffer.concat(buffers),
-        ]);
-        fse.writeFileSync(filePath, dataBuffer);
-        resolve();
-      })
-      .on('error', function (err) {
-        reject(err);
-      });
-    rows.forEach(function (row) {
+    const csvStream = createWriteCsvStream(filePath, transform);
+
+    csvStream.on('finished', () => {
+      resolve();
+    });
+
+    csvStream.on('error', (err) => {
+      console.error(err);
+      reject(err);
+    });
+
+    rows.forEach((row) => {
       csvStream.write(row);
     });
     csvStream.end();

@@ -59,7 +59,7 @@ import {
   readCSV,
   writeCsvWithUTF8Bom,
 } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
-import { hashInstrumentUKey } from '@kungfu-trader/kungfu-js-api/kungfu';
+import { hashInstrumentUKeyResolved } from '@kungfu-trader/kungfu-js-api/kungfu';
 import {
   buildInstrumentSelectOptionValue,
   useWritableTableSearchKeyword,
@@ -492,7 +492,10 @@ function instrumentsCsvCallback(
 
   instruments.forEach((item) => {
     if (item.exchange_id && item.instrument_id) {
-      const ukey = hashInstrumentUKey(item.instrument_id, item.exchange_id);
+      const ukey = hashInstrumentUKeyResolved(
+        item.instrument_id,
+        item.exchange_id,
+      );
       const existedInstrument = instrumentsCsvData[targetKey][ukey];
       if (!existedInstrument || !existedInstrument.instrumentName) {
         const instrumentResolved = getInstrumentByIds(
