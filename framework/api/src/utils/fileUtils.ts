@@ -283,11 +283,13 @@ export const findPackageRoot = () => {
 };
 
 export const readRootPackageJsonSync = (): RootConfigJSON => {
+  if (globalThis.rootPackageJson) return globalThis.rootPackageJson;
   const rootDir = findPackageRoot();
   const packageJsonPath = path.join(rootDir, 'package.json');
   if (fse.existsSync(packageJsonPath)) {
     try {
-      return fse.readJSONSync(packageJsonPath);
+      globalThis.rootPackageJson = fse.readJSONSync(packageJsonPath);
+      return globalThis.rootPackageJson;
     } catch (err) {
       console.error(err);
       return {};

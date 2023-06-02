@@ -1088,7 +1088,7 @@ export const useSubscibeInstrumentAtEntry = (
     useGlobalStore();
 
   const app = getCurrentInstance();
-  const SUBSCRIBE_INSTRUMENTS_LIMIT = 50;
+  // const SUBSCRIBE_INSTRUMENTS_LIMIT = 50;
 
   const getCurrentPositionsForSub = (watcher: KungfuApi.Watcher) => {
     if (!currentGlobalKfLocation.value) return [];
@@ -1100,24 +1100,26 @@ export const useSubscibeInstrumentAtEntry = (
       'position',
     ) as KungfuApi.Position[];
 
-    return positions
-      .reverse()
-      .slice(0, SUBSCRIBE_INSTRUMENTS_LIMIT)
-      .map((item: KungfuApi.Position): KungfuApi.InstrumentForSub => {
-        const uidKey = hashInstrumentUKeyResolved(
-          item.instrument_id,
-          item.exchange_id,
-        );
-        return {
-          uidKey,
-          exchangeId: item.exchange_id,
-          instrumentId: item.instrument_id,
-          instrumentType: item.instrument_type,
-          instrumentName: '',
-          ukey: uidKey,
-          id: uidKey,
-        };
-      });
+    return (
+      positions
+        .reverse()
+        // .slice(0, SUBSCRIBE_INSTRUMENTS_LIMIT)
+        .map((item: KungfuApi.Position): KungfuApi.InstrumentForSub => {
+          const uidKey = hashInstrumentUKeyResolved(
+            item.instrument_id,
+            item.exchange_id,
+          );
+          return {
+            uidKey,
+            exchangeId: item.exchange_id,
+            instrumentId: item.instrument_id,
+            instrumentType: item.instrument_type,
+            instrumentName: '',
+            ukey: uidKey,
+            id: uidKey,
+          };
+        })
+    );
   };
 
   const subscribeInstrumentsByCurPosAndProcessIds = (
