@@ -624,25 +624,27 @@ export const makeOrderByBasketTrade = (
   );
 };
 
+const ukeyCacheMap = new Map<string, string>();
+export const hashUkey = (...args: Array<string | number>) => {
+  const strArgs = args.map((arg) => `${arg}`);
+  const cacheKey = strArgs.join('_');
+  if (!ukeyCacheMap.has(cacheKey))
+    ukeyCacheMap.set(
+      cacheKey,
+      strArgs
+        .reduce<bigint>((pre, cur) => pre ^ BigInt(kf.hash(`${cur}`)), 0n)
+        .toString(16)
+        .padStart(16, '0'),
+    );
+
+  return ukeyCacheMap.get(cacheKey) || '';
+};
+
 export const hashInstrumentUKey = (
   instrumentId: string,
   exchangeId: string,
 ): string => {
-  return (BigInt(kf.hash(instrumentId)) ^ BigInt(kf.hash(exchangeId)))
-    .toString(16)
-    .padStart(16, '0');
-};
-
-const ukeyCacheMap = new Map<string, string>();
-export const hashInstrumentUKeyResolved = (
-  instrumentId: string,
-  exchangeId: string,
-) => {
-  const cacheKey = `${instrumentId}_${exchangeId}`;
-  if (!ukeyCacheMap.has(cacheKey))
-    ukeyCacheMap.set(cacheKey, hashInstrumentUKey(instrumentId, exchangeId));
-
-  return ukeyCacheMap.get(cacheKey) || '';
+  return hashUkey(instrumentId, exchangeId);
 };
 
 export const dealOrder = (
@@ -732,7 +734,7 @@ export const dealPosition = (
       ? `${holderLocation.group}_${holderLocation.name}`
       : '--';
   const closable_volume = getPosClosableVolume(pos);
-  const ukey = hashInstrumentUKeyResolved(pos.instrument_id, pos.exchange_id);
+  const ukey = hashInstrumentUKey(pos.instrument_id, pos.exchange_id);
   const currency =
     ((watcher.ledger.Instrument[ukey] as KungfuApi.Instrument) || null)
       ?.currency_type || CurrencyEnum.Unknown;

@@ -5,7 +5,7 @@ import {
   dealPosition,
   dealTradingDataItem,
   getKungfuHistoryData,
-  hashInstrumentUKeyResolved,
+  hashInstrumentUKey,
   kfRequestMarketData,
 } from '@kungfu-trader/kungfu-js-api/kungfu';
 import { setKfConfig } from '@kungfu-trader/kungfu-js-api/kungfu/store';
@@ -1088,7 +1088,7 @@ export const useSubscibeInstrumentAtEntry = (
     useGlobalStore();
 
   const app = getCurrentInstance();
-  const SUBSCRIBE_INSTRUMENTS_LIMIT = 50;
+  // const SUBSCRIBE_INSTRUMENTS_LIMIT = 50;
 
   const getCurrentPositionsForSub = (watcher: KungfuApi.Watcher) => {
     if (!currentGlobalKfLocation.value) return [];
@@ -1100,24 +1100,26 @@ export const useSubscibeInstrumentAtEntry = (
       'position',
     ) as KungfuApi.Position[];
 
-    return positions
-      .reverse()
-      .slice(0, SUBSCRIBE_INSTRUMENTS_LIMIT)
-      .map((item: KungfuApi.Position): KungfuApi.InstrumentForSub => {
-        const uidKey = hashInstrumentUKeyResolved(
-          item.instrument_id,
-          item.exchange_id,
-        );
-        return {
-          uidKey,
-          exchangeId: item.exchange_id,
-          instrumentId: item.instrument_id,
-          instrumentType: item.instrument_type,
-          instrumentName: '',
-          ukey: uidKey,
-          id: uidKey,
-        };
-      });
+    return (
+      positions
+        .reverse()
+        // .slice(0, SUBSCRIBE_INSTRUMENTS_LIMIT)
+        .map((item: KungfuApi.Position): KungfuApi.InstrumentForSub => {
+          const uidKey = hashInstrumentUKey(
+            item.instrument_id,
+            item.exchange_id,
+          );
+          return {
+            uidKey,
+            exchangeId: item.exchange_id,
+            instrumentId: item.instrument_id,
+            instrumentType: item.instrument_type,
+            instrumentName: '',
+            ukey: uidKey,
+            id: uidKey,
+          };
+        })
+    );
   };
 
   const subscribeInstrumentsByCurPosAndProcessIds = (
@@ -1204,7 +1206,7 @@ export const getInstrumentByInstrumentPair = (
   instruments: KungfuApi.InstrumentResolved[],
 ): KungfuApi.InstrumentResolved => {
   const { instrument_id, instrument_type, exchange_id } = instrumentPair;
-  const ukey = hashInstrumentUKeyResolved(instrument_id, exchange_id);
+  const ukey = hashInstrumentUKey(instrument_id, exchange_id);
   const targetInstrumnet: KungfuApi.InstrumentResolved | null =
     findTargetFromArray<KungfuApi.InstrumentResolved>(
       instruments,
@@ -1442,7 +1444,7 @@ export const useActiveInstruments = () => {
     exchangeId: string,
     forceConvert = false,
   ) => {
-    const ukey = hashInstrumentUKeyResolved(instrumentId, exchangeId);
+    const ukey = hashInstrumentUKey(instrumentId, exchangeId);
     const instrumentResolved = instrumentsMap[ukey];
 
     if (instrumentResolved) {
@@ -1468,7 +1470,7 @@ export const useActiveInstruments = () => {
     instrumentId: string,
     exchangeId: string,
   ) => {
-    const ukey = hashInstrumentUKeyResolved(instrumentId, exchangeId);
+    const ukey = hashInstrumentUKey(instrumentId, exchangeId);
     const watcher = window.watcher as KungfuApi.Watcher;
     const instrument = watcher.ledger.Instrument[ukey];
     if (instrument) return instrument;

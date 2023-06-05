@@ -17,7 +17,7 @@ import {
 } from './utils';
 import {
   makeOrderByOrderInput,
-  hashInstrumentUKeyResolved,
+  hashInstrumentUKey,
   getPosClosableVolume,
 } from '@kungfu-trader/kungfu-js-api/kungfu';
 import {
@@ -230,7 +230,7 @@ watch(
     triggerOrderBook(instrumentResolved.value);
 
     const { instrumentId, exchangeId } = instrumentResolved.value;
-    const instrumentUKey = hashInstrumentUKeyResolved(instrumentId, exchangeId);
+    const instrumentUKey = hashInstrumentUKey(instrumentId, exchangeId);
     formSteps.limit_price =
       (window.watcher.ledger.Instrument[instrumentUKey] as KungfuApi.Instrument)
         ?.price_tick || 0.001;
@@ -420,7 +420,7 @@ function dealFatFingerMessage(
   if (fatFingerRange === 0) return '';
 
   const { exchangeId, instrumentId } = instrumentResolved.value;
-  const ukey = hashInstrumentUKeyResolved(instrumentId, exchangeId);
+  const ukey = hashInstrumentUKey(instrumentId, exchangeId);
 
   const { limit_price: price, side } = makeOrderInput;
   const lastPrice = window.watcher.ledger.Quote[ukey]?.last_price;
