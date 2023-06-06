@@ -62,7 +62,7 @@ const {
 const { handleDownload } = useDownloadHistoryTradingData();
 const { triggerOrderBook, triggerMakeOrder } = useTriggerMakeOrder();
 const { instruments } = useInstruments();
-const { getDealerWithCache } = useDealDataWithCaches<
+const { dealDataWithCache } = useDealDataWithCaches<
   KungfuApi.Position,
   KungfuApi.PositionResolved
 >(['uid_key', 'update_time']);
@@ -101,7 +101,7 @@ onMounted(() => {
           positions
             .reverse()
             .map((item) =>
-              getDealerWithCache(item, () => dealPosition(watcher, item)),
+              dealDataWithCache(item, () => dealPosition(watcher, item)),
             ),
         );
       },

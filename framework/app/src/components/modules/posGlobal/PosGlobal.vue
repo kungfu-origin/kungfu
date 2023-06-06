@@ -34,6 +34,7 @@ import {
   useCurrentGlobalKfLocation,
   useInstruments,
   useActiveInstruments,
+  useDealDataWithCaches,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import {
   dealPosition,
@@ -70,6 +71,10 @@ const {
 const { instruments } = useInstruments();
 const { triggerOrderBook, triggerMakeOrder } = useTriggerMakeOrder();
 const { getInstrumentCurrencyByIds } = useActiveInstruments();
+const { dealDataWithCache } = useDealDataWithCaches<
+  KungfuApi.Position,
+  KungfuApi.PositionResolved
+>(['uid_key', 'update_time']);
 const { globalSetting } = storeToRefs(useGlobalStore());
 
 onMounted(() => {
@@ -86,7 +91,9 @@ onMounted(() => {
 
           pos.value = toRaw(
             buildGlobalPositions(positions).map((position) =>
-              dealPosition(window.watcher, position),
+              dealDataWithCache(position, () =>
+                dealPosition(watcher, position),
+              ),
             ),
           );
         });

@@ -64,7 +64,7 @@ const app = getCurrentInstance();
 const { handleBodySizeChange } = useDashboardBodySize();
 
 const { processStatusData } = useProcessStatusDetailData();
-const { getDealerWithCache, clearCaches } = useDealDataWithCaches<
+const { dealDataWithCache, clearCaches } = useDealDataWithCaches<
   KungfuApi.Order,
   KungfuApi.OrderResolved
 >(['uid_key', 'update_time']);
@@ -135,7 +135,7 @@ onMounted(() => {
         if (unfinishedOrder.value) {
           const tempAllOrders = ordersResolved.map((item) =>
             toRaw(
-              getDealerWithCache(item, () =>
+              dealDataWithCache(item, () =>
                 dealOrder(watcher, item, watcher.ledger.OrderStat),
               ),
             ),
@@ -151,7 +151,7 @@ onMounted(() => {
         const { totalOrders, ordersForTable } = ordersResolved.reduce(
           (preOrders, curOrder) => {
             const orderResolved = toRaw(
-              getDealerWithCache(curOrder, () =>
+              dealDataWithCache(curOrder, () =>
                 dealOrder(watcher, curOrder, watcher.ledger.OrderStat),
               ),
             );
@@ -228,7 +228,7 @@ watch(historyDate, async (newDate) => {
       const tempAllOrders = toRaw(
         orderResolved.map((item) =>
           toRaw(
-            getDealerWithCache(item, () =>
+            dealDataWithCache(item, () =>
               dealOrder(window.watcher, item, tradingData.OrderStat, true),
             ),
           ),

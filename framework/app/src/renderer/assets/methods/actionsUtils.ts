@@ -2508,7 +2508,7 @@ export const useBasket = () => {
 export const useDealDataWithCaches = <T, U>(keys: Array<keyof T>) => {
   const caches = new Map<string, U>();
 
-  const getDealerWithCache = (data: T, dealer: () => U): U => {
+  const dealDataWithCache = (data: T, dealer: () => U): U => {
     const curKey = keys.map((key) => data[key]).join('_');
     if (caches.has(curKey)) {
       const value = caches.get(curKey);
@@ -2531,7 +2531,7 @@ export const useDealDataWithCaches = <T, U>(keys: Array<keyof T>) => {
   });
 
   return {
-    getDealerWithCache,
+    dealDataWithCache,
     clearCaches,
   };
 };
