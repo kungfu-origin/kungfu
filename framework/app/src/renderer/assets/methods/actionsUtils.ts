@@ -42,7 +42,6 @@ import {
   dealKfNumber,
   dealKfPrice,
   transformSearchInstrumentResultToInstrument,
-  booleanProcessEnv,
   isShotable,
   isT0,
   getTradingDataSortKey,
@@ -50,6 +49,7 @@ import {
   isCheckVersionLogicEnable,
   kfLogger,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import { booleanProcessEnv } from '@kungfu-trader/kungfu-js-api/utils/commonUtils';
 import { BasketVolumeType } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import { writeCsvWithUTF8Bom } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import {
@@ -1225,6 +1225,14 @@ export const getInstrumentByInstrumentPair = (
   };
 };
 
+export const getPositionLastPrice = (pos: KungfuApi.PositionResolved) => {
+  const ukey = hashInstrumentUKey(pos.instrument_id, pos.exchange_id);
+  const quote = window.watcher.ledger.Quote[ukey] as KungfuApi.Quote;
+  return (
+    (quote.data_time > pos.update_time ? quote.last_price : pos.last_price) || 0
+  );
+};
+
 export const useQuote = (): {
   quotes: Ref<Record<string, KungfuApi.Quote>>;
   getQuoteByInstrument(
@@ -2011,6 +2019,7 @@ export const useMakeOrderInfo = (
   const { currentGlobalKfLocation } = useCurrentGlobalKfLocation(
     window.watcher,
   );
+  const { getQuoteByInstrument } = useQuote();
   const { currentPositionList } = useCurrentPositionList();
   const { getAssetsByKfConfig } = useAssets();
 
@@ -2185,7 +2194,34 @@ export const useMakeOrderInfo = (
     if (price_type === PriceTypeEnum.Limit) {
       return limit_price as number;
     } else if (price_type === PriceTypeEnum.Market) {
-      return currentPosition.value?.last_price ?? null;
+      if (currentPosition.value) {
+        const {
+          last_price,
+          instrument_id,
+          exchange_id,
+          instrument_type,
+          uid_key,
+          update_time,
+        } = currentPosition.value;
+
+        const quote = getQuoteByInstrument({
+          instrumentId: instrument_id,
+          instrumentType: instrument_type,
+          instrumentName: '',
+          exchangeId: exchange_id,
+          id: uid_key,
+          ukey: uid_key,
+        });
+
+        if (quote) {
+          return (
+            (quote.data_time > update_time ? quote.last_price : last_price) ||
+            null
+          );
+        }
+
+        return last_price || null;
+      }
     }
 
     return null;
