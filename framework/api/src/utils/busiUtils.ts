@@ -1956,26 +1956,6 @@ export const transformSearchInstrumentResultToInstrument = (
   };
 };
 
-export const booleanProcessEnv = (
-  val: string | boolean | undefined,
-): boolean => {
-  if (val === undefined) {
-    return false;
-  }
-
-  if (val === 'null') {
-    return false;
-  }
-
-  if (val === 'true') {
-    return true;
-  } else if (val === 'false') {
-    return false;
-  } else {
-    return !!val;
-  }
-};
-
 export const numberEnumRadioType: Record<
   string,
   Record<number, KungfuApi.KfTradeValueCommonData>

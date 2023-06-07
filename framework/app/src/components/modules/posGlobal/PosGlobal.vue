@@ -31,6 +31,7 @@ import {
 import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import {
   getInstrumentByInstrumentPair,
+  getPositionLastPrice,
   useCurrentGlobalKfLocation,
   useInstruments,
   useActiveInstruments,
@@ -181,7 +182,7 @@ function handleClickRow(data: {
   tiggerOrderBookAndMakeOrder(data.row);
 }
 
-function tiggerOrderBookAndMakeOrder(record: KungfuApi.Position) {
+function tiggerOrderBookAndMakeOrder(record: KungfuApi.PositionResolved) {
   const { instrument_id, instrument_type, exchange_id } = record;
   const ensuredInstrument: KungfuApi.InstrumentResolved =
     getInstrumentByInstrumentPair(
@@ -278,7 +279,9 @@ function tiggerOrderBookAndMakeOrder(record: KungfuApi.Position) {
             <KfBlinkNum :num="dealKfPrice(item.avg_open_price)"></KfBlinkNum>
           </template>
           <template v-else-if="column.dataIndex === 'last_price'">
-            <KfBlinkNum :num="dealKfPrice(item.last_price)"></KfBlinkNum>
+            <KfBlinkNum
+              :num="dealKfPrice(getPositionLastPrice(item))"
+            ></KfBlinkNum>
           </template>
           <template v-else-if="column.dataIndex === 'unrealized_pnl'">
             <KfBlinkNum
