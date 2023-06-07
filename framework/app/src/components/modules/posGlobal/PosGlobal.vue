@@ -31,9 +31,11 @@ import {
 import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import {
   getInstrumentByInstrumentPair,
+  getPositionLastPrice,
   useCurrentGlobalKfLocation,
   useInstruments,
   useActiveInstruments,
+  useDealDataWithCaches,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import {
   dealPosition,
@@ -70,6 +72,10 @@ const {
 const { instruments } = useInstruments();
 const { triggerOrderBook, triggerMakeOrder } = useTriggerMakeOrder();
 const { getInstrumentCurrencyByIds } = useActiveInstruments();
+const { dealDataWithCache } = useDealDataWithCaches<
+  KungfuApi.Position,
+  KungfuApi.PositionResolved
+>(['uid_key', 'update_time']);
 const { globalSetting } = storeToRefs(useGlobalStore());
 
 onMounted(() => {
@@ -86,7 +92,9 @@ onMounted(() => {
 
           pos.value = toRaw(
             buildGlobalPositions(positions).map((position) =>
-              dealPosition(window.watcher, position),
+              dealDataWithCache(position, () =>
+                dealPosition(watcher, position),
+              ),
             ),
           );
         });
@@ -174,7 +182,7 @@ function handleClickRow(data: {
   tiggerOrderBookAndMakeOrder(data.row);
 }
 
-function tiggerOrderBookAndMakeOrder(record: KungfuApi.Position) {
+function tiggerOrderBookAndMakeOrder(record: KungfuApi.PositionResolved) {
   const { instrument_id, instrument_type, exchange_id } = record;
   const ensuredInstrument: KungfuApi.InstrumentResolved =
     getInstrumentByInstrumentPair(
@@ -271,7 +279,9 @@ function tiggerOrderBookAndMakeOrder(record: KungfuApi.Position) {
             <KfBlinkNum :num="dealKfPrice(item.avg_open_price)"></KfBlinkNum>
           </template>
           <template v-else-if="column.dataIndex === 'last_price'">
-            <KfBlinkNum :num="dealKfPrice(item.last_price)"></KfBlinkNum>
+            <KfBlinkNum
+              :num="dealKfPrice(getPositionLastPrice(item))"
+            ></KfBlinkNum>
           </template>
           <template v-else-if="column.dataIndex === 'unrealized_pnl'">
             <KfBlinkNum

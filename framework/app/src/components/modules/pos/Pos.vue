@@ -38,6 +38,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
   getInstrumentByInstrumentPair,
+  getPositionLastPrice,
   useCurrentGlobalKfLocation,
   useInstruments,
   useDealDataWithCaches,
@@ -62,7 +63,7 @@ const {
 const { handleDownload } = useDownloadHistoryTradingData();
 const { triggerOrderBook, triggerMakeOrder } = useTriggerMakeOrder();
 const { instruments } = useInstruments();
-const { getDealerWithCache } = useDealDataWithCaches<
+const { dealDataWithCache } = useDealDataWithCaches<
   KungfuApi.Position,
   KungfuApi.PositionResolved
 >(['uid_key', 'update_time']);
@@ -101,7 +102,7 @@ onMounted(() => {
           positions
             .reverse()
             .map((item) =>
-              getDealerWithCache(item, () => dealPosition(watcher, item)),
+              dealDataWithCache(item, () => dealPosition(watcher, item)),
             ),
         );
       },
@@ -238,7 +239,9 @@ function dealLocationUIDResolved(holderUID: number): string {
             <KfBlinkNum :num="dealKfPrice(item.avg_open_price)"></KfBlinkNum>
           </template>
           <template v-else-if="column.dataIndex === 'last_price'">
-            <KfBlinkNum :num="dealKfPrice(item.last_price)"></KfBlinkNum>
+            <KfBlinkNum
+              :num="dealKfPrice(getPositionLastPrice(item))"
+            ></KfBlinkNum>
           </template>
           <template v-else-if="column.dataIndex === 'unrealized_pnl'">
             <KfBlinkNum

@@ -721,7 +721,7 @@ export default {
   closing: 'End the transaction process, Please do not close...',
 
   computer_performance_abnormal:
-    'Computer performance is too low, continue start maybe make system process crash, suggest use the CPU core num more than 8.',
+    'Computer performance is too low, will open the pass accounting option (you can reopen it in global system settings, but that maybe make system crash), suggest use the CPU core num more than 8.',
 
   quit_confirm:
     'Exiting the application ends all transactions, Confirm to exit?',

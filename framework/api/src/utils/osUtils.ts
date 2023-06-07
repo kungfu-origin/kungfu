@@ -1,7 +1,7 @@
 import os from 'os';
 import { promisified as regedit, RegistryItem } from 'regedit';
 
-const KUNGFU_SAFE_CPUS_NUM = 4;
+export const KUNGFU_SAFE_CPUS_NUM = 4;
 
 export const isWindows = () => os.platform() === 'win32';
 export const isMacos = () => os.platform() === 'darwin';

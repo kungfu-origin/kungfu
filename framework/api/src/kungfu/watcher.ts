@@ -1,13 +1,13 @@
 import { kf } from './index';
-import { KF_RUNTIME_DIR } from '../config/pathConfig';
+import { KF_RUNTIME_DIR } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 import { getKfGlobalSettingsValue } from '@kungfu-trader/kungfu-js-api/config/globalSettings';
 import {
-  booleanProcessEnv,
   kfLogger,
   setTimerPromiseTask,
   // statTime,
   // statTimeEnd,
-} from '../utils/busiUtils';
+} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import { booleanProcessEnv } from '@kungfu-trader/kungfu-js-api/utils/commonUtils';
 
 export const getWatcherId = () => {
   const watcherId = [

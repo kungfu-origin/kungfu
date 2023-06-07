@@ -34,6 +34,7 @@ import {
   isHexOrRgbColor,
   removeTodayArchive,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import { booleanProcessEnv } from '@kungfu-trader/kungfu-js-api/utils/commonUtils';
 import { readRootPackageJsonSync } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import { BrowserWindow, getCurrentWindow, dialog } from '@electron/remote';
@@ -45,7 +46,6 @@ import {
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import path from 'path';
 import { startExtDaemon } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
-import { checkIfCpusNumSafe } from '@kungfu-trader/kungfu-js-api/utils/osUtils';
 import { Proc } from 'pm2';
 import { VueNode } from 'ant-design-vue/lib/_util/type';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
@@ -386,15 +386,17 @@ export const preStartAll = async (): Promise<(void | Proc)[]> => {
 };
 
 export const checkCpusNumAndConfirmModal = (): Promise<boolean> => {
-  return checkIfCpusNumSafe().then((flag) => {
-    if (flag) return Promise.resolve(true);
+  return Promise.resolve(booleanProcessEnv(process.env.IF_CPUS_NUM_SAFE)).then(
+    (flag) => {
+      if (flag) return Promise.resolve(true);
 
-    return confirmModalByCustomArgs(
-      t('system_prompt'),
-      t('computer_performance_abnormal'),
-      { zIndex: 1001 },
-    );
-  });
+      return confirmModalByCustomArgs(
+        t('system_prompt'),
+        t('computer_performance_abnormal'),
+        { zIndex: 1001 },
+      );
+    },
+  );
 };
 
 export const postStartAll = async (): Promise<(void | Proc)[]> => {
