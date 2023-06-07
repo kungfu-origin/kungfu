@@ -5,13 +5,13 @@ import { getTradingDataSortKey } from '@kungfu-trader/kungfu-js-api/utils/busiUt
 const { t } = VueI18n.global;
 
 const buildSorter =
-  (dataIndex: keyof KungfuApi.Position) =>
-  (a: KungfuApi.Position, b: KungfuApi.Position) =>
+  (dataIndex: keyof KungfuApi.PositionResolved) =>
+  (a: KungfuApi.PositionResolved, b: KungfuApi.PositionResolved) =>
     (+Number(a[dataIndex]) || 0) - (+Number(b[dataIndex]) || 0);
 
 const buildStrSorter =
-  (dataIndex: keyof KungfuApi.Position) =>
-  (a: KungfuApi.Position, b: KungfuApi.Position) =>
+  (dataIndex: keyof KungfuApi.PositionResolved) =>
+  (a: KungfuApi.PositionResolved, b: KungfuApi.PositionResolved) =>
     a[dataIndex].toString().localeCompare(b[dataIndex].toString());
 
 export const getColumns = (): KfTradingDataTableHeaderConfig[] => [
