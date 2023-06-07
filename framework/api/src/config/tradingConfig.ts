@@ -917,3 +917,21 @@ export const Currency: Record<CurrencyEnum, KungfuApi.KfTradeValueCommonData> =
     [CurrencyEnum.SGD]: { name: t('tradingConfig.SGD') },
     [CurrencyEnum.MYR]: { name: t('tradingConfig.MYR') },
   };
+
+export const ExportTradingDataColumnsToFilter: Record<
+  KungfuApi.TradingDataTypeName,
+  string[]
+> = {
+  Position: ['dest', 'source'],
+  Trade: [],
+  Order: [],
+  Instrument: [],
+  AssetMargin: [],
+  Asset: [],
+  OrderInput: [],
+  OrderStat: [],
+  Quote: [],
+  Basket: [],
+  BasketInstrument: [],
+  BasketOrder: [],
+};

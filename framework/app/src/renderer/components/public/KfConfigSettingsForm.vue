@@ -777,7 +777,7 @@ function handleDownloadCsvTemplate(
                 filePaths[0],
                 template.name || t('settingsFormConfig.csv_template') + '.csv',
               );
-              return writeCsvWithUTF8Bom(filePath, template.data || []);
+              return writeCsvWithUTF8Bom(filePath, template.data || [], true);
             }),
           ).then(() => {
             messagePrompt().success();
