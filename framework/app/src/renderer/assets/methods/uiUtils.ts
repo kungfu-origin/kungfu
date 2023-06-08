@@ -901,8 +901,9 @@ export const vueProvideBaseOnParent = <T extends { [x: string]: any }>(
   key: InjectionKey<T> | string,
   value: T,
 ) => {
-  const parentProvide = inject(key);
-  if (!parentProvide) return provide(key, value);
+  const emptyObj = {} as T;
+  const parentProvide = inject(key, emptyObj);
+  if (!parentProvide || parentProvide === emptyObj) return provide(key, value);
   if (typeof parentProvide !== 'object' || typeof value !== 'object')
     return provide(key, value);
   return provide(key, Object.assign(parentProvide, value));

@@ -42,6 +42,7 @@ import {
   useCurrentGlobalKfLocation,
   useInstruments,
   useDealDataWithCaches,
+  useQuote,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 
 const app = getCurrentInstance();
@@ -63,6 +64,7 @@ const {
 const { handleDownload } = useDownloadHistoryTradingData();
 const { triggerOrderBook, triggerMakeOrder } = useTriggerMakeOrder();
 const { instruments } = useInstruments();
+const { getQuoteByPosition } = useQuote();
 const { dealDataWithCache } = useDealDataWithCaches<
   KungfuApi.Position,
   KungfuApi.PositionResolved
@@ -194,7 +196,7 @@ function dealLocationUIDResolved(holderUID: number): string {
       <KfTradingDataTable
         :columns="columns"
         :dataSource="tableData"
-        keyField="uid_key"
+        keyField="id"
         @clickCell="handleClickRow"
       >
         <template
@@ -240,7 +242,11 @@ function dealLocationUIDResolved(holderUID: number): string {
           </template>
           <template v-else-if="column.dataIndex === 'last_price'">
             <KfBlinkNum
-              :num="dealKfPrice(getPositionLastPrice(item))"
+              :num="
+                dealKfPrice(
+                  getPositionLastPrice(item, getQuoteByPosition(item)),
+                )
+              "
             ></KfBlinkNum>
           </template>
           <template v-else-if="column.dataIndex === 'unrealized_pnl'">

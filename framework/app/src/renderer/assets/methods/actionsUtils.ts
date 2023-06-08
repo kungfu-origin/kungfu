@@ -1244,13 +1244,17 @@ export const getInstrumentByInstrumentPair = (
   };
 };
 
-export const getPositionLastPrice = (pos: KungfuApi.PositionResolved) => {
-  const ukey = hashInstrumentUKey(pos.instrument_id, pos.exchange_id);
-  const quote = window.watcher.ledger.Quote[ukey] as KungfuApi.Quote;
+export const getPositionLastPrice = (
+  pos: KungfuApi.PositionResolved,
+  quote: KungfuApi.Quote | null,
+) => {
+  // 有行情时，根据 quote 和 position 更新时间取最新 last_price,
+  // 若 position 没有 last_price, 则取 quote 的 last_price
   if (quote) {
     return (
-      (quote.data_time > pos.update_time ? quote.last_price : pos.last_price) ||
-      0
+      (quote.data_time > pos.update_time
+        ? quote.last_price
+        : pos.last_price || quote.last_price) || 0
     );
   }
   return pos.last_price || 0;
@@ -1260,6 +1264,9 @@ export const useQuote = (): {
   quotes: Ref<Record<string, KungfuApi.Quote>>;
   getQuoteByInstrument(
     instrument: KungfuApi.InstrumentResolved | undefined,
+  ): KungfuApi.Quote | null;
+  getQuoteByPosition(
+    posiiton: KungfuApi.Position | undefined,
   ): KungfuApi.Quote | null;
   getLastPricePercent(
     instrument: KungfuApi.InstrumentResolved | undefined,
@@ -1298,6 +1305,25 @@ export const useQuote = (): {
     const { ukey } = instrument;
     const quote = quotes.value[ukey] as KungfuApi.Quote | undefined;
     return quote || null;
+  };
+
+  const getQuoteByPosition = (
+    position: KungfuApi.Position | undefined,
+  ): KungfuApi.Quote | null => {
+    if (!position) {
+      return null;
+    }
+
+    const instrumentResolved: KungfuApi.InstrumentResolved = {
+      instrumentId: position.instrument_id,
+      exchangeId: position.exchange_id,
+      instrumentName: '',
+      instrumentType: position.instrument_type,
+      ukey: position.uid_key,
+      id: position.uid_key,
+    };
+
+    return getQuoteByInstrument(instrumentResolved);
   };
 
   const getLastPricePercent = (
@@ -1396,6 +1422,7 @@ export const useQuote = (): {
   return {
     quotes,
     getQuoteByInstrument,
+    getQuoteByPosition,
     getLastPricePercent,
     getPreClosePrice,
     isInstrumentUpLimit,

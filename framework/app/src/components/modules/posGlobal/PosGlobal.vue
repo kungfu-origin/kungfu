@@ -36,6 +36,7 @@ import {
   useInstruments,
   useActiveInstruments,
   useDealDataWithCaches,
+  useQuote,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import {
   dealPosition,
@@ -70,6 +71,7 @@ const {
   setCurrentGlobalKfLocation,
 } = useCurrentGlobalKfLocation(window.watcher);
 const { instruments } = useInstruments();
+const { getQuoteByPosition } = useQuote();
 const { triggerOrderBook, triggerMakeOrder } = useTriggerMakeOrder();
 const { getInstrumentCurrencyByIds } = useActiveInstruments();
 const { dealDataWithCache } = useDealDataWithCaches<
@@ -118,8 +120,13 @@ function buildGlobalPositions(
       posStat[id] = pos;
     } else {
       const prePosStat = posStat[id];
-      const { avg_open_price, volume, yesterday_volume, unrealized_pnl } =
-        prePosStat;
+      const {
+        avg_open_price,
+        volume,
+        yesterday_volume,
+        unrealized_pnl,
+        update_time,
+      } = prePosStat;
       posStat[id] = {
         ...prePosStat,
         uid_key: pos.uid_key,
@@ -131,6 +138,8 @@ function buildGlobalPositions(
             pos.avg_open_price * Number(pos.volume)) /
           (Number(volume) + Number(pos.volume)),
         unrealized_pnl: unrealized_pnl + pos.unrealized_pnl,
+        update_time:
+          update_time > pos.update_time ? update_time : pos.update_time,
       };
     }
     return posStat;
@@ -222,7 +231,7 @@ function tiggerOrderBookAndMakeOrder(record: KungfuApi.PositionResolved) {
       </template>
       <KfTradingDataTable
         class="kf-ant-table"
-        key-field="uid_key"
+        key-field="id"
         :columns="columns"
         :data-source="tableData"
         :item-size="28"
@@ -280,7 +289,11 @@ function tiggerOrderBookAndMakeOrder(record: KungfuApi.PositionResolved) {
           </template>
           <template v-else-if="column.dataIndex === 'last_price'">
             <KfBlinkNum
-              :num="dealKfPrice(getPositionLastPrice(item))"
+              :num="
+                dealKfPrice(
+                  getPositionLastPrice(item, getQuoteByPosition(item)),
+                )
+              "
             ></KfBlinkNum>
           </template>
           <template v-else-if="column.dataIndex === 'unrealized_pnl'">
