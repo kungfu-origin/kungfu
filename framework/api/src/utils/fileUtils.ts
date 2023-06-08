@@ -87,9 +87,10 @@ export const readCSV = <T>(
  */
 export const createWriteCsvStream = (
   filePath: string,
+  headers: boolean | string[],
   transform?: (row: KungfuApi.TradingDataTypes) => FormatterRow,
 ): csv.CsvFormatterStream<KungfuApi.TradingDataTypes, csv.FormatterRow> => {
-  const csvStream = csv.format({ headers: true, transform });
+  const csvStream = csv.format({ headers, transform });
   const fileWriteStream = fse.createWriteStream(path.normalize(filePath));
   // 解决Excel导出乱码的问题
   fileWriteStream.write(Buffer.from('\xEF\xBB\xBF', 'binary'));
@@ -117,11 +118,12 @@ export const createWriteCsvStream = (
 export const writeCsvWithUTF8Bom = (
   filePath: string,
   rows: KungfuApi.TradingDataTypes[],
+  headers: boolean | string[],
   transform = (row: KungfuApi.TradingDataTypes) => row as FormatterRow,
 ) => {
   filePath = path.normalize(filePath);
   return new Promise<void>((resolve, reject) => {
-    const csvStream = createWriteCsvStream(filePath, transform);
+    const csvStream = createWriteCsvStream(filePath, headers, transform);
 
     csvStream.on('finished', () => {
       resolve();
