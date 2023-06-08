@@ -31,11 +31,11 @@ import {
 import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import {
   getInstrumentByInstrumentPair,
-  getPositionLastPrice,
   useCurrentGlobalKfLocation,
   useInstruments,
   useActiveInstruments,
   useDealDataWithCaches,
+  useQuote,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import {
   dealPosition,
@@ -70,6 +70,7 @@ const {
   setCurrentGlobalKfLocation,
 } = useCurrentGlobalKfLocation(window.watcher);
 const { instruments } = useInstruments();
+const { getPositionLastPrice } = useQuote();
 const { triggerOrderBook, triggerMakeOrder } = useTriggerMakeOrder();
 const { getInstrumentCurrencyByIds } = useActiveInstruments();
 const { dealDataWithCache } = useDealDataWithCaches<
@@ -118,8 +119,13 @@ function buildGlobalPositions(
       posStat[id] = pos;
     } else {
       const prePosStat = posStat[id];
-      const { avg_open_price, volume, yesterday_volume, unrealized_pnl } =
-        prePosStat;
+      const {
+        avg_open_price,
+        volume,
+        yesterday_volume,
+        unrealized_pnl,
+        update_time,
+      } = prePosStat;
       posStat[id] = {
         ...prePosStat,
         uid_key: pos.uid_key,
@@ -131,6 +137,8 @@ function buildGlobalPositions(
             pos.avg_open_price * Number(pos.volume)) /
           (Number(volume) + Number(pos.volume)),
         unrealized_pnl: unrealized_pnl + pos.unrealized_pnl,
+        update_time:
+          update_time > pos.update_time ? update_time : pos.update_time,
       };
     }
     return posStat;

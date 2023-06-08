@@ -1244,19 +1244,15 @@ export const getInstrumentByInstrumentPair = (
   };
 };
 
-export const getPositionLastPrice = (pos: KungfuApi.PositionResolved) => {
-  const ukey = hashInstrumentUKey(pos.instrument_id, pos.exchange_id);
-  const quote = window.watcher.ledger.Quote[ukey] as KungfuApi.Quote;
-  return (
-    (quote.data_time > pos.update_time ? quote.last_price : pos.last_price) || 0
-  );
-};
-
 export const useQuote = (): {
   quotes: Ref<Record<string, KungfuApi.Quote>>;
   getQuoteByInstrument(
     instrument: KungfuApi.InstrumentResolved | undefined,
   ): KungfuApi.Quote | null;
+  getQuoteByPosition(
+    posiiton: KungfuApi.Position | undefined,
+  ): KungfuApi.Quote | null;
+  getPositionLastPrice: (pos: KungfuApi.Position) => number;
   getLastPricePercent(
     instrument: KungfuApi.InstrumentResolved | undefined,
   ): string;
@@ -1294,6 +1290,44 @@ export const useQuote = (): {
     const { ukey } = instrument;
     const quote = quotes.value[ukey] as KungfuApi.Quote | undefined;
     return quote || null;
+  };
+
+  const getQuoteByPosition = (
+    position: KungfuApi.Position | undefined,
+  ): KungfuApi.Quote | null => {
+    if (!position) {
+      return null;
+    }
+
+    const ukey = hashInstrumentUKey(
+      position.instrument_id,
+      position.exchange_id,
+    );
+
+    const instrumentResolved: KungfuApi.InstrumentResolved = {
+      instrumentId: position.instrument_id,
+      exchangeId: position.exchange_id,
+      instrumentName: '',
+      instrumentType: position.instrument_type,
+      ukey,
+      id: position.uid_key,
+    };
+
+    return getQuoteByInstrument(instrumentResolved);
+  };
+
+  const getPositionLastPrice = (pos: KungfuApi.Position) => {
+    // 有行情时，根据 quote 和 position 更新时间取最新 last_price,
+    // 若 position 没有 last_price, 则取 quote 的 last_price
+    const quote = getQuoteByPosition(pos);
+    if (quote) {
+      return (
+        (quote.data_time > pos.update_time
+          ? quote.last_price
+          : pos.last_price || quote.last_price) || 0
+      );
+    }
+    return pos.last_price || 0;
   };
 
   const getLastPricePercent = (
@@ -1392,6 +1426,8 @@ export const useQuote = (): {
   return {
     quotes,
     getQuoteByInstrument,
+    getQuoteByPosition,
+    getPositionLastPrice,
     getLastPricePercent,
     getPreClosePrice,
     isInstrumentUpLimit,
@@ -2038,7 +2074,7 @@ export const useMakeOrderInfo = (
   const { currentGlobalKfLocation } = useCurrentGlobalKfLocation(
     window.watcher,
   );
-  const { getQuoteByInstrument } = useQuote();
+  const { getPositionLastPrice } = useQuote();
   const { currentPositionList } = useCurrentPositionList();
   const { getAssetsByKfConfig } = useAssets();
 
@@ -2214,32 +2250,7 @@ export const useMakeOrderInfo = (
       return limit_price as number;
     } else if (price_type === PriceTypeEnum.Market) {
       if (currentPosition.value) {
-        const {
-          last_price,
-          instrument_id,
-          exchange_id,
-          instrument_type,
-          uid_key,
-          update_time,
-        } = currentPosition.value;
-
-        const quote = getQuoteByInstrument({
-          instrumentId: instrument_id,
-          instrumentType: instrument_type,
-          instrumentName: '',
-          exchangeId: exchange_id,
-          id: uid_key,
-          ukey: uid_key,
-        });
-
-        if (quote) {
-          return (
-            (quote.data_time > update_time ? quote.last_price : last_price) ||
-            null
-          );
-        }
-
-        return last_price || null;
+        return getPositionLastPrice(currentPosition.value) || null;
       }
     }
 

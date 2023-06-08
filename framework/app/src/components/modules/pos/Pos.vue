@@ -38,10 +38,10 @@ import {
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
   getInstrumentByInstrumentPair,
-  getPositionLastPrice,
   useCurrentGlobalKfLocation,
   useInstruments,
   useDealDataWithCaches,
+  useQuote,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 
 const app = getCurrentInstance();
@@ -63,6 +63,7 @@ const {
 const { handleDownload } = useDownloadHistoryTradingData();
 const { triggerOrderBook, triggerMakeOrder } = useTriggerMakeOrder();
 const { instruments } = useInstruments();
+const { getPositionLastPrice } = useQuote();
 const { dealDataWithCache } = useDealDataWithCaches<
   KungfuApi.Position,
   KungfuApi.PositionResolved
