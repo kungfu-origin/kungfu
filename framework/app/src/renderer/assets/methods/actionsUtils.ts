@@ -1247,9 +1247,13 @@ export const getInstrumentByInstrumentPair = (
 export const getPositionLastPrice = (pos: KungfuApi.PositionResolved) => {
   const ukey = hashInstrumentUKey(pos.instrument_id, pos.exchange_id);
   const quote = window.watcher.ledger.Quote[ukey] as KungfuApi.Quote;
-  return (
-    (quote.data_time > pos.update_time ? quote.last_price : pos.last_price) || 0
-  );
+  if (quote) {
+    return (
+      (quote.data_time > pos.update_time ? quote.last_price : pos.last_price) ||
+      0
+    );
+  }
+  return pos.last_price || 0;
 };
 
 export const useQuote = (): {
