@@ -31,7 +31,6 @@ import {
 import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import {
   getInstrumentByInstrumentPair,
-  getPositionLastPrice,
   useCurrentGlobalKfLocation,
   useInstruments,
   useActiveInstruments,
@@ -71,7 +70,7 @@ const {
   setCurrentGlobalKfLocation,
 } = useCurrentGlobalKfLocation(window.watcher);
 const { instruments } = useInstruments();
-const { getQuoteByPosition } = useQuote();
+const { getPositionLastPrice } = useQuote();
 const { triggerOrderBook, triggerMakeOrder } = useTriggerMakeOrder();
 const { getInstrumentCurrencyByIds } = useActiveInstruments();
 const { dealDataWithCache } = useDealDataWithCaches<
@@ -231,7 +230,7 @@ function tiggerOrderBookAndMakeOrder(record: KungfuApi.PositionResolved) {
       </template>
       <KfTradingDataTable
         class="kf-ant-table"
-        key-field="id"
+        key-field="uid_key"
         :columns="columns"
         :data-source="tableData"
         :item-size="28"
@@ -289,11 +288,7 @@ function tiggerOrderBookAndMakeOrder(record: KungfuApi.PositionResolved) {
           </template>
           <template v-else-if="column.dataIndex === 'last_price'">
             <KfBlinkNum
-              :num="
-                dealKfPrice(
-                  getPositionLastPrice(item, getQuoteByPosition(item)),
-                )
-              "
+              :num="dealKfPrice(getPositionLastPrice(item))"
             ></KfBlinkNum>
           </template>
           <template v-else-if="column.dataIndex === 'unrealized_pnl'">

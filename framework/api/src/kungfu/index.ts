@@ -740,9 +740,9 @@ export const dealPosition = (
       ?.currency_type || CurrencyEnum.Unknown;
   return {
     ...pos,
-    id: `${pos.uid_key}_${pos.update_time}`,
     currency,
     closable_volume,
+    uid_key: pos.uid_key, // 隐式属性，...pos 并不能结构
     account_id_resolved,
     instrument_id_resolved: `${pos.instrument_id} ${
       ExchangeIds[pos.exchange_id]?.name ?? ''
