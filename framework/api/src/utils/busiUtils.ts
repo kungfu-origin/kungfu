@@ -33,6 +33,7 @@ import {
   T0ExchangeIds,
   PriceLevel,
   InstrumentMinOrderVolume,
+  ExportTradingDataColumnsToFilter,
 } from '../config/tradingConfig';
 import {
   KfCategoryEnum,
@@ -1339,6 +1340,16 @@ export const getAbleHedgeFlag = (): boolean => {
   return ableHedgeFlagResolved;
 };
 
+export const buildTradingDataHeaders = (
+  tradingDataType: KungfuApi.TradingDataTypeName,
+  tradingData: KungfuApi.TradingDataTypes[],
+) => {
+  if (!tradingData[0]) return true;
+  return [...Object.keys(tradingData[0]), 'source', 'dest'].filter(
+    (key) => !ExportTradingDataColumnsToFilter[tradingDataType].includes(key),
+  );
+};
+
 export const getT0Config = (): {
   instrumentTypes: InstrumentTypeEnum[];
   exchangeIds: string[];
@@ -1954,26 +1965,6 @@ export const transformSearchInstrumentResultToInstrument = (
     id: `${instrumentId}_${instrumentName}_${exchangeId}`.toLowerCase(),
     ukey,
   };
-};
-
-export const booleanProcessEnv = (
-  val: string | boolean | undefined,
-): boolean => {
-  if (val === undefined) {
-    return false;
-  }
-
-  if (val === 'null') {
-    return false;
-  }
-
-  if (val === 'true') {
-    return true;
-  } else if (val === 'false') {
-    return false;
-  } else {
-    return !!val;
-  }
 };
 
 export const numberEnumRadioType: Record<

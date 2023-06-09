@@ -34,6 +34,8 @@ import {
   useCurrentGlobalKfLocation,
   useInstruments,
   useActiveInstruments,
+  useDealDataWithCaches,
+  useQuote,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import {
   dealPosition,
@@ -68,8 +70,13 @@ const {
   setCurrentGlobalKfLocation,
 } = useCurrentGlobalKfLocation(window.watcher);
 const { instruments } = useInstruments();
+const { getPositionLastPrice } = useQuote();
 const { triggerOrderBook, triggerMakeOrder } = useTriggerMakeOrder();
 const { getInstrumentCurrencyByIds } = useActiveInstruments();
+const { dealDataWithCache } = useDealDataWithCaches<
+  KungfuApi.Position,
+  KungfuApi.PositionResolved
+>(['uid_key', 'update_time']);
 const { globalSetting } = storeToRefs(useGlobalStore());
 
 onMounted(() => {
@@ -86,7 +93,9 @@ onMounted(() => {
 
           pos.value = toRaw(
             buildGlobalPositions(positions).map((position) =>
-              dealPosition(window.watcher, position),
+              dealDataWithCache(position, () =>
+                dealPosition(watcher, position),
+              ),
             ),
           );
         });
@@ -110,8 +119,13 @@ function buildGlobalPositions(
       posStat[id] = pos;
     } else {
       const prePosStat = posStat[id];
-      const { avg_open_price, volume, yesterday_volume, unrealized_pnl } =
-        prePosStat;
+      const {
+        avg_open_price,
+        volume,
+        yesterday_volume,
+        unrealized_pnl,
+        update_time,
+      } = prePosStat;
       posStat[id] = {
         ...prePosStat,
         uid_key: pos.uid_key,
@@ -123,6 +137,8 @@ function buildGlobalPositions(
             pos.avg_open_price * Number(pos.volume)) /
           (Number(volume) + Number(pos.volume)),
         unrealized_pnl: unrealized_pnl + pos.unrealized_pnl,
+        update_time:
+          update_time > pos.update_time ? update_time : pos.update_time,
       };
     }
     return posStat;
@@ -174,7 +190,7 @@ function handleClickRow(data: {
   tiggerOrderBookAndMakeOrder(data.row);
 }
 
-function tiggerOrderBookAndMakeOrder(record: KungfuApi.Position) {
+function tiggerOrderBookAndMakeOrder(record: KungfuApi.PositionResolved) {
   const { instrument_id, instrument_type, exchange_id } = record;
   const ensuredInstrument: KungfuApi.InstrumentResolved =
     getInstrumentByInstrumentPair(
@@ -271,7 +287,9 @@ function tiggerOrderBookAndMakeOrder(record: KungfuApi.Position) {
             <KfBlinkNum :num="dealKfPrice(item.avg_open_price)"></KfBlinkNum>
           </template>
           <template v-else-if="column.dataIndex === 'last_price'">
-            <KfBlinkNum :num="dealKfPrice(item.last_price)"></KfBlinkNum>
+            <KfBlinkNum
+              :num="dealKfPrice(getPositionLastPrice(item))"
+            ></KfBlinkNum>
           </template>
           <template v-else-if="column.dataIndex === 'unrealized_pnl'">
             <KfBlinkNum

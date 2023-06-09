@@ -3,6 +3,7 @@ import './injectGlobal';
 import path from 'path';
 import { triggerStartStep } from '@kungfu-trader/kungfu-js-api/kungfu/tradingData';
 import {
+  buildTradingDataHeaders,
   getOrderTradeFilterKey,
   getProcessIdByKfLocation,
   getTradingDataSortKey,
@@ -247,14 +248,30 @@ async function exportTradingData(date, output_folder) {
   const posFilename = path.join(output_folder, `pos-${date}`);
 
   return Promise.all([
-    writeCsvWithUTF8Bom(ordersFilename, orders, dealTradingDataItemResolved),
-    writeCsvWithUTF8Bom(tradesFilename, trades, dealTradingDataItemResolved),
+    writeCsvWithUTF8Bom(
+      ordersFilename,
+      orders,
+      buildTradingDataHeaders('Order', orders),
+      dealTradingDataItemResolved,
+    ),
+    writeCsvWithUTF8Bom(
+      tradesFilename,
+      trades,
+      buildTradingDataHeaders('Trade', trades),
+      dealTradingDataItemResolved,
+    ),
     writeCsvWithUTF8Bom(
       orderStatFilename,
       orderStat,
+      buildTradingDataHeaders('OrderStat', orderStat),
       dealTradingDataItemResolved,
     ),
-    writeCsvWithUTF8Bom(posFilename, positions, dealTradingDataItemResolved),
+    writeCsvWithUTF8Bom(
+      posFilename,
+      positions,
+      buildTradingDataHeaders('Position', positions),
+      dealTradingDataItemResolved,
+    ),
   ]);
 }
 

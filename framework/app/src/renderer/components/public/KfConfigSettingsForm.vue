@@ -385,7 +385,7 @@ function isNumberInputType(type: string): boolean {
 }
 
 const SpecialWordsReg = new RegExp(
-  "[`~!@#$^&*()=|{}';',\\[\\]<>《》?~！@#￥……&*（）——|{}【】‘；”“'。，、？_]",
+  "[`~!@#$^&*()=|{}';'\\[\\]<>《》?~！@#￥……&*（）——|{}【】‘；”“'。，、？_]",
 );
 function primaryKeyValidator(_rule: RuleObject, value: string): Promise<void> {
   const combineValue: string = getCombineValueByPrimaryKeys(
@@ -777,7 +777,7 @@ function handleDownloadCsvTemplate(
                 filePaths[0],
                 template.name || t('settingsFormConfig.csv_template') + '.csv',
               );
-              return writeCsvWithUTF8Bom(filePath, template.data || []);
+              return writeCsvWithUTF8Bom(filePath, template.data || [], true);
             }),
           ).then(() => {
             messagePrompt().success();

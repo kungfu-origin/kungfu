@@ -42,14 +42,15 @@ import {
   dealKfNumber,
   dealKfPrice,
   transformSearchInstrumentResultToInstrument,
-  booleanProcessEnv,
   isShotable,
   isT0,
   getTradingDataSortKey,
   isUpdateVersionLogicEnable,
   isCheckVersionLogicEnable,
   kfLogger,
+  buildTradingDataHeaders,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import { booleanProcessEnv } from '@kungfu-trader/kungfu-js-api/utils/commonUtils';
 import { BasketVolumeType } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import { writeCsvWithUTF8Bom } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import {
@@ -490,7 +491,9 @@ export const useDealExportHistoryTradingData = (): {
       const orderStatSortKey = getTradingDataSortKey('OrderStat');
       const orderStat = tradingData.OrderStat.sort(orderStatSortKey);
       const positionSortKey = getTradingDataSortKey('Position');
-      const positions = tradingData.Position.sort(positionSortKey);
+      const positions = (
+        window.watcher as KungfuApi.Watcher
+      ).ledger.Position.sort(positionSortKey);
       const assetSortKey = getTradingDataSortKey('Asset');
       const assets = tradingData.Asset.sort(assetSortKey);
       const orderInputSortKey = getTradingDataSortKey('OrderInput');
@@ -530,31 +533,37 @@ export const useDealExportHistoryTradingData = (): {
         writeCsvWithUTF8Bom(
           ordersFilename,
           orders,
+          buildTradingDataHeaders('Order', orders),
           dealTradingDataItemResolved(),
         ),
         writeCsvWithUTF8Bom(
           tradesFilename,
           trades,
+          buildTradingDataHeaders('Trade', trades),
           dealTradingDataItemResolved(),
         ),
         writeCsvWithUTF8Bom(
           orderStatFilename,
           orderStat,
+          buildTradingDataHeaders('OrderStat', orderStat),
           dealTradingDataItemResolved(true),
         ),
         writeCsvWithUTF8Bom(
           posFilename,
           positions,
+          buildTradingDataHeaders('Position', positions),
           dealTradingDataItemResolved(),
         ),
         writeCsvWithUTF8Bom(
           assetFilename,
           assets,
+          buildTradingDataHeaders('Asset', assets),
           dealTradingDataItemResolved(),
         ),
         writeCsvWithUTF8Bom(
           orderInputsFilename,
           orderInputs,
+          buildTradingDataHeaders('OrderInput', orderInputs),
           dealTradingDataItemResolved(),
         ),
       ])
@@ -576,22 +585,28 @@ export const useDealExportHistoryTradingData = (): {
       tradingData: KungfuApi.TradingData;
     } | null = null;
 
-    try {
-      historyData = await getKungfuHistoryData(
-        date,
-        dateType,
-        tradingDataType,
-        currentKfLocation,
-      );
-    } catch (err) {
-      if (err instanceof Error) {
-        if (err.message === 'database_locked') {
-          error(t('export_database_locked'));
+    if ((tradingDataType as KungfuApi.TradingDataTypeName) === 'Position') {
+      historyData = {
+        tradingData: (window.watcher as KungfuApi.Watcher).ledger,
+      };
+    } else {
+      try {
+        historyData = await getKungfuHistoryData(
+          date,
+          dateType,
+          tradingDataType,
+          currentKfLocation,
+        );
+      } catch (err) {
+        if (err instanceof Error) {
+          if (err.message === 'database_locked') {
+            error(t('export_database_locked'));
+          } else {
+            console.error(err);
+          }
         } else {
           console.error(err);
         }
-      } else {
-        console.error(err);
       }
     }
 
@@ -638,6 +653,7 @@ export const useDealExportHistoryTradingData = (): {
     return writeCsvWithUTF8Bom(
       filename,
       exportDatas,
+      buildTradingDataHeaders(tradingDataType, exportDatas),
       dealTradingDataItemResolved(),
     )
       .then(() => {
@@ -1080,7 +1096,7 @@ export const useSubscibeInstrumentAtEntry = (
     useGlobalStore();
 
   const app = getCurrentInstance();
-  const SUBSCRIBE_INSTRUMENTS_LIMIT = 50;
+  // const SUBSCRIBE_INSTRUMENTS_LIMIT = 50;
 
   const getCurrentPositionsForSub = (watcher: KungfuApi.Watcher) => {
     if (!currentGlobalKfLocation.value) return [];
@@ -1092,21 +1108,26 @@ export const useSubscibeInstrumentAtEntry = (
       'position',
     ) as KungfuApi.Position[];
 
-    return positions
-      .reverse()
-      .slice(0, SUBSCRIBE_INSTRUMENTS_LIMIT)
-      .map((item: KungfuApi.Position): KungfuApi.InstrumentForSub => {
-        const uidKey = hashInstrumentUKey(item.instrument_id, item.exchange_id);
-        return {
-          uidKey,
-          exchangeId: item.exchange_id,
-          instrumentId: item.instrument_id,
-          instrumentType: item.instrument_type,
-          instrumentName: '',
-          ukey: uidKey,
-          id: uidKey,
-        };
-      });
+    return (
+      positions
+        .reverse()
+        // .slice(0, SUBSCRIBE_INSTRUMENTS_LIMIT)
+        .map((item: KungfuApi.Position): KungfuApi.InstrumentForSub => {
+          const uidKey = hashInstrumentUKey(
+            item.instrument_id,
+            item.exchange_id,
+          );
+          return {
+            uidKey,
+            exchangeId: item.exchange_id,
+            instrumentId: item.instrument_id,
+            instrumentType: item.instrument_type,
+            instrumentName: '',
+            ukey: uidKey,
+            id: uidKey,
+          };
+        })
+    );
   };
 
   const subscribeInstrumentsByCurPosAndProcessIds = (
@@ -1217,6 +1238,10 @@ export const useQuote = (): {
   getQuoteByInstrument(
     instrument: KungfuApi.InstrumentResolved | undefined,
   ): KungfuApi.Quote | null;
+  getQuoteByPosition(
+    posiiton: KungfuApi.Position | undefined,
+  ): KungfuApi.Quote | null;
+  getPositionLastPrice: (pos: KungfuApi.Position) => number;
   getLastPricePercent(
     instrument: KungfuApi.InstrumentResolved | undefined,
   ): string;
@@ -1254,6 +1279,44 @@ export const useQuote = (): {
     const { ukey } = instrument;
     const quote = quotes.value[ukey] as KungfuApi.Quote | undefined;
     return quote || null;
+  };
+
+  const getQuoteByPosition = (
+    position: KungfuApi.Position | undefined,
+  ): KungfuApi.Quote | null => {
+    if (!position) {
+      return null;
+    }
+
+    const ukey = hashInstrumentUKey(
+      position.instrument_id,
+      position.exchange_id,
+    );
+
+    const instrumentResolved: KungfuApi.InstrumentResolved = {
+      instrumentId: position.instrument_id,
+      exchangeId: position.exchange_id,
+      instrumentName: '',
+      instrumentType: position.instrument_type,
+      ukey,
+      id: position.uid_key,
+    };
+
+    return getQuoteByInstrument(instrumentResolved);
+  };
+
+  const getPositionLastPrice = (pos: KungfuApi.Position) => {
+    // 有行情时，根据 quote 和 position 更新时间取最新 last_price,
+    // 若 position 没有 last_price, 则取 quote 的 last_price
+    const quote = getQuoteByPosition(pos);
+    if (quote) {
+      return (
+        (quote.data_time > pos.update_time
+          ? quote.last_price
+          : pos.last_price || quote.last_price) || 0
+      );
+    }
+    return pos.last_price || 0;
   };
 
   const getLastPricePercent = (
@@ -1352,6 +1415,8 @@ export const useQuote = (): {
   return {
     quotes,
     getQuoteByInstrument,
+    getQuoteByPosition,
+    getPositionLastPrice,
     getLastPricePercent,
     getPreClosePrice,
     isInstrumentUpLimit,
@@ -1423,19 +1488,6 @@ export const useDealInstruments = (): void => {
   };
 };
 
-export const hashInstrumentUKeyResolved = (
-  instrumentId: string,
-  exchangeId: string,
-) => {
-  if (!window.ukeyCacheMap) window.ukeyCacheMap = new Map<string, string>();
-  const ukeyCacheMap = window.ukeyCacheMap;
-  const cacheKey = `${instrumentId}_${exchangeId}`;
-  if (!ukeyCacheMap.has(cacheKey))
-    ukeyCacheMap.set(cacheKey, hashInstrumentUKey(instrumentId, exchangeId));
-
-  return ukeyCacheMap.get(cacheKey) || '';
-};
-
 export const useActiveInstruments = () => {
   const { instrumentsMap } = useGlobalStore();
 
@@ -1444,7 +1496,7 @@ export const useActiveInstruments = () => {
     exchangeId: string,
     forceConvert = false,
   ) => {
-    const ukey = hashInstrumentUKeyResolved(instrumentId, exchangeId);
+    const ukey = hashInstrumentUKey(instrumentId, exchangeId);
     const instrumentResolved = instrumentsMap[ukey];
 
     if (instrumentResolved) {
@@ -1470,7 +1522,7 @@ export const useActiveInstruments = () => {
     instrumentId: string,
     exchangeId: string,
   ) => {
-    const ukey = hashInstrumentUKeyResolved(instrumentId, exchangeId);
+    const ukey = hashInstrumentUKey(instrumentId, exchangeId);
     const watcher = window.watcher as KungfuApi.Watcher;
     const instrument = watcher.ledger.Instrument[ukey];
     if (instrument) return instrument;
@@ -2011,6 +2063,7 @@ export const useMakeOrderInfo = (
   const { currentGlobalKfLocation } = useCurrentGlobalKfLocation(
     window.watcher,
   );
+  const { getPositionLastPrice } = useQuote();
   const { currentPositionList } = useCurrentPositionList();
   const { getAssetsByKfConfig } = useAssets();
 
@@ -2185,7 +2238,9 @@ export const useMakeOrderInfo = (
     if (price_type === PriceTypeEnum.Limit) {
       return limit_price as number;
     } else if (price_type === PriceTypeEnum.Market) {
-      return currentPosition.value?.last_price ?? null;
+      if (currentPosition.value) {
+        return getPositionLastPrice(currentPosition.value) || null;
+      }
     }
 
     return null;
@@ -2508,7 +2563,7 @@ export const useBasket = () => {
 export const useDealDataWithCaches = <T, U>(keys: Array<keyof T>) => {
   const caches = new Map<string, U>();
 
-  const dealerResolved = (data: T, dealer: () => U): U => {
+  const dealDataWithCache = (data: T, dealer: () => U): U => {
     const curKey = keys.map((key) => data[key]).join('_');
     if (caches.has(curKey)) {
       const value = caches.get(curKey);
@@ -2526,8 +2581,12 @@ export const useDealDataWithCaches = <T, U>(keys: Array<keyof T>) => {
     caches.clear();
   };
 
+  onBeforeUnmount(() => {
+    caches.clear();
+  });
+
   return {
-    dealerResolved,
+    dealDataWithCache,
     clearCaches,
   };
 };

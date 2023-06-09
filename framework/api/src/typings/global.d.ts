@@ -6,6 +6,7 @@ import {
   GenericServerOptions,
 } from 'builder-util-runtime';
 import { KfHookKeeper } from '../hooks';
+import { GlobalStorage } from '../utils/globalStorage';
 import { InstrumentTypeEnum, InstrumentTypes } from './enums';
 
 declare global {
@@ -32,6 +33,8 @@ declare global {
       APP_ID: string;
       EXTENSION_DIRS: string;
       KFC_DIR: string;
+      CPUS_NUM: number;
+      IF_CPUS_NUM_SAFE: boolean;
       ELECTRON_RUN_AS_NODE: boolean;
       ELECTRON_ENABLE_STACK_DUMPING: boolean;
       RELOAD_AFTER_CRASHED: 'true' | 'false' | undefined; // 需要作为pm2 env参数传递，为了统一识别，用string
@@ -74,6 +77,8 @@ declare module globalThis {
   const pm2: any;
   const HookKeeper: KfHookKeeper;
   const i18n: I18n;
+  const globalStorage: GlobalStorage;
+  const rootPackageJson: RootConfigJSON;
 }
 
 export interface Pm2StartOptions extends StartOptions {
@@ -101,6 +106,7 @@ export interface RootConfigJSON {
   kungfuCraft?: {
     appTitle?: string;
     productName?: string;
+    env?: Record<string, string>;
     autoUpdate?: {
       update?: Writeable<AllPublishOptions>;
     };
@@ -119,4 +125,8 @@ export interface RootConfigJSON {
       ableHedgeFlag?: boolean;
     };
   };
+}
+
+export interface GlobalStorageData {
+  ifNotFirstRunning?: boolean;
 }

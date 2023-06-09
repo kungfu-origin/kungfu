@@ -116,3 +116,11 @@ export function showCrashMessageBox(): Promise<boolean> {
       }
     });
 }
+
+export function destoryAllWindows() {
+  const windows = BrowserWindow.getAllWindows();
+
+  windows.forEach((window) => {
+    window.destroy();
+  });
+}

@@ -40,7 +40,8 @@ import {
   getInstrumentByInstrumentPair,
   useCurrentGlobalKfLocation,
   useInstruments,
-  useActiveInstruments,
+  useDealDataWithCaches,
+  useQuote,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 
 const app = getCurrentInstance();
@@ -62,7 +63,11 @@ const {
 const { handleDownload } = useDownloadHistoryTradingData();
 const { triggerOrderBook, triggerMakeOrder } = useTriggerMakeOrder();
 const { instruments } = useInstruments();
-const { getInstrumentCurrencyByIds } = useActiveInstruments();
+const { getPositionLastPrice } = useQuote();
+const { dealDataWithCache } = useDealDataWithCaches<
+  KungfuApi.Position,
+  KungfuApi.PositionResolved
+>(['uid_key', 'update_time']);
 const { globalSetting } = storeToRefs(useGlobalStore());
 
 const columns = computed(() => {
@@ -95,7 +100,11 @@ onMounted(() => {
           ) as KungfuApi.Position[];
 
         pos.value = toRaw(
-          positions.reverse().map((item) => dealPosition(watcher, item)),
+          positions
+            .reverse()
+            .map((item) =>
+              dealDataWithCache(item, () => dealPosition(watcher, item)),
+            ),
         );
       },
     );
@@ -205,14 +214,7 @@ function dealLocationUIDResolved(holderUID: number): string {
                 v-if="globalSetting?.currency?.instrumentCurrency"
                 style="color: #faad14"
               >
-                {{
-                  dealCurrency(
-                    getInstrumentCurrencyByIds(
-                      item.instrument_id,
-                      item.exchange_id,
-                    ),
-                  ).name
-                }}
+                {{ dealCurrency(item.currency).name }}
               </span>
             </span>
           </template>
@@ -238,7 +240,9 @@ function dealLocationUIDResolved(holderUID: number): string {
             <KfBlinkNum :num="dealKfPrice(item.avg_open_price)"></KfBlinkNum>
           </template>
           <template v-else-if="column.dataIndex === 'last_price'">
-            <KfBlinkNum :num="dealKfPrice(item.last_price)"></KfBlinkNum>
+            <KfBlinkNum
+              :num="dealKfPrice(getPositionLastPrice(item))"
+            ></KfBlinkNum>
           </template>
           <template v-else-if="column.dataIndex === 'unrealized_pnl'">
             <KfBlinkNum
