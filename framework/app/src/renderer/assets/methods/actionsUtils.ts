@@ -48,12 +48,10 @@ import {
   isUpdateVersionLogicEnable,
   isCheckVersionLogicEnable,
   kfLogger,
+  buildTradingDataHeaders,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { booleanProcessEnv } from '@kungfu-trader/kungfu-js-api/utils/commonUtils';
-import {
-  BasketVolumeType,
-  ExportTradingDataColumnsToFilter,
-} from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
+import { BasketVolumeType } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import { writeCsvWithUTF8Bom } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import {
   isAllMainProcessRunning,
@@ -448,15 +446,6 @@ export const useDealExportHistoryTradingData = (): {
       dealTradingDataItem(item, window.watcher, isShowOriginData) as Row;
   };
 
-  const buildHeaders = (
-    tradingDataType: KungfuApi.TradingDataTypeName,
-    tradingData: KungfuApi.TradingDataTypes[],
-  ) => {
-    return Object.keys(tradingData[0]).filter(
-      (key) => !ExportTradingDataColumnsToFilter[tradingDataType].includes(key),
-    );
-  };
-
   const handleConfirmExportDate = async (formState: {
     date: string;
     dateType: HistoryDateEnum;
@@ -544,37 +533,37 @@ export const useDealExportHistoryTradingData = (): {
         writeCsvWithUTF8Bom(
           ordersFilename,
           orders,
-          buildHeaders('Order', orders),
+          buildTradingDataHeaders('Order', orders),
           dealTradingDataItemResolved(),
         ),
         writeCsvWithUTF8Bom(
           tradesFilename,
           trades,
-          buildHeaders('Trade', trades),
+          buildTradingDataHeaders('Trade', trades),
           dealTradingDataItemResolved(),
         ),
         writeCsvWithUTF8Bom(
           orderStatFilename,
           orderStat,
-          buildHeaders('OrderStat', orderStat),
+          buildTradingDataHeaders('OrderStat', orderStat),
           dealTradingDataItemResolved(true),
         ),
         writeCsvWithUTF8Bom(
           posFilename,
           positions,
-          buildHeaders('Position', positions),
+          buildTradingDataHeaders('Position', positions),
           dealTradingDataItemResolved(),
         ),
         writeCsvWithUTF8Bom(
           assetFilename,
           assets,
-          buildHeaders('Asset', assets),
+          buildTradingDataHeaders('Asset', assets),
           dealTradingDataItemResolved(),
         ),
         writeCsvWithUTF8Bom(
           orderInputsFilename,
           orderInputs,
-          buildHeaders('OrderInput', orderInputs),
+          buildTradingDataHeaders('OrderInput', orderInputs),
           dealTradingDataItemResolved(),
         ),
       ])
@@ -664,7 +653,7 @@ export const useDealExportHistoryTradingData = (): {
     return writeCsvWithUTF8Bom(
       filename,
       exportDatas,
-      buildHeaders(tradingDataType, exportDatas),
+      buildTradingDataHeaders(tradingDataType, exportDatas),
       dealTradingDataItemResolved(),
     )
       .then(() => {
