@@ -3,6 +3,7 @@ import './injectGlobal';
 import path from 'path';
 import { triggerStartStep } from '@kungfu-trader/kungfu-js-api/kungfu/tradingData';
 import {
+  buildTradingDataHeaders,
   getOrderTradeFilterKey,
   getProcessIdByKfLocation,
   getTradingDataSortKey,
@@ -23,7 +24,6 @@ import { HistoryDateEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { writeCsvWithUTF8Bom } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import { Row } from '@fast-csv/format';
 import { useAllExtComponentByPosition } from './assets/methods/utils';
-import { ExportTradingDataColumnsToFilter } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 
 triggerStartStep();
 useAllExtComponentByPosition('dzxy');
@@ -226,15 +226,6 @@ function dealTradingDataItemResolved(item: KungfuApi.TradingDataTypes): Row {
   return dealTradingDataItem(item, watcher) as Row;
 }
 
-function buildHeaders(
-  tradingDataType: KungfuApi.TradingDataTypeName,
-  tradingData: KungfuApi.TradingDataTypes[],
-) {
-  return Object.keys(tradingData[0]).filter(
-    (key) => !ExportTradingDataColumnsToFilter[tradingDataType].includes(key),
-  );
-}
-
 async function exportTradingData(date, output_folder) {
   const { tradingData } = await getKungfuHistoryData(
     date,
@@ -260,25 +251,25 @@ async function exportTradingData(date, output_folder) {
     writeCsvWithUTF8Bom(
       ordersFilename,
       orders,
-      buildHeaders('Order', orders),
+      buildTradingDataHeaders('Order', orders),
       dealTradingDataItemResolved,
     ),
     writeCsvWithUTF8Bom(
       tradesFilename,
       trades,
-      buildHeaders('Trade', trades),
+      buildTradingDataHeaders('Trade', trades),
       dealTradingDataItemResolved,
     ),
     writeCsvWithUTF8Bom(
       orderStatFilename,
       orderStat,
-      buildHeaders('OrderStat', orderStat),
+      buildTradingDataHeaders('OrderStat', orderStat),
       dealTradingDataItemResolved,
     ),
     writeCsvWithUTF8Bom(
       posFilename,
       positions,
-      buildHeaders('Position', positions),
+      buildTradingDataHeaders('Position', positions),
       dealTradingDataItemResolved,
     ),
   ]);
