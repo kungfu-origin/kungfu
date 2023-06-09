@@ -33,6 +33,7 @@ import {
   T0ExchangeIds,
   PriceLevel,
   InstrumentMinOrderVolume,
+  ExportTradingDataColumnsToFilter,
 } from '../config/tradingConfig';
 import {
   KfCategoryEnum,
@@ -1337,6 +1338,16 @@ export const getAbleHedgeFlag = (): boolean => {
   const ableHedgeFlagResolved =
     ableHedgeFlag == undefined ? true : ableHedgeFlag;
   return ableHedgeFlagResolved;
+};
+
+export const buildTradingDataHeaders = (
+  tradingDataType: KungfuApi.TradingDataTypeName,
+  tradingData: KungfuApi.TradingDataTypes[],
+) => {
+  if (!tradingData[0]) return true;
+  return [...Object.keys(tradingData[0]), 'source', 'dest'].filter(
+    (key) => !ExportTradingDataColumnsToFilter[tradingDataType].includes(key),
+  );
 };
 
 export const getT0Config = (): {
