@@ -61,6 +61,10 @@ public:
     PYBIND11_OVERLOAD_PURE(bool, Trader, insert_order, event);
   }
 
+  void on_time_key_value(const kungfu::event_ptr &event) override {
+    PYBIND11_OVERLOAD_PURE(void, Trader, on_time_key_value, event);
+  }
+
   bool insert_batch_orders(const kungfu::event_ptr &event) override {
     PYBIND11_OVERLOAD(bool, Trader, insert_batch_orders, event);
   }
@@ -135,6 +139,7 @@ void bind_broker(pybind11::module &m) {
       .def("insert_block_message", &Trader::insert_block_message)
       .def("insert_order", &Trader::insert_order)
       .def("insert_batch_orders", &Trader::insert_batch_orders)
+      .def("on_time_key_value", &Trader::on_time_key_value)
       .def("cancel_order", &Trader::cancel_order)
       .def("req_history_order", &Trader::req_history_order)
       .def("req_history_trade", &Trader::req_history_trade)
