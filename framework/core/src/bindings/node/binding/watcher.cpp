@@ -88,6 +88,8 @@ void WatcherAutoClient::connect(const event_ptr &event, const longfist::types::R
   if ((uint32_t)app_uid == (uint32_t)ledger_uid) {
     // resume time has to be 0, otherwise the broker state be lost in cli mode
     app_.request_read_from_public(app_.now(), ledger_uid, 0);
+    app_.request_read_from(app_.now(), ledger_uid, app_.now());
+    app_.request_write_to(app_.now(), ledger_uid);
     return;
   }
 
@@ -255,6 +257,15 @@ Napi::Value Watcher::IsLive(const Napi::CallbackInfo &info) { return Napi::Boole
 
 Napi::Value Watcher::IsStarted(const Napi::CallbackInfo &info) { return Napi::Boolean::New(info.Env(), is_started()); }
 
+Napi::Value Watcher::RequestPosition(const Napi::CallbackInfo &info) {
+  if (not has_writer(ledger_home_location_->uid)) {
+    return Napi::Boolean::New(info.Env(), false);
+  }
+
+  get_writer(ledger_home_location_->uid)->mark(now(), PositionRequest::tag);
+  return Napi::Boolean::New(info.Env(), true);
+}
+
 Napi::Value Watcher::RequestStop(const Napi::CallbackInfo &info) {
   auto app_location = ExtractLocation(info, 0, get_locator());
 
@@ -381,6 +392,7 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
                       InstanceMethod("issueBasketOrder", &Watcher::IssueBasketOrder),   //
                       InstanceMethod("cancelOrder", &Watcher::CancelOrder),             //
                       InstanceMethod("requestMarketData", &Watcher::RequestMarketData), //
+                      InstanceMethod("requestPosition", &Watcher::RequestPosition),     //
                       InstanceMethod("start", &Watcher::Start),                         //
                       InstanceMethod("sync", &Watcher::Sync),                           //
                       InstanceMethod("quit", &Watcher::Quit),

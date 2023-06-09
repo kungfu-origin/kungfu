@@ -77,6 +77,8 @@ public:
 
   Napi::Value RequestStop(const Napi::CallbackInfo &info);
 
+  Napi::Value RequestPosition(const Napi::CallbackInfo &info);
+
   Napi::Value PublishState(const Napi::CallbackInfo &info);
 
   Napi::Value IsReadyToInteract(const Napi::CallbackInfo &info);

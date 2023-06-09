@@ -219,23 +219,30 @@ void Ledger::write_book_reset(int64_t trigger_time, uint32_t book_uid) {
 }
 
 void Ledger::write_strategy_data(int64_t trigger_time, uint32_t strategy_uid) {
+  if (not has_writer(strategy_uid) or not has_location(strategy_uid)) {
+    SPDLOG_WARN("write_strategy_data not found writer or location for target {}", strategy_uid);
+    return;
+  }
+  
+  auto location = get_location(strategy_uid);
   auto writer = get_writer(strategy_uid);
   for (const auto &pair : bookkeeper_.get_books()) {
     auto &book = pair.second;
     auto &asset = book->asset;
-    // auto &asset_margin = book->asset_margin;
+    auto &asset_margin = book->asset_margin;
     auto book_uid = asset.holder_uid;
     bool has_account = asset.ledger_category == LedgerCategory::Account and has_channel(book_uid, strategy_uid);
-    bool is_strategy = asset.ledger_category == LedgerCategory::Strategy and book_uid == strategy_uid;
-    if (has_account or is_strategy) {
+    bool is_strategy = location->category == category::STRATEGY and book_uid == strategy_uid;
+    bool is_node = location->category == category::SYSTEM && location->group == "node";
+    if (has_account or is_strategy or is_node) {
       write_positions(trigger_time, strategy_uid, book->long_positions);
       write_positions(trigger_time, strategy_uid, book->short_positions);
+      writer->open_data<PositionEnd>(trigger_time).holder_uid = book_uid;
+      writer->close_data();
       writer->write(trigger_time, asset);
-      writer->write(trigger_time, book->asset_margin);
+      writer->write(trigger_time, asset_margin);
     }
   }
-  writer->open_data<PositionEnd>(trigger_time).holder_uid = strategy_uid;
-  writer->close_data();
 }
 
 void Ledger::write_positions(int64_t trigger_time, uint32_t dest, book::PositionMap &positions) {
