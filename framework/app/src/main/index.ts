@@ -18,6 +18,7 @@ import {
   showCrashMessageBox,
   showKungfuInfo,
   openUrl,
+  destoryAllWindows,
 } from '@kungfu-trader/kungfu-app/src/main/utils';
 import {
   kfLogger,
@@ -65,7 +66,7 @@ async function createWindow(
 ) {
   if (reloadAfterCrashed) {
     CrashedReloading = true;
-    MainWindow && MainWindow.close();
+    destoryAllWindows();
   }
 
   if (reloadBySchedule) {
