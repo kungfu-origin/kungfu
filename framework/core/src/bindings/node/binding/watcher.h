@@ -32,6 +32,7 @@ public:
 
   void connect(const event_ptr &event, const longfist::types::Register &register_data) override;
   void connect(const event_ptr &event, const longfist::types::Band &band) override;
+  bool should_connect_system(const yijinjing::data::location_ptr &system_location) const override;
 
 private:
   bool bypass_trading_data_;
@@ -357,7 +358,6 @@ private:
       throw Napi::Error::New(info.Env(), "invalid instruction arguments");
     }
   }
-  
 
   template <typename Instruction, typename IdPtrType = uint64_t Instruction::*>
   Napi::Value InteractWithTD(const Napi::CallbackInfo &info, const Napi::Object &instruction_object, IdPtrType id_ptr) {

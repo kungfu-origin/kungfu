@@ -188,6 +188,8 @@ location_ptr hero::get_master_home_location() const { return master_home_locatio
 
 location_ptr hero::get_master_cmd_location() const { return master_cmd_location_; }
 
+location_ptr hero::get_cached_home_location() const { return cached_home_location_; }
+
 const rx::connectable_observable<event_ptr> &hero::get_events() const { return events_; }
 
 uint64_t hero::make_source_dest_hash(uint32_t source_id, uint32_t dest_id) {

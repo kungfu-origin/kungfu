@@ -121,6 +121,8 @@ public:
 
   yijinjing::data::location_ptr get_master_cmd_location() const;
 
+  yijinjing::data::location_ptr get_cached_home_location() const;
+
   const rx::connectable_observable<event_ptr> &get_events() const;
 
 protected:

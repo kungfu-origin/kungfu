@@ -81,7 +81,7 @@ declare namespace KungfuApi {
 
   type AnyEnumKeysAsStrings<TEnumType> = keyof TEnumType;
 
-  export type KfConfigItemSupportedTypes = 
+  export type KfConfigItemSupportedTypes =
     | 'str'
     | 'password'
     | 'file' // string
@@ -556,7 +556,7 @@ declare namespace KungfuApi {
     uid_key: string;
   }
 
-  export interface TimeKeyValue { 
+  export interface TimeKeyValue {
     key: string;
     update_time: bigint;
     tag_a: string;
@@ -923,10 +923,7 @@ declare namespace KungfuApi {
       blockMessage: BlockMessage,
       tdLocation: KfLocation,
     ): bigint;
-    issueCustomData(
-      message: TimeKeyValue,
-      targetLocation: KfLocation,
-    ): boolean;
+    issueCustomData(message: TimeKeyValue, targetLocation: KfLocation): boolean;
     issueBasketOrder(basketOrder: BasketOrder, tdLocation: KfLocation): bigint;
     quit(): void;
     now(): bigint;

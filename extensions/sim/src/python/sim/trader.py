@@ -239,4 +239,3 @@ class TraderSim(wc.Trader):
     def on_time_key_value(self, event):
         time_key_value = event.TimeKeyValue()
         self.logger.info(f"accept time_key_value {time_key_value}")
-        

@@ -80,22 +80,23 @@ WatcherAutoClient::WatcherAutoClient(yijinjing::practice::apprentice &app, bool 
     : SilentAutoClient(app), bypass_trading_data_(bypass_trading_data) {}
 
 void WatcherAutoClient::connect(const event_ptr &event, const longfist::types::Register &register_data) {
-  auto resume_time_point = get_resume_policy().get_connect_time(app_, register_data);
   auto app_uid = register_data.location_uid;
+  if (not app_.has_location(app_uid)) {
+    SPDLOG_WARN("no location {}", app_uid);
+    return;
+  }
+  auto app_location = app_.get_location(app_uid);
+  auto resume_time_point = get_resume_policy().get_connect_time(app_, register_data);
 
-  // for write msg and get msg from ledger public
-  auto ledger_uid = app_.get_ledger_home_location()->uid;
-  if ((uint32_t)app_uid == (uint32_t)ledger_uid) {
-    // resume time has to be 0, otherwise the broker state be lost in cli mode
-    app_.request_read_from_public(app_.now(), ledger_uid, 0);
-    app_.request_read_from(app_.now(), ledger_uid, app_.now());
-    app_.request_write_to(app_.now(), ledger_uid);
+  if (app_location->category == category::SYSTEM and should_connect_system(app_location)) {
+    app_.request_read_from_public(app_.now(), app_uid, 0);
+    app_.request_read_from(app_.now(), app_uid, app_.now());
+    app_.request_write_to(app_.now(), app_uid);
+    SPDLOG_INFO("resume {} connection from {}", app_.get_location_uname(app_uid), time::strftime(resume_time_point));
     return;
   }
 
   if (bypass_trading_data_) {
-    auto app_location = app_.get_location(app_uid);
-
     if (app_location->category == category::MD and should_connect_md(app_location)) {
       app_.request_write_to(app_.now(), app_uid);
       SPDLOG_INFO("resume {} connection from {}", app_.get_location_uname(app_uid), time::strftime(resume_time_point));
@@ -116,6 +117,13 @@ void WatcherAutoClient::connect(const event_ptr &event, const longfist::types::R
 }
 
 void WatcherAutoClient::connect(const event_ptr &event, const longfist::types::Band &band) { return; }
+
+bool WatcherAutoClient::should_connect_system(const yijinjing::data::location_ptr &system_location) const {
+  if (system_location->group == "service" && system_location->uid != app_.get_cached_home_location()->uid) {
+    return true;
+  }
+  return false;
+}
 
 Watcher::Watcher(const Napi::CallbackInfo &info)
     : ObjectWrap(info),                                                                           //
@@ -392,7 +400,7 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
                       InstanceMethod("getInstrumentType", &Watcher::GetInstrumentType), //
                       InstanceMethod("publishState", &Watcher::PublishState),           //
                       InstanceMethod("isReadyToInteract", &Watcher::IsReadyToInteract), //
-                      InstanceMethod("issueCustomData", &Watcher::IssueCustomData), //
+                      InstanceMethod("issueCustomData", &Watcher::IssueCustomData),     //
                       InstanceMethod("issueBlockMessage", &Watcher::IssueBlockMessage), //
                       InstanceMethod("issueOrder", &Watcher::IssueOrder),               //
                       InstanceMethod("issueBasketOrder", &Watcher::IssueBasketOrder),   //

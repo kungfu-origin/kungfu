@@ -114,13 +114,15 @@ public:
 
   [[nodiscard]] virtual bool should_connect_md(const yijinjing::data::location_ptr &md_location) const = 0;
 
-  [[nodiscard]] virtual bool should_connect_td(const yijinjing::data::location_ptr &md_location) const = 0;
+  [[nodiscard]] virtual bool should_connect_td(const yijinjing::data::location_ptr &td_location) const = 0;
 
   [[nodiscard]] virtual bool should_connect_md(uint32_t md_location_uid) const = 0;
 
   [[nodiscard]] virtual bool should_connect_td(uint32_t td_location_uid) const = 0;
 
-  [[nodiscard]] virtual bool should_connect_strategy(const yijinjing::data::location_ptr &md_location) const = 0;
+  [[nodiscard]] virtual bool should_connect_strategy(const yijinjing::data::location_ptr &strategy_location) const = 0;
+
+  [[nodiscard]] virtual bool should_connect_system(const yijinjing::data::location_ptr &system_location) const = 0;
 
   [[nodiscard]] kungfu::yijinjing::data::location_ptr get_location(uint32_t uid) const {
     return app_.get_location(uid);
@@ -165,13 +167,15 @@ public:
 protected:
   [[nodiscard]] bool should_connect_md(const yijinjing::data::location_ptr &md_location) const override;
 
-  [[nodiscard]] bool should_connect_td(const yijinjing::data::location_ptr &md_location) const override;
+  [[nodiscard]] bool should_connect_td(const yijinjing::data::location_ptr &td_location) const override;
 
   [[nodiscard]] bool should_connect_md(uint32_t md_location_uid) const override;
 
   [[nodiscard]] bool should_connect_td(uint32_t td_location_uid) const override;
 
-  [[nodiscard]] bool should_connect_strategy(const yijinjing::data::location_ptr &md_location) const override;
+  [[nodiscard]] bool should_connect_strategy(const yijinjing::data::location_ptr &strategy_location) const override;
+
+  [[nodiscard]] bool should_connect_system(const yijinjing::data::location_ptr &system_location) const override;
 
 private:
   StatelessResumePolicy resume_policy_ = {};
@@ -229,13 +233,15 @@ public:
 protected:
   [[nodiscard]] bool should_connect_md(const yijinjing::data::location_ptr &md_location) const override;
 
-  [[nodiscard]] bool should_connect_td(const yijinjing::data::location_ptr &md_location) const override;
+  [[nodiscard]] bool should_connect_td(const yijinjing::data::location_ptr &td_location) const override;
 
   [[nodiscard]] bool should_connect_md(uint32_t md_location_uid) const override;
 
   [[nodiscard]] bool should_connect_td(uint32_t td_location_uid) const override;
 
-  [[nodiscard]] bool should_connect_strategy(const yijinjing::data::location_ptr &md_location) const override;
+  [[nodiscard]] bool should_connect_strategy(const yijinjing::data::location_ptr &strategy_location) const override;
+
+  [[nodiscard]] bool should_connect_system(const yijinjing::data::location_ptr &system_location) const override;
 
 private:
   FromNowResumePolicy resume_policy_ = {};
