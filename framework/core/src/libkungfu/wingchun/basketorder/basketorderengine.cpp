@@ -34,6 +34,7 @@ void BasketOrderEngine::restore(const cache::bank &state_bank) {
   }
 
   for (auto &pair : state_bank[boost::hana::type_c<Basket>]) {
+    SPDLOG_INFO("restore basket {}", pair.second.data.to_string());
     update_basket(pair.second.data);
   }
 

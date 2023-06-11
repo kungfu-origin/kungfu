@@ -32,6 +32,7 @@ public:
 
   void connect(const event_ptr &event, const longfist::types::Register &register_data) override;
   void connect(const event_ptr &event, const longfist::types::Band &band) override;
+  bool should_connect_system(const yijinjing::data::location_ptr &system_location) const override;
 
 private:
   bool bypass_trading_data_;
@@ -77,9 +78,13 @@ public:
 
   Napi::Value RequestStop(const Napi::CallbackInfo &info);
 
+  Napi::Value RequestPosition(const Napi::CallbackInfo &info);
+
   Napi::Value PublishState(const Napi::CallbackInfo &info);
 
   Napi::Value IsReadyToInteract(const Napi::CallbackInfo &info);
+
+  Napi::Value IssueCustomData(const Napi::CallbackInfo &info);
 
   Napi::Value IssueBlockMessage(const Napi::CallbackInfo &info);
 
@@ -323,6 +328,37 @@ private:
     }
   }
 
+  template <typename Instruction>
+  Napi::Value InteractWithLocation(const Napi::CallbackInfo &info, const Napi::Object &instruction_object) {
+    try {
+      auto target_location = ExtractLocation(info, 1, get_locator());
+
+      if (target_location->category == longfist::enums::category::SYSTEM && target_location->group == "master") {
+        target_location = master_cmd_location_;
+      }
+
+      if (not is_location_live(target_location->uid) or not has_writer(target_location->uid)) {
+        return Napi::Boolean::New(info.Env(), false);
+      }
+
+      auto trigger_time = yijinjing::time::now_in_nano();
+      auto target_writer = get_writer(target_location->uid);
+      Instruction instruction = {};
+      serialize::JsGet{}(instruction_object, instruction);
+
+      if (info.Length() == 2) {
+        target_writer->write(trigger_time, instruction);
+        return Napi::Boolean::New(info.Env(), true);
+      }
+
+      throw Napi::Error::New(info.Env(), "Invalid instruction arguments length");
+    } catch (const std::exception &ex) {
+      throw Napi::Error::New(info.Env(), fmt::format("invalid instruction arguments: {}", ex.what()));
+    } catch (...) {
+      throw Napi::Error::New(info.Env(), "invalid instruction arguments");
+    }
+  }
+
   template <typename Instruction, typename IdPtrType = uint64_t Instruction::*>
   Napi::Value InteractWithTD(const Napi::CallbackInfo &info, const Napi::Object &instruction_object, IdPtrType id_ptr) {
     try {
@@ -381,9 +417,9 @@ private:
 
       return Napi::BigInt::New(info.Env(), std::uint64_t(0));
     } catch (const std::exception &ex) {
-      throw Napi::Error::New(info.Env(), fmt::format("invalid order arguments: {}", ex.what()));
+      throw Napi::Error::New(info.Env(), fmt::format("invalid instruction arguments: {}", ex.what()));
     } catch (...) {
-      throw Napi::Error::New(info.Env(), "invalid order arguments");
+      throw Napi::Error::New(info.Env(), "invalid instruction arguments");
     }
   };
 

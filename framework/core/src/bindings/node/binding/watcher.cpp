@@ -80,20 +80,23 @@ WatcherAutoClient::WatcherAutoClient(yijinjing::practice::apprentice &app, bool 
     : SilentAutoClient(app), bypass_trading_data_(bypass_trading_data) {}
 
 void WatcherAutoClient::connect(const event_ptr &event, const longfist::types::Register &register_data) {
-  auto resume_time_point = get_resume_policy().get_connect_time(app_, register_data);
   auto app_uid = register_data.location_uid;
+  if (not app_.has_location(app_uid)) {
+    SPDLOG_WARN("no location {}", app_uid);
+    return;
+  }
+  auto app_location = app_.get_location(app_uid);
+  auto resume_time_point = get_resume_policy().get_connect_time(app_, register_data);
 
-  // for write msg and get msg from ledger public
-  auto ledger_uid = app_.get_ledger_home_location()->uid;
-  if ((uint32_t)app_uid == (uint32_t)ledger_uid) {
-    // resume time has to be 0, otherwise the broker state be lost in cli mode
-    app_.request_read_from_public(app_.now(), ledger_uid, 0);
+  if (app_location->category == category::SYSTEM and should_connect_system(app_location)) {
+    app_.request_read_from_public(app_.now(), app_uid, 0);
+    app_.request_read_from(app_.now(), app_uid, app_.now());
+    app_.request_write_to(app_.now(), app_uid);
+    SPDLOG_INFO("resume {} connection from {}", app_.get_location_uname(app_uid), time::strftime(resume_time_point));
     return;
   }
 
   if (bypass_trading_data_) {
-    auto app_location = app_.get_location(app_uid);
-
     if (app_location->category == category::MD and should_connect_md(app_location)) {
       app_.request_write_to(app_.now(), app_uid);
       SPDLOG_INFO("resume {} connection from {}", app_.get_location_uname(app_uid), time::strftime(resume_time_point));
@@ -114,6 +117,13 @@ void WatcherAutoClient::connect(const event_ptr &event, const longfist::types::R
 }
 
 void WatcherAutoClient::connect(const event_ptr &event, const longfist::types::Band &band) { return; }
+
+bool WatcherAutoClient::should_connect_system(const yijinjing::data::location_ptr &system_location) const {
+  if (system_location->group == "service" && system_location->uid != app_.get_cached_home_location()->uid) {
+    return true;
+  }
+  return false;
+}
 
 Watcher::Watcher(const Napi::CallbackInfo &info)
     : ObjectWrap(info),                                                                           //
@@ -255,6 +265,15 @@ Napi::Value Watcher::IsLive(const Napi::CallbackInfo &info) { return Napi::Boole
 
 Napi::Value Watcher::IsStarted(const Napi::CallbackInfo &info) { return Napi::Boolean::New(info.Env(), is_started()); }
 
+Napi::Value Watcher::RequestPosition(const Napi::CallbackInfo &info) {
+  if (not has_writer(ledger_home_location_->uid)) {
+    return Napi::Boolean::New(info.Env(), false);
+  }
+
+  get_writer(ledger_home_location_->uid)->mark(now(), PositionRequest::tag);
+  return Napi::Boolean::New(info.Env(), true);
+}
+
 Napi::Value Watcher::RequestStop(const Napi::CallbackInfo &info) {
   auto app_location = ExtractLocation(info, 0, get_locator());
 
@@ -284,6 +303,11 @@ Napi::Value Watcher::PublishState(const Napi::CallbackInfo &info) {
 Napi::Value Watcher::IsReadyToInteract(const Napi::CallbackInfo &info) {
   auto account_location = ExtractLocation(info, 0, get_locator());
   return Napi::Boolean::New(info.Env(), account_location and has_writer(account_location->uid));
+}
+
+Napi::Value Watcher::IssueCustomData(const Napi::CallbackInfo &info) {
+  SPDLOG_INFO("issue custom data manually");
+  return InteractWithLocation<TimeKeyValue>(info, info[0].ToObject());
 }
 
 Napi::Value Watcher::IssueBlockMessage(const Napi::CallbackInfo &info) {
@@ -376,11 +400,13 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
                       InstanceMethod("getInstrumentType", &Watcher::GetInstrumentType), //
                       InstanceMethod("publishState", &Watcher::PublishState),           //
                       InstanceMethod("isReadyToInteract", &Watcher::IsReadyToInteract), //
+                      InstanceMethod("issueCustomData", &Watcher::IssueCustomData),     //
                       InstanceMethod("issueBlockMessage", &Watcher::IssueBlockMessage), //
                       InstanceMethod("issueOrder", &Watcher::IssueOrder),               //
                       InstanceMethod("issueBasketOrder", &Watcher::IssueBasketOrder),   //
                       InstanceMethod("cancelOrder", &Watcher::CancelOrder),             //
                       InstanceMethod("requestMarketData", &Watcher::RequestMarketData), //
+                      InstanceMethod("requestPosition", &Watcher::RequestPosition),     //
                       InstanceMethod("start", &Watcher::Start),                         //
                       InstanceMethod("sync", &Watcher::Sync),                           //
                       InstanceMethod("quit", &Watcher::Quit),
