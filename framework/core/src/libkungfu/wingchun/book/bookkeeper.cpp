@@ -70,6 +70,10 @@ void Bookkeeper::on_start(const rx::connectable_observable<event_ptr> &events) {
   events | is(ResetBookRequest::tag) | $$(drop_book(event->source()));
 }
 
+std::mutex& Bookkeeper::get_update_book_mutex() {
+  return update_book_mutex_;
+}
+
 void Bookkeeper::try_update_position_end(const PositionEnd &position_end) {
   get_book(position_end.holder_uid)->update(app_.now());
 }
@@ -221,6 +225,7 @@ void Bookkeeper::try_update_position(const Position &position) {
 }
 
 void Bookkeeper::try_sync_book_replica(uint32_t location_uid) {
+  std::lock_guard<std::mutex> lock(update_book_mutex_);
   /// sync的Asset, AssetMargin, PositionEnd都收到后才开始同步TD和策略的信息, 并使用TD的新book替换旧book
   if (not books_replica_asset_guards_.try_emplace(location_uid).first->second or
       not books_replica_position_guard_.try_emplace(location_uid).first->second or

@@ -128,7 +128,7 @@ bool WatcherAutoClient::should_connect_system(const yijinjing::data::location_pt
 Watcher::Watcher(const Napi::CallbackInfo &info)
     : ObjectWrap(info),                                                                           //
       apprentice(GetWatcherLocation(info), true),                                                 //
-      bypass_quote_(GetBypassQuote(info)),                                              //
+      bypass_quote_(GetBypassQuote(info)),                                                        //
       bypass_trading_data_(GetBypassTradingData(info)),                                           //
       refresh_trading_data_before_sync_(GetRefreshLedgerBeforeSync(info)),                        //
       milliseconds_sleep_after_step_(GetMillisecondsSleepAfterStep(info)),                        //
@@ -744,6 +744,9 @@ void Watcher::UpdateAsset(const event_ptr &event, uint32_t book_uid) {
 }
 
 void Watcher::UpdateBook(const event_ptr &event, const Quote &quote) {
+  auto &mutex = bookkeeper_.get_update_book_mutex();
+  std::lock_guard<std::mutex> lock(mutex);
+
   auto ledger_uid = ledger_home_location_->uid;
   for (const auto &item : bookkeeper_.get_books()) {
     auto &book = item.second;
@@ -773,6 +776,9 @@ void Watcher::UpdateBook(const event_ptr &event, const Quote &quote) {
 }
 
 void Watcher::UpdateBook(const event_ptr &event, const Position &position) {
+  auto &mutex = bookkeeper_.get_update_book_mutex();
+  std::lock_guard<std::mutex> lock(mutex);
+
   auto book = bookkeeper_.get_book(position.holder_uid);
   auto &book_position = book->get_position_for(position.direction, position);
   auto &book_oppsite_position = book->get_oppsite_position_for(position.direction, position);

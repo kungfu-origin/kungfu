@@ -231,6 +231,9 @@ private:
   };
 
   template <typename TradingData> void UpdateBook(const event_ptr &event, const TradingData &data) {
+    auto &mutex = bookkeeper_.get_update_book_mutex();
+    std::lock_guard<std::mutex> lock(mutex);
+
     auto update = [&](uint32_t source, uint32_t dest) {
       if (source == yijinjing::data::location::PUBLIC) {
         return;
