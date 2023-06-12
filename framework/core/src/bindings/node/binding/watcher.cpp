@@ -744,8 +744,8 @@ void Watcher::UpdateAsset(const event_ptr &event, uint32_t book_uid) {
 }
 
 void Watcher::UpdateBook(const event_ptr &event, const Quote &quote) {
-  auto &mutex = bookkeeper_.get_update_book_mutex();
-  std::lock_guard<std::mutex> lock(mutex);
+  // auto &mutex = bookkeeper_.get_update_book_mutex();
+  // std::lock_guard<std::mutex> lock(mutex);
 
   auto ledger_uid = ledger_home_location_->uid;
   for (const auto &item : bookkeeper_.get_books()) {
@@ -776,8 +776,8 @@ void Watcher::UpdateBook(const event_ptr &event, const Quote &quote) {
 }
 
 void Watcher::UpdateBook(const event_ptr &event, const Position &position) {
-  auto &mutex = bookkeeper_.get_update_book_mutex();
-  std::lock_guard<std::mutex> lock(mutex);
+  // auto &mutex = bookkeeper_.get_update_book_mutex();
+  // std::lock_guard<std::mutex> lock(mutex);
 
   auto book = bookkeeper_.get_book(position.holder_uid);
   auto &book_position = book->get_position_for(position.direction, position);

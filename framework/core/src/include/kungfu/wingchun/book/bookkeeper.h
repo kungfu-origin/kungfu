@@ -58,7 +58,7 @@ public:
 
   void update_book(const event_ptr &event, const longfist::types::InstrumentKey &instrument_key);
 
-  void update_book(const event_ptr &event, const longfist::types::Quote &quote);
+  void try_update_book(const event_ptr &event, const longfist::types::Quote &quote);
 
   void update_book(int64_t trigger_time, const longfist::types::Quote &quote);
 
