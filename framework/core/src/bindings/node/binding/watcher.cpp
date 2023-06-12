@@ -133,7 +133,7 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
       refresh_trading_data_before_sync_(GetRefreshLedgerBeforeSync(info)),                        //
       milliseconds_sleep_after_step_(GetMillisecondsSleepAfterStep(info)),                        //
       broker_client_(*this, bypass_trading_data_),                                                //
-      bookkeeper_(*this, broker_client_),                                                         //
+      bookkeeper_(*this, broker_client_, bypass_quote_),                                                         //
       basketorder_engine_(*this),                                                                 //
       state_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),                   //
       ledger_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),                  //
