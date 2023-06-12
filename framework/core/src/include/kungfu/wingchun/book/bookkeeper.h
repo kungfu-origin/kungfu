@@ -15,6 +15,8 @@ namespace kungfu::wingchun::book {
 // key = location_uid
 typedef std::unordered_map<uint32_t, Book_ptr> BookMap;
 
+typedef std::unordered_map<uint32_t, kungfu::state<longfist::types::Quote>> QuoteMap;
+
 typedef std::unordered_map<longfist::enums::InstrumentType, AccountingMethod_ptr> AccountingMethodMap;
 
 FORWARD_DECLARE_CLASS_PTR(Context)
@@ -29,7 +31,7 @@ DECLARE_PTR(BookListener)
 
 class Bookkeeper {
 public:
-  explicit Bookkeeper(yijinjing::practice::apprentice &app, broker::Client &broker_client);
+  explicit Bookkeeper(yijinjing::practice::apprentice &app, broker::Client &broker_client, bool bypass_quote = false);
 
   virtual ~Bookkeeper() = default;
 
@@ -56,13 +58,17 @@ public:
 
   void update_book(const event_ptr &event, const longfist::types::InstrumentKey &instrument_key);
 
-  void update_book(const event_ptr &event, const longfist::types::Quote &quote);
+  void try_update_book(const event_ptr &event, const longfist::types::Quote &quote);
+
+  void update_book(int64_t trigger_time, const longfist::types::Quote &quote);
 
   void add_book_listener(const BookListener_ptr &book_listener);
 
   void mirror_positions(int64_t trigger_time, uint32_t strategy_uid);
 
   void try_update_position_end(const longfist::types::PositionEnd &position_end);
+
+  std::mutex &get_update_book_mutex();
 
   template <typename TradingData, typename ApplyMethod = void (AccountingMethod::*)(Book_ptr, const TradingData &)>
   void update_book(const event_ptr &event, ApplyMethod method) {
@@ -113,6 +119,8 @@ public:
 private:
   yijinjing::practice::apprentice &app_;
   broker::Client &broker_client_;
+  const bool bypass_quote_;
+  QuoteMap quotes_;
 
   std::mutex update_book_mutex_;
   bool positions_guarded_ = false;
@@ -127,6 +135,8 @@ private:
   std::unordered_map<uint32_t, bool> books_replica_position_guard_ = {}; // PositionEnd::tag添加对应<location_uid,true>
 
   Book_ptr make_book(uint32_t location_uid);
+
+  void batch_update_book_by_quote();
 
   void update_instrument(const longfist::types::Instrument &instrument);
 

@@ -1095,7 +1095,6 @@ export const useSubscibeInstrumentAtEntry = (
     useGlobalStore();
 
   const app = getCurrentInstance();
-  // const SUBSCRIBE_INSTRUMENTS_LIMIT = 50;
 
   const getCurrentPositionsForSub = (watcher: KungfuApi.Watcher) => {
     if (!currentGlobalKfLocation.value) return [];
@@ -1107,26 +1106,20 @@ export const useSubscibeInstrumentAtEntry = (
       'position',
     ) as KungfuApi.Position[];
 
-    return (
-      positions
-        .reverse()
-        // .slice(0, SUBSCRIBE_INSTRUMENTS_LIMIT)
-        .map((item: KungfuApi.Position): KungfuApi.InstrumentForSub => {
-          const uidKey = hashInstrumentUKey(
-            item.instrument_id,
-            item.exchange_id,
-          );
-          return {
-            uidKey,
-            exchangeId: item.exchange_id,
-            instrumentId: item.instrument_id,
-            instrumentType: item.instrument_type,
-            instrumentName: '',
-            ukey: uidKey,
-            id: uidKey,
-          };
-        })
-    );
+    return positions
+      .reverse()
+      .map((item: KungfuApi.Position): KungfuApi.InstrumentForSub => {
+        const uidKey = hashInstrumentUKey(item.instrument_id, item.exchange_id);
+        return {
+          uidKey,
+          exchangeId: item.exchange_id,
+          instrumentId: item.instrument_id,
+          instrumentType: item.instrument_type,
+          instrumentName: '',
+          ukey: uidKey,
+          id: uidKey,
+        };
+      });
   };
 
   const subscribeInstrumentsByCurPosAndProcessIds = (
@@ -1163,7 +1156,7 @@ export const useSubscibeInstrumentAtEntry = (
   onMounted(() => {
     if (app?.proxy) {
       const subscription = app.proxy.$tradingDataSubject
-        .pipe(throttleTime(3000))
+        .pipe(throttleTime(30000))
         .subscribe((watcher: KungfuApi.Watcher) => {
           const instrumentsForSub = customInstrumentsForSubGetter
             ? customInstrumentsForSubGetter(watcher)

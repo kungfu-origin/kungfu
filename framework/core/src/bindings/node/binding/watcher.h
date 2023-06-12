@@ -107,7 +107,7 @@ public:
   void AfterMasterDown(const Napi::CallbackInfo &info);
 
 protected:
-  const bool bypass_accounting_;
+  const bool bypass_quote_;
   const bool bypass_trading_data_;
   const bool refresh_trading_data_before_sync_;
   const int milliseconds_sleep_after_step_;
@@ -231,6 +231,9 @@ private:
   };
 
   template <typename TradingData> void UpdateBook(const event_ptr &event, const TradingData &data) {
+    // auto &mutex = bookkeeper_.get_update_book_mutex();
+    // std::lock_guard<std::mutex> lock(mutex);
+
     auto update = [&](uint32_t source, uint32_t dest) {
       if (source == yijinjing::data::location::PUBLIC) {
         return;
