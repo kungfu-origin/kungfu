@@ -48,7 +48,7 @@ inline bool GetBypassRestore(const Napi::CallbackInfo &info) {
   return info[2].As<Napi::Boolean>().Value();
 }
 
-inline bool GetBypassAccounting(const Napi::CallbackInfo &info) {
+inline bool GetBypassQuote(const Napi::CallbackInfo &info) {
   if (not IsValid(info, 3, &Napi::Value::IsBoolean)) {
     throw Napi::Error::New(info.Env(), "Invalid bypassAccounting argument");
   }
@@ -128,7 +128,7 @@ bool WatcherAutoClient::should_connect_system(const yijinjing::data::location_pt
 Watcher::Watcher(const Napi::CallbackInfo &info)
     : ObjectWrap(info),                                                                           //
       apprentice(GetWatcherLocation(info), true),                                                 //
-      bypass_accounting_(GetBypassAccounting(info)),                                              //
+      bypass_quote_(GetBypassQuote(info)),                                              //
       bypass_trading_data_(GetBypassTradingData(info)),                                           //
       refresh_trading_data_before_sync_(GetRefreshLedgerBeforeSync(info)),                        //
       milliseconds_sleep_after_step_(GetMillisecondsSleepAfterStep(info)),                        //
@@ -448,12 +448,15 @@ void Watcher::on_start() {
         $$(feed_state_data(event, data_bank_));
   }
 
-  if (not bypass_accounting_ and not bypass_trading_data_) {
+  if (not bypass_trading_data_) {
     bookkeeper_.on_start(events_);
     bookkeeper_.guard_positions();
     bookkeeper_.add_book_listener(std::make_shared<BookListener>(*this));
 
-    events_ | is(Quote::tag) | is_subscribed(subscribed_instruments_) | $$(UpdateBook(event, event->data<Quote>()));
+    if (not bypass_quote_) {
+      events_ | is(Quote::tag) | is_subscribed(subscribed_instruments_) | $$(UpdateBook(event, event->data<Quote>()));
+    }
+
     events_ | is(OrderInput::tag) | $$(UpdateBook(event, event->data<OrderInput>()));
     events_ | is(Order::tag) | $$(UpdateBook(event, event->data<Order>()));
     events_ | is(Order::tag) | $$(UpdateBasketOrder(event->trigger_time(), event->data<Order>()));
