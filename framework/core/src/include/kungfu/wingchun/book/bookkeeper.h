@@ -15,7 +15,7 @@ namespace kungfu::wingchun::book {
 // key = location_uid
 typedef std::unordered_map<uint32_t, Book_ptr> BookMap;
 
-typedef std::unordered_map<uint32_t, longfist::types::Quote> QuoteMap;
+typedef std::unordered_map<uint32_t, kungfu::state<longfist::types::Quote>> QuoteMap;
 
 typedef std::unordered_map<longfist::enums::InstrumentType, AccountingMethod_ptr> AccountingMethodMap;
 
@@ -120,8 +120,8 @@ private:
   yijinjing::practice::apprentice &app_;
   broker::Client &broker_client_;
   const bool bypass_quote_;
-
   QuoteMap quotes_;
+
   std::mutex update_book_mutex_;
   bool positions_guarded_ = false;
   CommissionMap commissions_ = {};

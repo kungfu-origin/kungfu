@@ -76,9 +76,10 @@ void Bookkeeper::on_start(const rx::connectable_observable<event_ptr> &events) {
 }
 
 void Bookkeeper::batch_update_book_by_quote() {
+  std::lock_guard<std::mutex> lock(update_book_mutex_);
   for (const auto &iter : quotes_) {
-    const auto &quote = iter.second;
-    update_book(app_.now(), quote);
+    const auto &state_quote = iter.second;
+    update_book(state_quote.update_time, state_quote.data);
   }
 }
 
@@ -183,9 +184,10 @@ void Bookkeeper::update_book(const event_ptr &event, const InstrumentKey &instru
 
 void Bookkeeper::update_book(const event_ptr &event, const Quote &quote) {
   std::lock_guard<std::mutex> lock(update_book_mutex_);
-  quotes_.insert_or_assign(hash_instrument(quote.exchange_id, quote.instrument_id), quote);
-
   if (bypass_quote_) {
+    state<Quote> state_quote(event->source(), event->dest(), event->gen_time(), quote);
+    auto hashed_instrument_key = hash_instrument(quote.exchange_id, quote.instrument_id);
+    quotes_.insert_or_assign(hashed_instrument_key, state_quote);
     return;
   }
 
@@ -193,7 +195,6 @@ void Bookkeeper::update_book(const event_ptr &event, const Quote &quote) {
 }
 
 void Bookkeeper::update_book(int64_t trigger_time, const Quote &quote) {
-  std::lock_guard<std::mutex> lock(update_book_mutex_);
   if (accounting_methods_.find(quote.instrument_type) == accounting_methods_.end()) {
     return;
   }
