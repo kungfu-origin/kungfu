@@ -16,7 +16,8 @@ using namespace kungfu::yijinjing::data;
 using namespace kungfu::yijinjing::util;
 
 namespace kungfu::wingchun::book {
-Bookkeeper::Bookkeeper(apprentice &app, broker::Client &broker_client, bool bypass_quote) : app_(app), broker_client_(broker_client), bypass_quote_(bypass_quote) {
+Bookkeeper::Bookkeeper(apprentice &app, broker::Client &broker_client, bool bypass_quote)
+    : app_(app), broker_client_(broker_client), bypass_quote_(bypass_quote) {
   book::AccountingMethod::setup_defaults(*this);
 }
 
@@ -70,13 +71,13 @@ void Bookkeeper::on_start(const rx::connectable_observable<event_ptr> &events) {
   events | is(ResetBookRequest::tag) | $$(drop_book(event->source()));
 
   if (bypass_quote_) {
-    app_.add_time_interval(time_unit::NANOSECONDS_PER_SECOND * 30, [&](auto e) { batch_update_book_by_quote(); });
+    app_.add_time_interval(yijinjing::time_unit::NANOSECONDS_PER_MINUTE, [&](auto e) { batch_update_book_by_quote(); });
   }
 }
 
 void Bookkeeper::batch_update_book_by_quote() {
-  for (const auto& iter : quotes_) {
-    const auto& quote = iter.second;
+  for (const auto &iter : quotes_) {
+    const auto &quote = iter.second;
     update_book(app_.now(), quote);
   }
 }
@@ -183,15 +184,15 @@ void Bookkeeper::update_book(const event_ptr &event, const InstrumentKey &instru
 void Bookkeeper::update_book(const event_ptr &event, const Quote &quote) {
   std::lock_guard<std::mutex> lock(update_book_mutex_);
   quotes_.insert_or_assign(hash_instrument(quote.exchange_id, quote.instrument_id), quote);
-  
+
   if (bypass_quote_) {
     return;
   }
-  
+
   update_book(event->gen_time(), quote);
 }
 
-void Bookkeeper::update_book(int64_t trigger_time, const Quote& quote) {
+void Bookkeeper::update_book(int64_t trigger_time, const Quote &quote) {
   std::lock_guard<std::mutex> lock(update_book_mutex_);
   if (accounting_methods_.find(quote.instrument_type) == accounting_methods_.end()) {
     return;
