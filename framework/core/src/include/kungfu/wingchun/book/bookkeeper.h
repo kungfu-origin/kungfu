@@ -64,7 +64,7 @@ public:
 
   void try_update_position_end(const longfist::types::PositionEnd &position_end);
 
-  std::mutex& get_update_book_mutex();
+  std::mutex &get_update_book_mutex();
 
   template <typename TradingData, typename ApplyMethod = void (AccountingMethod::*)(Book_ptr, const TradingData &)>
   void update_book(const event_ptr &event, ApplyMethod method) {

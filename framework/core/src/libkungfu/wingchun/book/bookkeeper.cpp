@@ -70,9 +70,7 @@ void Bookkeeper::on_start(const rx::connectable_observable<event_ptr> &events) {
   events | is(ResetBookRequest::tag) | $$(drop_book(event->source()));
 }
 
-std::mutex& Bookkeeper::get_update_book_mutex() {
-  return update_book_mutex_;
-}
+std::mutex &Bookkeeper::get_update_book_mutex() { return update_book_mutex_; }
 
 void Bookkeeper::try_update_position_end(const PositionEnd &position_end) {
   get_book(position_end.holder_uid)->update(app_.now());
