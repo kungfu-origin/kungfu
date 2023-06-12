@@ -128,7 +128,7 @@ bool WatcherAutoClient::should_connect_system(const yijinjing::data::location_pt
 Watcher::Watcher(const Napi::CallbackInfo &info)
     : ObjectWrap(info),                                                                           //
       apprentice(GetWatcherLocation(info), true),                                                 //
-      bypass_quote_(GetBypassQuote(info)),                                              //
+      bypass_quote_(GetBypassQuote(info)),                                                        //
       bypass_trading_data_(GetBypassTradingData(info)),                                           //
       refresh_trading_data_before_sync_(GetRefreshLedgerBeforeSync(info)),                        //
       milliseconds_sleep_after_step_(GetMillisecondsSleepAfterStep(info)),                        //

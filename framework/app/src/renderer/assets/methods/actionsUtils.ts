@@ -1107,25 +1107,20 @@ export const useSubscibeInstrumentAtEntry = (
       'position',
     ) as KungfuApi.Position[];
 
-    return (
-      positions
-        .reverse()
-        .map((item: KungfuApi.Position): KungfuApi.InstrumentForSub => {
-          const uidKey = hashInstrumentUKey(
-            item.instrument_id,
-            item.exchange_id,
-          );
-          return {
-            uidKey,
-            exchangeId: item.exchange_id,
-            instrumentId: item.instrument_id,
-            instrumentType: item.instrument_type,
-            instrumentName: '',
-            ukey: uidKey,
-            id: uidKey,
-          };
-        })
-    );
+    return positions
+      .reverse()
+      .map((item: KungfuApi.Position): KungfuApi.InstrumentForSub => {
+        const uidKey = hashInstrumentUKey(item.instrument_id, item.exchange_id);
+        return {
+          uidKey,
+          exchangeId: item.exchange_id,
+          instrumentId: item.instrument_id,
+          instrumentType: item.instrument_type,
+          instrumentName: '',
+          ukey: uidKey,
+          id: uidKey,
+        };
+      });
   };
 
   const subscribeInstrumentsByCurPosAndProcessIds = (
