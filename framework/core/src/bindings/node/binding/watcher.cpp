@@ -8,7 +8,6 @@
 #include "commission_store.h"
 #include "config_store.h"
 #include "history.h"
-#include "kungfu/yijinjing/cache/ringqueue.h"
 #include <sstream>
 
 using namespace kungfu::rx;
@@ -430,7 +429,6 @@ void Watcher::on_react() {
   auto before_start_events = events_ | take_until(events_ | is(RequestStart::tag));
   before_start_events | is(Instrument::tag) | $$(Feed(event, event->data<Instrument>()));
   // bookkeeper restore, only Instrument and Commission,
-  // for hidden pos && asset
   before_start_events | is(Instrument::tag, Commission::tag) | $$(feed_state_data(event, state_bank_));
 }
 
@@ -443,9 +441,7 @@ void Watcher::on_start() {
     // for receive runtime data
     events_ | is(Quote::tag) | is_subscribed(subscribed_instruments_) | $$(feed_state_data(event, data_bank_));
     events_ | is(Instrument::tag) | $$(Feed(event, event->data<Instrument>()));
-    events_ | skip_while(while_is(Quote::tag)) | is_trading_data() | $$(feed_trading_data(event, trading_bank_));
-    events_ | skip_while(while_is(Quote::tag, Instrument::tag)) | skip_while(while_is_trading_data) |
-        $$(feed_state_data(event, data_bank_));
+    events_ | skip_while(while_is(Quote::tag, Instrument::tag)) | $$(feed_state_data(event, data_bank_));
   }
 
   if (not bypass_trading_data_) {
@@ -530,7 +526,11 @@ void Watcher::Sync(const Napi::CallbackInfo &info) {
 }
 
 void Watcher::SyncLedger() {
-  boost::hana::for_each(StateDataTypes, [&](auto it) { UpdateLedger(+boost::hana::second(it)); });
+  boost::hana::for_each(StateDataTypes, [&](auto it) { 
+    if (boost::hana::contains(longfist::TradingDataTypes, boost::hana::first(it))) {
+      return;
+    }
+    UpdateLedger(+boost::hana::second(it)); });
 }
 
 void Watcher::TryRefreshTradingData() {
@@ -540,7 +540,7 @@ void Watcher::TryRefreshTradingData() {
 }
 
 void Watcher::SyncTradingData() {
-  boost::hana::for_each(TradingDataTypes, [&](auto it) { UpdateTradingData(+boost::hana::second(it)); });
+  boost::hana::for_each(TradingDataTypes, [&](auto it) { UpdateLedger(+boost::hana::second(it)); });
 }
 
 void Watcher::SyncAppStates() {
