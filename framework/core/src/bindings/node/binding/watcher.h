@@ -23,6 +23,7 @@
 namespace kungfu::node {
 constexpr uint64_t ID_TRANC = 0x00000000FFFFFFFF;
 constexpr uint32_t PAGE_ID_MASK = 0x80000000;
+constexpr uint32_t TRANSFER_TRADING_DATA_LIMIT = 2000;
 
 class WatcherAutoClient : public wingchun::broker::SilentAutoClient {
 public:
@@ -134,7 +135,6 @@ private:
   serialize::JsPublishState publish;
   serialize::JsResetCache reset_cache;
   yijinjing::cache::bank data_bank_;
-  yijinjing::cache::trading_bank trading_bank_;
   std::vector<kungfu::state<longfist::types::CacheReset>> reset_cache_states_;
   InstrumentKeyMap subscribed_instruments_ = {};
   std::unordered_map<uint32_t, int> location_uid_states_map_ = {};
@@ -231,9 +231,6 @@ private:
   };
 
   template <typename TradingData> void UpdateBook(const event_ptr &event, const TradingData &data) {
-    // auto &mutex = bookkeeper_.get_update_book_mutex();
-    // std::lock_guard<std::mutex> lock(mutex);
-
     auto update = [&](uint32_t source, uint32_t dest) {
       if (source == yijinjing::data::location::PUBLIC) {
         return;
@@ -262,13 +259,13 @@ private:
 
   void UpdateBasketOrder(int64_t trigger_time, const longfist::types::Order &order) {
     if (basketorder_engine_.has_basket_order_state(order.parent_id)) {
-      trading_bank_ << basketorder_engine_.get_basket_order(order.parent_id);
+      data_bank_ << basketorder_engine_.get_basket_order(order.parent_id);
     }
   }
 
   void UpdateBasketOrders() {
     for (auto &pair : basketorder_engine_.get_all_basket_order_states()) {
-      trading_bank_ << pair.second->get_state();
+      data_bank_ << pair.second->get_state();
     }
   }
 
@@ -277,7 +274,7 @@ private:
                                                                                         const TradingData &data) {
     bookkeeper_.on_order_input(now(), source, dest, data);
     state<kungfu::longfist::types::OrderInput> cache_state_order_input(source, dest, now(), data);
-    trading_bank_ << cache_state_order_input;
+    data_bank_ << cache_state_order_input;
   }
 
   template <typename TradingData>
@@ -285,7 +282,7 @@ private:
                                                                                          const TradingData &data) {
     basketorder_engine_.insert_basket_order(now(), data);
     state<kungfu::longfist::types::BasketOrder> cache_state_basket_order(source, dest, now(), data);
-    trading_bank_ << cache_state_basket_order;
+    data_bank_ << cache_state_basket_order;
   }
 
   template <typename TradingData>
@@ -322,12 +319,15 @@ private:
   }
 
   template <typename DataType> void UpdateTradingData(const boost::hana::basic_type<DataType> &type) {
-    auto &order_queue = trading_bank_[type];
-    int i = 0;
-    kungfu::state<DataType> *pstate = nullptr;
-    while (i < longfist::TRADING_MAP_RING_SIZE && order_queue.pop(pstate) && pstate != nullptr) {
-      update_ledger(pstate->update_time, pstate->source, pstate->dest, pstate->data);
-      i++;
+    using DataTypeMap = std::unordered_map<uint64_t, state<DataType>>;
+    auto &target_map = const_cast<DataTypeMap &>(data_bank_[type]);
+    auto iter = target_map.begin();
+    auto count = 0;
+    while (iter != target_map.end() and target_map.size() > 0 and count < TRANSFER_TRADING_DATA_LIMIT) {
+      const auto &state = iter->second;
+      update_ledger(state.update_time, state.source, state.dest, state.data);
+      iter = target_map.erase(iter);
+      count++;
     }
   }
 

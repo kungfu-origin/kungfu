@@ -71,12 +71,13 @@ void Bookkeeper::on_start(const rx::connectable_observable<event_ptr> &events) {
   events | is(ResetBookRequest::tag) | $$(drop_book(event->source()));
 
   if (bypass_quote_) {
-    app_.add_time_interval(yijinjing::time_unit::NANOSECONDS_PER_SECOND * 10, [&](auto e) { batch_update_book_by_quote(); });
+    app_.add_time_interval(yijinjing::time_unit::NANOSECONDS_PER_SECOND * 15,
+                           [&](auto e) { batch_update_book_by_quote(); });
   }
 }
 
 void Bookkeeper::batch_update_book_by_quote() {
-  SPDLOG_INFO("batch_update_book_by_quote");
+  SPDLOG_DEBUG("batch_update_book_by_quote");
 
   for (const auto &iter : quotes_) {
     const auto &state_quote = iter.second;
