@@ -8,7 +8,6 @@
 #include "commission_store.h"
 #include "config_store.h"
 #include "history.h"
-#include "kungfu/yijinjing/cache/ringqueue.h"
 #include <sstream>
 
 using namespace kungfu::rx;
@@ -133,7 +132,7 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
       refresh_trading_data_before_sync_(GetRefreshLedgerBeforeSync(info)),                        //
       milliseconds_sleep_after_step_(GetMillisecondsSleepAfterStep(info)),                        //
       broker_client_(*this, bypass_trading_data_),                                                //
-      bookkeeper_(*this, broker_client_),                                                         //
+      bookkeeper_(*this, broker_client_, bypass_quote_),                                          //
       basketorder_engine_(*this),                                                                 //
       state_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),                   //
       ledger_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),                  //
@@ -430,7 +429,6 @@ void Watcher::on_react() {
   auto before_start_events = events_ | take_until(events_ | is(RequestStart::tag));
   before_start_events | is(Instrument::tag) | $$(Feed(event, event->data<Instrument>()));
   // bookkeeper restore, only Instrument and Commission,
-  // for hidden pos && asset
   before_start_events | is(Instrument::tag, Commission::tag) | $$(feed_state_data(event, state_bank_));
 }
 
@@ -443,9 +441,7 @@ void Watcher::on_start() {
     // for receive runtime data
     events_ | is(Quote::tag) | is_subscribed(subscribed_instruments_) | $$(feed_state_data(event, data_bank_));
     events_ | is(Instrument::tag) | $$(Feed(event, event->data<Instrument>()));
-    events_ | skip_while(while_is(Quote::tag)) | is_trading_data() | $$(feed_trading_data(event, trading_bank_));
-    events_ | skip_while(while_is(Quote::tag, Instrument::tag)) | skip_while(while_is_trading_data) |
-        $$(feed_state_data(event, data_bank_));
+    events_ | skip_while(while_is(Quote::tag, Instrument::tag)) | $$(feed_state_data(event, data_bank_));
   }
 
   if (not bypass_trading_data_) {
@@ -457,10 +453,10 @@ void Watcher::on_start() {
       events_ | is(Quote::tag) | is_subscribed(subscribed_instruments_) | $$(UpdateBook(event, event->data<Quote>()));
     }
 
-    events_ | is(OrderInput::tag) | $$(UpdateBook(event, event->data<OrderInput>()));
+    // events_ | is(OrderInput::tag) | $$(UpdateBook(event, event->data<OrderInput>()));
     events_ | is(Order::tag) | $$(UpdateBook(event, event->data<Order>()));
     events_ | is(Order::tag) | $$(UpdateBasketOrder(event->trigger_time(), event->data<Order>()));
-    events_ | is(Trade::tag) | $$(UpdateBook(event, event->data<Trade>()));
+    // events_ | is(Trade::tag) | $$(UpdateBook(event, event->data<Trade>()));
     events_ | is(Position::tag) | $$(UpdateBook(event, event->data<Position>()));
     events_ | is(PositionEnd::tag) | $$(UpdateAsset(event, event->data<PositionEnd>().holder_uid));
     refresh_books();
@@ -530,7 +526,12 @@ void Watcher::Sync(const Napi::CallbackInfo &info) {
 }
 
 void Watcher::SyncLedger() {
-  boost::hana::for_each(StateDataTypes, [&](auto it) { UpdateLedger(+boost::hana::second(it)); });
+  boost::hana::for_each(StateDataTypes, [&](auto it) {
+    if (boost::hana::contains(longfist::TradingDataTypes, boost::hana::first(it))) {
+      return;
+    }
+    UpdateLedger(+boost::hana::second(it));
+  });
 }
 
 void Watcher::TryRefreshTradingData() {
@@ -744,9 +745,6 @@ void Watcher::UpdateAsset(const event_ptr &event, uint32_t book_uid) {
 }
 
 void Watcher::UpdateBook(const event_ptr &event, const Quote &quote) {
-  auto &mutex = bookkeeper_.get_update_book_mutex();
-  std::lock_guard<std::mutex> lock(mutex);
-
   auto ledger_uid = ledger_home_location_->uid;
   for (const auto &item : bookkeeper_.get_books()) {
     auto &book = item.second;

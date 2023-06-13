@@ -16,7 +16,8 @@ using namespace kungfu::yijinjing::data;
 using namespace kungfu::yijinjing::util;
 
 namespace kungfu::wingchun::book {
-Bookkeeper::Bookkeeper(apprentice &app, broker::Client &broker_client) : app_(app), broker_client_(broker_client) {
+Bookkeeper::Bookkeeper(apprentice &app, broker::Client &broker_client, bool bypass_quote)
+    : app_(app), broker_client_(broker_client), bypass_quote_(bypass_quote) {
   book::AccountingMethod::setup_defaults(*this);
 }
 
@@ -56,7 +57,7 @@ void Bookkeeper::on_start(const rx::connectable_observable<event_ptr> &events) {
   on_trading_day(app_.get_trading_day());
 
   events | is(Instrument::tag) | $$(update_instrument(event->data<Instrument>()));
-  events | is_own<Quote>(broker_client_) | $$(update_book(event, event->data<Quote>()));
+  events | is_own<Quote>(broker_client_) | $$(try_update_book(event, event->data<Quote>()));
   events | is(InstrumentKey::tag) | $$(update_book(event, event->data<InstrumentKey>()));
   events | is(OrderInput::tag) | $$(update_book<OrderInput>(event, &AccountingMethod::apply_order_input));
   events | is(Order::tag) | $$(update_book<Order>(event, &AccountingMethod::apply_order));
@@ -68,6 +69,20 @@ void Bookkeeper::on_start(const rx::connectable_observable<event_ptr> &events) {
   events | fork<PositionEnd>(location::SYNC, &Bookkeeper::update_position_guard, &Bookkeeper::try_update_position_end);
   events | is(TradingDay::tag) | $$(on_trading_day(event->data<TradingDay>().timestamp));
   events | is(ResetBookRequest::tag) | $$(drop_book(event->source()));
+
+  if (bypass_quote_) {
+    app_.add_time_interval(yijinjing::time_unit::NANOSECONDS_PER_SECOND * 15,
+                           [&](auto e) { batch_update_book_by_quote(); });
+  }
+}
+
+void Bookkeeper::batch_update_book_by_quote() {
+  SPDLOG_DEBUG("batch_update_book_by_quote");
+
+  for (const auto &iter : quotes_) {
+    const auto &state_quote = iter.second;
+    update_book(state_quote.update_time, state_quote.data);
+  }
 }
 
 std::mutex &Bookkeeper::get_update_book_mutex() { return update_book_mutex_; }
@@ -169,7 +184,18 @@ void Bookkeeper::update_book(const event_ptr &event, const InstrumentKey &instru
   get_book(event->source())->ensure_position(instrument_key);
 }
 
-void Bookkeeper::update_book(const event_ptr &event, const Quote &quote) {
+void Bookkeeper::try_update_book(const event_ptr &event, const Quote &quote) {
+  if (bypass_quote_) {
+    state<Quote> state_quote(event->source(), event->dest(), event->gen_time(), quote);
+    auto hashed_instrument_key = hash_instrument(quote.exchange_id, quote.instrument_id);
+    quotes_.insert_or_assign(hashed_instrument_key, state_quote);
+    return;
+  }
+
+  update_book(event->gen_time(), quote);
+}
+
+void Bookkeeper::update_book(int64_t trigger_time, const Quote &quote) {
   std::lock_guard<std::mutex> lock(update_book_mutex_);
   if (accounting_methods_.find(quote.instrument_type) == accounting_methods_.end()) {
     return;
@@ -181,13 +207,13 @@ void Bookkeeper::update_book(const event_ptr &event, const Quote &quote) {
     auto has_short_position = book->has_short_position_for(quote);
     if (has_long_position or has_short_position) {
       accounting_method->apply_quote(book, quote);
-      book->update(event->gen_time());
+      book->update(trigger_time);
     }
     if (has_long_position) {
-      book->get_position_for(Direction::Long, quote).update_time = event->gen_time();
+      book->get_position_for(Direction::Long, quote).update_time = trigger_time;
     }
     if (has_short_position) {
-      book->get_position_for(Direction::Short, quote).update_time = event->gen_time();
+      book->get_position_for(Direction::Short, quote).update_time = trigger_time;
     }
   }
 }
@@ -223,7 +249,6 @@ void Bookkeeper::try_update_position(const Position &position) {
 }
 
 void Bookkeeper::try_sync_book_replica(uint32_t location_uid) {
-  std::lock_guard<std::mutex> lock(update_book_mutex_);
   /// sync的Asset, AssetMargin, PositionEnd都收到后才开始同步TD和策略的信息, 并使用TD的新book替换旧book
   if (not books_replica_asset_guards_.try_emplace(location_uid).first->second or
       not books_replica_position_guard_.try_emplace(location_uid).first->second or
@@ -448,4 +473,5 @@ void Bookkeeper::mirror_positions(int64_t trigger_time, uint32_t strategy_uid) {
   }
   strategy_book->update(trigger_time);
 }
+
 } // namespace kungfu::wingchun::book
