@@ -526,11 +526,12 @@ void Watcher::Sync(const Napi::CallbackInfo &info) {
 }
 
 void Watcher::SyncLedger() {
-  boost::hana::for_each(StateDataTypes, [&](auto it) { 
+  boost::hana::for_each(StateDataTypes, [&](auto it) {
     if (boost::hana::contains(longfist::TradingDataTypes, boost::hana::first(it))) {
       return;
     }
-    UpdateLedger(+boost::hana::second(it)); });
+    UpdateLedger(+boost::hana::second(it));
+  });
 }
 
 void Watcher::TryRefreshTradingData() {
