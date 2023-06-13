@@ -453,10 +453,10 @@ void Watcher::on_start() {
       events_ | is(Quote::tag) | is_subscribed(subscribed_instruments_) | $$(UpdateBook(event, event->data<Quote>()));
     }
 
-    events_ | is(OrderInput::tag) | $$(UpdateBook(event, event->data<OrderInput>()));
+    // events_ | is(OrderInput::tag) | $$(UpdateBook(event, event->data<OrderInput>()));
     events_ | is(Order::tag) | $$(UpdateBook(event, event->data<Order>()));
     events_ | is(Order::tag) | $$(UpdateBasketOrder(event->trigger_time(), event->data<Order>()));
-    events_ | is(Trade::tag) | $$(UpdateBook(event, event->data<Trade>()));
+    // events_ | is(Trade::tag) | $$(UpdateBook(event, event->data<Trade>()));
     events_ | is(Position::tag) | $$(UpdateBook(event, event->data<Position>()));
     events_ | is(PositionEnd::tag) | $$(UpdateAsset(event, event->data<PositionEnd>().holder_uid));
     refresh_books();
@@ -540,7 +540,7 @@ void Watcher::TryRefreshTradingData() {
 }
 
 void Watcher::SyncTradingData() {
-  boost::hana::for_each(TradingDataTypes, [&](auto it) { UpdateLedger(+boost::hana::second(it)); });
+  boost::hana::for_each(TradingDataTypes, [&](auto it) { UpdateTradingData(+boost::hana::second(it)); });
 }
 
 void Watcher::SyncAppStates() {
@@ -744,9 +744,6 @@ void Watcher::UpdateAsset(const event_ptr &event, uint32_t book_uid) {
 }
 
 void Watcher::UpdateBook(const event_ptr &event, const Quote &quote) {
-  auto &mutex = bookkeeper_.get_update_book_mutex();
-  std::lock_guard<std::mutex> lock(mutex);
-
   auto ledger_uid = ledger_home_location_->uid;
   for (const auto &item : bookkeeper_.get_books()) {
     auto &book = item.second;

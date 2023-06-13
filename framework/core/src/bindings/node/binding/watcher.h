@@ -23,7 +23,7 @@
 namespace kungfu::node {
 constexpr uint64_t ID_TRANC = 0x00000000FFFFFFFF;
 constexpr uint32_t PAGE_ID_MASK = 0x80000000;
-constexpr uint32_t TRANSFER_TRADING_DATA_LIMIT = 1000;
+constexpr uint32_t TRANSFER_TRADING_DATA_LIMIT = 2000;
 
 class WatcherAutoClient : public wingchun::broker::SilentAutoClient {
 public:
@@ -231,9 +231,6 @@ private:
   };
 
   template <typename TradingData> void UpdateBook(const event_ptr &event, const TradingData &data) {
-    auto &mutex = bookkeeper_.get_update_book_mutex();
-    std::lock_guard<std::mutex> lock(mutex);
-
     auto update = [&](uint32_t source, uint32_t dest) {
       if (source == yijinjing::data::location::PUBLIC) {
         return;
@@ -318,6 +315,19 @@ private:
       const auto &state = iter->second;
       update_ledger(state.update_time, state.source, state.dest, state.data);
       iter = target_map.erase(iter);
+    }
+  }
+
+  template <typename DataType> void UpdateTradingData(const boost::hana::basic_type<DataType> &type) {
+    using DataTypeMap = std::unordered_map<uint64_t, state<DataType>>;
+    auto &target_map = const_cast<DataTypeMap &>(data_bank_[type]);
+    auto iter = target_map.begin();
+    auto count = 0;
+    while (iter != target_map.end() and target_map.size() > 0 and count < TRANSFER_TRADING_DATA_LIMIT) {
+      const auto &state = iter->second;
+      update_ledger(state.update_time, state.source, state.dest, state.data);
+      iter = target_map.erase(iter);
+      count++;
     }
   }
 
