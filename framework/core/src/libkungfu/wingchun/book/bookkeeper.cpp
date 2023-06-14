@@ -83,6 +83,7 @@ void Bookkeeper::batch_update_book_by_quote() {
     const auto &state_quote = iter.second;
     update_book(state_quote.update_time, state_quote.data);
   }
+  quotes_.clear();
 }
 
 std::mutex &Bookkeeper::get_update_book_mutex() { return update_book_mutex_; }
