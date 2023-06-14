@@ -1095,6 +1095,7 @@ export const useSubscibeInstrumentAtEntry = (
     useGlobalStore();
 
   const app = getCurrentInstance();
+  const POSITION_SLICE_NUM = process.env.IF_CPUS_NUM_SAFE ? 128 : 0;
 
   const getCurrentPositionsForSub = (watcher: KungfuApi.Watcher) => {
     if (!currentGlobalKfLocation.value) return [];
@@ -1108,7 +1109,7 @@ export const useSubscibeInstrumentAtEntry = (
 
     return positions
       .reverse()
-      .slice(0, 128) // default subscribe 128 tickers, then subscribe by clicking position or manually subscribing
+      .slice(0, POSITION_SLICE_NUM) // default subscribe POSITION_SLICE_NUM tickers, then subscribe by clicking position or manually subscribing
       .map((item: KungfuApi.Position): KungfuApi.InstrumentForSub => {
         const uidKey = hashInstrumentUKey(item.instrument_id, item.exchange_id);
         return {
