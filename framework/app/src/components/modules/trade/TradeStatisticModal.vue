@@ -93,8 +93,10 @@ const priceVolumeStats = computed(() => {
 
   const priceVolumeDataResolved: Array<{
     instrumentId_exchangeId: string;
-    side: KungfuApi.KfTradeValueCommonData;
-    offset: KungfuApi.KfTradeValueCommonData;
+    sideName: string;
+    sideColor: KungfuApi.AntInKungfuColorTypes;
+    offsetName: string;
+    offsetColor: KungfuApi.AntInKungfuColorTypes;
     mean: string;
     min: string;
     max: string;
@@ -108,11 +110,15 @@ const priceVolumeStats = computed(() => {
       );
       const volumeSum = priceVolumeData[id].volume.reduce((a, b) => a + b);
       const range = priceStats.range();
+      const sideReolved = dealSide(+side);
+      const offsetResolved = dealOffset(+offset);
       return {
         id,
         instrumentId_exchangeId: `${instrumentId}_${exchangeId}`,
-        side: dealSide(+side),
-        offset: dealOffset(+offset),
+        sideName: sideReolved.name,
+        sideColor: sideReolved.color || 'default',
+        offsetName: offsetResolved.name,
+        offsetColor: offsetResolved.color || 'default',
         mean: Number(priceSum / volumeSum).toFixed(2),
         min: range[0].toFixed(2),
         max: range[1].toFixed(2),
@@ -128,8 +134,8 @@ const priceVolumeStats = computed(() => {
 
 const { searchKeyword, tableData } = useTableSearchKeyword(priceVolumeStats, [
   'instrumentId_exchangeId',
-  'side',
-  'offset',
+  'sideName',
+  'offsetName',
   'mean',
   'min',
   'max',
@@ -176,14 +182,14 @@ const { searchKeyword, tableData } = useTableSearchKeyword(priceVolumeStats, [
           :columns="statisColums"
         >
           <template #default="{ column, item }">
-            <template v-if="column.dataIndex === 'side'">
-              <span :class="`color-${item.side.color}`">
-                {{ item.side.name }}
+            <template v-if="column.dataIndex === 'sideName'">
+              <span :class="`color-${item.sideColor}`">
+                {{ item.sideName }}
               </span>
             </template>
-            <template v-else-if="column.dataIndex === 'offset'">
-              <span :class="`color-${item.offset.color}`">
-                {{ item.offset.name }}
+            <template v-else-if="column.dataIndex === 'offsetName'">
+              <span :class="`color-${item.offsetColor}`">
+                {{ item.offsetName }}
               </span>
             </template>
           </template>

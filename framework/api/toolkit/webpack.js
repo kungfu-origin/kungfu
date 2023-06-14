@@ -9,6 +9,9 @@ module.exports = {
     return {
       devtool: 'eval-source-map',
       mode: production ? 'production' : 'development',
+      experiments: {
+        topLevelAwait: true,
+      },
       optimization: {
         minimize: true,
         minimizer: [new TerserPlugin()],

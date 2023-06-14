@@ -126,7 +126,6 @@ function buildGlobalPositions(
         unrealized_pnl,
         update_time,
       } = prePosStat;
-      posStat[id].uid_key = pos.uid_key;
       posStat[id].yesterday_volume = yesterday_volume + pos.yesterday_volume;
       posStat[id].volume = volume + pos.volume;
       posStat[id].avg_open_price =
@@ -136,7 +135,6 @@ function buildGlobalPositions(
       posStat[id].unrealized_pnl = unrealized_pnl + pos.unrealized_pnl;
       posStat[id].update_time =
         update_time > pos.update_time ? update_time : pos.update_time;
-      posStat[id].uid_key = pos.uid_key;
     }
     return posStat;
   }, {} as PosStat);
