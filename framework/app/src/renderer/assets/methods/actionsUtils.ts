@@ -1108,6 +1108,7 @@ export const useSubscibeInstrumentAtEntry = (
 
     return positions
       .reverse()
+      .slice(0, 500)
       .map((item: KungfuApi.Position): KungfuApi.InstrumentForSub => {
         const uidKey = hashInstrumentUKey(item.instrument_id, item.exchange_id);
         return {
