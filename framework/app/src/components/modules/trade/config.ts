@@ -105,12 +105,12 @@ export const statisColums: KfTradingDataTableHeaderConfig[] = [
   },
   {
     name: '',
-    dataIndex: 'side',
+    dataIndex: 'sideName',
     width: 40,
   },
   {
     name: '',
-    dataIndex: 'offset',
+    dataIndex: 'offsetName',
     width: 40,
   },
   {

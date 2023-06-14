@@ -1108,6 +1108,7 @@ export const useSubscibeInstrumentAtEntry = (
 
     return positions
       .reverse()
+      .slice(0, 128) // default subscribe 128 tickers, then subscribe by clicking position or manually subscribing
       .map((item: KungfuApi.Position): KungfuApi.InstrumentForSub => {
         const uidKey = hashInstrumentUKey(item.instrument_id, item.exchange_id);
         return {
