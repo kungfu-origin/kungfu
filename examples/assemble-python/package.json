@@ -1,7 +1,7 @@
 {
   "name": "@kungfu-trader/examples-assemble-python",
   "author": "kungfu-trader",
-  "version": "2.4.70-alpha.6",
+  "version": "2.4.70-alpha.7",
   "description": "KungFu Example Assemble Python",
   "license": "Apache-2.0",
   "private": true,
@@ -13,6 +13,6 @@
     "read_bytes": "kfc -l debug assemble src/json/read_bytes_10026.json"
   },
   "devDependencies": {
-    "@kungfu-trader/kungfu-sdk": "^2.4.70-alpha.6"
+    "@kungfu-trader/kungfu-sdk": "^2.4.70-alpha.7"
   }
 }
