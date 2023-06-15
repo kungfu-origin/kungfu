@@ -347,6 +347,8 @@ export default {
     Continue: 'Continue',
     original_plan: 'Orignal plan',
     beyond_to_open: 'Take excess to open',
+    reach: 'Reach',
+    above: 'Above',
   },
 
   orderConfig: {
