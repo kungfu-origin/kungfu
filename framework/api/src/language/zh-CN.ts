@@ -345,8 +345,8 @@ export default {
     Continue: '继续下单',
     original_plan: '按原方案下单',
     beyond_to_open: '超出部分反向开仓',
-    equal_to: '等于',
-    greater_than: '大于',
+    reach: '达到',
+    above: '超过',
   },
 
   orderConfig: {

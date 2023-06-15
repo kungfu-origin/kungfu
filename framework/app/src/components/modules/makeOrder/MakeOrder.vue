@@ -616,23 +616,23 @@ function closeModalConditions(
     return { result: false };
   }
 
-  if (makeOrderInput.volume === positionVolume * (closeRange / 100)) {
+  const positionVolumeResolved = positionVolume * (closeRange / 100);
+
+  if (makeOrderInput.volume === positionVolumeResolved) {
     return {
       result: true,
-      relationship: t('tradingConfig.equal_to'),
+      relationship: t('tradingConfig.reach'),
     };
-  } else if (makeOrderInput.volume > positionVolume * (closeRange / 100)) {
+  } else if (makeOrderInput.volume > positionVolumeResolved) {
     return {
       result: true,
-      relationship: t('tradingConfig.greater_than'),
+      relationship: t('tradingConfig.above'),
     };
   } else {
     return {
       result: false,
     };
   }
-
-  // return makeOrderInput.volume >= positionVolume * (closeRange / 100);
 }
 
 const { handleOpenSetTradingTaskModal } = useTradingTask();
