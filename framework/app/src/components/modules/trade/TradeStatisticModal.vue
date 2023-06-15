@@ -134,8 +134,8 @@ const priceVolumeStats = computed(() => {
 
 const { searchKeyword, tableData } = useTableSearchKeyword(priceVolumeStats, [
   'instrumentId_exchangeId',
-  'side',
-  'offset',
+  'sideName',
+  'offsetName',
   'mean',
   'min',
   'max',
