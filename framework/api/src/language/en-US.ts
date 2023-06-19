@@ -423,7 +423,7 @@ export default {
       'The account process under account group change will not be affected, confirm the deletion',
   },
 
-  account_move: {
+  fund_trans: {
     config_error: '{td} abnormal configuration file for counter fund transfer',
     modal_title: 'Transfer of funds between counters',
     trans_selection: 'Please select the direction of fund transfer',

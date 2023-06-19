@@ -580,7 +580,7 @@ const getKfExtensionConfigByCategory = (
                 configOfCategory?.type || [],
               ),
               settings: configOfCategory?.settings || [],
-              account_move: configOfCategory?.account_move,
+              fund_trans: configOfCategory?.fund_trans,
             },
           };
         },

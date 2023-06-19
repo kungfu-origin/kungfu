@@ -23,15 +23,15 @@ defineEmits<{
 }>();
 
 const app = getCurrentInstance();
-const selectedExtension = ref<string>('between_nodes');
-const availExtensionList = ref([
+const selectedTransType = ref<string>('between_nodes');
+const availTransRecordList = ref([
   {
     key: 'between_nodes',
     name: 'HTS -> HTS',
   },
   {
     key: 'tranc_in',
-    name: `${t('account_move.centralized_counter')} -> HTS`,
+    name: `${t('fund_trans.centralized_counter')} -> HTS`,
   },
 ]);
 
@@ -39,15 +39,15 @@ const { modalVisible, closeModal } = useModalVisible(props.visible);
 const { isLanguageKeyAvailable } = useLanguage();
 
 onMounted(() => {
-  if (selectedExtension.value === 'between_nodes') {
-    if (availExtensionList.value.length) {
-      selectedExtension.value = availExtensionList.value[0].key;
+  if (selectedTransType.value === 'between_nodes') {
+    if (availTransRecordList.value.length) {
+      selectedTransType.value = availTransRecordList.value[0].key;
     }
   }
 });
 
 function handleConfirm() {
-  app && app.emit('confirm', selectedExtension.value);
+  app && app.emit('confirm', selectedTransType.value);
   closeModal();
 }
 </script>
@@ -56,15 +56,21 @@ function handleConfirm() {
     v-model:visible="modalVisible"
     class="kf-set-source-modal"
     :width="500"
-    :title="$t('account_move.modal_title')"
+    :title="$t('fund_trans.modal_title')"
     :destroy-on-close="true"
     @cancel="closeModal"
     @ok="handleConfirm"
   >
-    <p>{{ $t('account_move.trans_selection') }}</p>
-    <a-radio-group v-model:value="selectedExtension">
+    <p
+      :style="{
+        'font-size': '16px',
+      }"
+    >
+      {{ $t('fund_trans.trans_selection') }}
+    </p>
+    <a-radio-group v-model:value="selectedTransType">
       <a-radio
-        v-for="item in availExtensionList"
+        v-for="item in availTransRecordList"
         :key="item.key"
         :value="item.key"
         :style="{
@@ -85,7 +91,6 @@ function handleConfirm() {
 .kf-set-source-modal {
   .source-name__txt {
     margin-right: 8px;
-    // font-weight: bold;
   }
 
   .source-id__txt {

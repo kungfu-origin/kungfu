@@ -418,7 +418,7 @@ export default {
     confirm_delete_group: '不会影响改账户组下账户进程, 确认删除',
   },
 
-  account_move: {
+  fund_trans: {
     config_error: '{td}柜台资金划转配置文件异常',
     modal_title: '柜台间资金划转',
     trans_selection: '请选择资金划转的方向',

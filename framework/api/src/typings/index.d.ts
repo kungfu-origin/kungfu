@@ -230,7 +230,7 @@ declare namespace KungfuApi {
           | StrategyExtTypes[]
           | StrategyExtTypes;
         settings: KfConfigItem[];
-        account_move?: KfExtAccountMoveConfig | null;
+        fund_trans?: KfExtFundTransConfig | null;
       }
     >;
     language: {
@@ -247,7 +247,7 @@ declare namespace KungfuApi {
 
   export type KfExhibitConfigs = Record<string, KfExhibitConfig>;
 
-  export interface KfExtAccountMoveConfig {
+  export interface KfExtFundTransConfig {
     between_nodes: {
       settings: KfConfigItem[];
     };
@@ -263,7 +263,7 @@ declare namespace KungfuApi {
     extPath: string;
     type: InstrumentTypes[] | StrategyExtTypes[];
     settings: KfConfigItem[];
-    account_move?: KfExtAccountMoveConfig | null;
+    fund_trans?: KfExtFundTransConfig | null;
   }
 
   export type KfExtConfigs = Record<string, Record<string, KfExtConfig>>;

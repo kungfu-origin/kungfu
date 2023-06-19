@@ -68,8 +68,6 @@ import {
   triggerStartStep,
 } from '@kungfu-trader/kungfu-js-api/kungfu/tradingData';
 
-import { transferDataSubject } from '@kungfu-trader/kungfu-js-api/kungfu/transferData';
-
 import VueVirtualScroller from 'vue-virtual-scroller';
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
 import { useComponents } from './useComponents';
@@ -124,7 +122,6 @@ app.config.globalProperties.$antLocalesMap = {
 };
 app.config.globalProperties.$globalBus = globalBus;
 app.config.globalProperties.$tradingDataSubject = tradingDataSubject;
-app.config.globalProperties.$transferDataSubject = transferDataSubject;
 
 app.use(VueI18n);
 
