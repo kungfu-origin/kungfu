@@ -92,6 +92,7 @@ export default {
   Order: 'Order',
   PosGlobal: 'Positon Global',
   Pos: 'Positon',
+  TransferRecord: 'TransferRecord',
 
   please_wait: 'Please wait...',
   please_wait_and_retry: 'Please wait and retry',
@@ -420,6 +421,18 @@ export default {
     delete_amount_group: 'Deleting account Group {group}',
     confirm_delete_group:
       'The account process under account group change will not be affected, confirm the deletion',
+  },
+
+  account_move: {
+    config_error: '{td} abnormal configuration file for counter fund transfer',
+    modal_title: 'Transfer of funds between counters',
+    trans_selection: 'Please select the direction of fund transfer',
+    centralized_counter: 'Centralized counter',
+    source: 'Source',
+    target: 'Target',
+    amount: 'Amount',
+    trading_day: 'Transfer time',
+    error: 'Transfer failed, please contact the administrator!',
   },
 
   mdConfig: {

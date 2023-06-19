@@ -6,11 +6,13 @@ import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/p
 import KfProcessStatus from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfProcessStatus.vue';
 import KfSetExtensionModal from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfSetExtensionModal.vue';
 import KfSetByConfigModal from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfSetByConfigModal.vue';
+import KfAccountMoveModal from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfAccountMoveModal.vue';
 import Icon, {
   FileTextOutlined,
   SettingOutlined,
   DeleteOutlined,
   ReloadOutlined,
+  PayCircleOutlined,
 } from '@ant-design/icons-vue';
 
 import { categoryRegisterConfig, getColumns } from './config';
@@ -111,6 +113,23 @@ const tdGroupNames = computed(() => {
 const addTdGroupConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
   type: 'add',
   title: t('tdConfig.account_group'),
+  config: {} as KungfuApi.KfExtConfig,
+});
+
+const currentAccout: {
+  source: string;
+  transfer_type: 'between_nodes' | 'tranc_in';
+  config: KungfuApi.KfConfig | null;
+} = {
+  source: '',
+  transfer_type: 'between_nodes',
+  config: null,
+};
+const setAccountMoveModeModalVisible = ref<boolean>(false);
+const setAccountMoveConfigModalVisible = ref<boolean>(false);
+const setAccountMoveConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
+  type: 'custom',
+  title: t('Td'),
   config: {} as KungfuApi.KfExtConfig,
 });
 
@@ -288,6 +307,75 @@ function handleOpenAddTdGroupDialog(type: KungfuApi.ModalChangeType) {
   };
   addTdGroupConfigPayload.value.initValue = undefined;
   addTdGroupModalVisble.value = true;
+}
+
+function handleAccountMoveModeDialog(config: KungfuApi.KfConfig) {
+  currentAccout.source = config.group;
+  currentAccout.config = config;
+  setAccountMoveModeModalVisible.value = true;
+}
+
+function handleOpenSetAccountMoveModal(type: 'between_nodes' | 'tranc_in') {
+  const extConfig: KungfuApi.KfExtConfig = (extConfigs.value['td'] || {})[
+    currentAccout.source
+  ];
+  if (!extConfig.account_move) {
+    error(
+      t('account_move.config_error', {
+        td: currentAccout.source,
+      }),
+    );
+    return;
+  }
+
+  const selectAccountMoveConfig = extConfig.account_move[type];
+  currentAccout.transfer_type = type;
+  setTdConfigPayload.value.initValue = undefined;
+  setAccountMoveConfigPayload.value.title = t('account_move.modal_title');
+  setAccountMoveConfigPayload.value.config = {
+    type: [],
+    name: t('account_move.modal_title'),
+    category: 'td',
+    key: currentAccout.source,
+    extPath: '',
+    settings: selectAccountMoveConfig.settings,
+  };
+
+  const defaultSource: string = JSON.parse(
+    currentAccout.config?.value as string,
+  ).node_id;
+  setAccountMoveConfigPayload.value.initValue = {
+    source: defaultSource,
+  };
+
+  setAccountMoveConfigModalVisible.value = true;
+}
+
+function handleConfirmAccountMove(formState) {
+  const value = JSON.stringify(formState);
+  const message: KungfuApi.TimeKeyValue = {
+    key:
+      currentAccout.transfer_type === 'between_nodes'
+        ? 'FundTransBetweenNodes_Feedback'
+        : 'FundTransIn_Feedback',
+    update_time: window.watcher.now(),
+    value,
+    tag_a: '',
+    tag_b: '',
+    tag_c: '',
+    source: 0,
+    dest: 0,
+    uid_key: '',
+  };
+  const accountMoveResult = (
+    window.watcher as KungfuApi.Watcher
+  ).issueCustomData(message, currentAccout.config as KungfuApi.KfConfig);
+
+  if (accountMoveResult) {
+    success();
+  } else {
+    error(t('account_move.error'));
+  }
 }
 
 function handleConfirmAddUpdateTdGroup(
@@ -607,7 +695,13 @@ function handleRequestPosition() {
             ></KfBlinkNum>
           </template>
           <template v-else-if="column.dataIndex === 'actions'">
-            <div class="kf-actions__warp" v-if="record.category === 'td'">
+            <div v-if="record.category === 'td'" class="kf-actions__warp">
+              <PayCircleOutlined
+                style="font-size: 12px"
+                @click.stop="
+                  handleAccountMoveModeDialog(record as KungfuApi.KfConfig)
+                "
+              />
               <FileTextOutlined
                 style="font-size: 12px"
                 @click.stop="handleOpenLogview(record)"
@@ -644,9 +738,14 @@ function handleRequestPosition() {
     <KfSetExtensionModal
       v-if="setSourceModalVisible"
       v-model:visible="setSourceModalVisible"
-      extensionType="td"
+      extension-type="td"
       @confirm="handleOpenSetTdModal('add', $event)"
     ></KfSetExtensionModal>
+    <KfAccountMoveModal
+      v-if="setAccountMoveModeModalVisible"
+      v-model:visible="setAccountMoveModeModalVisible"
+      @confirm="handleOpenSetAccountMoveModal($event)"
+    ></KfAccountMoveModal>
     <KfSetByConfigModal
       v-if="setTdModalVisible"
       v-model:visible="setTdModalVisible"
@@ -663,6 +762,12 @@ function handleRequestPosition() {
       :payload="addTdGroupConfigPayload"
       :primaryKeyAvoidRepeatCompareTarget="tdGroupNames"
       @confirm="({ formState }) => handleConfirmAddUpdateTdGroup(formState)"
+    ></KfSetByConfigModal>
+    <KfSetByConfigModal
+      v-if="setAccountMoveConfigModalVisible"
+      v-model:visible="setAccountMoveConfigModalVisible"
+      :payload="setAccountMoveConfigPayload"
+      @confirm="({ formState }) => handleConfirmAccountMove(formState)"
     ></KfSetByConfigModal>
     <SetTdGroupModal
       v-if="setTdGroupModalVisble"

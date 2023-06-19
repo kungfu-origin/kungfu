@@ -230,6 +230,7 @@ declare namespace KungfuApi {
           | StrategyExtTypes[]
           | StrategyExtTypes;
         settings: KfConfigItem[];
+        account_move?: KfExtAccountMoveConfig | null;
       }
     >;
     language: {
@@ -246,6 +247,15 @@ declare namespace KungfuApi {
 
   export type KfExhibitConfigs = Record<string, KfExhibitConfig>;
 
+  export interface KfExtAccountMoveConfig {
+    between_nodes: {
+      settings: KfConfigItem[];
+    };
+    tranc_in: {
+      settings: KfConfigItem[];
+    };
+  }
+
   interface KfExtConfig {
     name: string;
     category: string;
@@ -253,6 +263,7 @@ declare namespace KungfuApi {
     extPath: string;
     type: InstrumentTypes[] | StrategyExtTypes[];
     settings: KfConfigItem[];
+    account_move?: KfExtAccountMoveConfig | null;
   }
 
   export type KfExtConfigs = Record<string, Record<string, KfExtConfig>>;
@@ -563,6 +574,17 @@ declare namespace KungfuApi {
     tag_b: string;
     tag_c: string;
     value: string;
+
+    source: number;
+    dest: number;
+    uid_key: string;
+  }
+
+  export interface TransferRecordResolved {
+    amount: number;
+    source: string;
+    target: string;
+    trading_day: bigint;
   }
   export interface BlockMessage {
     opponent_seat: number; // 对方手席位号
