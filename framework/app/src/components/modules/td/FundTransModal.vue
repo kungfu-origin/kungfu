@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, getCurrentInstance } from 'vue';
+import { ArrowRightOutlined } from '@ant-design/icons-vue';
 
 import { useModalVisible } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { useLanguage } from '@kungfu-trader/kungfu-js-api/language';
@@ -27,11 +28,11 @@ const selectedTransType = ref<string>('between_nodes');
 const availTransRecordList = ref([
   {
     key: 'between_nodes',
-    name: 'HTS -> HTS',
+    name: ['HTS', 'HTS'],
   },
   {
     key: 'tranc_in',
-    name: `${t('fund_trans.centralized_counter')} -> HTS`,
+    name: [t('fund_trans.centralized_counter'), 'HTS'],
   },
 ]);
 
@@ -81,7 +82,19 @@ function handleConfirm() {
         }"
       >
         <span class="source-name__txt">
-          {{ isLanguageKeyAvailable(item.name) ? $t(item.name) : item.name }}
+          {{
+            isLanguageKeyAvailable(item.name[0])
+              ? $t(item.name[0])
+              : item.name[0]
+          }}
+        </span>
+        <ArrowRightOutlined style="margin-right: 8px" />
+        <span class="source-name__txt">
+          {{
+            isLanguageKeyAvailable(item.name[1])
+              ? $t(item.name[1])
+              : item.name[1]
+          }}
         </span>
       </a-radio>
     </a-radio-group>

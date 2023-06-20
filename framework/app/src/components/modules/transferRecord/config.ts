@@ -3,8 +3,8 @@ const { t } = VueI18n.global;
 
 export const getColumns = (): AntTableColumns => [
   {
-    title: t('fund_trans.trading_day'),
-    dataIndex: 'trading_day',
+    title: t('fund_trans.update_time'),
+    dataIndex: 'update_time',
     align: 'center',
     width: 120,
   },

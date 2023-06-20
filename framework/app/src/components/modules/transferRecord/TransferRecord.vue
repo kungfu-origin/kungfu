@@ -21,7 +21,7 @@ let tableList = ref<KungfuApi.TimeKeyValue[]>([]);
 let tableListResolved = ref<KungfuApi.TransferRecordResolved[]>([]);
 const { searchKeyword, tableData } =
   useTableSearchKeyword<KungfuApi.TransferRecordResolved>(tableListResolved, [
-    'transfer_time',
+    'update_time',
     'source',
     'target',
     'amount',
@@ -33,18 +33,26 @@ onMounted(() => {
       (watcher: KungfuApi.Watcher) => {
         if (!currentGlobalKfLocation.value) return;
         const source = watcher.getLocationUID(currentGlobalKfLocation.value);
-        tableList.value = watcher.ledger['TimeKeyValue']
-          .filter('souce', source)
+        tableList.value = (
+          watcher.ledger[
+            'TimeKeyValue'
+          ] as KungfuApi.DataTable<KungfuApi.TimeKeyValue>
+        )
+          .filter('tag_a', 'FundTrans')
+          .filter('source', source)
           .list();
         tableListResolved.value = tableList.value.map(
           (item: KungfuApi.TimeKeyValue) => {
-            return {
-              ...JSON.parse(item.value),
-              trading_day: item.update_time,
+            const value = JSON.parse(item.value);
+            const result: KungfuApi.TransferRecordResolved = {
+              update_time: value.update_time,
+              source: value.source || '--',
+              target: value.target || '--',
+              amount: value.amount,
             };
+            return result;
           },
         );
-        console.log(tableListResolved.value, '`````````````');
       },
     );
 
@@ -84,8 +92,8 @@ onMounted(() => {
             record: KungfuApi.TransferRecordResolved,
           }"
         >
-          <template v-if="column.dataIndex === 'trading_day'">
-            <div>{{ dealKfTime(record.trading_day, true) }}</div>
+          <template v-if="column.dataIndex === 'update_time'">
+            <div>{{ dealKfTime(record.update_time, true) }}</div>
           </template>
         </template>
       </a-table>

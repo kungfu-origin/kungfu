@@ -423,11 +423,14 @@ export default {
     modal_title: '柜台间资金划转',
     trans_selection: '请选择资金划转的方向',
     centralized_counter: '集中柜台',
-    source: '来源',
-    target: '目标',
-    amount: '金额',
-    trading_day: '划转时间',
+    source: '划出节点',
+    target: '划入节点',
+    amount: '发生金额',
+    update_time: '划转时间',
     error: '划转失败,请联系管理员!',
+    capitalaccountor: '资金账号',
+    trade_password: '交易密码',
+    account: '客户号',
   },
 
   mdConfig: {

@@ -310,6 +310,7 @@ function handleOpenAddTdGroupDialog(type: KungfuApi.ModalChangeType) {
 }
 
 function handleFundTransModeDialog(config: KungfuApi.KfConfig) {
+  if (getProcessStatusName(config) !== 'Ready') return;
   currentAccout.source = config.group;
   currentAccout.config = config;
   setFundTransModeModalVisible.value = true;
@@ -341,39 +342,53 @@ function handleOpenSetFundTransModal(type: 'between_nodes' | 'tranc_in') {
     settings: selectFundTransConfig.settings,
   };
 
-  const defaultSource: string = JSON.parse(
-    currentAccout.config?.value as string,
-  ).node_id;
-  setFundTransConfigPayload.value.initValue = {
-    source: defaultSource,
-  };
-
   setFundTransConfigModalVisible.value = true;
 }
 
 function handleConfirmFundTrans(formState) {
-  const value = JSON.stringify(formState);
-  const message: KungfuApi.TimeKeyValue = {
+  const watcher = window.watcher as KungfuApi.Watcher;
+  const formStateResolved = {
+    ...formState,
     key: getFundTransKey(currentAccout.transfer_type),
-    update_time: window.watcher.now(),
-    value,
-    tag_a: '',
+    update_time: '',
+  };
+
+  const message: KungfuApi.TimeKeyValue = {
+    key: watcher.now().toString(),
+    update_time: watcher.now(),
+    value: JSON.stringify(formStateResolved),
+    tag_a: getFundTransKey(null),
     tag_b: '',
     tag_c: '',
     source: 0,
     dest: 0,
     uid_key: '',
   };
-  const fundTransResult = (window.watcher as KungfuApi.Watcher).issueCustomData(
+  const fundTransResult = watcher.issueCustomData(
     message,
     currentAccout.config as KungfuApi.KfConfig,
   );
+
+  if (
+    formState.source &&
+    formState.target &&
+    formState.source === formState.target
+  ) {
+    error('划入节点和划出节点不能一致，请重新选择！');
+    return;
+  }
 
   if (fundTransResult) {
     success();
   } else {
     error(t('fund_trans.error'));
   }
+}
+
+function dealDisabledColor(config: KungfuApi.KfConfig) {
+  return getProcessStatusName(config) === 'Ready'
+    ? 'rgba(255, 255, 255, 1)'
+    : 'rgba(255, 255, 255, 0.35)';
 }
 
 function handleConfirmAddUpdateTdGroup(
@@ -695,7 +710,10 @@ function handleRequestPosition() {
           <template v-else-if="column.dataIndex === 'actions'">
             <div v-if="record.category === 'td'" class="kf-actions__warp">
               <PayCircleOutlined
-                style="font-size: 12px"
+                v-if="record.group === 'itp'"
+                :style="{
+                  color: dealDisabledColor(record as KungfuApi.KfConfig),
+                }"
                 @click.stop="
                   handleFundTransModeDialog(record as KungfuApi.KfConfig)
                 "

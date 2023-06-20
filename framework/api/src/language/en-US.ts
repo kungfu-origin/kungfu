@@ -428,11 +428,14 @@ export default {
     modal_title: 'Transfer of funds between counters',
     trans_selection: 'Please select the direction of fund transfer',
     centralized_counter: 'Centralized counter',
-    source: 'Source',
-    target: 'Target',
-    amount: 'Amount',
+    source: 'Outline the node',
+    target: 'Into the node',
+    amount: 'Amount incurred',
     trading_day: 'Transfer time',
     error: 'Transfer failed, please contact the administrator!',
+    capitalaccountor: 'Fund account',
+    trade_password: 'Transaction password',
+    account: 'Client number',
   },
 
   mdConfig: {
