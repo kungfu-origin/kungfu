@@ -189,7 +189,7 @@ void apprentice::react() {
       auto data = event->data<Register>();
       last_active_time_ = data.last_active_time;
       checkin_time_ = data.checkin_time;
-      reader_->join(master_cmd_location_, get_live_home_uid(), event->gen_time());
+      reader_->join(master_cmd_location_, get_live_home_uid(), begin_time_);
     });
 
     auto cached_register_event = events_ | is(Register::tag) | filter([&](const event_ptr &event) {
