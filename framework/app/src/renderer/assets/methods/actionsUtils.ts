@@ -1322,12 +1322,12 @@ export const useQuote = (): {
       return '--';
     }
 
-    const { open_price, last_price } = quote;
-    if (!open_price || !last_price) {
+    const { pre_close_price, last_price } = quote;
+    if (!pre_close_price || !last_price) {
       return '--';
     }
 
-    const percent = (last_price - open_price) / open_price;
+    const percent = (last_price - pre_close_price) / pre_close_price;
     if (percent === Infinity) {
       return '--';
     }
