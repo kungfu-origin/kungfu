@@ -45,10 +45,10 @@ onMounted(() => {
           (item: KungfuApi.TimeKeyValue) => {
             const value = JSON.parse(item.value);
             const result: KungfuApi.TransferRecordResolved = {
-              update_time: value.update_time,
+              update_time: BigInt(value.update_time) || 0n,
               source: value.source || '--',
               target: value.target || '--',
-              amount: value.amount,
+              amount: value.amount || 0,
             };
             return result;
           },
