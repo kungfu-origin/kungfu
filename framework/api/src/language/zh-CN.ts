@@ -92,6 +92,7 @@ export default {
   Order: '委托记录',
   PosGlobal: '持仓汇总',
   Pos: '持仓',
+  TransferRecord: '划转记录',
 
   please_wait: '请稍后',
   please_wait_and_retry: '请稍后重试',
@@ -415,6 +416,22 @@ export default {
     need_only_group: '需保证该账户组名称唯一',
     delete_amount_group: '删除账户组 {group}',
     confirm_delete_group: '不会影响改账户组下账户进程, 确认删除',
+  },
+
+  fund_trans: {
+    config_error: '{td}柜台资金划转配置文件异常',
+    modal_title: '柜台间资金划转',
+    trans_selection: '请选择资金划转的方向',
+    centralized_counter: '集中柜台',
+    source: '划出节点',
+    target: '划入节点',
+    amount: '发生金额',
+    update_time: '划转时间',
+    error: '划转失败,请联系管理员!',
+    capitalaccountor: '资金账号',
+    trade_password: '交易密码',
+    account: '客户号',
+    trans_type: '划转类型',
   },
 
   mdConfig: {

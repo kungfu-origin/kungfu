@@ -171,3 +171,15 @@ export const categoryRegisterConfig: DealTradingDataGetter = {
     },
   },
 };
+
+export const getFundTransKey = (
+  type: 'between_nodes' | 'tranc_in' | null,
+): string => {
+  if (type === 'between_nodes') {
+    return 'FundTransBetweenNodes';
+  } else if (type === 'tranc_in') {
+    return 'FundTransIn';
+  } else {
+    return 'FundTrans';
+  }
+};
