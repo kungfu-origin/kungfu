@@ -120,10 +120,12 @@ const currentAccout: {
   source: string;
   transfer_type: 'between_nodes' | 'tranc_in';
   config: KungfuApi.KfConfig | null;
+  avail: number;
 } = {
   source: '',
   transfer_type: 'between_nodes',
   config: null,
+  avail: 0,
 };
 const setFundTransModeModalVisible = ref<boolean>(false);
 const setFundTransConfigModalVisible = ref<boolean>(false);
@@ -313,6 +315,7 @@ function handleFundTransModeDialog(config: KungfuApi.KfConfig) {
   if (getProcessStatusName(config) !== 'Ready') return;
   currentAccout.source = config.group;
   currentAccout.config = config;
+  currentAccout.avail = getAssetsByKfConfig(config).avail;
   setFundTransModeModalVisible.value = true;
 }
 
@@ -330,6 +333,11 @@ function handleOpenSetFundTransModal(type: 'between_nodes' | 'tranc_in') {
   }
 
   const selectFundTransConfig = extConfig.fund_trans[type];
+  selectFundTransConfig.settings.forEach((item) => {
+    if (item.key === 'amount') {
+      item.max = currentAccout.avail;
+    }
+  });
   currentAccout.transfer_type = type;
   setTdConfigPayload.value.initValue = undefined;
   setFundTransConfigPayload.value.title = t('fund_trans.modal_title');
