@@ -598,7 +598,7 @@ export default {
     fat_finger_threshold: '乌龙指阈值',
     set_fat_finger: '设置乌龙指触发阈值(百分比)',
     close_threshold: '平仓阈值',
-    set_close_threshold: '设置平仓阈值(百分比)',
+    set_close_threshold: '设置平仓阈值(百分比); 设置为 0% 时, 则视作关闭此项',
     trade_limit: '交易限制',
     set_trade_limit: '设置交易限制',
     order_input_key: '限制属性',
