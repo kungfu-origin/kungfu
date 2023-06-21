@@ -11,6 +11,10 @@ import { getCurrentInstance, onBeforeUnmount, onMounted, ref } from 'vue';
 
 import { useCurrentGlobalKfLocation } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import { dealKfTime } from '@kungfu-trader/kungfu-js-api/kungfu';
+import VueI18n from '@kungfu-trader/kungfu-js-api/language';
+import { ArrowRightOutlined } from '@ant-design/icons-vue';
+
+const { t } = VueI18n.global;
 
 const app = getCurrentInstance();
 const { dashboardBodyHeight, handleBodySizeChange } = useDashboardBodySize();
@@ -25,6 +29,7 @@ const { searchKeyword, tableData } =
     'source',
     'target',
     'amount',
+    'trans_type',
   ]);
 
 onMounted(() => {
@@ -49,6 +54,7 @@ onMounted(() => {
               source: value.source || '--',
               target: value.target || '--',
               amount: value.amount || 0,
+              trans_type: value.key,
             };
             return result;
           },
@@ -95,6 +101,20 @@ onMounted(() => {
           <template v-if="column.dataIndex === 'update_time'">
             <div>{{ dealKfTime(record.update_time, true) }}</div>
           </template>
+          <template v-if="column.dataIndex === 'trans_type'">
+            <div v-if="record.trans_type === 'FundTransBetweenNodes'">
+              <span class="trans-name__txt">HTS</span>
+              <ArrowRightOutlined style="margin-right: 8px; font-size: 10px" />
+              <span class="trans-name__txt">HTS</span>
+            </div>
+            <div v-if="record.trans_type === 'FundTransIn'">
+              <span class="trans-name__txt">
+                {{ t('fund_trans.centralized_counter') }}
+              </span>
+              <ArrowRightOutlined style="margin-right: 8px; font-size: 10px" />
+              <span class="trans-name__txt">HTS</span>
+            </div>
+          </template>
         </template>
       </a-table>
     </KfDashboard>
@@ -103,5 +123,8 @@ onMounted(() => {
 <style lang="less">
 .kf-market-data__warp {
   height: 100%;
+  .trans-name__txt {
+    margin-right: 8px;
+  }
 }
 </style>

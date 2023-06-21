@@ -436,6 +436,7 @@ export default {
     capitalaccountor: 'Fund account',
     trade_password: 'Transaction password',
     account: 'Client number',
+    trans_type: 'Transfer type',
   },
 
   mdConfig: {

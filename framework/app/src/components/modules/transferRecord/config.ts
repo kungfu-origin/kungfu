@@ -21,6 +21,12 @@ export const getColumns = (): AntTableColumns => [
     width: 80,
   },
   {
+    title: t('fund_trans.trans_type'),
+    dataIndex: 'trans_type',
+    align: 'center',
+    width: 120,
+  },
+  {
     title: t('fund_trans.amount'),
     dataIndex: 'amount',
     align: 'center',
