@@ -6,14 +6,16 @@ import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/p
 import KfProcessStatus from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfProcessStatus.vue';
 import KfSetExtensionModal from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfSetExtensionModal.vue';
 import KfSetByConfigModal from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfSetByConfigModal.vue';
+import FundTransModal from './FundTransModal.vue';
 import Icon, {
   FileTextOutlined,
   SettingOutlined,
   DeleteOutlined,
   ReloadOutlined,
+  PayCircleOutlined,
 } from '@ant-design/icons-vue';
 
-import { categoryRegisterConfig, getColumns } from './config';
+import { categoryRegisterConfig, getColumns, getFundTransKey } from './config';
 import {
   useTableSearchKeyword,
   handleOpenLogview,
@@ -111,6 +113,25 @@ const tdGroupNames = computed(() => {
 const addTdGroupConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
   type: 'add',
   title: t('tdConfig.account_group'),
+  config: {} as KungfuApi.KfExtConfig,
+});
+
+const currentAccout: {
+  source: string;
+  transfer_type: 'between_nodes' | 'tranc_in';
+  config: KungfuApi.KfConfig | null;
+  avail: number;
+} = {
+  source: '',
+  transfer_type: 'between_nodes',
+  config: null,
+  avail: 0,
+};
+const setFundTransModeModalVisible = ref<boolean>(false);
+const setFundTransConfigModalVisible = ref<boolean>(false);
+const setFundTransConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
+  type: 'custom',
+  title: t('Td'),
   config: {} as KungfuApi.KfExtConfig,
 });
 
@@ -288,6 +309,94 @@ function handleOpenAddTdGroupDialog(type: KungfuApi.ModalChangeType) {
   };
   addTdGroupConfigPayload.value.initValue = undefined;
   addTdGroupModalVisble.value = true;
+}
+
+function handleFundTransModeDialog(config: KungfuApi.KfConfig) {
+  if (getProcessStatusName(config) !== 'Ready') return;
+  currentAccout.source = config.group;
+  currentAccout.config = config;
+  currentAccout.avail = getAssetsByKfConfig(config).avail;
+  setFundTransModeModalVisible.value = true;
+}
+
+function handleOpenSetFundTransModal(type: 'between_nodes' | 'tranc_in') {
+  const extConfig: KungfuApi.KfExtConfig = (extConfigs.value['td'] || {})[
+    currentAccout.source
+  ];
+  if (!extConfig.fund_trans) {
+    error(
+      t('fund_trans.config_error', {
+        td: currentAccout.source,
+      }),
+    );
+    return;
+  }
+
+  const selectFundTransConfig = extConfig.fund_trans[type];
+  selectFundTransConfig.settings.forEach((item) => {
+    if (item.key === 'amount') {
+      item.max = currentAccout.avail;
+    }
+  });
+  currentAccout.transfer_type = type;
+  setTdConfigPayload.value.initValue = undefined;
+  setFundTransConfigPayload.value.title = t('fund_trans.modal_title');
+  setFundTransConfigPayload.value.config = {
+    type: [],
+    name: t('fund_trans.modal_title'),
+    category: 'td',
+    key: currentAccout.source,
+    extPath: '',
+    settings: selectFundTransConfig.settings,
+  };
+
+  setFundTransConfigModalVisible.value = true;
+}
+
+function handleConfirmFundTrans(formState) {
+  const watcher = window.watcher as KungfuApi.Watcher;
+  const formStateResolved = {
+    ...formState,
+    key: getFundTransKey(currentAccout.transfer_type),
+    update_time: '',
+  };
+
+  const message: KungfuApi.TimeKeyValue = {
+    key: watcher.now().toString(),
+    update_time: watcher.now(),
+    value: JSON.stringify(formStateResolved),
+    tag_a: getFundTransKey(null),
+    tag_b: '',
+    tag_c: '',
+    source: 0,
+    dest: 0,
+    uid_key: '',
+  };
+  const fundTransResult = watcher.issueCustomData(
+    message,
+    currentAccout.config as KungfuApi.KfConfig,
+  );
+
+  if (
+    formState.source &&
+    formState.target &&
+    formState.source === formState.target
+  ) {
+    error('划入节点和划出节点不能一致，请重新选择！');
+    return;
+  }
+
+  if (fundTransResult) {
+    success();
+  } else {
+    error(t('fund_trans.error'));
+  }
+}
+
+function dealDisabledColor(config: KungfuApi.KfConfig) {
+  return getProcessStatusName(config) === 'Ready'
+    ? 'rgba(255, 255, 255, 1)'
+    : 'rgba(255, 255, 255, 0.35)';
 }
 
 function handleConfirmAddUpdateTdGroup(
@@ -607,7 +716,16 @@ function handleRequestPosition() {
             ></KfBlinkNum>
           </template>
           <template v-else-if="column.dataIndex === 'actions'">
-            <div class="kf-actions__warp" v-if="record.category === 'td'">
+            <div v-if="record.category === 'td'" class="kf-actions__warp">
+              <PayCircleOutlined
+                v-if="record.group === 'itp'"
+                :style="{
+                  color: dealDisabledColor(record as KungfuApi.KfConfig),
+                }"
+                @click.stop="
+                  handleFundTransModeDialog(record as KungfuApi.KfConfig)
+                "
+              />
               <FileTextOutlined
                 style="font-size: 12px"
                 @click.stop="handleOpenLogview(record)"
@@ -644,9 +762,14 @@ function handleRequestPosition() {
     <KfSetExtensionModal
       v-if="setSourceModalVisible"
       v-model:visible="setSourceModalVisible"
-      extensionType="td"
+      extension-type="td"
       @confirm="handleOpenSetTdModal('add', $event)"
     ></KfSetExtensionModal>
+    <FundTransModal
+      v-if="setFundTransModeModalVisible"
+      v-model:visible="setFundTransModeModalVisible"
+      @confirm="handleOpenSetFundTransModal($event)"
+    ></FundTransModal>
     <KfSetByConfigModal
       v-if="setTdModalVisible"
       v-model:visible="setTdModalVisible"
@@ -663,6 +786,12 @@ function handleRequestPosition() {
       :payload="addTdGroupConfigPayload"
       :primaryKeyAvoidRepeatCompareTarget="tdGroupNames"
       @confirm="({ formState }) => handleConfirmAddUpdateTdGroup(formState)"
+    ></KfSetByConfigModal>
+    <KfSetByConfigModal
+      v-if="setFundTransConfigModalVisible"
+      v-model:visible="setFundTransConfigModalVisible"
+      :payload="setFundTransConfigPayload"
+      @confirm="({ formState }) => handleConfirmFundTrans(formState)"
     ></KfSetByConfigModal>
     <SetTdGroupModal
       v-if="setTdGroupModalVisble"
