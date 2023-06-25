@@ -432,6 +432,8 @@ export default {
     trade_password: '交易密码',
     account: '客户号',
     trans_type: '划转类型',
+    pending: '等待中',
+    status: '划转状态',
   },
 
   mdConfig: {

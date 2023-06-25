@@ -586,6 +586,9 @@ declare namespace KungfuApi {
     target: string;
     update_time: bigint;
     trans_type: string;
+    status: string;
+    ret?: number;
+    message?: string;
   }
   export interface BlockMessage {
     opponent_seat: number; // 对方手席位号

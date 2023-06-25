@@ -437,6 +437,8 @@ export default {
     trade_password: 'Transaction password',
     account: 'Client number',
     trans_type: 'Transfer type',
+    pending: 'Pending',
+    status: 'Transfer status',
   },
 
   mdConfig: {

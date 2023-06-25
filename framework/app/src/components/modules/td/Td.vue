@@ -334,7 +334,7 @@ function handleOpenSetFundTransModal(type: 'between_nodes' | 'tranc_in') {
 
   const selectFundTransConfig = extConfig.fund_trans[type];
   selectFundTransConfig.settings.forEach((item) => {
-    if (item.key === 'amount') {
+    if (item.key === 'amount' && type === 'between_nodes') {
       item.max = currentAccout.avail;
     }
   });
