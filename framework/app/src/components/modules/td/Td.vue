@@ -389,7 +389,7 @@ function handleConfirmFundTrans(formState) {
   if (fundTransResult) {
     success();
   } else {
-    error(t('fund_trans.error'));
+    error(t('fund_trans.tip_error'));
   }
 }
 

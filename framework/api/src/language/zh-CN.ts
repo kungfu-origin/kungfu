@@ -427,13 +427,15 @@ export default {
     target: '划入节点',
     amount: '发生金额',
     update_time: '划转时间',
-    error: '划转失败,请联系管理员!',
+    tip_error: '划转失败,请联系管理员!',
     capitalaccountor: '资金账号',
     trade_password: '交易密码',
     account: '客户号',
     trans_type: '划转类型',
     pending: '等待中',
     status: '划转状态',
+    success: '成功',
+    error: '失败',
   },
 
   mdConfig: {

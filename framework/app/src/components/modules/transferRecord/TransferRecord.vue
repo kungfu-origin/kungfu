@@ -14,6 +14,9 @@ import { dealKfTime } from '@kungfu-trader/kungfu-js-api/kungfu';
 import { dealKfPrice } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import { ArrowRightOutlined } from '@ant-design/icons-vue';
+import { FundTransEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
+import { FundTransType } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
+import { dealKungfuColorToClassname } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 
 const { t } = VueI18n.global;
 
@@ -50,13 +53,16 @@ onMounted(() => {
         tableListResolved.value = tableList.value.map(
           (item: KungfuApi.TimeKeyValue) => {
             const value = JSON.parse(item.value);
-            let message;
+            let message: string, status: FundTransEnum;
             if (!value.ret) {
               message = t('fund_trans.pending');
+              status = FundTransEnum.Pending;
             } else if (value.ret && value.ret < 0) {
-              message = value.message || t('error');
+              message = value.message || t('fund_trans.error');
+              status = FundTransEnum.Error;
             } else {
-              message = t('success');
+              message = t('fund_trans.success');
+              status = FundTransEnum.Success;
             }
             const result: KungfuApi.TransferRecordResolved = {
               update_time: BigInt(value.update_time || 0n),
@@ -64,8 +70,8 @@ onMounted(() => {
               target: value.target || '--',
               amount: value.amount || 0,
               trans_type: value.key,
-              status: message,
-              ret: value.ret || null,
+              status,
+              message,
             };
             return result;
           },
@@ -114,12 +120,12 @@ onMounted(() => {
           </template>
           <template v-if="column.dataIndex === 'status'">
             <span
-              :title="record.status"
-              :style="{
-                color: record.ret && record.ret < 0 ? '#f54747' : '#FFFFFFFD9',
-              }"
+              :title="record.message"
+              :class="
+                dealKungfuColorToClassname(FundTransType[record.status].color)
+              "
             >
-              {{ record.status }}
+              {{ record.message }}
             </span>
           </template>
           <template v-if="column.dataIndex === 'trans_type'">

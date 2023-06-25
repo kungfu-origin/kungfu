@@ -45,6 +45,7 @@ declare namespace KungfuApi {
     PriceLevelEnum,
     BasketOrderStatusEnum,
     CurrencyEnum,
+    FundTransEnum,
   } from './enums';
   import { Dayjs } from 'dayjs';
   import { Row } from 'fast-csv';
@@ -586,7 +587,7 @@ declare namespace KungfuApi {
     target: string;
     update_time: bigint;
     trans_type: string;
-    status: string;
+    status: FundTransEnum;
     ret?: number;
     message?: string;
   }
