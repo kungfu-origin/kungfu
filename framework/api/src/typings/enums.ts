@@ -264,3 +264,9 @@ export enum CurrencyEnum {
   SGD, // 新加坡元
   MYR, // 马来西亚吉特
 }
+
+export enum FundTransEnum {
+  Pending,
+  Success,
+  Error,
+}

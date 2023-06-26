@@ -432,11 +432,15 @@ export default {
     target: 'Into the node',
     amount: 'Amount incurred',
     trading_day: 'Transfer time',
-    error: 'Transfer failed, please contact the administrator!',
+    tip_error: 'Transfer failed, please contact the administrator!',
     capitalaccountor: 'Fund account',
     trade_password: 'Transaction password',
     account: 'Client number',
     trans_type: 'Transfer type',
+    pending: 'Pending',
+    status: 'Transfer status',
+    success: 'success',
+    error: 'error',
   },
 
   mdConfig: {

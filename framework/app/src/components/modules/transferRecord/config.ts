@@ -9,6 +9,12 @@ export const getColumns = (): AntTableColumns => [
     width: 120,
   },
   {
+    title: t('fund_trans.status'),
+    dataIndex: 'status',
+    align: 'center',
+    width: 80,
+  },
+  {
     title: t('fund_trans.source'),
     dataIndex: 'source',
     align: 'center',
