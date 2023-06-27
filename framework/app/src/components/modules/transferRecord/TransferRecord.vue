@@ -33,7 +33,8 @@ const { searchKeyword, tableData } =
     'source',
     'target',
     'amount',
-    'trans_type',
+    'trans_type_resolved',
+    'message',
   ]);
 
 onMounted(() => {
@@ -72,6 +73,7 @@ onMounted(() => {
               trans_type: value.key,
               status,
               message,
+              trans_type_resolved: getTransTypeResolved(value.key),
             };
             return result;
           },
@@ -84,6 +86,20 @@ onMounted(() => {
     });
   }
 });
+
+function getTransTypeResolved(
+  type: 'FundTransIn' | 'FundTransBetweenNodes' | 'FundTransOut',
+): string {
+  if (type === 'FundTransBetweenNodes') {
+    return 'HTS->HTS';
+  } else if (type === 'FundTransIn') {
+    return `${t('fund_trans.centralized_counter')}->HTS`;
+  } else if (type === 'FundTransOut') {
+    return `HTS->${t('fund_trans.centralized_counter')}`;
+  } else {
+    return '';
+  }
+}
 </script>
 <template>
   <div class="kf-market-data__warp">
@@ -140,6 +156,13 @@ onMounted(() => {
               </span>
               <ArrowRightOutlined style="margin-right: 8px; font-size: 10px" />
               <span class="trans-name__txt">HTS</span>
+            </div>
+            <div v-if="record.trans_type === 'FundTransOut'">
+              <span class="trans-name__txt">HTS</span>
+              <ArrowRightOutlined style="margin-right: 8px; font-size: 10px" />
+              <span class="trans-name__txt">
+                {{ t('fund_trans.centralized_counter') }}
+              </span>
             </div>
           </template>
           <template v-if="column.dataIndex === 'amount'">

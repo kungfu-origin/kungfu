@@ -46,6 +46,7 @@ declare namespace KungfuApi {
     BasketOrderStatusEnum,
     CurrencyEnum,
     FundTransEnum,
+    FundTransTypeEnum,
   } from './enums';
   import { Dayjs } from 'dayjs';
   import { Row } from 'fast-csv';
@@ -248,15 +249,10 @@ declare namespace KungfuApi {
 
   export type KfExhibitConfigs = Record<string, KfExhibitConfig>;
 
-  export interface KfExtFundTransConfig {
-    between_nodes: {
-      settings: KfConfigItem[];
-    };
-    tranc_in: {
-      settings: KfConfigItem[];
-    };
-  }
-
+  export type KfExtFundTransConfig = Record<
+    FundTransTypeEnum,
+    { settings: KfConfigItem[] }
+  >;
   interface KfExtConfig {
     name: string;
     category: string;
@@ -590,6 +586,7 @@ declare namespace KungfuApi {
     status: FundTransEnum;
     ret?: number;
     message?: string;
+    trans_type_resolved?: string;
   }
   export interface BlockMessage {
     opponent_seat: number; // 对方手席位号
