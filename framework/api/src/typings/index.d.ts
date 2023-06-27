@@ -1,5 +1,3 @@
-import { FundTransTypeEnum } from './enums';
-
 declare function __non_webpack_require__(id: string): unknown;
 declare const __python_version: string;
 declare const __git_commit_version: string;
@@ -48,6 +46,7 @@ declare namespace KungfuApi {
     BasketOrderStatusEnum,
     CurrencyEnum,
     FundTransEnum,
+    FundTransTypeEnum,
   } from './enums';
   import { Dayjs } from 'dayjs';
   import { Row } from 'fast-csv';
