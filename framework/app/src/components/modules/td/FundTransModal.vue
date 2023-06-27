@@ -34,6 +34,10 @@ const availTransRecordList = ref([
     key: 'tranc_in',
     name: [t('fund_trans.centralized_counter'), 'HTS'],
   },
+  {
+    key: 'tranc_out',
+    name: ['HTS', t('fund_trans.centralized_counter')],
+  },
 ]);
 
 const { modalVisible, closeModal } = useModalVisible(props.visible);
@@ -78,7 +82,7 @@ function handleConfirm() {
           'min-height': '36px',
           'line-height': '36px',
           'font-size': '16px',
-          'min-width': '45%',
+          'min-width': '100%',
         }"
       >
         <span class="source-name__txt">

@@ -255,6 +255,9 @@ declare namespace KungfuApi {
     tranc_in: {
       settings: KfConfigItem[];
     };
+    tranc_out: {
+      settings: KfConfigItem[];
+    };
   }
 
   interface KfExtConfig {
@@ -590,6 +593,7 @@ declare namespace KungfuApi {
     status: FundTransEnum;
     ret?: number;
     message?: string;
+    trans_type_resolved?: string;
   }
   export interface BlockMessage {
     opponent_seat: number; // 对方手席位号

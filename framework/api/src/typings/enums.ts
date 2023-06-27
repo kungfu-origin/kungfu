@@ -270,3 +270,5 @@ export enum FundTransEnum {
   Success,
   Error,
 }
+
+export type FundTransTypeEnum = 'between_nodes' | 'tranc_in' | 'tranc_out';

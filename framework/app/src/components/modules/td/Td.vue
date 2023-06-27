@@ -54,6 +54,7 @@ import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/ind
 import { messagePrompt } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import { storeToRefs } from 'pinia';
+import { FundTransTypeEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 
 const { t } = VueI18n.global;
 const { success, error } = messagePrompt();
@@ -118,7 +119,7 @@ const addTdGroupConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
 
 const currentAccout: {
   source: string;
-  transfer_type: 'between_nodes' | 'tranc_in';
+  transfer_type: FundTransTypeEnum;
   config: KungfuApi.KfConfig | null;
   avail: number;
 } = {
@@ -319,7 +320,7 @@ function handleFundTransModeDialog(config: KungfuApi.KfConfig) {
   setFundTransModeModalVisible.value = true;
 }
 
-function handleOpenSetFundTransModal(type: 'between_nodes' | 'tranc_in') {
+function handleOpenSetFundTransModal(type: FundTransTypeEnum) {
   const extConfig: KungfuApi.KfExtConfig = (extConfigs.value['td'] || {})[
     currentAccout.source
   ];
