@@ -124,7 +124,7 @@ const currentAccout: {
   avail: number;
 } = {
   source: '',
-  transfer_type: 'between_nodes',
+  transfer_type: FundTransTypeEnum.BetweenNodes,
   config: null,
   avail: 0,
 };
@@ -335,7 +335,7 @@ function handleOpenSetFundTransModal(type: FundTransTypeEnum) {
 
   const selectFundTransConfig = extConfig.fund_trans[type];
   selectFundTransConfig.settings.forEach((item) => {
-    if (item.key === 'amount' && type === 'between_nodes') {
+    if (item.key === 'amount' && type === FundTransTypeEnum.BetweenNodes) {
       item.max = currentAccout.avail;
     }
   });

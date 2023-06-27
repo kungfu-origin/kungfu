@@ -271,4 +271,8 @@ export enum FundTransEnum {
   Error,
 }
 
-export type FundTransTypeEnum = 'between_nodes' | 'tranc_in' | 'tranc_out';
+export enum FundTransTypeEnum {
+  BetweenNodes = 'between_nodes',
+  TrancIn = 'tranc_in',
+  TrancOut = 'tranc_out',
+}

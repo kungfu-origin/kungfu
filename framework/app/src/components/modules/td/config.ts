@@ -174,11 +174,11 @@ export const categoryRegisterConfig: DealTradingDataGetter = {
 };
 
 export const getFundTransKey = (type: FundTransTypeEnum | null): string => {
-  if (type === 'between_nodes') {
+  if (type === FundTransTypeEnum.BetweenNodes) {
     return 'FundTransBetweenNodes';
-  } else if (type === 'tranc_in') {
+  } else if (type === FundTransTypeEnum.TrancIn) {
     return 'FundTransIn';
-  } else if (type === 'tranc_out') {
+  } else if (type === FundTransTypeEnum.TrancOut) {
     return 'FundTransOut';
   } else {
     return 'FundTrans';

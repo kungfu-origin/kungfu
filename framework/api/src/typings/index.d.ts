@@ -1,3 +1,5 @@
+import { FundTransTypeEnum } from './enums';
+
 declare function __non_webpack_require__(id: string): unknown;
 declare const __python_version: string;
 declare const __git_commit_version: string;
@@ -248,18 +250,7 @@ declare namespace KungfuApi {
 
   export type KfExhibitConfigs = Record<string, KfExhibitConfig>;
 
-  export interface KfExtFundTransConfig {
-    between_nodes: {
-      settings: KfConfigItem[];
-    };
-    tranc_in: {
-      settings: KfConfigItem[];
-    };
-    tranc_out: {
-      settings: KfConfigItem[];
-    };
-  }
-
+  export type KfExtFundTransConfig = Record<FundTransTypeEnum, object>;
   interface KfExtConfig {
     name: string;
     category: string;
