@@ -45,6 +45,8 @@ declare namespace KungfuApi {
     PriceLevelEnum,
     BasketOrderStatusEnum,
     CurrencyEnum,
+    FundTransEnum,
+    FundTransTypeEnum,
   } from './enums';
   import { Dayjs } from 'dayjs';
   import { Row } from 'fast-csv';
@@ -230,6 +232,7 @@ declare namespace KungfuApi {
           | StrategyExtTypes[]
           | StrategyExtTypes;
         settings: KfConfigItem[];
+        fund_trans?: KfExtFundTransConfig | null;
       }
     >;
     language: {
@@ -246,6 +249,10 @@ declare namespace KungfuApi {
 
   export type KfExhibitConfigs = Record<string, KfExhibitConfig>;
 
+  export type KfExtFundTransConfig = Record<
+    FundTransTypeEnum,
+    { settings: KfConfigItem[] }
+  >;
   interface KfExtConfig {
     name: string;
     category: string;
@@ -253,6 +260,7 @@ declare namespace KungfuApi {
     extPath: string;
     type: InstrumentTypes[] | StrategyExtTypes[];
     settings: KfConfigItem[];
+    fund_trans?: KfExtFundTransConfig | null;
   }
 
   export type KfExtConfigs = Record<string, Record<string, KfExtConfig>>;
@@ -556,6 +564,30 @@ declare namespace KungfuApi {
     uid_key: string;
   }
 
+  export interface TimeKeyValue {
+    key: string;
+    update_time: bigint;
+    tag_a: string;
+    tag_b: string;
+    tag_c: string;
+    value: string;
+
+    source: number;
+    dest: number;
+    uid_key: string;
+  }
+
+  export interface TransferRecordResolved {
+    amount: number;
+    source: string;
+    target: string;
+    update_time: bigint;
+    trans_type: string;
+    status: FundTransEnum;
+    ret?: number;
+    message?: string;
+    trans_type_resolved?: string;
+  }
   export interface BlockMessage {
     opponent_seat: number; // 对方手席位号
     match_number: bigint; // 成交约定号
@@ -900,6 +932,7 @@ declare namespace KungfuApi {
       exchangeId: string,
       instrumentId: string,
     ): boolean;
+    requestPosition(): boolean;
     cancelOrder(
       orderAction: OrderAction,
       tdLocation: KfLocation,
@@ -914,6 +947,7 @@ declare namespace KungfuApi {
       blockMessage: BlockMessage,
       tdLocation: KfLocation,
     ): bigint;
+    issueCustomData(message: TimeKeyValue, targetLocation: KfLocation): boolean;
     issueBasketOrder(basketOrder: BasketOrder, tdLocation: KfLocation): bigint;
     quit(): void;
     now(): bigint;

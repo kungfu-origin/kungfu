@@ -22,7 +22,6 @@ import {
   SideEnum,
   StrategyExtTypes,
   OrderInputKeyEnum,
-  LedgerCategoryEnum,
   CurrencyEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
@@ -1096,7 +1095,7 @@ export const useSubscibeInstrumentAtEntry = (
     useGlobalStore();
 
   const app = getCurrentInstance();
-  // const SUBSCRIBE_INSTRUMENTS_LIMIT = 50;
+  const POSITION_SLICE_NUM = process.env.IF_CPUS_NUM_SAFE ? 128 : 0;
 
   const getCurrentPositionsForSub = (watcher: KungfuApi.Watcher) => {
     if (!currentGlobalKfLocation.value) return [];
@@ -1108,26 +1107,21 @@ export const useSubscibeInstrumentAtEntry = (
       'position',
     ) as KungfuApi.Position[];
 
-    return (
-      positions
-        .reverse()
-        // .slice(0, SUBSCRIBE_INSTRUMENTS_LIMIT)
-        .map((item: KungfuApi.Position): KungfuApi.InstrumentForSub => {
-          const uidKey = hashInstrumentUKey(
-            item.instrument_id,
-            item.exchange_id,
-          );
-          return {
-            uidKey,
-            exchangeId: item.exchange_id,
-            instrumentId: item.instrument_id,
-            instrumentType: item.instrument_type,
-            instrumentName: '',
-            ukey: uidKey,
-            id: uidKey,
-          };
-        })
-    );
+    return positions
+      .reverse()
+      .slice(0, POSITION_SLICE_NUM) // default subscribe POSITION_SLICE_NUM tickers, then subscribe by clicking position or manually subscribing
+      .map((item: KungfuApi.Position): KungfuApi.InstrumentForSub => {
+        const uidKey = hashInstrumentUKey(item.instrument_id, item.exchange_id);
+        return {
+          uidKey,
+          exchangeId: item.exchange_id,
+          instrumentId: item.instrument_id,
+          instrumentType: item.instrument_type,
+          instrumentName: '',
+          ukey: uidKey,
+          id: uidKey,
+        };
+      });
   };
 
   const subscribeInstrumentsByCurPosAndProcessIds = (
@@ -1164,7 +1158,7 @@ export const useSubscibeInstrumentAtEntry = (
   onMounted(() => {
     if (app?.proxy) {
       const subscription = app.proxy.$tradingDataSubject
-        .pipe(throttleTime(3000))
+        .pipe(throttleTime(30000))
         .subscribe((watcher: KungfuApi.Watcher) => {
           const instrumentsForSub = customInstrumentsForSubGetter
             ? customInstrumentsForSubGetter(watcher)
@@ -1328,12 +1322,12 @@ export const useQuote = (): {
       return '--';
     }
 
-    const { open_price, last_price } = quote;
-    if (!open_price || !last_price) {
+    const { pre_close_price, last_price } = quote;
+    if (!pre_close_price || !last_price) {
       return '--';
     }
 
-    const percent = (last_price - open_price) / open_price;
+    const percent = (last_price - pre_close_price) / pre_close_price;
     if (percent === Infinity) {
       return '--';
     }
@@ -1965,65 +1959,20 @@ export const playSound = (type: 'ding' | 'warn' = 'ding'): void => {
 
 export const useCurrentPositionList = () => {
   const app = getCurrentInstance();
-  type PosStat = Record<string, KungfuApi.Position>;
 
   const { currentGlobalKfLocation } = useCurrentGlobalKfLocation(
     window.watcher,
   );
+  const { dealDataWithCache } = useDealDataWithCaches<
+    KungfuApi.Position,
+    KungfuApi.PositionResolved
+  >(['uid_key', 'update_time']);
   const currentPositionList = ref<KungfuApi.PositionResolved[]>([]);
-  const allPositionMap = ref<PosStat>({});
-
-  function buildPrositionMapKey(
-    exchangeId: string,
-    instrumentId: string,
-    direction: DirectionEnum,
-  ) {
-    return `${exchangeId}_${instrumentId}_${direction}`;
-  }
-
-  function buildGlobalPositions(positions: KungfuApi.Position[]): PosStat {
-    return positions.reduce((posStat, pos) => {
-      const id = buildPrositionMapKey(
-        pos.exchange_id,
-        pos.instrument_id,
-        pos.direction,
-      );
-      if (!posStat[id]) {
-        posStat[id] = pos;
-      } else {
-        const prePosStat = posStat[id];
-        const { avg_open_price, volume, yesterday_volume, unrealized_pnl } =
-          prePosStat;
-        posStat[id] = {
-          ...prePosStat,
-          uid_key: pos.uid_key,
-          yesterday_volume: yesterday_volume + pos.yesterday_volume,
-          volume: volume + pos.volume,
-
-          avg_open_price:
-            (avg_open_price * Number(volume) +
-              pos.avg_open_price * Number(pos.volume)) /
-            (Number(pos.volume) + Number(pos.volume)),
-          unrealized_pnl: unrealized_pnl + pos.unrealized_pnl,
-        };
-      }
-      return posStat;
-    }, {} as PosStat);
-  }
 
   onMounted(() => {
     if (app?.proxy) {
       const subscription = app.proxy.$tradingDataSubject.subscribe(
         (watcher: KungfuApi.Watcher) => {
-          const allPositions = watcher.ledger.Position.nofilter(
-            'volume',
-            BigInt(0),
-          )
-            .filter('ledger_category', LedgerCategoryEnum.td)
-            .list();
-
-          allPositionMap.value = toRaw(buildGlobalPositions(allPositions));
-
           if (currentGlobalKfLocation.value === null) {
             return;
           }
@@ -2039,7 +1988,9 @@ export const useCurrentPositionList = () => {
           currentPositionList.value = toRaw(
             currentPositions
               .reverse()
-              .map((item) => dealPosition(watcher, item)),
+              .map((item) =>
+                dealDataWithCache(item, () => dealPosition(watcher, item)),
+              ),
           );
         },
       );
@@ -2051,8 +2002,6 @@ export const useCurrentPositionList = () => {
   });
 
   return {
-    allPositionMap,
-    buildPrositionMapKey,
     currentPositionList,
   };
 };

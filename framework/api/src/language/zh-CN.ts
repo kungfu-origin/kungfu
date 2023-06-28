@@ -92,6 +92,7 @@ export default {
   Order: '委托记录',
   PosGlobal: '持仓汇总',
   Pos: '持仓',
+  TransferRecord: '划转记录',
 
   please_wait: '请稍后',
   please_wait_and_retry: '请稍后重试',
@@ -341,10 +342,12 @@ export default {
       '下单量为 {volume}, 当前标的可平 {direction} 仓为 {closable_volume}, 超出数量为 {open_volume}\n点击 “超出部分反向开仓”, 将会 平 {direction} {closable_volume}, 开{direction} {open_volume}\n点击“按原方案下单”, 将会继续平 {direction} {volume}',
     start_process: '请先启动{process}交易进程',
     place_confirm: '下单确认',
-    continue_close_rate: '超过平仓阈值 ({rate}%), 是否继续下单?',
+    continue_close_rate: '{relationship} 平仓阈值 ({rate}%), 是否继续下单?',
     Continue: '继续下单',
     original_plan: '按原方案下单',
     beyond_to_open: '超出部分反向开仓',
+    reach: '达到',
+    above: '超过',
   },
 
   orderConfig: {
@@ -413,6 +416,26 @@ export default {
     need_only_group: '需保证该账户组名称唯一',
     delete_amount_group: '删除账户组 {group}',
     confirm_delete_group: '不会影响改账户组下账户进程, 确认删除',
+  },
+
+  fund_trans: {
+    config_error: '{td}柜台资金划转配置文件异常',
+    modal_title: '柜台间资金划转',
+    trans_selection: '请选择资金划转的方向',
+    centralized_counter: '集中柜台',
+    source: '划出节点',
+    target: '划入节点',
+    amount: '发生金额',
+    update_time: '划转时间',
+    tip_error: '划转失败,请联系管理员!',
+    capitalaccountor: '资金账号',
+    trade_password: '交易密码',
+    account: '客户号',
+    trans_type: '划转类型',
+    pending: '等待中',
+    status: '划转状态',
+    success: '成功',
+    error: '失败',
   },
 
   mdConfig: {
@@ -596,7 +619,7 @@ export default {
     fat_finger_threshold: '乌龙指阈值',
     set_fat_finger: '设置乌龙指触发阈值(百分比)',
     close_threshold: '平仓阈值',
-    set_close_threshold: '设置平仓阈值(百分比)',
+    set_close_threshold: '设置平仓阈值(百分比); 设置为 0% 时, 则视作关闭此项',
     trade_limit: '交易限制',
     set_trade_limit: '设置交易限制',
     order_input_key: '限制属性',

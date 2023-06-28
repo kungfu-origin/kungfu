@@ -3,6 +3,7 @@ import { LedgerCategoryEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import { DealTradingDataGetter } from '@kungfu-trader/kungfu-js-api/hooks/dealTradingDataHook';
 import { getTradingDataSortKey } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import { FundTransTypeEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 const { t } = VueI18n.global;
 
 export const getColumns = (
@@ -170,4 +171,16 @@ export const categoryRegisterConfig: DealTradingDataGetter = {
         });
     },
   },
+};
+
+export const getFundTransKey = (type: FundTransTypeEnum | null): string => {
+  if (type === FundTransTypeEnum.BetweenNodes) {
+    return 'FundTransBetweenNodes';
+  } else if (type === FundTransTypeEnum.TrancIn) {
+    return 'FundTransIn';
+  } else if (type === FundTransTypeEnum.TrancOut) {
+    return 'FundTransOut';
+  } else {
+    return 'FundTrans';
+  }
 };

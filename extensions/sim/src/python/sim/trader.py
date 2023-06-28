@@ -235,3 +235,7 @@ class TraderSim(wc.Trader):
         if self.match_mode == MatchMode.Custom:
             return self.ctx.req_order_trade(self.ctx)
         return False
+
+    def on_time_key_value(self, event):
+        time_key_value = event.TimeKeyValue()
+        self.logger.info(f"accept time_key_value {time_key_value}")
