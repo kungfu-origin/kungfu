@@ -1839,8 +1839,8 @@ function positionOverlayContent({
     contentTop = window.innerHeight - contentHeight;
   }
 
-  overlayContent.style.left = Math.round(contentLeft) + 'px';
-  overlayContent.style.top = Math.round(contentTop) + 'px';
+  overlayContent.style.left = ~~contentLeft + 'px';
+  overlayContent.style.top = ~~contentTop + 'px';
 }
 
 async function updateOverlay(backend, ctx) {
