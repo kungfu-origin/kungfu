@@ -16,14 +16,15 @@
 #include <kungfu/yijinjing/time.h>
 #include <kungfu/yijinjing/util/util.h>
 
-#define EXCHANGE_SSE "SSE"
-#define EXCHANGE_SZE "SZE"
-#define EXCHANGE_BSE "BSE"
-#define EXCHANGE_SHFE "SHFE"
-#define EXCHANGE_DCE "DCE"
-#define EXCHANGE_CZCE "CZCE"
-#define EXCHANGE_CFFEX "CFFEX"
-#define EXCHANGE_INE "INE"
+#define EXCHANGE_SSE "SSE"     // 上交所
+#define EXCHANGE_SZE "SZE"     // 深交所
+#define EXCHANGE_BSE "BSE"     // 北交所
+#define EXCHANGE_GFEX "GFEX"   // 广交所
+#define EXCHANGE_SHFE "SHFE"   // 上期所
+#define EXCHANGE_DCE "DCE"     // 大商所
+#define EXCHANGE_CZCE "CZCE"   // 郑商所
+#define EXCHANGE_CFFEX "CFFEX" // 中金所
+#define EXCHANGE_INE "INE"     // 上海能源中心
 #define EXCHANGE_BINANCE "BINANCE"
 #define EXCHANGE_HB "HB"
 
