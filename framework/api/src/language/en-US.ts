@@ -681,7 +681,9 @@ export default {
   白名单设置警告: 'Please set the whitelist for this account first',
 
   validate: {
-    no_special_characters: 'Cannot contain special characters',
+    no_special_characters:
+      'Cannot contain special characters or Chinese characters',
+    single_characters: 'Must contain numbers and letters',
     no_underscore: 'Cannot contain underscores',
     no_zero_number: 'Cannot contain zero',
     no_negative_number: 'Cannot contain negative',

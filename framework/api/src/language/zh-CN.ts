@@ -670,7 +670,8 @@ export default {
   白名单设置警告: '请先为此账户设置标的白名单',
 
   validate: {
-    no_special_characters: '不能含有特殊字符',
+    no_special_characters: '不能含有特殊字符和中文',
+    single_characters: '必须包含数字和字母',
     no_underline: '不能含有下划线',
     no_zero_number: '请输入非零数字',
     no_negative_number: '请输入非负数',
