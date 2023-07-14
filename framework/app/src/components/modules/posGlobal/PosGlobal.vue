@@ -195,10 +195,7 @@ function handleClickRow(data: {
 }
 
 const resolveTriggerOffset = (position: KungfuApi.PositionResolved) => {
-  if (
-    isShotable(position.instrument_type) ||
-    isT0(position.instrument_type, position.exchange_id)
-  ) {
+  if (isShotable(position.instrument_type)) {
     return position.yesterday_volume !== BigInt(0)
       ? OffsetEnum.CloseYest
       : OffsetEnum.CloseToday;
