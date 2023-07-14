@@ -23,7 +23,6 @@ import {
   dealKfPrice,
   dealCurrency,
   isShotable,
-  isT0,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
   LedgerCategoryEnum,
