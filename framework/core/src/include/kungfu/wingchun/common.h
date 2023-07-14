@@ -334,7 +334,7 @@ inline longfist::enums::InstrumentType get_instrument_type(const std::string &ex
     return longfist::enums::InstrumentType::Stock;
   } else if (string_equals(exchange_id, EXCHANGE_DCE) || string_equals(exchange_id, EXCHANGE_SHFE) ||
              string_equals(exchange_id, EXCHANGE_CFFEX) || string_equals(exchange_id, EXCHANGE_CZCE) ||
-             string_equals(exchange_id, EXCHANGE_INE)) {
+             string_equals(exchange_id, EXCHANGE_INE) || string_equals(exchange_id, EXCHANGE_GFEX)) {
     return longfist::enums::InstrumentType::Future;
   } else if (string_equals(exchange_id, EXCHANGE_BINANCE) || string_equals(exchange_id, EXCHANGE_HB)) {
     return longfist::enums::InstrumentType::Crypto;
@@ -478,6 +478,8 @@ inline std::string get_exchange_id_from_future_instrument_id(const std::string &
     return EXCHANGE_CFFEX;
   } else if (product == "sc") {
     return EXCHANGE_INE;
+  } else if (product == "si") {
+    return EXCHANGE_GFEX;
   } else {
     return "";
   }
