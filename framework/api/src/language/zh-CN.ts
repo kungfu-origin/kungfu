@@ -234,6 +234,7 @@ export default {
     SSE: '上交所',
     SZE: '深交所',
     BSE: '北交所',
+    GFEX: '广交所',
     SHFE: '上期所',
     DCE: '大商所',
     CZCE: '郑商所',
