@@ -24,14 +24,17 @@ const run = (distDir) => {
       ),
     },
   };
-  const notarizeConfig = process.env.CSC_LINK ? {
-    afterSign: "electron-builder-notarize",
-    mac: {
-      ...baseConfig.mac,
-      "hardenedRuntime": true,
-      "entitlements": "./node_modules/electron-builder-notarize/entitlements.mac.inherit.plist",
-    }
-  } : {};
+  const notarizeConfig = process.env.CSC_LINK
+    ? {
+        afterSign: 'electron-builder-notarize',
+        mac: {
+          ...baseConfig.mac,
+          hardenedRuntime: true,
+          entitlements:
+            './node_modules/electron-builder-notarize/entitlements.mac.inherit.plist',
+        },
+      }
+    : {};
   process.chdir(cwd);
   return electronBuilder.build({
     config: { ...baseConfig, ...craftConfig, ...appConfig, ...notarizeConfig },
