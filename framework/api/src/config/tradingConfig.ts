@@ -678,6 +678,10 @@ export const ExchangeIds: Record<string, KungfuApi.KfTradeValueCommonData> = {
     name: t('tradingConfig.SHFE'),
     color: InstrumentType[InstrumentTypeEnum.future].color,
   },
+  GFEX: {
+    name: t('tradingConfig.GFEX'),
+    color: InstrumentType[InstrumentTypeEnum.stock].color,
+  },
   DCE: {
     name: t('tradingConfig.DCE'),
     color: InstrumentType[InstrumentTypeEnum.future].color,

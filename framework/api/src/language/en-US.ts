@@ -236,6 +236,7 @@ export default {
     SZE: 'SZE',
     BSE: 'BSE',
     SHFE: 'SHFE',
+    GFEX: 'GFEX',
     DCE: 'DCE',
     CZCE: 'CZCE',
     CFFEX: 'CFFEX',
