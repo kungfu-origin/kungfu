@@ -1,4 +1,5 @@
 import os from 'os';
+import path from 'path';
 import { promisified as regedit, RegistryItem } from 'regedit';
 
 export const KUNGFU_SAFE_CPUS_NUM = 4;
@@ -26,4 +27,10 @@ export const getWinRegistry = (
 
 export const isWinRegistryExists = (registry: RegistryItem): boolean => {
   return !!registry && registry.exists;
+};
+
+export const normalizePath = (p: string) => {
+  const pathResolved = path.normalize(p);
+  if (isWindows()) return pathResolved.replace(/\\/g, '\\\\');
+  return pathResolved;
 };
