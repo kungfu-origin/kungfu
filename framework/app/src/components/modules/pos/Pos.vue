@@ -6,6 +6,7 @@ import {
   dealCurrency,
   isTdStrategyCategory,
   getIdByKfLocation,
+  isShotable,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
   useDownloadHistoryTradingData,
@@ -123,6 +124,16 @@ watch(currentGlobalKfLocation, () => {
   pos.value = [];
 });
 
+const resolveTriggerOffset = (position: KungfuApi.PositionResolved) => {
+  if (isShotable(position.instrument_type)) {
+    return position.yesterday_volume !== BigInt(0)
+      ? OffsetEnum.CloseYest
+      : OffsetEnum.CloseToday;
+  } else {
+    return OffsetEnum.Close;
+  }
+};
+
 function handleClickRow(data: {
   event: MouseEvent;
   row: KungfuApi.PositionResolved;
@@ -143,10 +154,7 @@ function handleClickRow(data: {
   triggerOrderBook(ensuredInstrument);
   const extraOrderInput: ExtraOrderInput = {
     side: row.direction === 0 ? SideEnum.Sell : SideEnum.Buy,
-    offset:
-      row.yesterday_volume !== BigInt(0)
-        ? OffsetEnum.CloseYest
-        : OffsetEnum.CloseToday,
+    offset: resolveTriggerOffset(row),
     volume: row.closable_volume,
 
     price: row.last_price || row.avg_open_price || 0,

@@ -265,7 +265,7 @@ void Trader::deal_write_frame() {
   // set order as Lost which without external_order_id
   for (auto &pair : orders_) {
     Order &order = pair.second.data;
-    if (not is_final_status(order.status) and order.external_order_id.to_string().empty()) {
+    if (not is_final_status(order.status) and (order.external_order_id.to_string().empty() or disable_recover_)) {
       order.status = OrderStatus::Lost;
       order.update_time = time::now_in_nano();
 

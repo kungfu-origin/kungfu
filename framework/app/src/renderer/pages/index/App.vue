@@ -249,8 +249,6 @@ onBeforeUnmount(() => {
 #app {
   width: 100%;
   height: 100%;
-  font-family: Consolas, Monaco, Lucida Console, Liberation Mono,
-    DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 

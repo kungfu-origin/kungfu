@@ -43,6 +43,7 @@ import {
   preStartAll,
   mergeExtLanguages,
   checkCpusNumAndConfirmModal,
+  loadCustomFont,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
 import {
@@ -125,10 +126,12 @@ app.config.globalProperties.$tradingDataSubject = tradingDataSubject;
 
 app.use(VueI18n);
 
-mergeExtLanguages().then(() =>
-  useComponents(app, router).then(() => {
-    app.mount('#app');
-  }),
+loadCustomFont().then(() =>
+  mergeExtLanguages().then(() =>
+    useComponents(app, router).then(() => {
+      app.mount('#app');
+    }),
+  ),
 );
 
 const globalStore = useGlobalStore();
