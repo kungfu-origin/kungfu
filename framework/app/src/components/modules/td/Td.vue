@@ -334,11 +334,6 @@ function handleOpenSetFundTransModal(type: FundTransTypeEnum) {
   }
 
   const selectFundTransConfig = extConfig.fund_trans[type];
-  selectFundTransConfig.settings.forEach((item) => {
-    if (item.key === 'amount' && type === FundTransTypeEnum.BetweenNodes) {
-      item.max = currentAccout.avail;
-    }
-  });
   currentAccout.transfer_type = type;
   setTdConfigPayload.value.initValue = undefined;
   setFundTransConfigPayload.value.title = t('fund_trans.modal_title');

@@ -16,14 +16,15 @@
 #include <kungfu/yijinjing/time.h>
 #include <kungfu/yijinjing/util/util.h>
 
-#define EXCHANGE_SSE "SSE"
-#define EXCHANGE_SZE "SZE"
-#define EXCHANGE_BSE "BSE"
-#define EXCHANGE_SHFE "SHFE"
-#define EXCHANGE_DCE "DCE"
-#define EXCHANGE_CZCE "CZCE"
-#define EXCHANGE_CFFEX "CFFEX"
-#define EXCHANGE_INE "INE"
+#define EXCHANGE_SSE "SSE"     // 上交所
+#define EXCHANGE_SZE "SZE"     // 深交所
+#define EXCHANGE_BSE "BSE"     // 北交所
+#define EXCHANGE_GFEX "GFEX"   // 广交所
+#define EXCHANGE_SHFE "SHFE"   // 上期所
+#define EXCHANGE_DCE "DCE"     // 大商所
+#define EXCHANGE_CZCE "CZCE"   // 郑商所
+#define EXCHANGE_CFFEX "CFFEX" // 中金所
+#define EXCHANGE_INE "INE"     // 上海能源中心
 #define EXCHANGE_BINANCE "BINANCE"
 #define EXCHANGE_HB "HB"
 
@@ -333,7 +334,7 @@ inline longfist::enums::InstrumentType get_instrument_type(const std::string &ex
     return longfist::enums::InstrumentType::Stock;
   } else if (string_equals(exchange_id, EXCHANGE_DCE) || string_equals(exchange_id, EXCHANGE_SHFE) ||
              string_equals(exchange_id, EXCHANGE_CFFEX) || string_equals(exchange_id, EXCHANGE_CZCE) ||
-             string_equals(exchange_id, EXCHANGE_INE)) {
+             string_equals(exchange_id, EXCHANGE_INE) || string_equals(exchange_id, EXCHANGE_GFEX)) {
     return longfist::enums::InstrumentType::Future;
   } else if (string_equals(exchange_id, EXCHANGE_BINANCE) || string_equals(exchange_id, EXCHANGE_HB)) {
     return longfist::enums::InstrumentType::Crypto;
@@ -477,6 +478,8 @@ inline std::string get_exchange_id_from_future_instrument_id(const std::string &
     return EXCHANGE_CFFEX;
   } else if (product == "sc") {
     return EXCHANGE_INE;
+  } else if (product == "si") {
+    return EXCHANGE_GFEX;
   } else {
     return "";
   }

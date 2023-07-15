@@ -675,19 +675,13 @@ const handlePercentChange = (target: number) => {
     const availMoney = dealStringToNumber(currentAvailMoney.value);
     const allVolume = currentPrice.value ? availMoney / currentPrice.value : 0;
     targetVolume = allVolume * targetPercent;
-  } else if (curOffset === OffsetEnum.Close) {
+  } else {
     const availPosVolume = dealStringToNumber(currentAvailPosVolume.value);
     targetVolume = availPosVolume * targetPercent;
-  } else if (curOffset === OffsetEnum.CloseToday) {
-    const availPosVolume = currentPosition.value?.volume;
-    targetVolume = Number(availPosVolume) * targetPercent;
-  } else if (curOffset === OffsetEnum.CloseYest) {
-    const availPosVolume = currentPosition.value?.yesterday_volume;
-    targetVolume = Number(availPosVolume) * targetPercent;
   }
 
   formState.value.volume = dealVolumeByInstrumentType(
-    ~~targetVolume,
+    Math.round(targetVolume),
     instrumentResolved.value?.instrumentType,
   );
   if (formState.value.volume) {

@@ -43,6 +43,9 @@ def run(ctx, mode, category, group, name, low_latency, reference, arguments, ven
     ctx.arguments = arguments
     ctx.vendor = vendor
 
+    if ctx.arguments is None:
+        ctx.arguments = ""
+
     registry = ExecutorRegistry(ctx)
 
     cheatsheet = {
