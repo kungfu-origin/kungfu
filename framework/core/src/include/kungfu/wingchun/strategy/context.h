@@ -71,8 +71,9 @@ public:
    * @param value
    * @return
    */
-  virtual uint64_t insert_block_message(const std::string &source, const std::string &account, uint32_t opponent_seat,
-                                        uint64_t match_number, bool is_specific = false) = 0;
+  virtual uint64_t insert_block_message(const std::string &source, const std::string &account,
+                                        const std::string &opponent_seat, uint64_t match_number,
+                                        bool is_specific = false) = 0;
 
   /**
    * Insert order.
