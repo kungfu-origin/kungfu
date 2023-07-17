@@ -41,6 +41,7 @@ import {
   dealPriceType,
   dealPriceLevel,
   dealSide,
+  replaceNonAlphaNumericWithSpace,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { RuleObject } from 'ant-design-vue/lib/form';
 import {
@@ -391,23 +392,11 @@ function primaryKeyValidator(_rule: RuleObject, value: string): Promise<void> {
     formState.value,
     props.primaryKeyAvoidRepeatCompareExtra,
   );
-  if (!combineValue) {
+
+  if (!combineValue || replaceNonAlphaNumericWithSpace(value) === '') {
     return Promise.reject(
       new Error(
         t('validate.single_characters', {
-          value: combineValue,
-        }),
-      ),
-    );
-  }
-  if (
-    props.primaryKeyAvoidRepeatCompareTarget
-      .map((item): string => item.toLowerCase())
-      .includes(combineValue.toLowerCase())
-  ) {
-    return Promise.reject(
-      new Error(
-        t('validate.value_existing', {
           value: combineValue,
         }),
       ),
@@ -426,6 +415,20 @@ function primaryKeyValidator(_rule: RuleObject, value: string): Promise<void> {
     !props.passPrimaryKeySpecialWordsVerify
   ) {
     return Promise.reject(new Error(t('validate.no_underline')));
+  }
+
+  if (
+    props.primaryKeyAvoidRepeatCompareTarget
+      .map((item): string => item.toLowerCase())
+      .includes(combineValue.toLowerCase())
+  ) {
+    return Promise.reject(
+      new Error(
+        t('validate.value_existing', {
+          value: combineValue,
+        }),
+      ),
+    );
   }
 
   return Promise.resolve();
