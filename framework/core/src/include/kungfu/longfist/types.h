@@ -19,6 +19,7 @@ static constexpr int EXCHANGE_ID_LEN = 16;
 static constexpr int TRAIDNG_PHASE_CODE_LEN = 8;
 static constexpr int ERROR_MSG_LEN = 256;
 static constexpr int EXTERNAL_ID_LEN = 32;
+static constexpr int OPPONENT_SEAT_LEN = 16;
 
 KF_DEFINE_MARK_TYPE(PageEnd, 10000);
 KF_DEFINE_MARK_TYPE(SessionStart, 10001);
@@ -527,11 +528,11 @@ KF_DEFINE_PACK_TYPE(                                       //
 
 KF_DEFINE_PACK_TYPE(                                         //
     BlockMessage, 207, PK(block_id), TIMESTAMP(insert_time), //
-    (uint64_t, block_id),      // 大宗交易信息id, 用于TD从OrderInput找到此数据
-    (uint32_t, opponent_seat), // 对手方席号
-    (uint64_t, match_number),  // 成交约定号
-    (bool, is_specific),       // 是否受限(特定)股份
-    (int64_t, insert_time)     // 写入时间
+    (uint64_t, block_id), // 大宗交易信息id, 用于TD从OrderInput找到此数据
+    (kungfu::array<char, OPPONENT_SEAT_LEN>, opponent_seat), // 对手方席号
+    (uint64_t, match_number),                                // 成交约定号
+    (bool, is_specific),                                     // 是否受限(特定)股份
+    (int64_t, insert_time)                                   // 写入时间
 );
 
 KF_DEFINE_PACK_TYPE(                                               //
