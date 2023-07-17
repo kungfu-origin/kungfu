@@ -589,7 +589,7 @@ declare namespace KungfuApi {
     trans_type_resolved?: string;
   }
   export interface BlockMessage {
-    opponent_seat: number; // 对方手席位号
+    opponent_seat: string; // 对方手席位号
     match_number: bigint; // 成交约定号
     is_specific: boolean; // 是否受限股份
     insert_time: bigint;
