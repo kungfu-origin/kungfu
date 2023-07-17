@@ -1334,6 +1334,19 @@ export const getOffsetConfig = (): Record<
     }, {});
 };
 
+export const getOffsetByOffsetFilter = (
+  offsetKey: keyof typeof OffsetEnum,
+  defaultOffset: OffsetEnum,
+): OffsetEnum => {
+  const rootPackageJson = readRootPackageJsonSync();
+  const offsetConfig =
+    rootPackageJson?.appConfig?.makeOrder?.offsetFilter ||
+    ({} as Record<string, boolean>);
+  return offsetConfig[offsetKey] !== false
+    ? OffsetEnum[offsetKey]
+    : defaultOffset;
+};
+
 export const getAbleHedgeFlag = (): boolean => {
   const rootPackageJson = readRootPackageJsonSync();
   const ableHedgeFlag = rootPackageJson?.appConfig?.makeOrder?.ableHedgeFlag;
