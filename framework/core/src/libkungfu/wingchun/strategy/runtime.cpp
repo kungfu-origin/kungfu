@@ -94,7 +94,6 @@ uint64_t RuntimeContext::insert_block_message(const std::string &source, const s
   }
   auto writer = app_.get_writer(account_location_uid);
   BlockMessage &msg = writer->open_data<BlockMessage>(app_.now());
-  msg.opponent_seat = opponent_seat;
   strncpy(msg.opponent_seat, opponent_seat.c_str(), opponent_seat.length());
   msg.match_number = match_number;
   msg.is_specific = is_specific;
