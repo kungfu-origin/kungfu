@@ -341,7 +341,7 @@ export default {
     fat_finger_sell_modal:
       'The selling price exceeded the warning line, the current price is {price}, line for {warningLine}, fat finger is {fatFinger}%',
     close_apart_open_modal:
-      'The order input volume is {volume}, the current closable {direction} position is {closable_volume}, the excess is {open_volume}\nclick “Take excess to open”, will close {direction} {closable_volume}, open {direction} {open_volume}\nclick “Orignal plan”, will continue close {direction} {volume}',
+      'The order input volume is {volume}, the current closable {direction} position is {closableVolume}, the excess is {openVolume}\nclick “Take excess to open”, will close {direction} {closableVolume}, open {oppositeDirection} {openVolume}\nclick “Orignal plan”, will continue close {direction} {volume}',
     start_process: 'please start {process} first',
     place_confirm: 'Place Order Confirm',
     continue_close_rate:
