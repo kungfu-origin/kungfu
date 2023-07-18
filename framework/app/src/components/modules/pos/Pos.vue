@@ -42,7 +42,7 @@ import {
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import { messagePrompt } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
-import { resolveTriggerOffset } from './utils';
+import { getPosClosableVolumeByOffset, resolveTriggerOffset } from './utils';
 
 const { t } = VueI18n.global;
 const { success, error } = messagePrompt();
@@ -139,10 +139,12 @@ function handleClickRow(data: {
     );
 
   triggerOrderBook(ensuredInstrument);
+
+  const offset = resolveTriggerOffset(row);
   const extraOrderInput: ExtraOrderInput = {
     side: row.direction === 0 ? SideEnum.Sell : SideEnum.Buy,
-    offset: resolveTriggerOffset(row),
-    volume: row.closable_volume,
+    offset,
+    volume: getPosClosableVolumeByOffset(row, offset),
 
     price: row.last_price || row.avg_open_price || 0,
     accountId: isTdStrategyCategory(currentGlobalKfLocation.value?.category)
