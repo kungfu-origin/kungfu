@@ -1662,7 +1662,7 @@ export const useCurrentGlobalKfLocation = (
     KungfuApi.KfLocation | KungfuApi.KfLocationGroup | KungfuApi.KfConfig | null
   >;
   currentCategoryData: ComputedRef<KungfuApi.KfTradeValueCommonData | null>;
-  currentUID: ComputedRef<string>;
+  currentUID: ComputedRef<number>;
   setCurrentGlobalKfLocation(
     kfConfig:
       | KungfuApi.KfLocation
@@ -1747,11 +1747,11 @@ export const useCurrentGlobalKfLocation = (
 
   const currentUID = computed(() => {
     if (!watcher) {
-      return '';
+      return 0;
     }
 
     if (!currentGlobalKfLocation.value) {
-      return '';
+      return 0;
     }
 
     return watcher.getLocationUID(currentGlobalKfLocation.value);
@@ -2118,13 +2118,14 @@ export const useMakeOrderInfo = (
     ).getLocationUID(currentPositionHolderLocation.value);
 
     const { exchangeId, instrumentId, instrumentType } = instrument;
-    const targetPositionList: KungfuApi.Position[] = positionList.filter(
-      (position) =>
-        position.exchange_id === exchangeId &&
-        position.instrument_id === instrumentId &&
-        position.instrument_type === instrumentType &&
-        position.holder_uid === currentAccountLocationUID,
-    );
+    const targetPositionList: KungfuApi.PositionResolved[] =
+      positionList.filter(
+        (position) =>
+          position.exchange_id === exchangeId &&
+          position.instrument_id === instrumentId &&
+          position.instrument_type === instrumentType &&
+          position.holder_uid === currentAccountLocationUID,
+      );
 
     if (targetPositionList && targetPositionList.length) {
       const targetPositionWithLongDirection = targetPositionList.filter(
