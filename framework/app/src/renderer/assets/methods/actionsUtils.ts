@@ -2027,6 +2027,12 @@ export const useMakeOrderInfo = (
     () => currentGlobalKfLocation.value?.category === 'td',
   );
 
+  const isCurrentCategoryIsTdOrStrategy = computed(
+    () =>
+      currentGlobalKfLocation.value?.category === 'td' ||
+      currentGlobalKfLocation.value?.category === 'strategy',
+  );
+
   const isAccountOrInstrumentConfirmed = computed(() => {
     if (formState.value?.side === SideEnum.Buy) {
       return isCurrentCategoryIsTd.value ? true : !!formState.value.account_id;
@@ -2046,6 +2052,25 @@ export const useMakeOrderInfo = (
 
   const currentAccountLocation = computed(() => {
     if (currentGlobalKfLocation.value && isCurrentCategoryIsTd.value) {
+      return currentGlobalKfLocation.value;
+    } else if (formState.value.account_id) {
+      const { source, id } = formState.value.account_id.parseSourceAccountId();
+      return {
+        category: 'td',
+        group: source,
+        name: id,
+        mode: 'live',
+      } as KungfuApi.KfLocation;
+    } else {
+      return null;
+    }
+  });
+
+  const currentPositionHolderLocation = computed(() => {
+    if (
+      currentGlobalKfLocation.value &&
+      isCurrentCategoryIsTdOrStrategy.value
+    ) {
       return currentGlobalKfLocation.value;
     } else if (formState.value.account_id) {
       const { source, id } = formState.value.account_id.parseSourceAccountId();
@@ -2085,8 +2110,12 @@ export const useMakeOrderInfo = (
     instrument: KungfuApi.InstrumentResolved | null,
     direction: DirectionEnum,
   ) => {
-    if (!currentAccountLocation.value) return null;
+    if (!currentPositionHolderLocation.value) return null;
     if (!positionList.length || !instrument) return null;
+
+    const currentAccountLocationUID = (
+      window.watcher as KungfuApi.Watcher
+    ).getLocationUID(currentPositionHolderLocation.value);
 
     const { exchangeId, instrumentId, instrumentType } = instrument;
     const targetPositionList: KungfuApi.Position[] = positionList.filter(
@@ -2094,10 +2123,7 @@ export const useMakeOrderInfo = (
         position.exchange_id === exchangeId &&
         position.instrument_id === instrumentId &&
         position.instrument_type === instrumentType &&
-        position.account_id_resolved ===
-          getIdByKfLocation(
-            currentAccountLocation.value as KungfuApi.KfLocation,
-          ),
+        position.holder_uid === currentAccountLocationUID,
     );
 
     if (targetPositionList && targetPositionList.length) {

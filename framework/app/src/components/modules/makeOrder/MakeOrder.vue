@@ -37,6 +37,7 @@ import {
   dealVolumeByInstrumentType,
   getExtConfigList,
   getIdByKfLocation,
+  getOffsetByOffsetFilter,
   getProcessIdByKfLocation,
   initFormStateByConfig,
   isShotable,
@@ -245,16 +246,22 @@ watch(
     if (instrumentResolved.value) {
       const { instrumentType } = instrumentResolved.value;
 
+      const resolveOffsetByPosition = (pos: KungfuApi.PositionResolved) => {
+        return pos.yesterday_volume
+          ? getOffsetByOffsetFilter('CloseYest', OffsetEnum.Close)
+          : getOffsetByOffsetFilter('CloseToday', OffsetEnum.Close);
+      };
+
       if (isShotable(instrumentType)) {
         if (newSide === SideEnum.Sell) {
           if (currentPositionWithLongDirection.value) {
-            formState.value.offset = !!currentPositionWithLongDirection.value
-              ? OffsetEnum.Close
+            formState.value.offset = currentPositionWithLongDirection.value
+              ? resolveOffsetByPosition(currentPositionWithLongDirection.value)
               : OffsetEnum.Open;
           }
         } else if (newSide === SideEnum.Buy) {
-          formState.value.offset = !!currentPositionWithShortDirection.value
-            ? OffsetEnum.Close
+          formState.value.offset = currentPositionWithShortDirection.value
+            ? resolveOffsetByPosition(currentPositionWithShortDirection.value)
             : OffsetEnum.Open;
         }
       } else {
