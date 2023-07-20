@@ -52,6 +52,7 @@ import { VueNode } from 'ant-design-vue/lib/_util/type';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 const { t } = VueI18n.global;
 import fse from 'fs-extra';
+import fsPromise from 'fs/promises';
 import md from 'markdown-it';
 import { Router } from 'vue-router';
 import { normalizePath } from '@kungfu-trader/kungfu-js-api/utils/osUtils';
@@ -66,14 +67,21 @@ export const loadCustomFont = () => {
       fontFiles.map((fontFileName) => {
         const fontName = fontFileName.split('.')[0];
         const fontFullPath = normalizePath(path.join(fontsDir, fontFileName));
-        const font = new FontFace(fontName, `url(${fontFullPath})`);
-        return font.load().then(() => {
-          document.fonts.add(font);
-          return fontName;
-        });
+
+        if (fse.existsSync(fontFullPath)) {
+          return fsPromise.readFile(fontFullPath).then((fontBuffer) => {
+            const font = new FontFace(fontName, fontBuffer);
+            return font.load().then(() => {
+              document.fonts.add(font);
+              return fontName;
+            });
+          });
+        }
+
+        return Promise.resolve('');
       }),
     ).then((fontNames) => {
-      const newLoadedFont = fontNames.join(', ');
+      const newLoadedFont = fontNames.filter((item) => !!item).join(', ');
       document.body.style.fontFamily = `${newLoadedFont}, monospace, sans-serif`;
     });
   });

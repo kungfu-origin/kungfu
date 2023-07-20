@@ -48,10 +48,7 @@ void TraderVendor::on_start() {
   events_ | is(RequestHistoryTrade::tag) | $$(service_->req_history_trade(event));
   events_ | is(AssetSync::tag) | $$(service_->handle_asset_sync());
   events_ | is(PositionSync::tag) | $$(service_->handle_position_sync());
-
-  events_ | filter([&](const event_ptr &event) {
-    return event->msg_type() == BatchOrderBegin::tag or event->msg_type() == BatchOrderEnd::tag;
-  }) | $$(service_->handle_batch_order_tag(event));
+  events_ | is(BatchOrderBegin::tag, BatchOrderEnd::tag) | $$(service_->handle_batch_order_tag(event));
 
   service_->recover();
   service_->on_recover();
@@ -289,12 +286,12 @@ void Trader::deal_read_frame() {
     if (frame->msg_type() == OrderInput::tag) {
       const OrderInput &order_input = frame->data<OrderInput>();
       if (orders_.find(order_input.order_id) == orders_.end()) {
-        if (has_writer(frame->dest())) {
-          Order &order = get_writer(frame->dest())->open_data<Order>();
+        if (has_writer(frame->source())) {
+          Order &order = get_writer(frame->source())->open_data<Order>();
           order_from_input(order_input, order);
           order.status = OrderStatus::Lost;
           order.update_time = time::now_in_nano();
-          get_writer(frame->dest())->close_data();
+          get_writer(frame->source())->close_data();
         }
       }
     }

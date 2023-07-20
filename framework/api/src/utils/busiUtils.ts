@@ -10,7 +10,10 @@ import {
   KF_HOME,
   KF_RUNTIME_DIR,
 } from '../config/pathConfig';
-import { SpecialWordsReg } from '../config/systemConfig';
+import {
+  EnterableSpecialWordsReg,
+  SpecialWordsReg,
+} from '../config/systemConfig';
 import {
   InstrumentType,
   KfCategory,
@@ -1334,6 +1337,19 @@ export const getOffsetConfig = (): Record<
     }, {});
 };
 
+export const getOffsetByOffsetFilter = (
+  offsetKey: keyof typeof OffsetEnum,
+  defaultOffset: OffsetEnum,
+): OffsetEnum => {
+  const rootPackageJson = readRootPackageJsonSync();
+  const offsetConfig =
+    rootPackageJson?.appConfig?.makeOrder?.offsetFilter ||
+    ({} as Record<string, boolean>);
+  return offsetConfig[offsetKey] !== false
+    ? OffsetEnum[offsetKey]
+    : defaultOffset;
+};
+
 export const getAbleHedgeFlag = (): boolean => {
   const rootPackageJson = readRootPackageJsonSync();
   const ableHedgeFlag = rootPackageJson?.appConfig?.makeOrder?.ableHedgeFlag;
@@ -1915,7 +1931,9 @@ export const replaceNonAlphaNumericWithSpace = (
   value: KungfuApi.KfConfigValue,
 ) => {
   if (typeof value === 'string') {
-    return value.replace(SpecialWordsReg, '').replace(/[.:/]/g, '');
+    return value
+      .replace(SpecialWordsReg, '')
+      .replace(EnterableSpecialWordsReg, '');
   } else {
     return value;
   }

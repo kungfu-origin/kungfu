@@ -6,7 +6,6 @@ import {
   dealCurrency,
   isTdStrategyCategory,
   getIdByKfLocation,
-  isShotable,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
   useDownloadHistoryTradingData,
@@ -33,10 +32,7 @@ import { getColumns } from './config';
 import KfBlinkNum from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfBlinkNum.vue';
 import { dealPosition } from '@kungfu-trader/kungfu-js-api/kungfu';
 import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
-import {
-  OffsetEnum,
-  SideEnum,
-} from '@kungfu-trader/kungfu-js-api/typings/enums';
+import { SideEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
   getInstrumentByInstrumentPair,
   useCurrentGlobalKfLocation,
@@ -46,6 +42,7 @@ import {
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import { messagePrompt } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
+import { getPosClosableVolumeByOffset, resolveTriggerOffset } from './utils';
 
 const { t } = VueI18n.global;
 const { success, error } = messagePrompt();
@@ -124,16 +121,6 @@ watch(currentGlobalKfLocation, () => {
   pos.value = [];
 });
 
-const resolveTriggerOffset = (position: KungfuApi.PositionResolved) => {
-  if (isShotable(position.instrument_type)) {
-    return position.yesterday_volume !== BigInt(0)
-      ? OffsetEnum.CloseYest
-      : OffsetEnum.CloseToday;
-  } else {
-    return OffsetEnum.Close;
-  }
-};
-
 function handleClickRow(data: {
   event: MouseEvent;
   row: KungfuApi.PositionResolved;
@@ -152,10 +139,12 @@ function handleClickRow(data: {
     );
 
   triggerOrderBook(ensuredInstrument);
+
+  const offset = resolveTriggerOffset(row);
   const extraOrderInput: ExtraOrderInput = {
     side: row.direction === 0 ? SideEnum.Sell : SideEnum.Buy,
-    offset: resolveTriggerOffset(row),
-    volume: row.closable_volume,
+    offset,
+    volume: getPosClosableVolumeByOffset(row, offset),
 
     price: row.last_price || row.avg_open_price || 0,
     accountId: isTdStrategyCategory(currentGlobalKfLocation.value?.category)

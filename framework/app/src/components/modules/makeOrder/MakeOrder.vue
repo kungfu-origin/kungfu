@@ -37,6 +37,7 @@ import {
   dealVolumeByInstrumentType,
   getExtConfigList,
   getIdByKfLocation,
+  getOffsetByOffsetFilter,
   getProcessIdByKfLocation,
   initFormStateByConfig,
   isShotable,
@@ -245,16 +246,22 @@ watch(
     if (instrumentResolved.value) {
       const { instrumentType } = instrumentResolved.value;
 
+      const resolveOffsetByPosition = (pos: KungfuApi.PositionResolved) => {
+        return pos.yesterday_volume
+          ? getOffsetByOffsetFilter('CloseYest', OffsetEnum.Close)
+          : getOffsetByOffsetFilter('CloseToday', OffsetEnum.Close);
+      };
+
       if (isShotable(instrumentType)) {
         if (newSide === SideEnum.Sell) {
           if (currentPositionWithLongDirection.value) {
-            formState.value.offset = !!currentPositionWithLongDirection.value
-              ? OffsetEnum.Close
+            formState.value.offset = currentPositionWithLongDirection.value
+              ? resolveOffsetByPosition(currentPositionWithLongDirection.value)
               : OffsetEnum.Open;
           }
         } else if (newSide === SideEnum.Buy) {
-          formState.value.offset = !!currentPositionWithShortDirection.value
-            ? OffsetEnum.Close
+          formState.value.offset = currentPositionWithShortDirection.value
+            ? resolveOffsetByPosition(currentPositionWithShortDirection.value)
             : OffsetEnum.Open;
         }
       } else {
@@ -487,46 +494,50 @@ async function confirmApartCloseToOpen(
     offset !== OffsetEnum.Open
   ) {
     let direction: string = '',
-      closable_volume: number | undefined = undefined;
+      oppositeDirection: string = '',
+      closableVolume: number | undefined = undefined;
 
     if (side === SideEnum.Buy) {
       if (currentPositionWithShortDirection.value) {
-        closable_volume = Number(
+        closableVolume = Number(
           getPosClosableVolume(currentPositionWithShortDirection.value),
         );
 
         direction = t('tradingConfig.short');
+        oppositeDirection = t('tradingConfig.long');
       }
     } else if (side === SideEnum.Sell) {
       if (currentPositionWithLongDirection.value) {
-        closable_volume = Number(
+        closableVolume = Number(
           getPosClosableVolume(currentPositionWithLongDirection.value),
         );
 
         direction = t('tradingConfig.long');
+        oppositeDirection = t('tradingConfig.short');
       }
     }
 
-    if (direction === '' || closable_volume === undefined)
+    if (direction === '' || closableVolume === undefined)
       return [makeOrderInput];
 
-    if (volume > closable_volume) {
-      const open_volume = volume - Number(closable_volume);
+    if (volume > closableVolume) {
+      const openVolume = volume - Number(closableVolume);
       const firstOrderInput: KungfuApi.MakeOrderInput = {
         ...makeOrderInput,
-        volume: Number(closable_volume),
+        volume: Number(closableVolume),
       };
       const secondOrderInput: KungfuApi.MakeOrderInput = {
         ...makeOrderInput,
         offset: OffsetEnum.Open,
-        volume: volume - Number(closable_volume),
+        volume: volume - Number(closableVolume),
       };
       const flag = await confirmContinueOrderModal(
         t('tradingConfig.close_apart_open_modal', {
           direction,
+          oppositeDirection,
           volume,
-          closable_volume,
-          open_volume,
+          closableVolume,
+          openVolume,
         }),
         t('tradingConfig.original_plan'),
         t('tradingConfig.beyond_to_open'),
