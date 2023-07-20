@@ -289,12 +289,12 @@ void Trader::deal_read_frame() {
     if (frame->msg_type() == OrderInput::tag) {
       const OrderInput &order_input = frame->data<OrderInput>();
       if (orders_.find(order_input.order_id) == orders_.end()) {
-        if (has_writer(frame->dest())) {
-          Order &order = get_writer(frame->dest())->open_data<Order>();
+        if (has_writer(frame->source())) {
+          Order &order = get_writer(frame->source())->open_data<Order>();
           order_from_input(order_input, order);
           order.status = OrderStatus::Lost;
           order.update_time = time::now_in_nano();
-          get_writer(frame->dest())->close_data();
+          get_writer(frame->source())->close_data();
         }
       }
     }
