@@ -48,10 +48,7 @@ void TraderVendor::on_start() {
   events_ | is(RequestHistoryTrade::tag) | $$(service_->req_history_trade(event));
   events_ | is(AssetSync::tag) | $$(service_->handle_asset_sync());
   events_ | is(PositionSync::tag) | $$(service_->handle_position_sync());
-
-  events_ | filter([&](const event_ptr &event) {
-    return event->msg_type() == BatchOrderBegin::tag or event->msg_type() == BatchOrderEnd::tag;
-  }) | $$(service_->handle_batch_order_tag(event));
+  events_ | is(BatchOrderBegin::tag, BatchOrderEnd::tag) | $$(service_->handle_batch_order_tag(event));
 
   service_->recover();
   service_->on_recover();
