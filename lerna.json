@@ -9,11 +9,7 @@
   ],
   "command": {
     "version": {
-      "allowBranch": [
-        "main",
-        "release/**",
-        "alpha/**"
-      ]
+      "allowBranch": ["main", "release/**", "alpha/**"]
     }
   }
 }
