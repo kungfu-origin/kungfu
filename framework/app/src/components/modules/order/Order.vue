@@ -6,7 +6,6 @@ import {
   getIdByKfLocation,
   delayMilliSeconds,
   getProcessIdByKfLocation,
-  dealOrderStat,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
   useDownloadHistoryTradingData,
