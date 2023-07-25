@@ -61,6 +61,7 @@ import { normalizePath } from '@kungfu-trader/kungfu-js-api/utils/osUtils';
 
 export const loadCustomFont = () => {
   const fontsDir = path.normalize(path.join(KUNGFU_RESOURCES_DIR, 'fonts'));
+  if (!fse.existsSync(fontsDir)) return Promise.resolve();
 
   return fse.readdir(fontsDir).then((fontFiles) => {
     return Promise.all(
