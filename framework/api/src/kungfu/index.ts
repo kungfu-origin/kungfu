@@ -646,6 +646,22 @@ export const hashInstrumentUKey = (
   return hashUkey(instrumentId, exchangeId);
 };
 
+export const getOrderLatencyDataByOrderStat = (
+  order: KungfuApi.Order,
+  orderStats: KungfuApi.DataTable<KungfuApi.OrderStat>,
+) => {
+  const latencyData = dealOrderStat(orderStats, order.uid_key) || {
+    latencySystem: '--',
+    latencyNetwork: '--',
+    avg_price: 0,
+  };
+  return {
+    latency_system: latencyData.latencySystem,
+    latency_network: latencyData.latencyNetwork,
+    avg_price: latencyData.avg_price,
+  };
+};
+
 export const dealOrder = (
   watcher: KungfuApi.Watcher,
   order: KungfuApi.Order,

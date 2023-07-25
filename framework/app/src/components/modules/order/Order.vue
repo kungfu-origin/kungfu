@@ -42,6 +42,7 @@ import {
   kfCancelAllOrders,
   kfCancelOrder,
   makeOrderByOrderInput,
+  getOrderLatencyDataByOrderStat,
 } from '@kungfu-trader/kungfu-js-api/kungfu';
 import type { Dayjs } from 'dayjs';
 import { UnfinishedOrderStatus } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
@@ -137,7 +138,7 @@ onMounted(() => {
           const tempAllOrders = ordersResolved.map((item) => {
             return toRaw({
               ...dealDataWithCache(item, () => dealOrder(watcher, item, false)),
-              ...getLatencyData(item), // 分离出OrderMedianResolved，解决缓存依赖值变更，但缓存uid_key和update_time不变导致取值错误
+              ...getOrderLatencyDataByOrderStat(item, watcher.ledger.OrderStat), // 分离出OrderMedianResolved，解决缓存依赖值变更，但缓存uid_key和update_time不变导致取值错误
             });
           });
           allOrders.value = tempAllOrders;
@@ -154,7 +155,10 @@ onMounted(() => {
               ...dealDataWithCache(curOrder, () =>
                 dealOrder(watcher, curOrder, false),
               ),
-              ...getLatencyData(curOrder),
+              ...getOrderLatencyDataByOrderStat(
+                curOrder,
+                watcher.ledger.OrderStat,
+              ),
             });
             preOrders.totalOrders.push(orderResolved);
             if (isFinishedOrderStatus(curOrder.status)) {
@@ -232,7 +236,10 @@ watch(historyDate, async (newDate) => {
             ...dealDataWithCache(item, () =>
               dealOrder(window.watcher, item, true),
             ),
-            ...getLatencyData(item),
+            ...getOrderLatencyDataByOrderStat(
+              item,
+              window.watcher.ledger.OrderStat,
+            ),
           });
         }),
       );
@@ -250,22 +257,6 @@ watch(historyDate, async (newDate) => {
       historyDataLoading.value = false;
     });
 });
-
-function getLatencyData(order) {
-  const latencyData = dealOrderStat(
-    window.watcher.ledger.OrderStat,
-    order.uid_key,
-  ) || {
-    latencySystem: '--',
-    latencyNetwork: '--',
-    avg_price: 0,
-  };
-  return {
-    latency_system: latencyData.latencySystem,
-    latency_network: latencyData.latencyNetwork,
-    avg_price: latencyData.avg_price,
-  };
-}
 
 function isFinishedOrderStatus(orderStatus: OrderStatusEnum): boolean {
   return !UnfinishedOrderStatus.includes(orderStatus);
