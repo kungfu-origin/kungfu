@@ -460,25 +460,25 @@ inline std::string get_exchange_id_from_future_instrument_id(const std::string &
   if (product == "c" || product == "cs" || product == "a" || product == "b" || product == "m" || product == "y" ||
       product == "p" || product == "fb" || product == "bb" || product == "jd" || product == "rr" || product == "l" ||
       product == "v" || product == "pp" || product == "j" || product == "jm" || product == "i" || product == "eg" ||
-      product == "eb") {
+      product == "eb" || product == "pg" || product == "lh") {
     return EXCHANGE_DCE;
   } else if (product == "wh" || product == "pm" || product == "cf" || product == "sr" || product == "oi" ||
              product == "ri" || product == "rs" || product == "rm" || product == "jr" || product == "lr" ||
              product == "cy" || product == "ap" || product == "cj" || product == "ta" || product == "ma" ||
              product == "zc" || product == "sf" || product == "sm" || product == "ur" || product == "fg" ||
-             product == "sa") {
+             product == "sa" || product == "pf" || product == "pk") {
     return EXCHANGE_CZCE;
   } else if (product == "cu" || product == "al" || product == "zn" || product == "pb" || product == "ni" ||
              product == "sn" || product == "au" || product == "ag" || product == "rb" || product == "wr" ||
              product == "hc" || product == "ss" || product == "fu" || product == "bu" || product == "ru" ||
-             product == "nr" || product == "sp") {
+             product == "sp" || product == "ao" || product == "br") {
     return EXCHANGE_SHFE;
   } else if (product == "if" || product == "ic" || product == "ih" || product == "ts" || product == "tf" ||
-             product == "t") {
+             product == "tl" || product == "t" || product == "im") {
     return EXCHANGE_CFFEX;
-  } else if (product == "sc") {
+  } else if (product == "sc" || product == "bc" || product == "lu" || product == "nr") {
     return EXCHANGE_INE;
-  } else if (product == "si") {
+  } else if (product == "si" || product == "lc") {
     return EXCHANGE_GFEX;
   } else {
     return "";
