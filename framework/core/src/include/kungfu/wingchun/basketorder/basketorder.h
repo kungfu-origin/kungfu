@@ -35,7 +35,7 @@ inline bool is_all_order_end(const OrderMap &orders) {
 struct BasketOrderState {
   kungfu::state<longfist::types::BasketOrder> state_data;
   OrderMap orders = {};
-  HashedInstrumentToOrderMap lastest_order_map = {};
+  HashedInstrumentToOrderMap last_order_map = {};
 
   BasketOrderState(uint32_t source, uint32_t dest, int64_t trigger_time,
                    const longfist::types::BasketOrder &basket_order);
