@@ -18,18 +18,17 @@ void BasketOrderState::update_lastst_order(const longfist::types::Order &order) 
   orders.insert_or_assign(order.order_id, order);
 
   auto hashed_key = hash_instrument(order);
-  if (lastest_order_map.find(hashed_key) == lastest_order_map.end()) {
-    lastest_order_map.emplace(hashed_key, order);
+  if (last_order_map.find(hashed_key) == last_order_map.end()) {
+    last_order_map.emplace(hashed_key, order);
     return;
   }
 
-  auto &old_lastest_order = lastest_order_map.at(hashed_key);
-  if (old_lastest_order.insert_time > order.insert_time) {
+  auto &old_last_order = last_order_map.at(hashed_key);
+  if (old_last_order.insert_time > order.insert_time) {
     return;
   }
 
-  lastest_order_map.insert_or_assign(hashed_key, order);
-  return;
+  last_order_map.insert_or_assign(hashed_key, order);
 }
 
 void BasketOrderState::update(const longfist::types::Order &order) {
@@ -56,9 +55,9 @@ int64_t BasketOrderState::get_total_volume() {
   for (auto &iter : orders) {
     auto &order = iter.second;
     auto hashed_key = hash_instrument(order);
-    auto is_lastest_order = lastest_order_map.find(hashed_key) != lastest_order_map.end() &&
-                            lastest_order_map.at(hashed_key).order_id == order.order_id;
-    total_volume += is_lastest_order                ? order.volume
+    auto is_last_order = last_order_map.find(hashed_key) != last_order_map.end() &&
+                         last_order_map.at(hashed_key).order_id == order.order_id;
+    total_volume += is_last_order                   ? order.volume
                     : is_final_status(order.status) ? order.volume - order.volume_left
                                                     : order.volume;
   }
