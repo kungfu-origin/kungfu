@@ -21,3 +21,4 @@ jobs:
       AWS_USER_ACCESS_KEY_ID: ${{ secrets.AWS_USER_ACCESS_KEY_ID }}
       AWS_USER_SECRET_ACCESS_KEY: ${{ secrets.AWS_USER_SECRET_ACCESS_KEY }}
       MONDAY_API_KEY: ${{ secrets.MONDAY_API_KEY }}
+      AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
