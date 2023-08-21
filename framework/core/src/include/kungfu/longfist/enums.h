@@ -339,7 +339,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(PriceType, {
 inline std::ostream &operator<<(std::ostream &os, PriceType t) { return os << int8_t(t); }
 
 enum class PriceLevel : int8_t {
-  Lastest, // 最新价
+  Last, // 最新价
   Sell5,
   Sell4,
   Sell3,
@@ -356,7 +356,7 @@ enum class PriceLevel : int8_t {
 };
 
 NLOHMANN_JSON_SERIALIZE_ENUM(PriceLevel, {
-                                             {PriceLevel::Lastest, "Lastest"},
+                                             {PriceLevel::Last, "Last"},
                                              {PriceLevel::Sell5, "Sell5"},
                                              {PriceLevel::Sell4, "Sell4"},
                                              {PriceLevel::Sell3, "Sell3"},

@@ -58,7 +58,10 @@ function handleUpdateKungfu(
   if (!app.isPackaged) return;
 
   const rootPackageJson = readRootPackageJsonSync();
-  const updaterOption = rootPackageJson?.kungfuCraft?.autoUpdate?.update;
+  const rawUpdateOption = rootPackageJson?.kungfuCraft?.autoUpdate?.update;
+  const updaterOption = rawUpdateOption
+    ? Object.assign({}, rawUpdateOption)
+    : undefined;
 
   if (!rootPackageJson || !updaterOption) return;
 

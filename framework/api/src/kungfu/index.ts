@@ -646,23 +646,33 @@ export const hashInstrumentUKey = (
   return hashUkey(instrumentId, exchangeId);
 };
 
+export const getOrderLatencyDataByOrderStat = (
+  order: KungfuApi.Order,
+  orderStats: KungfuApi.DataTable<KungfuApi.OrderStat>,
+) => {
+  const latencyData = dealOrderStat(orderStats, order.uid_key) || {
+    latencySystem: '--',
+    latencyNetwork: '--',
+    avg_price: 0,
+  };
+  return {
+    latency_system: latencyData.latencySystem,
+    latency_network: latencyData.latencyNetwork,
+    avg_price: latencyData.avg_price,
+  };
+};
+
 export const dealOrder = (
   watcher: KungfuApi.Watcher,
   order: KungfuApi.Order,
-  orderStats: KungfuApi.DataTable<KungfuApi.OrderStat>,
   isHistory = false,
-): KungfuApi.OrderResolved => {
+): KungfuApi.OrderResolvedWithoutStat => {
   const sourceResolvedData = resolveAccountId(
     watcher,
     order.source,
     order.dest,
   );
   const destResolvedData = resolveClientId(watcher, order.dest);
-  const latencyData = dealOrderStat(orderStats, order.uid_key) || {
-    latencySystem: '--',
-    latencyNetwork: '--',
-    avg_price: 0,
-  };
   const statusData = dealOrderStatus(order.status, order.error_msg);
   return {
     ...order,
@@ -676,9 +686,6 @@ export const dealOrder = (
     status_uname: statusData.name,
     status_color: statusData.color || 'default',
     update_time_resolved: dealKfTime(order.update_time, isHistory),
-    latency_system: latencyData.latencySystem,
-    latency_network: latencyData.latencyNetwork,
-    avg_price: latencyData.avg_price,
   };
 };
 

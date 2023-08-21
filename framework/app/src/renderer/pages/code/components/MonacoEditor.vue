@@ -149,6 +149,10 @@ function createEditor(
 
       fontSize: 14,
       automaticLayout: true,
+
+      ...(document.body.style.fontFamily
+        ? { fontFamily: document.body.style.fontFamily }
+        : {}),
     },
   );
   return editor;

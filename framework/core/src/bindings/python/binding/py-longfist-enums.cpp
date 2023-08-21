@@ -146,7 +146,7 @@ void bind_enums(py::module &m) {
       .def("__eq__", [](const PriceType &a, int b) { return static_cast<int>(a) == b; });
 
   py::enum_<PriceLevel>(m_enums, "PriceLevel", py::arithmetic())
-      .value("Lastest", PriceLevel::Lastest)
+      .value("Last", PriceLevel::Last)
       .value("Sell5", PriceLevel::Sell5)
       .value("Sell4", PriceLevel::Sell4)
       .value("Sell3", PriceLevel::Sell3)

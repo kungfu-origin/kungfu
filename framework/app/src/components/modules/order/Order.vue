@@ -41,6 +41,7 @@ import {
   kfCancelAllOrders,
   kfCancelOrder,
   makeOrderByOrderInput,
+  getOrderLatencyDataByOrderStat,
 } from '@kungfu-trader/kungfu-js-api/kungfu';
 import type { Dayjs } from 'dayjs';
 import { UnfinishedOrderStatus } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
@@ -66,7 +67,7 @@ const { handleBodySizeChange } = useDashboardBodySize();
 const { processStatusData } = useProcessStatusDetailData();
 const { dealDataWithCache, clearCaches } = useDealDataWithCaches<
   KungfuApi.Order,
-  KungfuApi.OrderResolved
+  KungfuApi.OrderResolvedWithoutStat
 >(['uid_key', 'update_time']);
 const orders = ref<KungfuApi.OrderResolved[]>([]);
 const allOrders = ref<KungfuApi.OrderResolved[]>([]);
@@ -133,13 +134,12 @@ onMounted(() => {
           ) as KungfuApi.Order[];
 
         if (unfinishedOrder.value) {
-          const tempAllOrders = ordersResolved.map((item) =>
-            toRaw(
-              dealDataWithCache(item, () =>
-                dealOrder(watcher, item, watcher.ledger.OrderStat),
-              ),
-            ),
-          );
+          const tempAllOrders = ordersResolved.map((item) => {
+            return toRaw({
+              ...dealDataWithCache(item, () => dealOrder(watcher, item, false)),
+              ...getOrderLatencyDataByOrderStat(item, watcher.ledger.OrderStat), // 分离出OrderMedianResolved，解决缓存依赖值变更，但缓存uid_key和update_time不变导致取值错误
+            });
+          });
           allOrders.value = tempAllOrders;
           orders.value = toRaw(
             tempAllOrders.filter((item) => !isFinishedOrderStatus(item.status)),
@@ -150,11 +150,15 @@ onMounted(() => {
         let finishedOrdersCount = 0;
         const { totalOrders, ordersForTable } = ordersResolved.reduce(
           (preOrders, curOrder) => {
-            const orderResolved = toRaw(
-              dealDataWithCache(curOrder, () =>
-                dealOrder(watcher, curOrder, watcher.ledger.OrderStat),
+            const orderResolved = toRaw({
+              ...dealDataWithCache(curOrder, () =>
+                dealOrder(watcher, curOrder, false),
               ),
-            );
+              ...getOrderLatencyDataByOrderStat(
+                curOrder,
+                watcher.ledger.OrderStat,
+              ),
+            });
             preOrders.totalOrders.push(orderResolved);
             if (isFinishedOrderStatus(curOrder.status)) {
               if (finishedOrdersCount < 500) {
@@ -226,13 +230,17 @@ watch(historyDate, async (newDate) => {
         ) as KungfuApi.Order[];
 
       const tempAllOrders = toRaw(
-        orderResolved.map((item) =>
-          toRaw(
-            dealDataWithCache(item, () =>
-              dealOrder(window.watcher, item, tradingData.OrderStat, true),
+        orderResolved.map((item) => {
+          return toRaw({
+            ...dealDataWithCache(item, () =>
+              dealOrder(window.watcher, item, true),
             ),
-          ),
-        ),
+            ...getOrderLatencyDataByOrderStat(
+              item,
+              window.watcher.ledger.OrderStat,
+            ),
+          });
+        }),
       );
       allOrders.value = tempAllOrders;
       orders.value = tempAllOrders;

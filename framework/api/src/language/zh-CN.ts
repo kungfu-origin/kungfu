@@ -292,10 +292,10 @@ export default {
     METL: 'METL',
     IPM: '国际贵金属',
 
-    SP: '郑商所 跨期 SP',
-    SPC: '郑商所 跨品种 SPC',
-    SPD: '大商所 跨期 SPD',
-    IPS: '大商所 跨品种 IPS',
+    SP: '大商所 跨期 SP',
+    SPC: '大商所 跨品种 SPC',
+    SPD: '郑商所 跨期 SPD',
+    IPS: '郑商所 跨品种 IPS',
 
     CNY: 'CNY',
     HKD: 'HKD',
