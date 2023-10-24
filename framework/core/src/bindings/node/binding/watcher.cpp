@@ -388,27 +388,27 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
   Napi::Function func =
       DefineClass(env, "Watcher",
                   {
-                      InstanceMethod("now", &Watcher::Now),                             //
-                      InstanceMethod("isUsable", &Watcher::IsUsable),                   //
-                      InstanceMethod("isLive", &Watcher::IsLive),                       //
-                      InstanceMethod("isStarted", &Watcher::IsStarted),                 //
-                      InstanceMethod("requestStop", &Watcher::RequestStop),             //
-                      InstanceMethod("hasLocation", &Watcher::HasLocation),             //
-                      InstanceMethod("getLocation", &Watcher::GetLocation),             //
-                      InstanceMethod("getLocationUID", &Watcher::GetLocationUID),       //
-                      InstanceMethod("getInstrumentType", &Watcher::GetInstrumentType), //
-                      InstanceMethod("publishState", &Watcher::PublishState),           //
-                      InstanceMethod("isReadyToInteract", &Watcher::IsReadyToInteract), //
-                      InstanceMethod("issueCustomData", &Watcher::IssueCustomData),     //
-                      InstanceMethod("issueBlockMessage", &Watcher::IssueBlockMessage), //
-                      InstanceMethod("issueOrder", &Watcher::IssueOrder),               //
-                      InstanceMethod("issueBasketOrder", &Watcher::IssueBasketOrder),   //
-                      InstanceMethod("cancelOrder", &Watcher::CancelOrder),             //
-                      InstanceMethod("requestMarketData", &Watcher::RequestMarketData), //
-                      InstanceMethod("requestPosition", &Watcher::RequestPosition),     //
-                      InstanceMethod("start", &Watcher::Start),                         //
-                      InstanceMethod("sync", &Watcher::Sync),                           //
-                      InstanceMethod("quit", &Watcher::Quit),
+                      InstanceMethod("now", &Watcher::Now),                                             //
+                      InstanceMethod("isUsable", &Watcher::IsUsable),                                   //
+                      InstanceMethod("isLive", &Watcher::IsLive),                                       //
+                      InstanceMethod("isStarted", &Watcher::IsStarted),                                 //
+                      InstanceMethod("requestStop", &Watcher::RequestStop),                             //
+                      InstanceMethod("hasLocation", &Watcher::HasLocation),                             //
+                      InstanceMethod("getLocation", &Watcher::GetLocation),                             //
+                      InstanceMethod("getLocationUID", &Watcher::GetLocationUID),                       //
+                      InstanceMethod("getInstrumentType", &Watcher::GetInstrumentType),                 //
+                      InstanceMethod("publishState", &Watcher::PublishState),                           //
+                      InstanceMethod("isReadyToInteract", &Watcher::IsReadyToInteract),                 //
+                      InstanceMethod("issueCustomData", &Watcher::IssueCustomData),                     //
+                      InstanceMethod("issueBlockMessage", &Watcher::IssueBlockMessage),                 //
+                      InstanceMethod("issueOrder", &Watcher::IssueOrder),                               //
+                      InstanceMethod("issueBasketOrder", &Watcher::IssueBasketOrder),                   //
+                      InstanceMethod("cancelOrder", &Watcher::CancelOrder),                             //
+                      InstanceMethod("requestMarketData", &Watcher::RequestMarketData),                 //
+                      InstanceMethod("requestPosition", &Watcher::RequestPosition),                     //
+                      InstanceMethod("start", &Watcher::Start),                                         //
+                      InstanceMethod("sync", &Watcher::Sync),                                           //
+                      InstanceMethod("quit", &Watcher::Quit),                                           //
                       InstanceAccessor("state", &Watcher::GetState, &Watcher::NoSet),                   //
                       InstanceAccessor("ledger", &Watcher::GetLedger, &Watcher::NoSet),                 //
                       InstanceAccessor("appStates", &Watcher::GetAppStates, &Watcher::NoSet),           //
@@ -787,35 +787,29 @@ void Watcher::UpdateBook(const event_ptr &event, const Position &position) {
 Watcher::BookListener::BookListener(Watcher &watcher) : watcher_(watcher) {}
 
 void Watcher::BookListener::on_asset_sync_reset(const Asset &old_asset, const Asset &new_asset) {
-  auto book = watcher_.bookkeeper_.get_book(new_asset.holder_uid);
-  state<Asset> cache_state(watcher_.ledger_home_location_->uid, book->asset.holder_uid, book->asset.update_time,
-                           book->asset);
+  state<Asset> cache_state(watcher_.ledger_home_location_->uid, new_asset.holder_uid, new_asset.update_time, new_asset);
   watcher_.feed_state_data_bank(cache_state, watcher_.data_bank_);
 }
 
 void Watcher::BookListener::on_asset_margin_sync_reset(const AssetMargin &old_asset_margin,
                                                        const AssetMargin &new_asset_margin) {
-  auto book = watcher_.bookkeeper_.get_book(new_asset_margin.holder_uid);
-  state<AssetMargin> cache_state(watcher_.ledger_home_location_->uid, book->asset_margin.holder_uid,
-                                 book->asset_margin.update_time, book->asset_margin);
+  state<AssetMargin> cache_state(watcher_.ledger_home_location_->uid, new_asset_margin.holder_uid,
+                                 new_asset_margin.update_time, new_asset_margin);
   watcher_.feed_state_data_bank(cache_state, watcher_.data_bank_);
 }
 
 void Watcher::BookListener::on_position_sync_reset(const book::Book &old_book, const book::Book &new_book) {
-  auto update_position = [&](book::PositionMap &position_map) {
+  auto update_position = [&](const book::PositionMap &position_map) {
     for (auto &pair : position_map) {
-      auto &position = pair.second;
+      const auto &position = pair.second;
       state<Position> cache_state(watcher_.ledger_home_location_->uid, position.holder_uid, position.update_time,
                                   position);
       watcher_.feed_state_data_bank(cache_state, watcher_.data_bank_);
     }
   };
 
-  for (auto &pair : watcher_.bookkeeper_.get_books()) {
-    auto &book = pair.second;
-    update_position(book->long_positions);
-    update_position(book->short_positions);
-  }
+  update_position(new_book.long_positions);
+  update_position(new_book.short_positions);
 }
 
 } // namespace kungfu::node

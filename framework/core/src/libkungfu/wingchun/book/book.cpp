@@ -160,4 +160,17 @@ void Book::replace(const Order &order) { orders.insert_or_assign(order.order_id,
 
 void Book::replace(const Trade &trade) { trades.insert_or_assign(trade.trade_id, trade); }
 
+void Book::mirror_position_from(const Book &book) {
+  auto mirror_position = [&](const PositionMap &source_map) {
+    for (auto &source_pair : source_map) {
+      longfist::copy(get_position_for(source_pair.second.direction, source_pair.second), source_pair.second);
+    }
+  };
+
+  long_positions.clear();
+  short_positions.clear();
+  mirror_position(book.long_positions);
+  mirror_position(book.short_positions);
+}
+
 } // namespace kungfu::wingchun::book
