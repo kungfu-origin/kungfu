@@ -130,9 +130,9 @@ private:
   AccountingMethodMap accounting_methods_ = {};
   std::vector<BookListener_ptr> book_listeners_ = {};
   BookMap books_replica_ = {}; // 暂存从location::SYNC传来的asset和position信息
-  std::unordered_map<uint32_t, bool> books_replica_asset_guards_ = {}; // Asset::tag添加对应<location_uid,true>
-  std::unordered_map<uint32_t, bool> books_replica_asset_margin_guards_ = {}; // AssetMargin::tag-><location_uid,true>
-  std::unordered_map<uint32_t, bool> books_replica_position_guard_ = {}; // PositionEnd::tag添加对应<location_uid,true>
+  bool sync_asset_{};
+  bool sync_asset_margin_{};
+  bool sync_position_{};
 
   Book_ptr make_book(uint32_t location_uid);
 
@@ -146,16 +146,13 @@ private:
 
   void try_update_position(const longfist::types::Position &position);
 
-  /// 把books_replica_中location_uid对应的book复制到books_，然后重置asset_guards和position_guards为false
-  void try_sync_book_replica(uint32_t location_uid);
+  void try_sync_asset(const longfist::types::Asset &asset);
 
-  void try_update_asset_replica(const longfist::types::Asset &asset);
+  void try_sync_asset_margin(const longfist::types::AssetMargin &asset_margin);
 
-  void try_update_assetmargin_replica(const longfist::types::AssetMargin &asset_margin);
+  void try_sync_position(const longfist::types::Position &position);
 
-  void try_update_position_replica(const longfist::types::Position &position);
-
-  void update_position_guard(const longfist::types::PositionEnd &position_end);
+  void try_sync_position_end(const longfist::types::PositionEnd &position_end);
 
   Book_ptr get_book_replica(uint32_t location_uid);
 };

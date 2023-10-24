@@ -813,6 +813,9 @@ void Watcher::BookListener::on_position_sync_reset(const book::Book &old_book, c
 
   for (auto &pair : watcher_.bookkeeper_.get_books()) {
     auto &book = pair.second;
+    if (book->asset.holder_uid == new_book.asset.holder_uid) {
+      book->mirror_position_from(new_book);
+    }
     update_position(book->long_positions);
     update_position(book->short_positions);
   }
