@@ -175,12 +175,12 @@ void Bookkeeper::update_instrument(const longfist::types::Instrument &instrument
         double long_margin_ratio = inserted_inst.long_margin_ratio;
         double short_margin_ratio = inserted_inst.short_margin_ratio;
         double conversion_rate = inserted_inst.conversion_rate;
-        memcpy(&inserted_inst, &instrument, sizeof(longfist::types::Instrument));
+        longfist::copy(inserted_inst, instrument);
         inserted_inst.long_margin_ratio = long_margin_ratio;
         inserted_inst.short_margin_ratio = short_margin_ratio;
         inserted_inst.conversion_rate = conversion_rate;
       } else {
-        memcpy(&inserted_inst, &instrument, sizeof(longfist::types::Instrument));
+        longfist::copy(inserted_inst, instrument);
       }
     }
   }
@@ -276,8 +276,8 @@ void Bookkeeper::try_sync_asset(const longfist::types::Asset &asset) {
     for (auto &book_listener : book_listeners_) {
       book_listener->on_asset_sync_reset(old_book->asset, asset);
     }
+    longfist::copy(old_book->asset, asset);
   }
-  longfist::copy(old_book->asset, asset);
 }
 
 void Bookkeeper::try_sync_asset_margin(const longfist::types::AssetMargin &asset_margin) {
@@ -305,8 +305,8 @@ void Bookkeeper::try_sync_asset_margin(const longfist::types::AssetMargin &asset
     for (auto &book_listener : book_listeners_) {
       book_listener->on_asset_margin_sync_reset(old_book->asset_margin, asset_margin);
     }
+    longfist::copy(old_book->asset_margin, asset_margin);
   }
-  longfist::copy(old_book->asset_margin, asset_margin);
 }
 
 void Bookkeeper::try_sync_position(const longfist::types::Position &position) {
@@ -423,5 +423,11 @@ void Bookkeeper::mirror_positions(int64_t trigger_time, uint32_t strategy_uid) {
   }
   strategy_book->update(trigger_time);
 }
+
+bool Bookkeeper::is_sync_asset() const { return sync_asset_; }
+
+bool Bookkeeper::is_sync_asset_margin() const { return sync_asset_margin_; }
+
+bool Bookkeeper::is_sync_position() const { return sync_position_; }
 
 } // namespace kungfu::wingchun::book

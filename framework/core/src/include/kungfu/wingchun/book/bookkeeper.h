@@ -68,6 +68,12 @@ public:
 
   void try_update_position_end(const longfist::types::PositionEnd &position_end);
 
+  [[nodiscard]] bool is_sync_asset() const;
+
+  [[nodiscard]] bool is_sync_asset_margin() const;
+
+  [[nodiscard]] bool is_sync_position() const;
+
   std::mutex &get_update_book_mutex();
 
   template <typename TradingData, typename ApplyMethod = void (AccountingMethod::*)(Book_ptr, const TradingData &)>
