@@ -263,14 +263,8 @@ void Bookkeeper::try_sync_asset(const longfist::types::Asset &asset) {
 
   get_book_replica(asset.holder_uid)->asset = asset;
   auto old_book = get_book(asset.holder_uid);
-  bool asset_changed = false;
-  auto asset_compare = [](const Asset &old_asset, const Asset &new_asset) {
-    bool changed = false;
-    changed |= old_asset.avail != new_asset.avail;   // 可用资金
-    changed |= old_asset.margin != new_asset.margin; // 保证金(期货)
-    return changed;
-  };
-  asset_changed |= asset_compare(old_book->asset, asset);
+  bool asset_changed = old_book->asset.avail != asset.avail || // 可用资金
+                       old_book->asset.margin != asset.margin; // 保证金(期货)
 
   if (asset_changed) {
     for (auto &book_listener : book_listeners_) {
@@ -287,19 +281,13 @@ void Bookkeeper::try_sync_asset_margin(const longfist::types::AssetMargin &asset
 
   get_book_replica(asset_margin.holder_uid)->asset_margin = asset_margin;
   auto old_book = get_book(asset_margin.holder_uid);
-  bool asset_margin_changed = false;
-  auto asset_margin_compare = [](const AssetMargin &old_asset_margin, const AssetMargin &new_asset_margin) {
-    bool changed = false;
-    changed |= old_asset_margin.total_asset != new_asset_margin.total_asset;   // 总资产
-    changed |= old_asset_margin.avail_margin != new_asset_margin.avail_margin; // 可用保证金
-    changed |= old_asset_margin.cash_margin != new_asset_margin.cash_margin;   // 融资占用保证金
-    changed |= old_asset_margin.short_margin != new_asset_margin.short_margin; // 融券占用保证金
-    changed |= old_asset_margin.margin != new_asset_margin.margin;             // 总占用保证金
-    changed |= old_asset_margin.cash_debt != new_asset_margin.cash_debt;       // 融资负债
-    changed |= old_asset_margin.short_cash != new_asset_margin.short_cash;     // 融券卖出金额
-    return changed;
-  };
-  asset_margin_changed |= asset_margin_compare(old_book->asset_margin, asset_margin);
+  bool asset_margin_changed = old_book->asset_margin.total_asset != asset_margin.total_asset ||   // 总资产
+                              old_book->asset_margin.avail_margin != asset_margin.avail_margin || // 可用保证金
+                              old_book->asset_margin.cash_margin != asset_margin.cash_margin || // 融资占用保证金
+                              old_book->asset_margin.short_margin != asset_margin.short_margin || // 融券占用保证金
+                              old_book->asset_margin.margin != asset_margin.margin ||             // 总占用保证金
+                              old_book->asset_margin.cash_debt != asset_margin.cash_debt ||       // 融资负债
+                              old_book->asset_margin.short_cash != asset_margin.short_cash;       // 融券卖出金额
 
   if (asset_margin_changed) {
     for (auto &book_listener : book_listeners_) {
@@ -332,24 +320,19 @@ void Bookkeeper::try_sync_position_end(const PositionEnd &position_end) {
 
   auto old_book = get_book(position_end.holder_uid);
   auto new_book = get_book_replica(position_end.holder_uid);
-  bool position_changed = false;
+
   auto position_compare = [](const PositionMap &source_map, Book_ptr &target_book) {
-    bool changed = false;
-    for (auto &source_pair : source_map) {
-      auto &source_position = source_pair.second;
+    return std::any_of(source_map.begin(), source_map.end(), [&](const auto &source_pair) {
+      const auto &source_position = source_pair.second;
       const auto &target_position = target_book->get_position_for(source_position.direction, source_position);
-      changed |= source_position.volume != target_position.volume;                     // 数量
-      changed |= source_position.yesterday_volume != target_position.yesterday_volume; // 昨仓数量
-    }
-    return changed;
+      return source_position.volume != target_position.volume ||                   // 数量
+             source_position.yesterday_volume != target_position.yesterday_volume; // 昨仓数量
+    });
   };
 
-  /// 用new_book的position去检测old_book的position,new有old无会加上
-  position_changed |= position_compare(new_book->long_positions, old_book);
-  position_changed |= position_compare(new_book->short_positions, old_book);
-  /// 用old_book的position去检测new_book的position，old有new无会设置为0删掉
-  position_changed |= position_compare(old_book->long_positions, new_book);
-  position_changed |= position_compare(old_book->short_positions, new_book);
+  bool position_changed =
+      position_compare(new_book->long_positions, old_book) || position_compare(new_book->short_positions, old_book) ||
+      position_compare(old_book->long_positions, new_book) || position_compare(old_book->short_positions, new_book);
 
   if (position_changed) {
     for (auto &book_listener : book_listeners_) {
