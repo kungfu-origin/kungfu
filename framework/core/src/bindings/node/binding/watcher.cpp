@@ -408,7 +408,7 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
                       InstanceMethod("requestPosition", &Watcher::RequestPosition),                     //
                       InstanceMethod("start", &Watcher::Start),                                         //
                       InstanceMethod("sync", &Watcher::Sync),                                           //
-                      InstanceMethod("quit", &Watcher::Quit),
+                      InstanceMethod("quit", &Watcher::Quit),                                           //
                       InstanceAccessor("state", &Watcher::GetState, &Watcher::NoSet),                   //
                       InstanceAccessor("ledger", &Watcher::GetLedger, &Watcher::NoSet),                 //
                       InstanceAccessor("appStates", &Watcher::GetAppStates, &Watcher::NoSet),           //
@@ -808,16 +808,8 @@ void Watcher::BookListener::on_position_sync_reset(const book::Book &old_book, c
     }
   };
 
-  for (auto &pair : watcher_.bookkeeper_.get_books()) {
-    auto &book = pair.second;
-    if (book->asset.holder_uid == new_book.asset.holder_uid) {
-      update_position(new_book.long_positions);
-      update_position(new_book.short_positions);
-    } else {
-      update_position(book->long_positions);
-      update_position(book->short_positions);
-    }
-  }
+  update_position(new_book.long_positions);
+  update_position(new_book.short_positions);
 }
 
 } // namespace kungfu::node
