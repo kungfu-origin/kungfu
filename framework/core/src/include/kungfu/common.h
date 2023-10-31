@@ -349,7 +349,6 @@ template <typename DataType> struct data {
     });
     return j.dump(-1, ' ', false, nlohmann::json::basic_json::error_handler_t::replace);
   }
-  }
 
   explicit operator std::string() const { return to_string(); }
 
