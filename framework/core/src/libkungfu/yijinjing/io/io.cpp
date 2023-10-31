@@ -32,7 +32,7 @@ public:
 
 class nanomsg_resource : public resource {
 protected:
-  nanomsg_resource(const io_device &io_device, bool low_latency, protocol p)
+  nanomsg_resource(const io_device &io_device, bool low_latency, protocol p, )
       : io_device_(io_device), low_latency_(low_latency),
         location_(std::make_shared<data::location>(longfist::enums::mode::LIVE, longfist::enums::category::SYSTEM,
                                                    "master", "master", io_device_.get_home()->locator)),
