@@ -347,7 +347,8 @@ template <typename DataType> struct data {
       auto accessor = boost::hana::second(it);
       j[name.c_str()] = accessor(*reinterpret_cast<const DataType *>(this));
     });
-    return j.dump();
+    return j.dump(-1, ' ', false, nlohmann::json::basic_json::error_handler_t::replace);
+  }
   }
 
   explicit operator std::string() const { return to_string(); }
