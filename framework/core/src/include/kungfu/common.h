@@ -349,43 +349,39 @@ template <typename DataType> struct data {
     });
     return j.dump(-1, ' ', false, nlohmann::json::basic_json::error_handler_t::replace);
   }
-}
 
-explicit
-operator std::string() const {
-  return to_string();
-}
+  explicit operator std::string() const { return to_string(); }
 
-[[nodiscard]] uint64_t uid() const {
-  auto primary_keys = boost::hana::transform(DataType::primary_keys, [this](auto pk) {
-    auto just =
-        boost::hana::find_if(boost::hana::accessors<DataType>(), [&](auto it) { return pk == boost::hana::first(it); });
-    auto accessor = boost::hana::second(*just);
-    auto value = accessor(*(reinterpret_cast<const DataType *>(this)));
-    return hash<decltype(value)>{}(value);
-  });
-  return boost::hana::fold(primary_keys, std::bit_xor<>());
-}
+  [[nodiscard]] uint64_t uid() const {
+    auto primary_keys = boost::hana::transform(DataType::primary_keys, [this](auto pk) {
+      auto just = boost::hana::find_if(boost::hana::accessors<DataType>(),
+                                       [&](auto it) { return pk == boost::hana::first(it); });
+      auto accessor = boost::hana::second(*just);
+      auto value = accessor(*(reinterpret_cast<const DataType *>(this)));
+      return hash<decltype(value)>{}(value);
+    });
+    return boost::hana::fold(primary_keys, std::bit_xor<>());
+  }
 
 private:
-template <typename V> static std::enable_if_t<is_numeric_v<V>> init_member(V &v) { v = static_cast<V>(0); }
+  template <typename V> static std::enable_if_t<is_numeric_v<V>> init_member(V &v) { v = static_cast<V>(0); }
 
-template <typename V> static std::enable_if_t<not is_numeric_v<V>> init_member(V &) {}
+  template <typename V> static std::enable_if_t<not is_numeric_v<V>> init_member(V &) {}
 
-template <typename J, typename V>
-static std::enable_if_t<std::is_arithmetic_v<V> or is_array_of_others_v<V, char>> restore_from_json(J &j, V &v) {
-  v = j;
-}
+  template <typename J, typename V>
+  static std::enable_if_t<std::is_arithmetic_v<V> or is_array_of_others_v<V, char>> restore_from_json(J &j, V &v) {
+    v = j;
+  }
 
-template <typename J, typename V> static std::enable_if_t<is_array_of_v<V, char>> restore_from_json(J &j, V &v) {
-  std::string value = j;
-  v = value.c_str(); // kungfu_array overload operator=, it actually use memcpy rather than assign pointer
-}
+  template <typename J, typename V> static std::enable_if_t<is_array_of_v<V, char>> restore_from_json(J &j, V &v) {
+    std::string value = j;
+    v = value.c_str(); // kungfu_array overload operator=, it actually use memcpy rather than assign pointer
+  }
 
-template <typename J, typename V>
-static std::enable_if_t<not std::is_arithmetic_v<V> and not is_array_v<V>> restore_from_json(J &j, V &v) {
-  j.get_to(v);
-}
+  template <typename J, typename V>
+  static std::enable_if_t<not std::is_arithmetic_v<V> and not is_array_v<V>> restore_from_json(J &j, V &v) {
+    j.get_to(v);
+  }
 };
 
 template <typename> struct member_pointer_trait;
