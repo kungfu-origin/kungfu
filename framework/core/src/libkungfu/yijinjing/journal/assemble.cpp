@@ -153,7 +153,7 @@ bool assemble::data_available() {
 }
 
 void assemble::next() {
-  if (current_reader_ and current_reader_->data_available()) {
+  if (current_reader_) {
     current_reader_->next();
   }
   sort();

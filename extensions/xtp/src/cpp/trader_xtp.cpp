@@ -424,7 +424,7 @@ void TraderXTP::on_recover() {
 bool TraderXTP::req_order_trade() {
   for (auto &pair : orders_) {
     SPDLOG_DEBUG("order: {}", pair.second.data.to_string());
-    if (not is_final_status(pair.second.data.status)) {
+    if (not is_final_status(pair.second.data.status) or pair.second.data.status == OrderStatus::Lost) {
       uint64_t order_id = pair.first;
       uint64_t order_xtp_id = map_kf_to_xtp_order_id_.at(order_id);
       int ret = api_->QueryOrderByXTPID(order_xtp_id, session_id_, ++request_id_);
