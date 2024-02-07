@@ -3,10 +3,23 @@
 # Then let poetry to manage the other dependencies.
 
 [packages]
-poetry = "==1.2.2"
-pip = "==23.0"
-setuptools = "==67.2.0"
-virtualenv = "==20.19.0"
-wheel = "==0.38.4"
-keyring = "==23.13.1"
-xattr = {version = "==0.9.9", sys_platform = "!= 'win32'"}
+##########################################################################
+pip = "==23.2.1"
+setuptools = "==68.2.2"
+virtualenv = "==20.24.4"
+wheel = "==0.41.3"
+##########################################################################
+poetry = "==1.6.1"
+# required by poetry on linux
+urllib3 = "==1.26.16"
+# required by poetry on macos
+xattr = {version = "==0.10.1", markers = "sys_platform != 'win32'"}
+##########################################################################
+# os related deps
+cffi = {version = "==1.15.1", markers = "sys_platform != 'win32'"}
+pycparser = {version = "==2.21", markers = "sys_platform != 'win32'"}
+colorama = {version = "==0.4.6", markers = "os_name == 'nt'"}
+pywin32-ctypes = {version = "==0.2.2", markers = "sys_platform == 'win32'"}
+cryptography = {version = "==41.0.4", markers = "sys_platform == 'linux'"}
+jeepney = {version = "==0.8.0", markers = "sys_platform == 'linux'"}
+secretstorage = {version = "==3.3.3", markers = "sys_platform == 'linux'"}
