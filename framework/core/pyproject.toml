@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 [tool.poetry]
-name = "kungfu"
+name = "kungfu-core"
 version = "0.0.0"
 description = "Kungfu Core Library"
 license = "Apache-2.0"
