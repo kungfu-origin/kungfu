@@ -24,6 +24,7 @@ with open(build_info_path, "r") as build_info_file:
 
 class BinaryDistribution(Distribution):
     """Distribution which always forces a binary package with platform name"""
+
     def has_ext_modules(self):
         return True
 
@@ -36,11 +37,9 @@ setup(
     url=package.homepage,
     project_urls={"repository": package.repository_url},
     packages=[""] + find_packages(exclude=["test"]),
-    package_data={
-        "": ["*.dll", "*.dylib", "*.pyd", "*.so", "*.so.*", "*.json"]
-    },
+    package_data={"": ["*.dll", "*.dylib", "*.pyd", "*.so", "*.so.*", "*.json"]},
     include_package_data=True,
     install_requires=install_requires,
     entry_points={"console_scripts": ["kfc = kungfu.__main__:main"]},
-    distclass=BinaryDistribution
+    distclass=BinaryDistribution,
 )
