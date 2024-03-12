@@ -35,7 +35,7 @@
     "@kungfu-trader/kungfu-sdk": "^2.4.77-alpha.2"
   },
   "kungfuDependencies": {
-    "xtp": "v2.2.32.2"
+    "xtp": "v2.2.37.4"
   },
   "kungfuBuild": {
     "cpp": {
