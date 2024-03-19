@@ -4,7 +4,7 @@
     "name": "Kungfu Trader",
     "email": "info@kungfu.link"
   },
-  "version": "2.4.77-alpha.2",
+  "version": "2.4.77",
   "description": "Kungfu Javascript/Typescript API",
   "license": "Apache-2.0",
   "repository": {
@@ -31,7 +31,7 @@
     "format": "prettier -l -w --config ../core/.prettierrc.js ."
   },
   "dependencies": {
-    "@kungfu-trader/kungfu-core": "^2.4.77-alpha.2",
+    "@kungfu-trader/kungfu-core": "^2.4.77",
     "cfonts": "^2.10.0",
     "chalk": "^4.1.0",
     "fast-csv": "^4.3.5",
