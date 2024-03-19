@@ -1,6 +1,6 @@
 # Intro 简介
 
-[功夫量化](https://www.kungfu-trader.com) 是专为量化交易者设计的开源交易执行系统。功夫想要解决以下问题：
+[功夫核心库](https://libkungfu.cc) 是专为量化交易者设计的开源交易执行系统。功夫想要解决以下问题：
 * 低延迟交易 - 量化交易者对系统内响应速度有极高要求，功夫提供微秒级别的系统响应，支持带纳秒级时间戳的交易数据实时存储和盘后分析。
 * 开放的策略编写方式 - 功夫支持 Python 3 及 C++ 形式的策略编写，策略师可以不受限的自由使用第三方计算库，放飞创意。
 * 友好的使用方式 - 告别 Linux shell 小黑屋，功夫提供图形化操作界面，简化策略运维流程。而进阶用户仍然具备通过底层 API 以无界面形式使用系统的能力。
@@ -19,11 +19,9 @@
   * [Vue.js](https://vuejs.org) - UI开发框架
 
 功夫在系统设计上支持任意柜台的对接（涵盖中国所有股票、期货市场），功夫开源版提供 [XTP](https://xtp.zts.com.cn/) 柜台对接的参考实现。
-如果需要接入更多柜台请至 [功夫量化官网](https://www.kungfu-trader.com) 下载专业版或联系我们。
+如果需要接入更多柜台请至 [功夫量化](https://www.kungfu-trader.com) 下载标准版或联系我们。
 
-初次使用请参考 [功夫文档](https://docs.kungfu-trader.com)。
-
-更多介绍请关注知乎专栏 [硅商冲击](https://zhuanlan.zhihu.com/silicontrader)。
+初次使用请参考 [功夫核心库文档](https://docs.libkungfu.cc)。
 
 # License
 
@@ -32,12 +30,13 @@ Apache License 2.0
 # Setup 编译及运行环境
 
 功夫的编译依赖以下工具：
+
 * 支持 C++20 的编译器
 * [cmake](https://cmake.org/) (>=3.15)
 * [Node.js](https://nodejs.org/) (^14.x)
 * [yarn](https://classic.yarnpkg.com/) (^1.x)
 * [Python 3](https://www.python.org/) (~3.9)
-* [pipenv](https://pipenv.pypa.io/) (^1.x)
+* [pipenv](https://pipenv.pypa.io/) (>=2023.9.1)
 
 开始编译前，请先确保安装以上工具，且正确设置 PATH 环境变量。
 
@@ -45,11 +44,11 @@ Apache License 2.0
 
 #### 常规操作
 
-获取代码并编译：
+获取代码并编译(必须用git方式获取代码，功夫编译需要获取git仓库的版本信息）：
 ```
-$ git clone git@github.com:kungfu-trader/kungfu.git
+## git clone kungfu repo
 $ cd kungfu
-$ yarn install
+$ yarn install --frozen-lockfile
 $ yarn build
 $ yarn package
 ```
@@ -89,6 +88,6 @@ $HOME/.local/share/virtualenvs      # pipenv(unix) 存储的 Python 依赖
 
 # Help 帮助信息
 
-更多信息请访问 [功夫量化](https://www.kungfu-trader.com)。
+更多信息请访问网站 [功夫核心库](https://libkungfu.cc) 及 [功夫量化](https://www.kungfu-trader.com)。
 
-QQ 交流群 312745666，入群问题答案：kungfu.trader
+微信公众号：功夫量化

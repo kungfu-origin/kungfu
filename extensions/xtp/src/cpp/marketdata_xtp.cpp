@@ -44,6 +44,7 @@ MarketDataXTP::~MarketDataXTP() {
 }
 
 void MarketDataXTP::on_start() {
+  public_wirter_ = get_writer(0);
   level2_tick_band_uid_ = request_band("market-data-band");
 
   MDConfiguration config = nlohmann::json::parse(get_config());
@@ -158,17 +159,17 @@ void MarketDataXTP::OnQueryAllTickers(XTPQSI *ticker_info, XTPRI *error_info, bo
     return;
   }
 
-  Instrument &instrument = get_writer(0)->open_data<Instrument>(0);
+  Instrument &instrument = public_wirter_->open_data<Instrument>(0);
   from_xtp(ticker_info, instrument);
-  get_writer(0)->close_data();
+  public_wirter_->close_data();
   SPDLOG_TRACE("instrument {}", instrument.to_string());
 }
 
 void MarketDataXTP::OnDepthMarketData(XTPMD *market_data, int64_t *bid1_qty, int32_t bid1_count, int32_t max_bid1_count,
                                       int64_t *ask1_qty, int32_t ask1_count, int32_t max_ask1_count) {
-  Quote &quote = get_writer(0)->open_data<Quote>(0);
+  Quote &quote = public_wirter_->open_data<Quote>(0);
   from_xtp(*market_data, quote);
-  get_writer(0)->close_data();
+  public_wirter_->close_data();
 }
 
 void MarketDataXTP::OnTickByTick(XTPTBT *tbt_data) {
@@ -194,7 +195,7 @@ void MarketDataXTP::OnQueryAllTickersFullInfo(XTPQFI *ticker_info, XTPRI *error_
     return;
   }
 
-  Instrument &instrument = get_writer(0)->open_data<Instrument>(0);
+  Instrument &instrument = public_wirter_->open_data<Instrument>(0);
   strcpy(instrument.instrument_id, ticker_info->ticker);
   if (ticker_info->exchange_id == 1) {
     instrument.exchange_id = EXCHANGE_SSE;
@@ -204,7 +205,7 @@ void MarketDataXTP::OnQueryAllTickersFullInfo(XTPQFI *ticker_info, XTPRI *error_
 
   memcpy(instrument.product_id, ticker_info->ticker_name, strlen(ticker_info->ticker_name));
   instrument.instrument_type = get_instrument_type(instrument.exchange_id, instrument.instrument_id);
-  get_writer(0)->close_data();
+  public_wirter_->close_data();
   SPDLOG_TRACE("instrument {}", instrument.to_string());
 }
 } // namespace kungfu::wingchun::xtp
