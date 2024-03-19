@@ -225,6 +225,7 @@ protected:
 private:
   XTP::API::QuoteApi *api_{};
   uint32_t level2_tick_band_uid_;
+  yijinjing::journal::writer_ptr public_wirter_{};
 
   bool subscribe(const std::vector<std::string> &instruments, const std::string &exchange_id);
 };
