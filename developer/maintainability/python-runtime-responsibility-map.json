@@ -5,7 +5,7 @@
   "baselineRevision": "ed34f1ecc7151e6418ddca8e9e9a50abdf4c50bb",
   "owner": "core/package",
   "measurement": {
-    "functionRisk": "developer/maintainability/source-analysis-kernel.mjs python-multiline-v2 plus function-risk.mjs qualified-occurrence-v2 analyzeTransition over the exact same-owner logical facade-plus-owner path set; exact call-time facade adapters are separately enumerated and budgeted",
+    "functionRisk": "developer/maintainability/source-analysis-kernel.mjs python-multiline-v2 plus function-risk.mjs qualified-occurrence-v2 analyzeTransition over the exact same-owner logical facade-plus-owner path set; exact call-time facade adapters are separately enumerated and budgeted; the bounded assessment subscription publication adapter is enumerated with the persistence-edge adapters",
     "physicalLines": "UTF-8 source splitlines over sourcePaths plus ownerFiles",
     "responsibilities": "top-level classes/functions plus distinct kungfu imports over sourcePaths plus ownerFiles"
   },
@@ -91,7 +91,7 @@
     },
     {
       "path": "framework/core/src/python/kungfu/_runtime_service/state.py",
-      "sha256": "68d475dc6ec635e3bbeccd3a50ca7182aaa0d2fbd99c9b4b152a758861d7d5eb"
+      "sha256": "05fa540defd98b080368af04c1b9c10a7634c00e4de761b1f3accf1b85c61bdd"
     },
     {
       "path": "framework/core/src/python/kungfu/_runtime_service/engine.py",
@@ -143,7 +143,7 @@
     },
     {
       "path": "framework/core/tests/python/_runtime_service_assessment_cases.py",
-      "sha256": "d06942462cf4641718faeb1bf35e4551d1e11dfcedc42b9e0a0db1aa7840f560"
+      "sha256": "13c31a4cdaf494cdbc13988bc7f58fabaac493df5547190b19182abb366aa813"
     }
   ],
   "baseline": {
@@ -160,14 +160,14 @@
     }
   },
   "current": {
-    "physicalLines": 3776,
-    "responsibilities": 195,
+    "physicalLines": 3798,
+    "responsibilities": 196,
     "maximumPhysicalLines": 850,
-    "maximumResponsibilities": 51,
+    "maximumResponsibilities": 52,
     "functionRisk": {
-      "functions": 165,
-      "baseRisk": 2266,
-      "changeRisk": 2616,
+      "functions": 166,
+      "baseRisk": 2311,
+      "changeRisk": 2667,
       "maximumBaseRisk": 265,
       "maximumChangeRisk": 267
     }
@@ -177,17 +177,20 @@
       "functions": 155,
       "previousBaseRisk": 2184,
       "currentBaseRisk": 2179,
-      "currentChangeRisk": 2499
+      "currentChangeRisk": 2502
     },
     "new": {
-      "functions": 10,
-      "currentBaseRisk": 87,
-      "currentChangeRisk": 117
+      "functions": 11,
+      "currentBaseRisk": 132,
+      "currentChangeRisk": 165
     },
     "retired": {
       "functions": 2,
       "previousBaseRisk": 9,
-      "symbols": ["_empty_routes", "_supervisor_always_on"]
+      "symbols": [
+        "_empty_routes",
+        "_supervisor_always_on"
+      ]
     }
   },
   "functionRiskAdapters": [
@@ -213,6 +216,10 @@
     },
     {
       "path": "framework/core/src/python/kungfu/_runtime_service/state.py",
+      "symbol": "_publish_assessment_subscription"
+    },
+    {
+      "path": "framework/core/src/python/kungfu/_runtime_service/state.py",
       "symbol": "route_status"
     },
     {
@@ -233,9 +240,9 @@
     }
   ],
   "adapterRiskBudget": {
-    "functions": 10,
-    "baseRisk": 87,
-    "changeRisk": 117
+    "functions": 11,
+    "baseRisk": 132,
+    "changeRisk": 165
   },
   "processIdentityContinuity": [
     "_terminate_process_if_matches",
@@ -329,7 +336,9 @@
       "route_status"
     ]
   },
-  "serviceLocalDefinitions": ["_terminate_and_reap_child"],
+  "serviceLocalDefinitions": [
+    "_terminate_and_reap_child"
+  ],
   "ownedDefinitions": {
     "moduleFunctions": [
       "_terminate_process_if_matches",
@@ -373,9 +382,9 @@
   "nonWrapperEvidence": [
     "The stable runtime_service facade preserves all 118 exact-baseline public symbols, while persistence paths, schema constants, native class signatures, side-effect ordering bodies, CoordinatorProcess, and the service-local child lifecycle remain AST-identical after removing only the declared call-time seam decorator.",
     "The CLI facade composes four responsibility owners and preserves all 42 exact-baseline Click function signatures and decorators; _plain_status moves to the rendering owner with the same bodyRoot and baseRisk 55.",
-    "Every one of the 155 exact-baseline business functions retains a previousId, previousBaseRisk 2184, and aggregate current baseRisk 2179; the 10 new functions are the closed call-time facade and runtime-image GC discovery adapter set, budgeted separately at baseRisk 87 and changeRisk 117, with no additional retired business function.",
+    "The 155 exact-baseline business functions retain their previousId and aggregate current baseRisk 2179. The enumerated adapters include the original facade and runtime-image GC adapters plus the bounded assessment subscription publisher; current risk totals are remeasured without retiring a baseline business function.",
     "The migration raises measured transition changeRisk because same-owner functions acquire renamed-file movement cost; it does not raise business baseRisk or maximum baseRisk. The checker therefore records migration risk without misrepresenting it as steady-state responsibility risk.",
-    "Maximum file size falls from 1961 to 850 physical lines and maximum per-module responsibility count falls from 88 to 51. Aggregate lines and import-count responsibilities are reported honestly at 3776 and 195 because stable facades preserve every baseline module attribute and explicit owner dependencies are retained rather than hidden.",
+    "Maximum file size remains 850 physical lines and maximum per-module responsibility count remains 52, below their baseline values. Aggregate lines and import-count responsibilities are reported at 3798 and 196; the assessment publication adapter accounts for the bounded increase.",
     "runtime_processes continues to own PID-reuse-fenced signalling and bounded process-tree termination from Wave 1; Wave 2 adds no cross-language, dependency, persistence-format, public API, or Click-surface change."
   ]
 }

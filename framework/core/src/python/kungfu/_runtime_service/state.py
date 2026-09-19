@@ -283,7 +283,29 @@ def assessment_snapshot(runtime_dir: str) -> dict[str, Any]:
 @_runtime_facade_seam("publish_assessment_snapshot")
 def publish_assessment_snapshot(runtime_dir: str) -> dict[str, Any]:
     snapshot = assessment_snapshot(runtime_dir)
-    _json_write(assessment_subscription_path(runtime_dir), snapshot)
+    path = assessment_subscription_path(runtime_dir)
+    return _publish_assessment_subscription(path, snapshot)
+
+
+def _publish_assessment_subscription(
+    path: Path, snapshot: dict[str, Any]
+) -> dict[str, Any]:
+    """Persist a subscription change, retaining unchanged publication identity."""
+    previous = _json_read(path)
+    # The publication timestamp is not a heartbeat. Preserve the last published
+    # snapshot while its content is unchanged, including across process restarts.
+    if isinstance(previous, dict) and isinstance(
+        previous.get("updatedAt"), (int, float)
+    ):
+        previous_content = {
+            key: value for key, value in previous.items() if key != "updatedAt"
+        }
+        current_content = {
+            key: value for key, value in snapshot.items() if key != "updatedAt"
+        }
+        if previous_content == current_content:
+            return previous
+    _json_write(path, snapshot)
     return snapshot
 
 

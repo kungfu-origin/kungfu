@@ -117,3 +117,57 @@ def test_assessment_subscription_snapshot_exposes_summary_before_proof(
         runtime_service.assessment_subscription_path(str(runtime_dir))
     )
     assert persisted["counts"] == snapshot["counts"]
+
+
+def test_assessment_subscription_keeps_unchanged_snapshot_on_disk(
+    tmp_path, monkeypatch
+):
+    runtime_dir = str(tmp_path / "runtime")
+    lifecycle = {"assessment_count": 0, "assessments": []}
+    monkeypatch.setattr(
+        runtime_service.storage_service, "assessment_list", lambda _: lifecycle
+    )
+    monkeypatch.setattr(runtime_service, "_now", lambda: 100.0)
+    first = runtime_service.publish_assessment_snapshot(runtime_dir)
+    path = runtime_service.assessment_subscription_path(runtime_dir)
+    before = path.stat()
+    contents = path.read_bytes()
+    monkeypatch.setattr(runtime_service, "_now", lambda: 200.0)
+    for _ in range(5):
+        assert runtime_service.publish_assessment_snapshot(runtime_dir) == first
+    after = path.stat()
+    assert path.read_bytes() == contents
+    assert (after.st_mtime_ns, after.st_ino) == (before.st_mtime_ns, before.st_ino)
+
+    lifecycle["assessment_count"] = 1
+    lifecycle["assessments"] = [{"assessment_key": "task", "state": "pending"}]
+    changed = runtime_service.publish_assessment_snapshot(runtime_dir)
+    assert changed["counts"] == {"pending": 1}
+    assert changed["updatedAt"] == 200.0
+    assert runtime_service._json_read(path) == changed
+
+    lifecycle["assessments"][0]["state"] = "fresh"
+    updated = runtime_service.publish_assessment_snapshot(runtime_dir)
+    assert updated["counts"] == {"fresh": 1}
+    assert runtime_service._json_read(path) == updated
+
+
+@pytest.mark.parametrize("damaged", [None, "{", "[]", "null"])
+def test_assessment_subscription_recreates_missing_or_invalid_snapshot(
+    tmp_path, monkeypatch, damaged
+):
+    runtime_dir = str(tmp_path / "runtime")
+    monkeypatch.setattr(
+        runtime_service.storage_service,
+        "assessment_list",
+        lambda _: {"assessment_count": 0, "assessments": []},
+    )
+    first = runtime_service.publish_assessment_snapshot(runtime_dir)
+    path = runtime_service.assessment_subscription_path(runtime_dir)
+    if damaged is None:
+        path.unlink()
+    else:
+        path.write_text(damaged)
+    restored = runtime_service.publish_assessment_snapshot(runtime_dir)
+    assert restored["assessments"] == first["assessments"]
+    assert runtime_service._json_read(path) == restored
