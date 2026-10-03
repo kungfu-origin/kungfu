@@ -20,7 +20,7 @@ wasmtime-engine = []
 wasmer-engine = []
 
 [dependencies]
-wasmtime = { version = "=46.0.1", default-features = false, features = ["cranelift", "runtime", "std"] }
+wasmtime = { version = "=46.0.2", default-features = false, features = ["cranelift", "runtime", "std"] }
 wat = "1"
 
 [target.'cfg(windows)'.dependencies]
